@@ -12,6 +12,11 @@ export default class AuthMiddleware {
    */
   redirectTo = '/login'
 
+  /**
+   * Verifie la session sans flasher d'erreur systeme.
+   * Une redirection vers login n'est pas une erreur utilisateur.
+   * Evite le toast "Unauthorized access" sur la page de connexion.
+   */
   async handle(
     ctx: HttpContext,
     next: NextFn,
@@ -19,7 +24,15 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {}
   ) {
-    await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
-    return next()
+    const guards = options.guards || [ctx.auth.defaultGuard]
+
+    for (const guard of guards) {
+      // check() hydrate auth.user si la session est valide.
+      if (await ctx.auth.use(guard).check()) {
+        return next()
+      }
+    }
+
+    return ctx.response.redirect(this.redirectTo, true)
   }
 }

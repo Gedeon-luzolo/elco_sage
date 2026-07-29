@@ -7,5 +7,7 @@ export const controllers = {
   auth: {
     Session: () => import('#controllers/auth/session_controller'),
   },
-  NewAccount: () => import('#controllers/new_account_controller'),
+  users: {
+    Users: () => import('#controllers/users/users_controller'),
+  },
 }

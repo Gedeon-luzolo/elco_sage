@@ -1,18 +1,17 @@
+import { UserRole, UserStatus } from '#models/user'
 import vine from '@vinejs/vine'
+import type { InferInput } from '@vinejs/vine/types'
 
 /**
- * Shared rules for email and password.
+ * Valide les donnees de creation utilisateur par le back-office.
+ * Le role est obligatoire pour eviter les comptes ambigus.
+ * Le statut reste optionnel et ACTIVE sera applique par le service.
  */
-const email = () => vine.string().email().maxLength(254)
-const password = () => vine.string().minLength(8).maxLength(32)
-
-/**
- * Validator to use when performing self-signup
- */
-export const signupValidator = vine.create({
+export const createUserValidator = vine.create({
   fullName: vine.string().nullable(),
-  email: email().unique({ table: 'users', column: 'email' }),
-  password: password().confirmed({
-    confirmationField: 'passwordConfirmation',
-  }),
+  email: vine.string().email().maxLength(254).unique({ table: 'users', column: 'email' }),
+  role: vine.enum(Object.values(UserRole)),
+  status: vine.enum(Object.values(UserStatus)).optional(),
 })
+
+export type CreateUserInput = InferInput<typeof createUserValidator>

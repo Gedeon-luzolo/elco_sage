@@ -8,17 +8,19 @@
 */
 
 import SessionController from '#controllers/auth/session_controller'
-import { controllers } from '#generated/controllers'
+import UsersController from '#controllers/users/users_controller'
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 
-router.on('/').renderInertia('home', {}).as('home').use(middleware.auth())
+router
+  .on('/')
+  .renderInertia('home', {})
+  .as('home')
+  .use(middleware.auth())
+  .use(middleware.managementAccess())
 
 router
   .group(() => {
-    router.get('signup', [controllers.NewAccount, 'create'])
-    router.post('signup', [controllers.NewAccount, 'store'])
-
     router.get('login', [SessionController, 'create'])
     router.post('login', [SessionController, 'store'])
   })
@@ -27,5 +29,6 @@ router
 router
   .group(() => {
     router.post('logout', [SessionController, 'destroy'])
+    router.post('users', [UsersController, 'store']).as('users.store')
   })
   .use(middleware.auth())

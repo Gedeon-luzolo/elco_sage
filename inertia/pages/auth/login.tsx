@@ -25,10 +25,11 @@ export default function Login() {
                 <Label className="sr-only" htmlFor="email">
                   Adresse email
                 </Label>
-                <div className="flex h-12 items-center gap-3 border border-amber-50/15 bg-white px-4 text-neutral-400 shadow-xs transition-colors focus-within:border-amber-50/60">
-                  <Mail aria-hidden="true" className="size-5 shrink-0 text-neutral-400" />
+                <div className="relative">
+                  {/* L'input garde son style shadcn, on ajoute seulement l'espace pour l'icone. */}
+                  <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 text-base text-neutral-950 shadow-none outline-none ring-0 placeholder:text-neutral-400 focus-visible:border-0 focus-visible:ring-0"
+                    className="h-12 rounded-xl bg-white pl-10 text-neutral-950"
                     type="email"
                     name="email"
                     id="email"
@@ -45,10 +46,11 @@ export default function Login() {
                 <Label className="sr-only" htmlFor="password">
                   Mot de passe
                 </Label>
-                <div className="flex h-12 items-center gap-3 border border-amber-50/15 bg-white px-4 text-neutral-400 shadow-xs transition-colors focus-within:border-amber-50/60">
-                  <Lock aria-hidden="true" className="size-5 shrink-0 text-neutral-400" />
+                <div className="relative">
+                  {/* Meme approche pour garder un rendu coherent avec la librairie UI. */}
+                  <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 text-base text-neutral-950 shadow-none outline-none ring-0 placeholder:text-neutral-400 focus-visible:border-0 focus-visible:ring-0"
+                    className="h-12 rounded-xl bg-white pl-10 text-neutral-950"
                     type="password"
                     name="password"
                     id="password"
