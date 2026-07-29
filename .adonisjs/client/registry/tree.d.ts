@@ -3,6 +3,7 @@ import type { routes } from './index.ts'
 
 export interface ApiDefinition {
   home: typeof routes['home']
+  splash: typeof routes['splash']
   session: {
     create: typeof routes['session.create']
     store: typeof routes['session.store']

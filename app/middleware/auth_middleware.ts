@@ -22,6 +22,7 @@ export default class AuthMiddleware {
     next: NextFn,
     options: {
       guards?: (keyof Authenticators)[]
+      redirectTo?: string
     } = {}
   ) {
     const guards = options.guards || [ctx.auth.defaultGuard]
@@ -33,6 +34,6 @@ export default class AuthMiddleware {
       }
     }
 
-    return ctx.response.redirect(this.redirectTo, true)
+    return ctx.response.redirect(options.redirectTo || this.redirectTo, true)
   }
 }

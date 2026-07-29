@@ -12,6 +12,12 @@ const routes = {
     tokens: [{"old":"/","type":0,"val":"/","end":""}],
     types: placeholder as Registry['home']['types'],
   },
+  'splash': {
+    methods: ["GET","HEAD"],
+    pattern: '/splash',
+    tokens: [{"old":"/splash","type":0,"val":"splash","end":""}],
+    types: placeholder as Registry['splash']['types'],
+  },
   'session.create': {
     methods: ["GET","HEAD"],
     pattern: '/login',

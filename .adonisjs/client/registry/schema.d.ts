@@ -19,6 +19,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'splash': {
+    methods: ["GET","HEAD"]
+    pattern: '/splash'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'session.create': {
     methods: ["GET","HEAD"]
     pattern: '/login'

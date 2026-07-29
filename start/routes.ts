@@ -16,11 +16,12 @@ router
   .on('/')
   .renderInertia('home', {})
   .as('home')
-  .use(middleware.auth())
+  .use(middleware.auth({ redirectTo: '/splash' }))
   .use(middleware.managementAccess())
 
 router
   .group(() => {
+    router.on('splash').renderInertia('splash', {}).as('splash')
     router.get('login', [SessionController, 'create'])
     router.post('login', [SessionController, 'store'])
   })
@@ -32,3 +33,4 @@ router
     router.post('users', [UsersController, 'store']).as('users.store')
   })
   .use(middleware.auth())
+
