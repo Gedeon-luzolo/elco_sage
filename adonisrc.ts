@@ -46,7 +46,7 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/hash_provider'),
     {
       file: () => import('@adonisjs/core/providers/repl_provider'),
-      environment: ['repl', 'test'],
+      environment: ['repl'],
     },
     () => import('@adonisjs/core/providers/vinejs_provider'),
     () => import('@adonisjs/core/providers/edge_provider'),
@@ -74,36 +74,6 @@ export default defineConfig({
     () => import('#start/kernel'),
     () => import('#start/validator'),
   ],
-
-  /*
-  |--------------------------------------------------------------------------
-  | Tests
-  |--------------------------------------------------------------------------
-  |
-  | List of test suites to organize tests by their type. Feel free to remove
-  | and add additional suites.
-  |
-  */
-  tests: {
-    suites: [
-      {
-        files: ['tests/unit/**/*.spec.{ts,js}'],
-        name: 'unit',
-        timeout: 2000,
-      },
-      {
-        files: ['tests/functional/**/*.spec.{ts,js}'],
-        name: 'functional',
-        timeout: 30000,
-      },
-      {
-        files: ['tests/browser/**/*.spec.{ts,js}'],
-        name: 'browser',
-        timeout: 300000,
-      },
-    ],
-    forceExit: false,
-  },
 
   /*
   |--------------------------------------------------------------------------

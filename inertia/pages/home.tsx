@@ -1,30 +1,24 @@
-export default function Home() {
+import { Form } from '@adonisjs/inertia/react'
+import { type InertiaProps } from '~/types'
+
+export default function Home(props: InertiaProps) {
   return (
-    <>
-      <div className="hero">
-        <h1>It works — welcome to the power of a full-stack React app</h1>
-        <p>
-          Powered by Inertia and React, this setup blends server-driven routing with rich
-          client-side interactivity — seamless, fast, and cohesive.
-        </p>
-      </div>
-
-      <div className="cards">
-        <a href="https://docs.adonisjs.com/introduction" target="_blank" rel="noreferrer">
-          <h3>Official Docs &nbsp;›</h3>
-          <p>Comprehensive reference for building with AdonisJS</p>
-        </a>
-
-        <a href="https://adocasts.com/" target="_blank" rel="noreferrer">
-          <h3>Adocasts &nbsp;›</h3>
-          <p>Guided video tutorials for everyday development</p>
-        </a>
-
-        <a href="https://discord.gg/vDcEjq6" target="_blank" rel="noreferrer">
-          <h3>Discord &nbsp;›</h3>
-          <p>Connect with developers building with AdonisJS every day</p>
-        </a>
-      </div>
-    </>
+    <main className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center text-foreground">
+      <h2 className="text-3xl">
+        Bienvenue, <span className="font-bold">{props.user?.fullName}</span>
+      </h2>
+      <p className="text-muted-foreground">{props.user?.role}</p>
+      <Form route="session.destroy">
+        {({ processing }) => (
+          <button
+            type="submit"
+            disabled={processing}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+          >
+            Se deconnecter
+          </button>
+        )}
+      </Form>
+    </main>
   )
 }

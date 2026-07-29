@@ -11,7 +11,6 @@
     "start": "node bin/server.js",
     "build": "node ace build",
     "dev": "node ace serve --hmr",
-    "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json"
@@ -32,7 +31,6 @@
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",
     "#database/*": "./database/*.js",
-    "#tests/*": "./tests/*.js",
     "#start/*": "./start/*.js",
     "#config/*": "./config/*.js"
   },
@@ -41,10 +39,6 @@
     "@adonisjs/eslint-config": "^3.1.0",
     "@adonisjs/prettier-config": "^1.5.0",
     "@adonisjs/tsconfig": "^2.0.0",
-    "@japa/assert": "^4.2.0",
-    "@japa/browser-client": "^2.3.0",
-    "@japa/plugin-adonisjs": "^5.2.0",
-    "@japa/runner": "^5.3.0",
     "@poppinss/ts-exec": "^1.4.4",
     "@types/luxon": "^3.7.1",
     "@types/node": "~25.9.1",
@@ -75,9 +69,9 @@
     "@tailwindcss/vite": "^4.3.3",
     "@tuyau/core": "^1.2.2",
     "@vinejs/vine": "^4.4.0",
-    "better-sqlite3": "^12.10.0",
     "edge.js": "^6.5.1",
     "luxon": "^3.7.2",
+    "pg": "^8.22.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "reflect-metadata": "^0.2.2",
@@ -102,7 +96,6 @@
   },
   "allowScripts": {
     "@swc/core": true,
-    "better-sqlite3": true,
     "esbuild": true,
     "fsevents": true
   },
