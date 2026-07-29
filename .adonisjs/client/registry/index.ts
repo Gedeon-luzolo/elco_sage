@@ -42,11 +42,29 @@ const routes = {
     tokens: [{"old":"/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'users.get': {
+    methods: ["GET","HEAD"],
+    pattern: '/users',
+    tokens: [{"old":"/users","type":0,"val":"users","end":""}],
+    types: placeholder as Registry['users.get']['types'],
+  },
   'users.store': {
     methods: ["POST"],
     pattern: '/users',
     tokens: [{"old":"/users","type":0,"val":"users","end":""}],
     types: placeholder as Registry['users.store']['types'],
+  },
+  'users.update': {
+    methods: ["PUT"],
+    pattern: '/users/:id',
+    tokens: [{"old":"/users/:id","type":0,"val":"users","end":""},{"old":"/users/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['users.update']['types'],
+  },
+  'users.destroy': {
+    methods: ["DELETE"],
+    pattern: '/users/:id',
+    tokens: [{"old":"/users/:id","type":0,"val":"users","end":""},{"old":"/users/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['users.destroy']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

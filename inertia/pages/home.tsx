@@ -1,4 +1,4 @@
-import { Form } from '@adonisjs/inertia/react'
+import { Form, Link } from '@adonisjs/inertia/react'
 import { BarChart3 } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -63,10 +63,19 @@ export default function Home(props: InertiaProps) {
                   </CardAction>
                 </CardHeader>
                 <CardContent>
-                  {/* Les vraies routes de modules seront branchees apres creation des ecrans. */}
-                  <Button variant="outline" className="w-full justify-center" type="button">
-                    Ouvrir
-                  </Button>
+                  {module.href ? (
+                    <Button
+                      render={<Link href={module.href} />}
+                      variant="outline"
+                      className="w-full justify-center"
+                    >
+                      Ouvrir
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="w-full justify-center" type="button">
+                      Ouvrir
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )

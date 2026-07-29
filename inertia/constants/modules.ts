@@ -13,6 +13,7 @@ export interface NavigationModule {
   description: string
   icon: LucideIcon
   isManagement?: boolean
+  href?: string
 }
 
 /**
@@ -46,6 +47,7 @@ export const MODULES: NavigationModule[] = [
     description: 'Creer les comptes, roles, statuts et acces utilisateurs.',
     icon: Users,
     isManagement: true,
+    href: '/users',
   },
   {
     title: 'Parametres',

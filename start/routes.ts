@@ -7,9 +7,9 @@
 |
 */
 
-import SessionController from '#controllers/auth/session_controller'
-import UsersController from '#controllers/users/users_controller'
 import { middleware } from '#start/kernel'
+import { registerAuthenticatedAuthRoutes, registerGuestAuthRoutes } from '#routes/auth_routes'
+import { registerUserRoutes } from '#routes/user_routes'
 import router from '@adonisjs/core/services/router'
 
 router
@@ -21,16 +21,13 @@ router
 
 router
   .group(() => {
-    router.on('splash').renderInertia('splash', {}).as('splash')
-    router.get('login', [SessionController, 'create'])
-    router.post('login', [SessionController, 'store'])
+    registerGuestAuthRoutes()
   })
   .use(middleware.guest())
 
 router
   .group(() => {
-    router.post('auth/verify-password', [SessionController, 'verifyPassword']).as('auth.verify_password')
-    router.post('logout', [SessionController, 'destroy'])
-    router.post('users', [UsersController, 'store']).as('users.store')
+    registerAuthenticatedAuthRoutes()
+    registerUserRoutes()
   })
   .use(middleware.auth())

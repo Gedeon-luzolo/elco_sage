@@ -39,8 +39,8 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: {}
-      response: unknown
-      errorResponse: unknown
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['create']>>>
     }
   }
   'session.store': {
@@ -51,20 +51,20 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: {}
-      response: unknown
-      errorResponse: unknown
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['store']>>>
     }
   }
   'auth.verify_password': {
     methods: ["POST"]
     pattern: '/auth/verify-password'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/auth/password').verifyPasswordValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
+      query: ExtractQuery<InferInput<(typeof import('#validators/auth/password').verifyPasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['verifyPassword']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['verifyPassword']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'session.destroy': {
@@ -75,20 +75,56 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: {}
-      response: unknown
-      errorResponse: unknown
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['destroy']>>>
     }
   }
-  'users.store': {
-    methods: ["POST"]
+  'users.get': {
+    methods: ["GET","HEAD"]
     pattern: '/users'
     types: {
       body: {}
       paramsTuple: []
       params: {}
       query: {}
-      response: unknown
-      errorResponse: unknown
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['getUsers']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['getUsers']>>>
+    }
+  }
+  'users.store': {
+    methods: ["POST"]
+    pattern: '/users'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').createUserValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').createUserValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'users.update': {
+    methods: ["PUT"]
+    pattern: '/users/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').updateUserValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').updateUserValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'users.destroy': {
+    methods: ["DELETE"]
+    pattern: '/users/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['destroy']>>>
     }
   }
 }

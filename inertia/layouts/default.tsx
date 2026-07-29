@@ -40,7 +40,7 @@ export default function Layout({ children }: { children: ReactElement<Data.Share
         </motion.div>
       </AnimatePresence>
       <IdleScreen user={children.props.user} />
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-right" richColors />
     </>
   )
 }
