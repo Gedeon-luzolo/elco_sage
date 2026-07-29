@@ -3,6 +3,7 @@ import { toast, Toaster } from 'sonner'
 import { usePage } from '@inertiajs/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { type ReactElement, useEffect } from 'react'
+import { IdleScreen } from '~/components/auth/idle_screen'
 
 const IGNORED_FLASH_ERRORS = ['Unauthorized access']
 
@@ -38,6 +39,7 @@ export default function Layout({ children }: { children: ReactElement<Data.Share
           {children}
         </motion.div>
       </AnimatePresence>
+      <IdleScreen user={children.props.user} />
       <Toaster position="top-center" richColors />
     </>
   )

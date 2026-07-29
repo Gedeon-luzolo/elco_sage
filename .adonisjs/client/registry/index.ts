@@ -30,6 +30,12 @@ const routes = {
     tokens: [{"old":"/login","type":0,"val":"login","end":""}],
     types: placeholder as Registry['session.store']['types'],
   },
+  'auth.verify_password': {
+    methods: ["POST"],
+    pattern: '/auth/verify-password',
+    tokens: [{"old":"/auth/verify-password","type":0,"val":"auth","end":""},{"old":"/auth/verify-password","type":0,"val":"verify-password","end":""}],
+    types: placeholder as Registry['auth.verify_password']['types'],
+  },
   'session.destroy': {
     methods: ["POST"],
     pattern: '/logout',

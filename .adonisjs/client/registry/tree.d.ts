@@ -9,6 +9,9 @@ export interface ApiDefinition {
     store: typeof routes['session.store']
     destroy: typeof routes['session.destroy']
   }
+  auth: {
+    verifyPassword: typeof routes['auth.verify_password']
+  }
   users: {
     store: typeof routes['users.store']
   }

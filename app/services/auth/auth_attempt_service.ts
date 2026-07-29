@@ -48,6 +48,22 @@ export default class AuthAttemptService {
   }
 
   /**
+   * Verifie le mot de passe du compte deja connecte.
+   * Sert au deverrouillage idle sans refaire un login complet.
+   * Ne modifie pas les tentatives de connexion du compte.
+   */
+  async verifyCurrentPassword(user: User, password: string): Promise<boolean> {
+    // On relit le compte pour verifier son statut et son hash a jour.
+    const freshUser = await User.find(user.id)
+
+    if (!freshUser || freshUser.status !== UserStatus.ACTIVE) {
+      return false
+    }
+
+    return hash.verify(freshUser.password, password)
+  }
+
+  /**
    * Enregistre une mauvaise tentative de connexion.
    * Bloque automatiquement le compte au seuil defini.
    * Renvoie toujours un resultat d'echec exploitable par le controleur.

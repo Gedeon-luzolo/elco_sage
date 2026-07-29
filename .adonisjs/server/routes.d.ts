@@ -8,6 +8,7 @@ export type ScannedRoutes = {
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
+    'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
   }
@@ -23,6 +24,7 @@ export type ScannedRoutes = {
   }
   POST: {
     'session.store': { paramsTuple?: []; params?: {} }
+    'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
   }

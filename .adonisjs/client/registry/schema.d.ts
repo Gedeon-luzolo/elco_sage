@@ -55,6 +55,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'auth.verify_password': {
+    methods: ["POST"]
+    pattern: '/auth/verify-password'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'session.destroy': {
     methods: ["POST"]
     pattern: '/logout'

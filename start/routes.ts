@@ -29,8 +29,8 @@ router
 
 router
   .group(() => {
+    router.post('auth/verify-password', [SessionController, 'verifyPassword']).as('auth.verify_password')
     router.post('logout', [SessionController, 'destroy'])
     router.post('users', [UsersController, 'store']).as('users.store')
   })
   .use(middleware.auth())
-
