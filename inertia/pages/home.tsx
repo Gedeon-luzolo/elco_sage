@@ -22,9 +22,9 @@ export default function Home(props: InertiaProps) {
             <Badge variant="outline" className="mb-3 bg-background">
               Elco Sage
             </Badge>
-            <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Modules</h1>
+            <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Acceuil</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Bienvenue {props.user?.fullName}. Selectionnez un module pour continuer.
+              Bienvenue {props.user?.fullName}
             </p>
           </div>
 
@@ -48,7 +48,10 @@ export default function Home(props: InertiaProps) {
             const Icon = module.icon
 
             return (
-              <Card key={module.title} className="rounded-2xl bg-background transition-colors hover:bg-card/80">
+              <Card
+                key={module.title}
+                className="rounded-2xl bg-background transition-colors hover:bg-card/80"
+              >
                 <CardHeader>
                   <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-[#2b1810] text-amber-50">
                     <Icon className="size-5" aria-hidden="true" />

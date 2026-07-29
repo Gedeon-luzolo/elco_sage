@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, LoaderCircle, Lock, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ArrowRight, LoaderCircle, Lock, X } from 'lucide-react'
 import { useState } from 'react'
+import { UserProfileBadge } from '~/components/auth/user_profile_badge'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useIdle } from '~/hooks/useIdle'
+import bgIdleUrl from '~/images/bg-iddle.webp'
 import { type Data } from '@generated/data'
 
 interface IdleScreenProps {
@@ -22,82 +24,104 @@ interface LockedContentProps {
  */
 function LockedContent({ idle, user }: LockedContentProps) {
   const [isPasswordPromptVisible, setIsPasswordPromptVisible] = useState(false)
-  const displayName = user.fullName || user.email
 
   return (
     <motion.div
-      className="fixed inset-0 z-9999 flex cursor-pointer items-center justify-center overflow-hidden px-6 text-amber-50"
+      className="fixed inset-0 z-9999 flex cursor-pointer items-center justify-center overflow-hidden text-white"
       role="dialog"
       aria-modal="true"
       aria-label="Session verrouillee"
-      initial={{ opacity: 0, scale: 1.03 }}
+      initial={{ opacity: 0, scale: 1.05 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.32, ease: 'easeOut' }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4, ease: 'easeInOut' }}
       onClick={() => setIsPasswordPromptVisible(true)}
     >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,#2b1810_0%,#4b2612_34%,#0c4b2b_68%,#082f1d_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_42%,rgba(0,0,0,0.28)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.04)_32%,rgba(0,0,0,0.18)_100%)]" />
-
-      <div className="absolute left-6 top-6 flex items-center gap-3 md:left-10 md:top-8">
-        <div className="flex size-11 items-center justify-center rounded-full border border-amber-50/50 bg-white/10 text-2xl font-bold backdrop-blur-md">
-          e
-        </div>
-        <div>
-          <p className="text-lg font-semibold leading-none text-white">Elco Sage</p>
-          <p className="mt-1 text-xs text-amber-50/65">Session securisee</p>
-        </div>
-      </div>
-
-      <div className="absolute right-6 top-6 hidden items-center gap-3 rounded-full border border-amber-50/25 bg-white/10 px-4 py-3 text-left backdrop-blur-md md:right-10 md:top-8 md:flex">
-        <div className="flex size-10 items-center justify-center rounded-full bg-amber-50/15">
-          <UserRound className="size-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="max-w-48 truncate text-sm font-semibold text-white">{displayName}</p>
-          <p className="max-w-48 truncate text-xs text-amber-50/70">{user.email}</p>
-        </div>
-        <div className="flex items-center gap-1 rounded-full bg-amber-50/15 px-2.5 py-1 text-xs font-medium text-amber-50">
-          <ShieldCheck className="size-3.5" />
-          {user.role}
-        </div>
-      </div>
-
-      <motion.section
-        className="relative flex w-full max-w-md flex-col items-center text-center"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08, duration: 0.35, ease: 'easeOut' }}
+      <div
+        className={`absolute -inset-10 transition-all duration-500 ${
+          isPasswordPromptVisible ? 'scale-110 blur-2xl brightness-75' : 'scale-100 blur-0 brightness-100'
+        }`}
       >
-        <div className="flex size-24 items-center justify-center rounded-full border-2 border-amber-50/75 bg-white/10 text-5xl font-bold shadow-2xl shadow-black/20 backdrop-blur-md">
-          e
-        </div>
-        <p className="mt-6 text-sm text-amber-50/70">Session verrouillee</p>
-        <h2 className="mt-3 text-6xl font-semibold leading-none md:text-7xl">
-          {idle.formattedTime}
-        </h2>
-        <p className="mt-4 capitalize text-amber-50/80">{idle.formattedDate}</p>
-        <p className="mt-8 text-sm text-amber-50/75">
-          {isPasswordPromptVisible
-            ? 'Saisissez votre mot de passe pour reprendre.'
-            : 'Cliquez ou appuyez pour reprendre.'}
-        </p>
+        <img
+          src={bgIdleUrl}
+          alt="Fond d'ecran de l'ecran verrouille"
+          aria-hidden="true"
+          className="size-full object-cover blur-sm"
+        />
+      </div>
+      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(0,0,0,0.35)_100%)]" />
 
-        <AnimatePresence mode="wait">
-          {isPasswordPromptVisible && (
-            <motion.div
-              className="mt-8 w-full"
-              initial={{ opacity: 0, y: 12 }}
+      <div
+        className={`absolute inset-0 transition-all duration-500 ${
+          isPasswordPromptVisible ? 'scale-110 blur-xl opacity-55' : 'scale-100 blur-0 opacity-100'
+        }`}
+      >
+        <div className="absolute left-6 top-6 flex items-center gap-3 md:left-12 md:top-8">
+          <div className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-white/10 text-2xl font-bold backdrop-blur-md">
+            e
+          </div>
+          <div>
+            <p className="text-2xl font-bold leading-none text-white/85">Elco Sage</p>
+            <p className="mt-1 text-xs text-white/65">Session securisee</p>
+          </div>
+        </div>
+
+        <UserProfileBadge
+          user={user}
+          className="absolute right-6 top-6 hidden md:right-12 md:top-8 md:flex"
+        />
+
+        <div className="flex h-full items-center justify-center px-4 text-center text-white">
+          <div>
+            <motion.h2
+              className="text-5xl font-bold leading-none md:text-7xl lg:text-8xl"
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              onClick={(event) => event.stopPropagation()}
+              transition={{ duration: 1, ease: 'easeOut' }}
             >
+              {idle.formattedTime}
+            </motion.h2>
+            <motion.p
+              className="mt-6 text-2xl font-bold capitalize text-white/90 md:text-4xl lg:text-5xl"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: 'easeOut', delay: 0.4 }}
+            >
+              {idle.formattedDate}
+            </motion.p>
+            <motion.div
+              className="mt-16"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <p className="text-sm text-white/75 md:text-base">
+                {isPasswordPromptVisible
+                  ? 'Saisissez votre mot de passe pour reprendre.'
+                  : 'Cliquez ou appuyez pour reprendre.'}
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {isPasswordPromptVisible && (
+          <motion.section
+            className="relative z-10 flex w-full max-w-sm flex-col items-center px-4 text-white"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 18 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <UserProfileBadge user={user} className="mb-8" showRole={false} />
+
+            <div className="w-full">
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
                 <Input
-                  className="h-12 rounded-xl bg-white pl-10 text-neutral-950"
+                  className="h-12 rounded-xl border-white/25 bg-white/20 pl-10 text-lg text-white placeholder:text-white/60 backdrop-blur-md focus-visible:border-white/70 focus-visible:ring-white/30"
                   type="password"
                   value={idle.password}
                   placeholder="Mot de passe"
@@ -111,11 +135,14 @@ function LockedContent({ idle, user }: LockedContentProps) {
                   }}
                 />
               </div>
-              {idle.error && <p className="mt-3 text-sm text-amber-200">{idle.error}</p>}
+              {idle.error && (
+                <p className="mt-5 text-center text-sm font-medium text-amber-100">{idle.error}</p>
+              )}
               <div className="mt-4 flex items-center gap-3">
                 <Button
-                  className="h-11 flex-1 rounded-xl bg-orange-900 text-white hover:bg-[#0c4b2b]"
+                  className="h-12 flex-1 rounded-xl border-white/70 bg-transparent text-white/80 hover:bg-white/10 hover:text-white"
                   type="button"
+                  variant="outline"
                   disabled={idle.isVerifying}
                   onClick={() => void idle.verifyPassword()}
                 >
@@ -126,24 +153,27 @@ function LockedContent({ idle, user }: LockedContentProps) {
                   )}
                   Deverrouiller
                 </Button>
-                <Button
-                  className="size-11 rounded-xl border-amber-50/40 text-amber-50 hover:bg-amber-50/10"
-                  type="button"
-                  variant="outline"
-                  aria-label="Effacer"
-                  onClick={() => {
-                    // Le bouton X revient a l'ecran idle simple sans deverrouiller.
-                    idle.clearPasswordPrompt()
-                    setIsPasswordPromptVisible(false)
-                  }}
-                >
-                  <X className="size-4" />
-                </Button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.section>
+            </div>
+
+            <button
+              className="mt-32 flex flex-col items-center gap-2 text-white/80 transition-colors hover:text-white"
+              type="button"
+              aria-label="Annuler le deverrouillage"
+              onClick={() => {
+                // Le bouton X revient a l'ecran idle simple sans deverrouiller.
+                idle.clearPasswordPrompt()
+                setIsPasswordPromptVisible(false)
+              }}
+            >
+              <span className="flex size-9 items-center justify-center rounded-full border border-white/70">
+                <X className="size-4" />
+              </span>
+              <span className="text-sm">Annuler</span>
+            </button>
+          </motion.section>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
