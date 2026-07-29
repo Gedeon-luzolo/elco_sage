@@ -1,94 +1,86 @@
 import { Form } from '@adonisjs/inertia/react'
+import { Lock, Mail } from 'lucide-react'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 
 export default function Login() {
   return (
-    <div className="flex h-screen w-screen bg-background text-foreground">
-      <div className="relative hidden flex-1 items-center justify-center overflow-hidden bg-[#2b1810] md:flex">
-        <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#3d2416]" />
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#3d2416]" />
-        <div className="relative z-10 text-center">
-          <h1 className="text-5xl font-bold tracking-wide text-amber-50">Elco Sage</h1>
-          <p className="mt-3 text-sm text-amber-50/70">
-            Gestion des ventes, du stock et des inventaires
-          </p>
+    <main className="flex min-h-screen w-screen items-center justify-center bg-[#2b1810] px-6 py-10 text-amber-50">
+      <section className="flex w-full max-w-sm flex-col items-center">
+        <div className="flex size-24 items-center justify-center rounded-full border-4 border-amber-50 text-5xl font-bold">
+          e
         </div>
-      </div>
+        <h1 className="mt-7 text-center text-6xl font-normal leading-none tracking-normal">
+          Elco Sage
+        </h1>
+        <p className="mt-3 text-center text-sm text-amber-50/75">
+          Gestion des ventes, du stock et des inventaires
+        </p>
 
-      <main className="flex flex-1 items-center justify-center bg-background px-6">
-        <section className="w-full max-w-md">
-          <h2 className="text-4xl font-bold text-foreground">Connexion</h2>
-          <p className="mt-1 text-muted-foreground">
-            Entrez vos identifiants pour acceder a votre espace.
-          </p>
-
-          <Form route="session.store" className="mt-8 flex flex-col gap-4">
-            {({ errors, processing }) => (
-              <>
-                <div>
-                  <label className="sr-only" htmlFor="email">
-                    Adresse email
-                  </label>
-                  <div className="flex h-14 items-center gap-3 rounded-xl border border-input bg-background px-4 text-muted-foreground shadow-xs transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-                    <span aria-hidden="true" className="text-xl">
-                      @
-                    </span>
-                    <input
-                      className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
-                      type="email"
-                      name="email"
-                      id="email"
-                      placeholder="Adresse email"
-                      autoComplete="email"
-                      data-invalid={errors.email ? 'true' : undefined}
-                      required
-                    />
-                  </div>
-                  {errors.email && <p className="mt-2 text-sm text-destructive">{errors.email}</p>}
+        <Form route="session.store" className="mt-10 flex w-full flex-col gap-4">
+          {({ errors, processing }) => (
+            <>
+              <div>
+                <Label className="sr-only" htmlFor="email">
+                  Adresse email
+                </Label>
+                <div className="flex h-12 items-center gap-3 border border-amber-50/15 bg-white px-4 text-neutral-400 shadow-xs transition-colors focus-within:border-amber-50/60">
+                  <Mail aria-hidden="true" className="size-5 shrink-0 text-neutral-400" />
+                  <Input
+                    className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 text-base text-neutral-950 shadow-none outline-none ring-0 placeholder:text-neutral-400 focus-visible:border-0 focus-visible:ring-0"
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Email"
+                    autoComplete="email"
+                    data-invalid={errors.email ? 'true' : undefined}
+                    required
+                  />
                 </div>
+                {errors.email && <p className="mt-2 text-sm text-amber-200">{errors.email}</p>}
+              </div>
 
-                <div>
-                  <label className="sr-only" htmlFor="password">
-                    Mot de passe
-                  </label>
-                  <div className="flex h-14 items-center gap-3 rounded-xl border border-input bg-background px-4 text-muted-foreground shadow-xs transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-                    <span aria-hidden="true" className="text-xl">
-                      *
-                    </span>
-                    <input
-                      className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
-                      type="password"
-                      name="password"
-                      id="password"
-                      placeholder="Mot de passe"
-                      autoComplete="current-password"
-                      data-invalid={errors.password ? 'true' : undefined}
-                      required
-                    />
-                  </div>
-                  {errors.password && (
-                    <p className="mt-2 text-sm text-destructive">{errors.password}</p>
-                  )}
+              <div>
+                <Label className="sr-only" htmlFor="password">
+                  Mot de passe
+                </Label>
+                <div className="flex h-12 items-center gap-3 border border-amber-50/15 bg-white px-4 text-neutral-400 shadow-xs transition-colors focus-within:border-amber-50/60">
+                  <Lock aria-hidden="true" className="size-5 shrink-0 text-neutral-400" />
+                  <Input
+                    className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 text-base text-neutral-950 shadow-none outline-none ring-0 placeholder:text-neutral-400 focus-visible:border-0 focus-visible:ring-0"
+                    type="password"
+                    name="password"
+                    id="password"
+                    placeholder="Mot de passe"
+                    autoComplete="current-password"
+                    data-invalid={errors.password ? 'true' : undefined}
+                    required
+                  />
                 </div>
-
-                {errors.E_INVALID_CREDENTIALS && (
-                  <p className="text-sm text-destructive">{errors.E_INVALID_CREDENTIALS}</p>
+                {errors.password && (
+                  <p className="mt-2 text-sm text-amber-200">{errors.password}</p>
                 )}
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={processing}
-                  className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#2b1810] px-5 text-base font-medium text-amber-50 transition-colors hover:bg-[#3d2416] disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {processing && (
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-50/40 border-t-amber-50" />
-                  )}
-                  {processing ? 'Connexion...' : 'Se connecter'}
-                </button>
-              </>
-            )}
-          </Form>
-        </section>
-      </main>
-    </div>
+              {errors.E_INVALID_CREDENTIALS && (
+                <p className="text-sm text-amber-200">{errors.E_INVALID_CREDENTIALS}</p>
+              )}
+
+              <Button
+                type="submit"
+                disabled={processing}
+                className="mt-7 h-12 rounded-none bg-orange-900 px-5 text-base text-white hover:bg-[#0c4b2b]"
+              >
+                {processing && (
+                  <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                )}
+                {processing ? 'Connexion...' : 'Se connecter'}
+              </Button>
+            </>
+          )}
+        </Form>
+      </section>
+    </main>
   )
 }

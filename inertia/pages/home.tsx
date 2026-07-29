@@ -1,4 +1,5 @@
 import { Form } from '@adonisjs/inertia/react'
+import { Button } from '~/components/ui/button'
 import { type InertiaProps } from '~/types'
 
 export default function Home(props: InertiaProps) {
@@ -10,13 +11,13 @@ export default function Home(props: InertiaProps) {
       <p className="text-muted-foreground">{props.user?.role}</p>
       <Form route="session.destroy">
         {({ processing }) => (
-          <button
+          <Button
+            variant="outline"
             type="submit"
             disabled={processing}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
           >
             Se deconnecter
-          </button>
+          </Button>
         )}
       </Form>
     </main>
