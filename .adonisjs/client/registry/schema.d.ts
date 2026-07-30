@@ -93,7 +93,7 @@ export interface Registry {
   }
   'journalisations.get': {
     methods: ["GET","HEAD"]
-    pattern: '/journalisations'
+    pattern: '/management/journalisations'
     types: {
       body: {}
       paramsTuple: []
@@ -105,7 +105,7 @@ export interface Registry {
   }
   'users.get': {
     methods: ["GET","HEAD"]
-    pattern: '/users'
+    pattern: '/management/users'
     types: {
       body: {}
       paramsTuple: []
@@ -117,7 +117,7 @@ export interface Registry {
   }
   'users.store': {
     methods: ["POST"]
-    pattern: '/users'
+    pattern: '/management/users'
     types: {
       body: ExtractBody<InferInput<(typeof import('#validators/user').createUserValidator)>>
       paramsTuple: []
@@ -129,7 +129,7 @@ export interface Registry {
   }
   'users.update': {
     methods: ["PUT"]
-    pattern: '/users/:id'
+    pattern: '/management/users/:id'
     types: {
       body: ExtractBody<InferInput<(typeof import('#validators/user').updateUserValidator)>>
       paramsTuple: [ParamValue]
@@ -141,7 +141,7 @@ export interface Registry {
   }
   'users.destroy': {
     methods: ["DELETE"]
-    pattern: '/users/:id'
+    pattern: '/management/users/:id'
     types: {
       body: {}
       paramsTuple: [ParamValue]
@@ -149,6 +149,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['destroy']>>>
+    }
+  }
+  'exchange_rates.store': {
+    methods: ["POST"]
+    pattern: '/management/rates'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/exchange_rate').createExchangeRateValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/exchange_rate').createExchangeRateValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/exchange_rates/exchange_rates_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exchange_rates/exchange_rates_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
 }

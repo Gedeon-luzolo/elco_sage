@@ -7,6 +7,9 @@ export const controllers = {
   auth: {
     Session: () => import('#controllers/auth/session_controller'),
   },
+  exchangeRates: {
+    ExchangeRates: () => import('#controllers/exchange_rates/exchange_rates_controller'),
+  },
   journalisations: {
     Journalisations: () => import('#controllers/journalisations/journalisations_controller'),
   },

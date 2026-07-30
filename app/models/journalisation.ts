@@ -6,6 +6,7 @@ import { DateTime } from 'luxon'
 
 export enum JournalisationModule {
   AUTHENTIFICATION = 'AUTHENTIFICATION',
+  EXCHANGE_RATES = 'EXCHANGE_RATES',
   USERS = 'USERS',
 }
 

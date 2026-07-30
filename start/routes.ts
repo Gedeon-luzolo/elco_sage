@@ -9,6 +9,7 @@
 
 import { middleware } from '#start/kernel'
 import { registerAuthenticatedAuthRoutes, registerGuestAuthRoutes } from '#routes/auth_routes'
+import { registerExchangeRateRoutes } from '#routes/exchange_rate_routes'
 import { registerManagementRoutes } from '#routes/management_routes'
 import { registerUserRoutes } from '#routes/user_routes'
 import router from '@adonisjs/core/services/router'
@@ -29,7 +30,14 @@ router
 router
   .group(() => {
     registerAuthenticatedAuthRoutes()
-    registerManagementRoutes()
-    registerUserRoutes()
+
+    router
+      .group(() => {
+        registerManagementRoutes()
+        registerUserRoutes()
+        registerExchangeRateRoutes()
+      })
+      .prefix('management')
+      .use(middleware.managementAccess())
   })
   .use(middleware.auth())

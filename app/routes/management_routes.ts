@@ -1,4 +1,3 @@
-import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 
 const JournalisationsController = () =>
@@ -6,13 +5,8 @@ const JournalisationsController = () =>
 
 // Regroupe les routes du module management.
 export function registerManagementRoutes() {
-  router
-    .on('management')
-    .renderInertia('management', {})
-    .as('management')
-    .use(middleware.managementAccess())
+  router.on('/').renderInertia('management', {}).as('management')
   router
     .get('journalisations', [JournalisationsController, 'getJournalisations'])
     .as('journalisations.get')
-    .use(middleware.managementAccess())
 }

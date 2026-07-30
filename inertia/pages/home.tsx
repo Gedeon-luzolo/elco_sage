@@ -1,4 +1,4 @@
-import { Form, Link } from '@adonisjs/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
@@ -27,19 +27,7 @@ export default function Home(props: InertiaProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right md:block">
-              <p className="text-sm font-medium">{props.user?.fullName}</p>
-              <p className="text-xs text-muted-foreground">{props.user?.role}</p>
-            </div>
-            <Form route="session.destroy">
-              {({ processing }) => (
-                <Button variant="outline" type="submit" disabled={processing}>
-                  Se deconnecter
-                </Button>
-              )}
-            </Form>
-          </div>
+          <p className="text-sm text-muted-foreground">{props.user?.role}</p>
         </header>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">

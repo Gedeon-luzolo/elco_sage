@@ -22,4 +22,7 @@ export interface ApiDefinition {
     update: typeof routes['users.update']
     destroy: typeof routes['users.destroy']
   }
+  exchangeRates: {
+    store: typeof routes['exchange_rates.store']
+  }
 }

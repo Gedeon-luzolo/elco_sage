@@ -69,7 +69,7 @@ export default function JournalisationsPage({
     setIsLoading(true)
 
     router.get(
-      '/journalisations',
+      '/management/journalisations',
       {
         module,
         startDate: selectionDate.startDate,

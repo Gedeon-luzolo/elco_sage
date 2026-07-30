@@ -83,12 +83,12 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
 
     // Si on est en edition, on envoie un PUT vers le compte existant, sinon un POST vers la collection.
     if (editingUser) {
-      router.put(`/users/${editingUser.id}`, payload, options)
+      router.put(`/management/users/${editingUser.id}`, payload, options)
       return
     }
 
     // Creation d'un nouveau compte.
-    router.post('/users', payload, options)
+    router.post('/management/users', payload, options)
   }
 
   // Supprime le compte apres confirmation explicite.
@@ -99,7 +99,7 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
 
     setProcessing(true)
 
-    router.delete(`/users/${deletingUser.id}`, {
+    router.delete(`/management/users/${deletingUser.id}`, {
       preserveScroll: true,
       onSuccess: closeDialogs,
       onFinish: () => setProcessing(false),

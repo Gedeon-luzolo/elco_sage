@@ -67,18 +67,18 @@ export const MANAGEMENT_MODULES: NavigationModuleItem[] = [
     title: 'Gestion des users',
     description: 'Créer les comptes, rôles, statuts et accès utilisateurs.',
     icon: Users,
-    href: '/users',
+    href: '/management/users',
   },
   {
     title: 'Journalisation',
     description: 'Consulter les actions enregistrées dans le système.',
     icon: ScrollText,
-    href: '/journalisations',
+    href: '/management/journalisations',
   },
   {
     title: 'Gestion de taux',
     description: 'Définir et suivre les taux utilisés par le système.',
     icon: CircleDollarSign,
-    href: '/rates',
+    href: '/management/rates',
   },
 ]
