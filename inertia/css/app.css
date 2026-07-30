@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 @source "../views";
@@ -151,5 +151,16 @@ body {
   }
   html {
     @apply font-sans;
+  }
+
+  /* Scrollbar principal de l'application */
+  ::-webkit-scrollbar {
+    @apply w-3;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md bg-gradient-to-b from-orange-900 to-amber-700;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: #2b1810;
   }
 }

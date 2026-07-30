@@ -16,6 +16,7 @@ export type ScannedRoutes = {
     'users.store': { paramsTuple?: []; params?: {} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
   }
   GET: {
@@ -25,6 +26,7 @@ export type ScannedRoutes = {
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
+    'exchange_rates.get': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
@@ -33,6 +35,7 @@ export type ScannedRoutes = {
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
+    'exchange_rates.get': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'session.store': { paramsTuple?: []; params?: {} }

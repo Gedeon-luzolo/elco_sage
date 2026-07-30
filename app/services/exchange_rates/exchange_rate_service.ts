@@ -12,6 +12,11 @@ export default class ExchangeRateService {
     return ExchangeRate.query().orderBy('createdAt', 'desc').first()
   }
 
+  // Recupere les derniers taux pour l'historique du back-office.
+  async getHistory(limit = 10) {
+    return ExchangeRate.query().orderBy('createdAt', 'desc').limit(limit)
+  }
+
   /**
    * Cree une nouvelle ligne de taux pour garder l'historique.
    * La derniere ligne creee devient automatiquement la valeur affichee dans l'app.

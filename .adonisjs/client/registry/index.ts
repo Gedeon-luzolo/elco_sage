@@ -78,6 +78,12 @@ const routes = {
     tokens: [{"old":"/management/users/:id","type":0,"val":"management","end":""},{"old":"/management/users/:id","type":0,"val":"users","end":""},{"old":"/management/users/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['users.destroy']['types'],
   },
+  'exchange_rates.get': {
+    methods: ["GET","HEAD"],
+    pattern: '/management/rates',
+    tokens: [{"old":"/management/rates","type":0,"val":"management","end":""},{"old":"/management/rates","type":0,"val":"rates","end":""}],
+    types: placeholder as Registry['exchange_rates.get']['types'],
+  },
   'exchange_rates.store': {
     methods: ["POST"],
     pattern: '/management/rates',

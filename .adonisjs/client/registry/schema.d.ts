@@ -151,6 +151,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/users/users_controller').default['destroy']>>>
     }
   }
+  'exchange_rates.get': {
+    methods: ["GET","HEAD"]
+    pattern: '/management/rates'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/exchange_rates/exchange_rates_controller').default['getExchangeRates']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exchange_rates/exchange_rates_controller').default['getExchangeRates']>>>
+    }
+  }
   'exchange_rates.store': {
     methods: ["POST"]
     pattern: '/management/rates'

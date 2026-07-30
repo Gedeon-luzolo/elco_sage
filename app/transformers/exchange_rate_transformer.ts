@@ -9,4 +9,12 @@ export default class ExchangeRateTransformer extends BaseTransformer<ExchangeRat
       usdToCdfSellRate: Number(this.resource.usdToCdfSellRate),
     }
   }
+
+  // Ajoute la date uniquement pour l'historique du back-office.
+  toHistory() {
+    return {
+      ...this.toObject(),
+      createdAt: this.resource.createdAt.toJSDate().toISOString(),
+    }
+  }
 }
