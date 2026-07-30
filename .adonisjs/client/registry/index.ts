@@ -48,6 +48,12 @@ const routes = {
     tokens: [{"old":"/management","type":0,"val":"management","end":""}],
     types: placeholder as Registry['management']['types'],
   },
+  'journalisations.get': {
+    methods: ["GET","HEAD"],
+    pattern: '/journalisations',
+    tokens: [{"old":"/journalisations","type":0,"val":"journalisations","end":""}],
+    types: placeholder as Registry['journalisations.get']['types'],
+  },
   'users.get': {
     methods: ["GET","HEAD"],
     pattern: '/users',

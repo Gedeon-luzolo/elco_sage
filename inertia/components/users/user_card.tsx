@@ -2,7 +2,7 @@ import { Edit3, Trash2, UserRound } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import type { UserListItem, UserRole, UserStatus } from '~/user_types'
+import type { UserListItem, UserRole, UserStatus } from '~/types/user_types'
 
 interface UserCardProps {
   user: UserListItem

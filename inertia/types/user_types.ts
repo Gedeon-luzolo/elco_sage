@@ -1,12 +1,12 @@
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
-// Roles connus cote backend pour le formulaire utilisateur.
+// Rôles connus côté backend pour le formulaire utilisateur.
 export type UserRole = 'ADMIN' | 'DIRECTOR' | 'CASHIER' | 'OPERATOR'
 
-// Statuts connus cote backend pour le formulaire utilisateur.
+// Statuts connus côté backend pour le formulaire utilisateur.
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
 
-// Statistiques globales affichees au-dessus de la liste.
+// Statistiques globales affichées au-dessus de la liste.
 export type UserStats = Record<string, JSONDataTypes> & {
   total: number
   active: number
@@ -14,13 +14,13 @@ export type UserStats = Record<string, JSONDataTypes> & {
   blocked: number
 }
 
-// Ligne de distribution utilisee pour les compteurs par statut.
+// Ligne de distribution utilisée pour les compteurs par statut.
 export type UserStatusDistribution = Record<string, JSONDataTypes> & {
   status: UserStatus
   total: number
 }
 
-// Forme serialisee exposee par UserTransformer pour la page.
+// Forme sérialisée exposée par UserTransformer pour la page.
 export type UserListItem = Record<string, JSONDataTypes> & {
   id: string
   fullName: string | null
@@ -32,14 +32,14 @@ export type UserListItem = Record<string, JSONDataTypes> & {
   initials: string
 }
 
-// Props envoyees par le controller Inertia.
+// Props envoyées par le controller Inertia.
 export interface UsersPageProps extends Record<string, JSONDataTypes> {
   users: UserListItem[]
   stats: UserStats
   statusDistribution: UserStatusDistribution[]
 }
 
-// Etat local partage entre creation et modification.
+// État local partagé entre création et modification.
 export interface UserFormState {
   fullName: string
   email: string
@@ -47,7 +47,7 @@ export interface UserFormState {
   status: UserStatus
 }
 
-// Option generique pour les selects role/statut.
+// Option générique pour les selects rôle/statut.
 export interface UserSelectOption<T extends string> {
   value: T
   label: string

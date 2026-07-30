@@ -10,4 +10,7 @@ export const controllers = {
   users: {
     Users: () => import('#controllers/users/users_controller'),
   },
+  journalisations: {
+    Journalisations: () => import('#controllers/journalisations/journalisations_controller'),
+  },
 }

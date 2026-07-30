@@ -1,0 +1,198 @@
+import { router } from '@inertiajs/react'
+import { History } from 'lucide-react'
+import { useState } from 'react'
+import { Badge } from '~/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { PeriodSelector } from '~/components/ui/period_selector'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
+import {
+  JOURNALISATION_MODULE_LABELS,
+  JOURNALISATION_MODULE_OPTIONS,
+} from '~/constants/journalisations'
+import { useSelectionDate } from '~/hooks/use_selection_date'
+import { ManagementLayout } from '~/layouts/management_layout'
+import { formatLongDate, formatShortTime } from '~/utils/date'
+import type {
+  JournalisationModuleFilter,
+  JournalisationsPageProps,
+} from '~/types/journalisation_types'
+
+export default function JournalisationsPage({
+  journalisations,
+  filters,
+}: JournalisationsPageProps) {
+  // Hooks d'état local pour les filtres.
+  const selectionDate = useSelectionDate({
+    initialStartDate: filters.startDate,
+    initialEndDate: filters.endDate,
+  })
+
+  // Hooks d'état local pour le module et le chargement.
+  const [module, setModule] = useState<JournalisationModuleFilter>(filters.module)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Résout le libellé affiché dans le select au lieu de la valeur technique.
+  const getModuleLabel = (value: JournalisationModuleFilter | null) => {
+    return (
+      JOURNALISATION_MODULE_OPTIONS.find((option) => option.value === value)?.label ??
+      'Tous les modules'
+    )
+  }
+
+  // Applique les filtres via query string Inertia.
+  const searchJournalisations = () => {
+    setIsLoading(true)
+
+    router.get(
+      '/journalisations',
+      {
+        module,
+        startDate: selectionDate.startDate,
+        endDate: selectionDate.endDate,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => setIsLoading(false),
+      }
+    )
+  }
+
+  return (
+    <ManagementLayout title="Journalisation">
+      <section className="flex flex-col gap-6">
+        <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Journalisation</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Les 50 dernières actions sont affichées.
+            </p>
+          </div>
+        </header>
+
+        <Card className="bg-background">
+          <CardHeader className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <CardTitle>Filtres</CardTitle>
+              <CardDescription>Filtrer les actions par module et période.</CardDescription>
+            </div>
+
+            <div className="flex w-full flex-col gap-4 xl:w-auto xl:flex-row xl:items-end xl:justify-end">
+              <div className="grid gap-2 xl:w-56">
+                <label className="text-sm font-medium" htmlFor="journalisation-module">
+                  Module
+                </label>
+                <Select
+                  value={module}
+                  onValueChange={(value) => setModule(value as JournalisationModuleFilter)}
+                >
+                  <SelectTrigger id="journalisation-module" className="h-10 w-full">
+                    <SelectValue>{(value) => getModuleLabel(value)}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOURNALISATION_MODULE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <PeriodSelector
+                startDate={selectionDate.startDate}
+                endDate={selectionDate.endDate}
+                onDateChange={selectionDate.handleDateChange}
+                onSearch={searchJournalisations}
+                isLoading={isLoading}
+                className="xl:w-auto"
+                hideCardWrapper
+              />
+            </div>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-background">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-md bg-muted">
+                <History className="size-5" />
+              </span>
+              <div>
+                <CardTitle>Actions enregistrées</CardTitle>
+                <CardDescription>{journalisations.length} entrée(s)</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Module</TableHead>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead>Message</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {journalisations.map((journalisation) => {
+                  const createdAt = new Date(journalisation.createdAt)
+
+                  return (
+                    <TableRow key={journalisation.id}>
+                      <TableCell>
+                        <div className="grid gap-1">
+                          <span>{formatLongDate(createdAt)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatShortTime(createdAt)}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {JOURNALISATION_MODULE_LABELS[journalisation.module]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {journalisation.user ? (
+                          <span>{journalisation.user.fullName ?? 'Utilisateur sans nom'}</span>
+                        ) : (
+                          <span className="text-muted-foreground">Système</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-xl whitespace-normal">
+                        {journalisation.message}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+
+                {journalisations.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                      Aucune entrée trouvée pour ces filtres.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
+    </ManagementLayout>
+  )
+}

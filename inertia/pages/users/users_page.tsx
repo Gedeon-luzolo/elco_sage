@@ -18,7 +18,7 @@ import type {
   UserListItem,
   UsersPageProps,
   UserStatusDistribution,
-} from '~/user_types'
+} from '~/types/user_types'
 import { ManagementLayout } from '~/layouts/management_layout'
 
 // Transforme les donnees du formulaire en payload pour l'API.

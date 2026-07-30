@@ -1,4 +1,4 @@
-import type { UserFormState, UserRole, UserSelectOption, UserStatus } from '~/user_types'
+import type { UserFormState, UserRole, UserSelectOption, UserStatus } from '~/types/user_types'
 
 // Options disponibles pour le champ role utilisateur.
 export const USER_ROLE_OPTIONS: Array<UserSelectOption<UserRole>> = [

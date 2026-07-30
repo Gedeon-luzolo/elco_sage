@@ -91,6 +91,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'journalisations.get': {
+    methods: ["GET","HEAD"]
+    pattern: '/journalisations'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/journalisations/journalisations_controller').default['getJournalisations']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/journalisations/journalisations_controller').default['getJournalisations']>>>
+    }
+  }
   'users.get': {
     methods: ["GET","HEAD"]
     pattern: '/users'

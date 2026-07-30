@@ -28,18 +28,27 @@ export default class JournalisationService {
     startDate,
     endDate,
   }: FindJournalisationsParams = {}) {
-    const query = Journalisation.query().preload('user').orderBy('createdAt', 'desc').offset(offset)
+    // Cree la requete de base pour recuperer les entrees de journalisation.
+    const query = Journalisation.query()
+      .preload('user', (userQuery) => {
+        userQuery.select('id', 'fullName')
+      })
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
 
+    // Applique les filtres de module si fournis.
     if (module) {
       query.where('module', module)
     }
 
+    // Applique les filtres de date si fournis.
     if (startDate && endDate) {
       const dateRange = normalizeDateRange(startDate, endDate)
 
       query.whereBetween('createdAt', [dateRange.startDate, dateRange.endDate])
     }
 
+    // Limite le nombre d'entrees retournees pour eviter de surcharger la page.
     return query.limit(limit)
   }
 

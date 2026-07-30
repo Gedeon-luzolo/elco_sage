@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import type { UserListItem, UserRole, UserSelectOption, UserStatus } from '~/user_types'
+import type { UserListItem, UserRole, UserSelectOption, UserStatus } from '~/types/user_types'
 
 type UserDialogDefaultValues = Pick<UserListItem, 'fullName' | 'email' | 'role' | 'status'>
 

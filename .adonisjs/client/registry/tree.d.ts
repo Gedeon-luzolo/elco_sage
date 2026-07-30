@@ -13,6 +13,9 @@ export interface ApiDefinition {
     verifyPassword: typeof routes['auth.verify_password']
   }
   management: typeof routes['management']
+  journalisations: {
+    get: typeof routes['journalisations.get']
+  }
   users: {
     get: typeof routes['users.get']
     store: typeof routes['users.store']
