@@ -7,10 +7,10 @@ export const controllers = {
   auth: {
     Session: () => import('#controllers/auth/session_controller'),
   },
-  users: {
-    Users: () => import('#controllers/users/users_controller'),
-  },
   journalisations: {
     Journalisations: () => import('#controllers/journalisations/journalisations_controller'),
+  },
+  users: {
+    Users: () => import('#controllers/users/users_controller'),
   },
 }

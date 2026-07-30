@@ -3,6 +3,7 @@ import { History } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
 import {
   Select,
@@ -23,13 +24,17 @@ import {
   JOURNALISATION_MODULE_LABELS,
   JOURNALISATION_MODULE_OPTIONS,
 } from '~/constants/journalisations'
+import { usePaginated } from '~/hooks/use_paginated'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import { ManagementLayout } from '~/layouts/management_layout'
 import { formatLongDate, formatShortTime } from '~/utils/date'
 import type {
+  JournalisationListItem,
   JournalisationModuleFilter,
   JournalisationsPageProps,
 } from '~/types/journalisation_types'
+
+const JOURNALISATIONS_PAGE_SIZE = 10
 
 export default function JournalisationsPage({
   journalisations,
@@ -45,6 +50,12 @@ export default function JournalisationsPage({
   const [module, setModule] = useState<JournalisationModuleFilter>(filters.module)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Hook de pagination pour gérer les entrées visibles et la navigation.
+  const paginatedJournalisations = usePaginated<JournalisationListItem>({
+    initialItems: journalisations,
+    pageSize: JOURNALISATIONS_PAGE_SIZE,
+  })
+
   // Résout le libellé affiché dans le select au lieu de la valeur technique.
   const getModuleLabel = (value: JournalisationModuleFilter | null) => {
     return (
@@ -53,7 +64,7 @@ export default function JournalisationsPage({
     )
   }
 
-  // Applique les filtres via query string Inertia.
+  // Applique les filtres via Inertia; la pagination reste ensuite locale.
   const searchJournalisations = () => {
     setIsLoading(true)
 
@@ -65,7 +76,7 @@ export default function JournalisationsPage({
         endDate: selectionDate.endDate,
       },
       {
-        preserveState: true,
+        preserveState: false,
         preserveScroll: true,
         onFinish: () => setIsLoading(false),
       }
@@ -79,7 +90,7 @@ export default function JournalisationsPage({
           <div>
             <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Journalisation</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Les 50 dernières actions sont affichées.
+              Les actions chargées sont affichées par page de {JOURNALISATIONS_PAGE_SIZE}.
             </p>
           </div>
         </header>
@@ -134,11 +145,21 @@ export default function JournalisationsPage({
               </span>
               <div>
                 <CardTitle>Actions enregistrées</CardTitle>
-                <CardDescription>{journalisations.length} entrée(s)</CardDescription>
+                <CardDescription>
+                  Page {paginatedJournalisations.currentPage} -{' '}
+                  {paginatedJournalisations.loadedItemsCount} entrée(s) chargée(s)
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
+            <PaginationControls
+              canGoPrevious={paginatedJournalisations.canGoPrevious}
+              canGoNext={paginatedJournalisations.canGoNext}
+              pageSize={JOURNALISATIONS_PAGE_SIZE}
+              onPrevious={paginatedJournalisations.goToPreviousPage}
+              onNext={paginatedJournalisations.goToNextPage}
+            />
             <Table>
               <TableHeader>
                 <TableRow>
@@ -149,7 +170,7 @@ export default function JournalisationsPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {journalisations.map((journalisation) => {
+                {paginatedJournalisations.visibleItems.map((journalisation) => {
                   const createdAt = new Date(journalisation.createdAt)
 
                   return (
@@ -181,7 +202,7 @@ export default function JournalisationsPage({
                   )
                 })}
 
-                {journalisations.length === 0 && (
+                {paginatedJournalisations.items.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                       Aucune entrée trouvée pour ces filtres.

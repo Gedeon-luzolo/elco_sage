@@ -20,7 +20,7 @@ export function ManagementLayout({ title, children }: ManagementLayoutProps) {
           <h1 className="text-sm font-medium">{title}</h1>
         </header>
 
-        <main className="flex flex-1 flex-col gap-4 p-4 px-28">{children}</main>
+        <main className="flex flex-1 flex-col gap-4 p-4 sm:px-26  px-2">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )

@@ -15,9 +15,8 @@ export default class JournalisationsController {
     const startDate = request.input('startDate')
     const endDate = request.input('endDate')
 
-    // Recupere les entrees de journalisation par batch avec les filtres appliques.
+    // Récupère les entrées de journalisation avec les filtres appliqués.
     const journalisations = await journalisationService.findAllBatch({
-      limit: 50,
       module: this.normalizeModule(module),
       startDate,
       endDate,

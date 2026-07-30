@@ -1,6 +1,7 @@
 import { Link } from '@adonisjs/inertia/react'
 import { usePage } from '@inertiajs/react'
-import { Home, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
+import { ManagementUserMenu } from '~/components/management/management_user_menu'
 import {
   Sidebar,
   SidebarContent,
@@ -15,10 +16,11 @@ import {
   SidebarRail,
 } from '~/components/ui/sidebar'
 import { MANAGEMENT_MODULES } from '~/constants/modules'
+import type { InertiaProps } from '~/types'
 
 // Navigation interne du module management.
 export function ManagementSidebar() {
-  const { url } = usePage()
+  const { props, url } = usePage<InertiaProps>()
 
   // La page dashboard doit être active uniquement sur /management.
   const isActiveItem = (href: string) => {
@@ -71,14 +73,7 @@ export function ManagementSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href="/" />} tooltip="Accueil">
-              <Home className="size-4" />
-              <span>Accueil</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <ManagementUserMenu user={props.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
