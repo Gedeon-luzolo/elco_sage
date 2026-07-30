@@ -1,7 +1,10 @@
+import { JournalisationModule } from '#models/journalisation'
 import User, { UserStatus } from '#models/user'
+import JournalisationService from '#services/journalisation/journalisation_service'
 import hash from '@adonisjs/core/services/hash'
 
 const MAX_FAILED_LOGIN_ATTEMPTS = 3
+const journalisationService = new JournalisationService()
 
 export type LoginAttemptResult =
   | {
@@ -76,7 +79,14 @@ export default class AuthAttemptService {
       user.status = UserStatus.BLOCKED
       await user.save()
 
-      return this.failed('Compte bloque apres 3 tentatives de connexion echouees')
+      // Journalise le blocage automatique après les échecs de connexion.
+      await journalisationService.create({
+        module: JournalisationModule.AUTHENTIFICATION,
+        message: `Le compte de ${user.fullName ?? user.email} a ete automatiquement bloque apres ${MAX_FAILED_LOGIN_ATTEMPTS} tentatives de connexion echouees`,
+        user,
+      })
+
+      return this.failed('Compte bloqué apres 3 tentatives de connexion echouées')
     }
 
     await user.save()
@@ -105,7 +115,7 @@ export default class AuthAttemptService {
    */
   private getUnavailableAccountMessage(status: UserStatus) {
     if (status === UserStatus.BLOCKED) {
-      return 'Ce compte est bloque. Contactez un administrateur.'
+      return 'Ce compte est bloqué. Contactez un administrateur.'
     }
 
     return 'Ce compte est inactif. Contactez un administrateur.'

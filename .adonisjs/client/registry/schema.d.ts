@@ -79,6 +79,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['destroy']>>>
     }
   }
+  'management': {
+    methods: ["GET","HEAD"]
+    pattern: '/management'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'users.get': {
     methods: ["GET","HEAD"]
     pattern: '/users'

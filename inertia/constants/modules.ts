@@ -1,12 +1,21 @@
 import {
   Boxes,
-  ClipboardList,
+  CircleDollarSign,
+  LayoutDashboard,
   Package,
-  Settings,
+  ScrollText,
+  ShieldCheck,
   ShoppingCart,
   Users,
   type LucideIcon,
 } from 'lucide-react'
+
+export interface NavigationModuleItem {
+  title: string
+  description: string
+  icon: LucideIcon
+  href: string
+}
 
 export interface NavigationModule {
   title: string
@@ -17,41 +26,59 @@ export interface NavigationModule {
 }
 
 /**
- * Liste principale des modules affiches sur la page home.
- * Cette constante est reservee aux pages de navigation UI.
- * La protection d'acces reste geree cote middleware backend.
+ * Liste principale des modules affichés sur la page home.
+ * Cette constante est réservée aux pages de navigation UI.
+ * La protection d'accès reste gérée côté middleware backend.
  */
 export const MODULES: NavigationModule[] = [
   {
     title: 'Gestion des ventes',
-    description: 'Suivre les ventes, encaissements et operations commerciales.',
+    description: 'Suivre les ventes, encaissements et opérations commerciales.',
     icon: ShoppingCart,
   },
   {
     title: 'Gestion des produits',
-    description: 'Administrer les articles, prix, categories et references.',
+    description: 'Administrer les articles, prix, catégories et références.',
     icon: Package,
   },
   {
     title: 'Gestion de stock',
-    description: 'Controler les entrees, sorties et niveaux disponibles.',
+    description: 'Contrôler les entrées, sorties et niveaux disponibles.',
     icon: Boxes,
   },
   {
-    title: 'Inventaires',
-    description: 'Preparer les comptages et rapprocher les ecarts de stock.',
-    icon: ClipboardList,
+    title: 'Management',
+    description: 'Administrer les accès et suivre les actions sensibles.',
+    icon: ShieldCheck,
+    isManagement: true,
+    href: '/management',
+  },
+]
+
+// Rubriques affichées dans la sidebar du module management.
+export const MANAGEMENT_MODULES: NavigationModuleItem[] = [
+  {
+    title: 'Dashboard',
+    description: 'Vue générale du module management.',
+    icon: LayoutDashboard,
+    href: '/management',
   },
   {
     title: 'Gestion des users',
-    description: 'Creer les comptes, roles, statuts et acces utilisateurs.',
+    description: 'Créer les comptes, rôles, statuts et accès utilisateurs.',
     icon: Users,
-    isManagement: true,
     href: '/users',
   },
   {
-    title: 'Parametres',
-    description: 'Configurer les preferences et informations du systeme.',
-    icon: Settings,
+    title: 'Journalisation',
+    description: 'Consulter les actions enregistrées dans le système.',
+    icon: ScrollText,
+    href: '/journalisations',
+  },
+  {
+    title: 'Gestion de taux',
+    description: 'Définir et suivre les taux utilisés par le système.',
+    icon: CircleDollarSign,
+    href: '/rates',
   },
 ]

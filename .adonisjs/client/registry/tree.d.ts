@@ -12,6 +12,7 @@ export interface ApiDefinition {
   auth: {
     verifyPassword: typeof routes['auth.verify_password']
   }
+  management: typeof routes['management']
   users: {
     get: typeof routes['users.get']
     store: typeof routes['users.store']

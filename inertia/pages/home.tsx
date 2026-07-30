@@ -1,5 +1,4 @@
 import { Form, Link } from '@adonisjs/inertia/react'
-import { BarChart3 } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
@@ -43,7 +42,7 @@ export default function Home(props: InertiaProps) {
           </div>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
           {MODULES.map((module) => {
             const Icon = module.icon
 
@@ -80,28 +79,6 @@ export default function Home(props: InertiaProps) {
               </Card>
             )
           })}
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <Card size="sm" className="rounded-2xl bg-background md:col-span-2">
-            <CardHeader>
-              <CardTitle>Vue generale</CardTitle>
-              <CardDescription>
-                Les indicateurs rapides seront affiches ici apres connexion des modules metier.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card size="sm" className="rounded-2xl bg-[#2b1810] text-amber-50">
-            <CardHeader>
-              <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-amber-50/10">
-                <BarChart3 className="size-5" aria-hidden="true" />
-              </div>
-              <CardTitle>Acces rapide</CardTitle>
-              <CardDescription className="text-amber-50/70">
-                Une navigation simple pour demarrer la gestion quotidienne.
-              </CardDescription>
-            </CardHeader>
-          </Card>
         </section>
       </section>
     </main>

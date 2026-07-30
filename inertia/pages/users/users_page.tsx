@@ -1,8 +1,6 @@
-import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
 import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
@@ -21,6 +19,7 @@ import type {
   UsersPageProps,
   UserStatusDistribution,
 } from '~/user_types'
+import { ManagementLayout } from '~/layouts/management_layout'
 
 // Transforme les donnees du formulaire en payload pour l'API.
 function getUserFormPayload(formData: FormData): UserFormState {
@@ -108,13 +107,10 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 text-foreground">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8 lg:px-10">
+    <ManagementLayout title="Gestion des utilisateurs">
+      <section className="flex w-full flex-col gap-6">
         <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <Badge variant="outline" className="mb-3 bg-background">
-              Direction
-            </Badge>
             <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">
               Gestion des utilisateurs
             </h1>
@@ -124,9 +120,6 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
           </div>
 
           <div className="flex items-center gap-2">
-            <Button render={<Link href="/" />} variant="outline">
-              Retour
-            </Button>
             <Button type="button" onClick={openCreateDialog}>
               <Plus className="size-4" />
               Creer
@@ -198,6 +191,6 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
         onCancel={closeDialogs}
         onConfirm={confirmDelete}
       />
-    </main>
+    </ManagementLayout>
   )
 }

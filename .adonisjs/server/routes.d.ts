@@ -10,6 +10,7 @@ export type ScannedRoutes = {
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'management': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -19,12 +20,14 @@ export type ScannedRoutes = {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'management': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'management': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
   }
   POST: {

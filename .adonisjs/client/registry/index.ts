@@ -42,6 +42,12 @@ const routes = {
     tokens: [{"old":"/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'management': {
+    methods: ["GET","HEAD"],
+    pattern: '/management',
+    tokens: [{"old":"/management","type":0,"val":"management","end":""}],
+    types: placeholder as Registry['management']['types'],
+  },
   'users.get': {
     methods: ["GET","HEAD"],
     pattern: '/users',

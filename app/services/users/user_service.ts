@@ -1,4 +1,6 @@
+import { JournalisationModule } from '#models/journalisation'
 import User, { UserRole, UserStatus } from '#models/user'
+import JournalisationService from '#services/journalisation/journalisation_service'
 import type {
   CreatedUserResult,
   UserOverview,
@@ -10,6 +12,7 @@ import db from '@adonisjs/lucid/services/db'
 
 const DEFAULT_USER_PASSWORD = '12345678'
 const USER_CREATION_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR]
+const journalisationService = new JournalisationService()
 
 export default class UserService {
   /**
@@ -62,6 +65,13 @@ export default class UserService {
       failedLoginAttempts: 0,
     })
 
+    // Journalise la création du nouveau compte utilisateur.
+    await journalisationService.create({
+      module: JournalisationModule.USERS,
+      message: `Le compte ${user.fullName ?? user.email} a ete cree par ${actor.fullName ?? actor.email}`,
+      user,
+    })
+
     return {
       user,
       temporaryPassword: DEFAULT_USER_PASSWORD,
@@ -92,6 +102,14 @@ export default class UserService {
     })
 
     await user.save()
+
+    // Journalise la mise à jour du compte utilisateur.
+    await journalisationService.create({
+      module: JournalisationModule.USERS,
+      message: `Le compte ${user.fullName ?? user.email} a ete mis a jour par ${actor.fullName ?? actor.email}`,
+      user,
+    })
+
     return user
   }
 
@@ -108,6 +126,13 @@ export default class UserService {
     }
 
     const user = await User.findOrFail(userId)
+
+    // Journalise la suppression avant que le compte ne disparaisse.
+    await journalisationService.create({
+      module: JournalisationModule.USERS,
+      message: `Le compte ${user.fullName ?? user.email} a ete supprime par ${actor.fullName ?? actor.email}`,
+      user,
+    })
     await user.delete()
   }
 

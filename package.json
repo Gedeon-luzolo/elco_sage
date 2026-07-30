@@ -28,6 +28,7 @@
     "#routes/*": "./app/routes/*.js",
     "#transformers/*": "./app/transformers/*.js",
     "#types/*": "./app/types/*.js",
+    "#utils/*": "./app/utils/*.js",
     "#validators/*": "./app/validators/*.js",
     "#providers/*": "./providers/*.js",
     "#policies/*": "./app/policies/*.js",
