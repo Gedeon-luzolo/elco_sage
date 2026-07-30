@@ -1,8 +1,11 @@
+import { JournalisationModule } from '#models/journalisation'
 import AuthAttemptService from '#services/auth/auth_attempt_service'
+import JournalisationService from '#services/journalisation/journalisation_service'
 import { verifyPasswordValidator } from '#validators/auth/password'
 import type { HttpContext } from '@adonisjs/core/http'
 
 const authAttemptService = new AuthAttemptService()
+const journalisationService = new JournalisationService()
 
 export default class SessionController {
   /**
@@ -32,6 +35,13 @@ export default class SessionController {
 
     // La session Adonis est creee seulement apres les controles de securite.
     await auth.use('web').login(result.user)
+
+    await journalisationService.create({
+      module: JournalisationModule.AUTHENTIFICATION,
+      message: `${result.user.fullName ?? result.user.email} vient de se connectéé au systeme`,
+      user: result.user,
+    })
+
     return response.redirect().toRoute('home')
   }
 
@@ -61,6 +71,16 @@ export default class SessionController {
    * Ne touche pas aux compteurs de tentatives du compte.
    */
   async destroy({ auth, response }: HttpContext) {
+    const user = auth.user
+
+    if (user) {
+      await journalisationService.create({
+        module: JournalisationModule.AUTHENTIFICATION,
+        message: `${user.fullName ?? user.email} vient de se deconnecter du systeme`,
+        user,
+      })
+    }
+
     await auth.use('web').logout()
     response.redirect().toRoute('session.create')
   }
