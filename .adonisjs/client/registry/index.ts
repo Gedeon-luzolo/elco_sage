@@ -54,6 +54,12 @@ const routes = {
     tokens: [{"old":"/management/journalisations","type":0,"val":"management","end":""},{"old":"/management/journalisations","type":0,"val":"journalisations","end":""}],
     types: placeholder as Registry['journalisations.get']['types'],
   },
+  'management.products_and_services': {
+    methods: ["GET","HEAD"],
+    pattern: '/management/products-and-services',
+    tokens: [{"old":"/management/products-and-services","type":0,"val":"management","end":""},{"old":"/management/products-and-services","type":0,"val":"products-and-services","end":""}],
+    types: placeholder as Registry['management.products_and_services']['types'],
+  },
   'users.get': {
     methods: ["GET","HEAD"],
     pattern: '/management/users',

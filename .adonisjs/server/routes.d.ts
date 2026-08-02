@@ -12,6 +12,7 @@ export type ScannedRoutes = {
     'session.destroy': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get': { paramsTuple?: []; params?: {} }
+    'management.products_and_services': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -29,6 +30,7 @@ export type ScannedRoutes = {
     'session.create': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get': { paramsTuple?: []; params?: {} }
+    'management.products_and_services': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'product_categories.index': { paramsTuple?: []; params?: {} }
@@ -39,6 +41,7 @@ export type ScannedRoutes = {
     'session.create': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get': { paramsTuple?: []; params?: {} }
+    'management.products_and_services': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'product_categories.index': { paramsTuple?: []; params?: {} }

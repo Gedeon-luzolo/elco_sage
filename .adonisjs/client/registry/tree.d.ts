@@ -12,7 +12,9 @@ export interface ApiDefinition {
   auth: {
     verifyPassword: typeof routes['auth.verify_password']
   }
-  management: typeof routes['management']
+  management: typeof routes['management'] & {
+    productsAndServices: typeof routes['management.products_and_services']
+  }
   journalisations: {
     get: typeof routes['journalisations.get']
   }

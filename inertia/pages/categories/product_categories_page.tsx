@@ -108,12 +108,11 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
   }
 
   return (
-    <ManagementLayout title="Catégories de services">
+    <ManagementLayout title="Catégories des produits & Services">
       <section className="flex w-full flex-col gap-6">
         <PageHeader
-          title="Catégories de services"
-          description="Organisez les types d'impressions, façonnages et prestati
-          ons proposées par votre imprimerie."
+          title="Catégories des produits & Services"
+          description="Organisez les différents produits et services proposés par votre imprimerie."
           icon={Tags}
         >
           <Button type="button" onClick={openCreateModal}>

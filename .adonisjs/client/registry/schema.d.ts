@@ -103,6 +103,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/journalisations/journalisations_controller').default['getJournalisations']>>>
     }
   }
+  'management.products_and_services': {
+    methods: ["GET","HEAD"]
+    pattern: '/management/products-and-services'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'users.get': {
     methods: ["GET","HEAD"]
     pattern: '/management/users'

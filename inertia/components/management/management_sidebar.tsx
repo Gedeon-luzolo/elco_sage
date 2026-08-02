@@ -1,7 +1,8 @@
 import { Link } from '@adonisjs/inertia/react'
 import { usePage } from '@inertiajs/react'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, ChevronRight } from 'lucide-react'
 import { ManagementUserMenu } from '~/components/management/management_user_menu'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +12,12 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarRail,
 } from '~/components/ui/sidebar'
 import { MANAGEMENT_MODULES } from '~/constants/modules'
@@ -55,16 +60,54 @@ export function ManagementSidebar() {
                 const Icon = item.icon
 
                 return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      render={<Link href={item.href} />}
-                      isActive={isActiveItem(item.href)}
-                      tooltip={item.title}
-                    >
-                      <Icon className="size-4" />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <Collapsible
+                    key={item.href}
+                    render={<SidebarMenuItem />}
+                    defaultOpen={
+                      isActiveItem(item.href) ||
+                      (item.subItems && item.subItems.some((sub) => isActiveItem(sub.href)))
+                    }
+                    className="group/collapsible"
+                  >
+                      <SidebarMenuButton
+                        render={<Link href={item.href} />}
+                        isActive={isActiveItem(item.href)}
+                        tooltip={item.title}
+                      >
+                        <Icon className="size-4" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+
+                      {item.subItems && (
+                        <>
+                          <CollapsibleTrigger
+                            render={
+                              <SidebarMenuAction
+                                className="left-auto right-1 data-[state=open]:rotate-90 transition-transform"
+                                showOnHover
+                              />
+                            }
+                          >
+                            <ChevronRight />
+                            <span className="sr-only">Toggle</span>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.subItems.map((subItem) => (
+                                <SidebarMenuSubItem key={subItem.href}>
+                                  <SidebarMenuSubButton
+                                    render={<Link href={subItem.href} />}
+                                    isActive={isActiveItem(subItem.href)}
+                                  >
+                                    {subItem.title}
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </>
+                      )}
+                  </Collapsible>
                 )
               })}
             </SidebarMenu>
