@@ -1,4 +1,5 @@
 import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,6 @@ interface ProductCategoryModalProps {
   open: boolean
   // En mode création, category est null — le statut est géré par le backend (défaut: true).
   category: ProductCategoryItem | null
-  processing: boolean
   submitLabel: string
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
@@ -35,7 +35,6 @@ export function ProductCategoryModal({
   description,
   open,
   category,
-  processing,
   submitLabel,
   onOpenChange,
   action,
@@ -99,9 +98,7 @@ export function ProductCategoryModal({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <Button type="submit" size="lg" disabled={processing}>
-              {processing ? 'Enregistrement...' : submitLabel}
-            </Button>
+            <SubmitButton size="lg" label={submitLabel} />
           </DialogFooter>
         </form>
       </DialogContent>

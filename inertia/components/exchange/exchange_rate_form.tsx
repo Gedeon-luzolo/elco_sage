@@ -1,5 +1,5 @@
 import { Save } from 'lucide-react'
-import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -7,15 +7,17 @@ import { Label } from '~/components/ui/label'
 
 interface ExchangeRateFormProps {
   errors: Record<string, string | undefined>
-  processing: boolean
-  onSubmit: (formData: FormData) => void
+  currentBuyRate?: number
+  currentSellRate?: number
+  action: (formData: FormData) => void | Promise<void>
 }
 
 // Affiche le formulaire de mise a jour du taux courant.
 export function ExchangeRateForm({
   errors,
-  processing,
-  onSubmit,
+  currentBuyRate,
+  currentSellRate,
+  action,
 }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">
@@ -26,7 +28,7 @@ export function ExchangeRateForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form key={'new-rate'} className="grid gap-5" action={onSubmit}>
+        <form key={'new-rate'} className="grid gap-5" action={action}>
           <div className="grid gap-2">
             <Label htmlFor="usdToCdfBuyRate">Taux d&apos;achat</Label>
             <div className="relative">
@@ -37,6 +39,7 @@ export function ExchangeRateForm({
                 min="0.0001"
                 step="0.0001"
                 className="h-10 pr-14"
+                defaultValue={currentBuyRate ?? ''}
                 placeholder="Ex. 2800"
                 required
               />
@@ -59,6 +62,7 @@ export function ExchangeRateForm({
                 min="0.0001"
                 step="0.0001"
                 className="h-10 pr-14"
+                defaultValue={currentSellRate ?? ''}
                 placeholder="Ex. 2850"
                 required
               />
@@ -71,10 +75,11 @@ export function ExchangeRateForm({
             )}
           </div>
 
-          <Button type="submit" className="justify-self-start" disabled={processing}>
-            <Save className="size-4" />
-            {processing ? 'Enregistrement...' : 'Enregistrer'}
-          </Button>
+          <SubmitButton 
+            className="justify-self-start" 
+            label="Enregistrer" 
+            icon={<Save className="size-4" />} 
+          />
         </form>
       </CardContent>
     </Card>

@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
@@ -25,7 +26,6 @@ interface CreateUpdateUserDialogProps {
   description: string
   open: boolean
   defaultValues: UserDialogDefaultValues
-  processing: boolean
   submitLabel: string
   roleOptions: Array<UserSelectOption<UserRole>>
   statusOptions: Array<UserSelectOption<UserStatus>>
@@ -39,7 +39,6 @@ export function CreateUpdateUserDialog({
   description,
   open,
   defaultValues,
-  processing,
   submitLabel,
   roleOptions,
   statusOptions,
@@ -117,9 +116,7 @@ export function CreateUpdateUserDialog({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Fermer
             </Button>
-            <Button type="submit" size="lg" disabled={processing}>
-              {processing ? 'Traitement...' : submitLabel}
-            </Button>
+            <SubmitButton size="lg" label={submitLabel} />
           </DialogFooter>
         </form>
       </DialogContent>

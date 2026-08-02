@@ -33,7 +33,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ProductCategoryItem | null>(null)
   const [deletingCategory, setDeletingCategory] = useState<ProductCategoryItem | null>(null)
-  const [processing, setProcessing] = useState(false)
 
   // Dérivé directement des props : ne change qu'après une action serveur.
   const statCards = [
@@ -78,13 +77,7 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
 
   // Envoie le formulaire vers la création ou la modification selon le mode courant.
   const saveCategory = (formData: FormData) => {
-    setProcessing(true)
-
-    const options = {
-      preserveScroll: true,
-      onSuccess: closeModal,
-      onFinish: () => setProcessing(false),
-    }
+    const options = { preserveScroll: true, onSuccess: closeModal }
 
     if (editingCategory) {
       // En édition, isActive est présent dans le form et explicitement envoyé.
@@ -108,11 +101,9 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
   const confirmDelete = () => {
     if (!deletingCategory) return
 
-    setProcessing(true)
     router.delete(`/management/product-categories/${deletingCategory.id}`, {
       preserveScroll: true,
       onSuccess: closeModal,
-      onFinish: () => setProcessing(false),
     })
   }
 
@@ -286,7 +277,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
         }
         open={isModalOpen}
         category={editingCategory}
-        processing={processing}
         submitLabel={editingCategory ? 'Enregistrer' : 'Créer'}
         onOpenChange={(open) => {
           if (!open) closeModal()
@@ -302,7 +292,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
         description={`Êtes-vous sûr de vouloir supprimer la catégorie "${deletingCategory?.name ?? ''}" ? Cette action est irréversible.`}
         confirmLabel="Supprimer"
         variant="destructive"
-        processing={processing}
         onOpenChange={(open) => {
           if (!open) closeModal()
         }}

@@ -1,6 +1,5 @@
 import { router, usePage } from '@inertiajs/react'
 import { ArrowDownToLine, ArrowUpFromLine, Banknote } from 'lucide-react'
-import { useState } from 'react'
 import { type Data } from '@generated/data'
 import { ExchangeRateForm } from '~/components/exchange/exchange_rate_form'
 import { ExchangeRateHistoryTable } from '~/components/exchange/exchange_rate_history_table'
@@ -18,23 +17,17 @@ interface RatesPageProps {
 
 export default function RatesPage({ exchangeRates }: RatesPageProps) {
   const { errors } = usePage<InertiaProps>().props
-  const [processing, setProcessing] = useState(false)
   const currentRate = exchangeRates[0]
 
   // Enregistre une nouvelle ligne pour conserver l'historique des taux.
   const saveRate = (formData: FormData) => {
-    setProcessing(true)
-
     router.post(
       '/management/rates',
       {
         usdToCdfBuyRate: Number(formData.get('usdToCdfBuyRate')),
         usdToCdfSellRate: Number(formData.get('usdToCdfSellRate')),
       },
-      {
-        preserveScroll: true,
-        onFinish: () => setProcessing(false),
-      }
+      { preserveScroll: true }
     )
   }
 
@@ -87,9 +80,10 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
 
         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <ExchangeRateForm
+            action={saveRate}
             errors={errors}
-            processing={processing}
-            onSubmit={saveRate}
+            currentBuyRate={currentRate?.usdToCdfBuyRate}
+            currentSellRate={currentRate?.usdToCdfSellRate}
           />
           <ExchangeRateHistoryTable exchangeRates={exchangeRates} />
         </section>

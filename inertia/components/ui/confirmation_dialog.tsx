@@ -1,5 +1,6 @@
 import { CircleAlert, Trash2, type LucideIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ interface ConfirmationDialogProps {
   icon?: LucideIcon
   onOpenChange: (open: boolean) => void
   onCancel?: () => void
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
 }
 
 // Dialog generique pour confirmer une action utilisateur.
@@ -53,19 +54,19 @@ export function ConfirmationDialog({
           <DialogDescription className="text-center text-base">{description}</DialogDescription>
         </DialogHeader>
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={processing}
-            onClick={onCancel ?? (() => onOpenChange(false))}
-          >
-            {cancelLabel}
-          </Button>
-          <Button type="button" variant={confirmVariant} disabled={processing} onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
-        </DialogFooter>
+        <form action={onConfirm}>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={processing}
+              onClick={onCancel ?? (() => onOpenChange(false))}
+            >
+              {cancelLabel}
+            </Button>
+            <SubmitButton variant={confirmVariant} label={confirmLabel} />
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

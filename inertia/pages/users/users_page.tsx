@@ -37,7 +37,6 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserListItem | null>(null)
   const [deletingUser, setDeletingUser] = useState<UserListItem | null>(null)
-  const [processing, setProcessing] = useState(false)
 
   // Memoize les cartes de stats pour eviter de recalculer a chaque rendu.
   const statCards = [
@@ -69,39 +68,23 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
 
   // Envoie le formulaire vers la creation ou la modification selon le mode courant.
   const saveUser = (formData: FormData) => {
-    setProcessing(true)
-
     const payload = { ...getUserFormPayload(formData) }
+    const options = { preserveScroll: true, onSuccess: closeDialogs }
 
-    // Crréer les options de navigation pour conserver le scroll et fermer les modales apres succes.
-    const options = {
-      preserveScroll: true,
-      onSuccess: closeDialogs,
-      onFinish: () => setProcessing(false),
-    }
-
-    // Si on est en edition, on envoie un PUT vers le compte existant, sinon un POST vers la collection.
     if (editingUser) {
       router.put(`/management/users/${editingUser.id}`, payload, options)
-      return
+    } else {
+      router.post('/management/users', payload, options)
     }
-
-    // Creation d'un nouveau compte.
-    router.post('/management/users', payload, options)
   }
 
   // Supprime le compte apres confirmation explicite.
   const confirmDelete = () => {
-    if (!deletingUser) {
-      return
-    }
-
-    setProcessing(true)
+    if (!deletingUser) return
 
     router.delete(`/management/users/${deletingUser.id}`, {
       preserveScroll: true,
       onSuccess: closeDialogs,
-      onFinish: () => setProcessing(false),
     })
   }
 
@@ -156,7 +139,6 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
         }
         open={isCreateOpen || Boolean(editingUser)}
         defaultValues={editingUser ?? EMPTY_USER_FORM}
-        processing={processing}
         submitLabel={editingUser ? 'Enregistrer' : 'Creer'}
         roleOptions={USER_ROLE_OPTIONS}
         statusOptions={USER_STATUS_OPTIONS}
@@ -173,11 +155,10 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
 
       <ConfirmationDialog
         open={Boolean(deletingUser)}
-        title="Supprimer le compte"
-        description={`Cette action supprimera definitivement le compte ${deletingUser?.email ?? ''}.`}
+        title="Supprimer l'utilisateur"
+        description={`Etes-vous sur de vouloir supprimer ${deletingUser?.fullName} ? Cette action est irreversible.`}
         confirmLabel="Supprimer"
         variant="destructive"
-        processing={processing}
         onOpenChange={(open) => {
           if (!open) {
             closeDialogs()
