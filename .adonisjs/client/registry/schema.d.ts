@@ -175,4 +175,52 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exchange_rates/exchange_rates_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'product_categories.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/management/product-categories'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['index']>>>
+    }
+  }
+  'product_categories.store': {
+    methods: ["POST"]
+    pattern: '/management/product-categories'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/product_category').createProductCategoryValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/product_category').createProductCategoryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'product_categories.update': {
+    methods: ["PUT"]
+    pattern: '/management/product-categories/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/product_category').updateProductCategoryValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/product_category').updateProductCategoryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'product_categories.destroy': {
+    methods: ["DELETE"]
+    pattern: '/management/product-categories/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['destroy']>>>
+    }
+  }
 }

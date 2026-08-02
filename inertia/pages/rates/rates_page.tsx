@@ -1,10 +1,11 @@
 import { router, usePage } from '@inertiajs/react'
-import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
+import { ArrowDownToLine, ArrowUpFromLine, Banknote } from 'lucide-react'
 import { useState } from 'react'
 import { type Data } from '@generated/data'
 import { ExchangeRateForm } from '~/components/exchange/exchange_rate_form'
 import { ExchangeRateHistoryTable } from '~/components/exchange/exchange_rate_history_table'
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { PageHeader } from '~/components/common/page_header'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type { InertiaProps } from '~/types'
 import { numberFormatter } from '~/utils/format_number.utils'
@@ -40,12 +41,11 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
   return (
     <ManagementLayout title="Gestion des taux">
       <section className="flex w-full flex-col gap-6">
-        <header className="border-b border-border pb-6">
-          <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Gestion des taux</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Definir les taux USD vers CDF utilises dans toute l&apos;application.
-          </p>
-        </header>
+        <PageHeader
+          title="Gestion des taux"
+          description="Definir les taux USD vers CDF utilises dans toute l'application."
+          icon={Banknote}
+        />
 
         <section className="grid gap-3 sm:grid-cols-2">
           <Card size="sm" className="bg-background">

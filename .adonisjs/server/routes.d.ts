@@ -18,6 +18,10 @@ export type ScannedRoutes = {
     'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
+    'product_categories.index': { paramsTuple?: []; params?: {} }
+    'product_categories.store': { paramsTuple?: []; params?: {} }
+    'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   GET: {
     'home': { paramsTuple?: []; params?: {} }
@@ -27,6 +31,7 @@ export type ScannedRoutes = {
     'journalisations.get': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
+    'product_categories.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
@@ -36,6 +41,7 @@ export type ScannedRoutes = {
     'journalisations.get': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
+    'product_categories.index': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'session.store': { paramsTuple?: []; params?: {} }
@@ -43,12 +49,15 @@ export type ScannedRoutes = {
     'session.destroy': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
+    'product_categories.store': { paramsTuple?: []; params?: {} }
   }
   PUT: {
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
     'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

@@ -90,6 +90,30 @@ const routes = {
     tokens: [{"old":"/management/rates","type":0,"val":"management","end":""},{"old":"/management/rates","type":0,"val":"rates","end":""}],
     types: placeholder as Registry['exchange_rates.store']['types'],
   },
+  'product_categories.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/management/product-categories',
+    tokens: [{"old":"/management/product-categories","type":0,"val":"management","end":""},{"old":"/management/product-categories","type":0,"val":"product-categories","end":""}],
+    types: placeholder as Registry['product_categories.index']['types'],
+  },
+  'product_categories.store': {
+    methods: ["POST"],
+    pattern: '/management/product-categories',
+    tokens: [{"old":"/management/product-categories","type":0,"val":"management","end":""},{"old":"/management/product-categories","type":0,"val":"product-categories","end":""}],
+    types: placeholder as Registry['product_categories.store']['types'],
+  },
+  'product_categories.update': {
+    methods: ["PUT"],
+    pattern: '/management/product-categories/:id',
+    tokens: [{"old":"/management/product-categories/:id","type":0,"val":"management","end":""},{"old":"/management/product-categories/:id","type":0,"val":"product-categories","end":""},{"old":"/management/product-categories/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['product_categories.update']['types'],
+  },
+  'product_categories.destroy': {
+    methods: ["DELETE"],
+    pattern: '/management/product-categories/:id',
+    tokens: [{"old":"/management/product-categories/:id","type":0,"val":"management","end":""},{"old":"/management/product-categories/:id","type":0,"val":"product-categories","end":""},{"old":"/management/product-categories/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['product_categories.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

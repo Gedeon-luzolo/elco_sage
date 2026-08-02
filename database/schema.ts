@@ -39,6 +39,23 @@ export class JournalisationSchema extends BaseModel {
   declare userId: string | null
 }
 
+export class ProductCategorySchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'id', 'isActive', 'name', 'updatedAt'] as const
+  $columns = ProductCategorySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'failedLoginAttempts', 'fullName', 'id', 'password', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns

@@ -9,5 +9,15 @@
       "@generated/*": ["./.adonisjs/client/*"]
     }
   },
+  "include": [
+    "app/**/*",
+    "config/**/*",
+    "start/**/*",
+    "database/**/*",
+    "providers/**/*",
+    "inertia/**/*",
+    ".adonisjs/**/*.d.ts",
+    ".adonisjs/**/*.ts"
+  ],
   "references": [{ "path": "./tsconfig.inertia.json" }]
 }

@@ -1,4 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
+import { Home as HomeIcon } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
@@ -10,25 +11,20 @@ import {
   CardTitle,
 } from '~/components/ui/card'
 import { MODULES } from '~/constants/modules'
+import { PageHeader } from '~/components/common/page_header'
 import { type InertiaProps } from '~/types'
 
 export default function Home(props: InertiaProps) {
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10">
-        <header className="flex flex-col gap-5 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <Badge variant="outline" className="mb-3 bg-background">
-              Elco Sage
-            </Badge>
-            <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Acceuil</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Bienvenue {props.user?.fullName}
-            </p>
-          </div>
-
+        <PageHeader
+          title="Accueil"
+          description={`Bienvenue ${props.user?.fullName}`}
+          icon={HomeIcon}
+        >
           <p className="text-sm text-muted-foreground">{props.user?.role}</p>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
           {MODULES.map((module) => {

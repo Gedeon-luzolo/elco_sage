@@ -29,3 +29,16 @@ export const getLocalDateKey = (date: Date) => {
 export const getStartOfMonth = (date: Date) => {
   return new Date(date.getFullYear(), date.getMonth(), 1)
 }
+
+// Formate une date en libellé court français (ex: 15 jan. 2025).
+export const formatShortDate = (dateStr: string) => {
+  try {
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return dateStr
+  }
+}

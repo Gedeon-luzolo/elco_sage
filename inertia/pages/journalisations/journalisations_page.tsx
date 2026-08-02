@@ -5,6 +5,8 @@ import { Badge } from '~/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
+import { PageHeader } from '~/components/common/page_header'
+import { EmptyState } from '~/components/common/empty_state'
 import {
   Select,
   SelectContent,
@@ -86,14 +88,11 @@ export default function JournalisationsPage({
   return (
     <ManagementLayout title="Journalisation">
       <section className="flex flex-col gap-6">
-        <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-normal md:text-4xl">Journalisation</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Les actions chargées sont affichées par page de {JOURNALISATIONS_PAGE_SIZE}.
-            </p>
-          </div>
-        </header>
+        <PageHeader
+          title="Journalisation"
+          description={`Les actions chargées sont affichées par page de ${JOURNALISATIONS_PAGE_SIZE}.`}
+          icon={History}
+        />
 
         <Card className="bg-background">
           <CardHeader className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
@@ -204,8 +203,13 @@ export default function JournalisationsPage({
 
                 {paginatedJournalisations.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                      Aucune entrée trouvée pour ces filtres.
+                    <TableCell colSpan={4} className="h-64">
+                      <EmptyState
+                        icon={History}
+                        title="Aucune entrée trouvée"
+                        description="Aucune action n'a été enregistrée pour cette période ou ces critères."
+                        className="border-none shadow-none bg-transparent"
+                      />
                     </TableCell>
                   </TableRow>
                 )}

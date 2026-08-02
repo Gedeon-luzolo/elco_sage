@@ -26,4 +26,10 @@ export interface ApiDefinition {
     get: typeof routes['exchange_rates.get']
     store: typeof routes['exchange_rates.store']
   }
+  productCategories: {
+    index: typeof routes['product_categories.index']
+    store: typeof routes['product_categories.store']
+    update: typeof routes['product_categories.update']
+    destroy: typeof routes['product_categories.destroy']
+  }
 }

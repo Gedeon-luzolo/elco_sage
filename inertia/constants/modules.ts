@@ -6,6 +6,7 @@ import {
   ScrollText,
   ShieldCheck,
   ShoppingCart,
+  Tags,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -37,7 +38,7 @@ export const MODULES: NavigationModule[] = [
     icon: ShoppingCart,
   },
   {
-    title: 'Gestion des produits',
+    title: 'Gestion des produits & Services',
     description: 'Administrer les articles, prix, catégories et références.',
     icon: Package,
   },
@@ -74,6 +75,12 @@ export const MANAGEMENT_MODULES: NavigationModuleItem[] = [
     description: 'Consulter les actions enregistrées dans le système.',
     icon: ScrollText,
     href: '/management/journalisations',
+  },
+  {
+    title: 'Catégories de services',
+    description: 'Gérer les catégories de services et travaux d\'imprimerie.',
+    icon: Tags,
+    href: '/management/product-categories',
   },
   {
     title: 'Gestion de taux',
