@@ -13,6 +13,7 @@ import { registerExchangeRateRoutes } from '#routes/exchange_rate_routes'
 import { registerManagementRoutes } from '#routes/management_routes'
 import { registerProductCategoryRoutes } from '#routes/product_category_routes'
 import { registerProductServiceRoutes } from '#routes/product_service_routes'
+import { registerStockMovementRoutes } from '#routes/stock_movement_routes'
 import { registerUserRoutes } from '#routes/user_routes'
 import router from '@adonisjs/core/services/router'
 
@@ -40,6 +41,7 @@ router
         registerExchangeRateRoutes()
         registerProductCategoryRoutes()
         registerProductServiceRoutes()
+        registerStockMovementRoutes()
       })
       .prefix('management')
       .use(middleware.managementAccess())

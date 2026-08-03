@@ -85,6 +85,31 @@ export class ProductServiceSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class StockMovementSchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'entries', 'id', 'initialStock', 'losses', 'outputs', 'physicalStock', 'productId', 'updatedAt'] as const
+  $columns = StockMovementSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column()
+  declare entries: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare initialStock: string
+  @column()
+  declare losses: string | null
+  @column()
+  declare outputs: string
+  @column()
+  declare physicalStock: string | null
+  @column()
+  declare productId: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'failedLoginAttempts', 'fullName', 'id', 'password', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns

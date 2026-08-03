@@ -1,6 +1,6 @@
 import Journalisation from '#models/journalisation'
 import type { CreateJournalisationParams, FindJournalisationsParams } from '#types/journalisation'
-import { normalizeDateRange } from '#utils/date'
+import { normalizeDateRange } from '#utils/date_utils'
 
 export default class JournalisationService {
   /**
