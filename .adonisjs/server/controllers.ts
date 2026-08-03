@@ -19,4 +19,7 @@ export const controllers = {
   users: {
     Users: () => import('#controllers/users/users_controller'),
   },
+  products: {
+    ProductServices: () => import('#controllers/products/product_services_controller'),
+  },
 }

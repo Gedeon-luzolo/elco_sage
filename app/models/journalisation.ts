@@ -9,6 +9,7 @@ export enum JournalisationModule {
   EXCHANGE_RATES = 'EXCHANGE_RATES',
   USERS = 'USERS',
   PRODUCT_CATEGORIES = 'PRODUCT_CATEGORIES',
+  PRODUCT_SERVICES = 'PRODUCT_SERVICES',
 }
 
 export default class Journalisation extends BaseModel {

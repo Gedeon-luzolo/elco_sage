@@ -10,6 +10,7 @@ import type ExchangeRateTransformer from '#transformers/exchange_rate_transforme
 import type JournalisationTransformer from '#transformers/journalisation_transformer'
 import type ProductCategoryTransformer from '#transformers/product_category_transformer'
 import type UserTransformer from '#transformers/user_transformer'
+import type ProductServiceTransformer from '#transformers/product_service_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
 export namespace Data {
@@ -28,6 +29,10 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
+  }
+  export type ProductService = InferData<ProductServiceTransformer>
+  export namespace ProductService {
+    export type Variants = InferVariants<ProductServiceTransformer>
   }
   export type SharedProps = InferSharedProps<InertiaMiddleware>
 }

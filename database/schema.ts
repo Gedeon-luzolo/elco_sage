@@ -56,6 +56,35 @@ export class ProductCategorySchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProductServiceSchema extends BaseModel {
+  static $columns = ['baseUnit', 'categoryId', 'createdAt', 'id', 'isActive', 'name', 'packagingCapacity', 'packagingUnit', 'priceCdf', 'priceUsd', 'type', 'updatedAt'] as const
+  $columns = ProductServiceSchema.$columns
+  @column()
+  declare baseUnit: string
+  @column()
+  declare categoryId: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column()
+  declare packagingCapacity: number | null
+  @column()
+  declare packagingUnit: string | null
+  @column()
+  declare priceCdf: string
+  @column()
+  declare priceUsd: string
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'failedLoginAttempts', 'fullName', 'id', 'password', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns

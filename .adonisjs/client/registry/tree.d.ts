@@ -12,11 +12,9 @@ export interface ApiDefinition {
   auth: {
     verifyPassword: typeof routes['auth.verify_password']
   }
-  management: typeof routes['management'] & {
-    productsAndServices: typeof routes['management.products_and_services']
-  }
+  management: typeof routes['management']
   journalisations: {
-    get: typeof routes['journalisations.get']
+    getJournalisations: typeof routes['journalisations.get_journalisations']
   }
   users: {
     get: typeof routes['users.get']
@@ -33,5 +31,11 @@ export interface ApiDefinition {
     store: typeof routes['product_categories.store']
     update: typeof routes['product_categories.update']
     destroy: typeof routes['product_categories.destroy']
+  }
+  productServices: {
+    index: typeof routes['product_services.index']
+    store: typeof routes['product_services.store']
+    update: typeof routes['product_services.update']
+    destroy: typeof routes['product_services.destroy']
   }
 }

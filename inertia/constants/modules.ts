@@ -80,7 +80,7 @@ export const MANAGEMENT_MODULES: NavigationModuleItem[] = [
     title: 'Produits & Services',
     description: 'Administrer les articles, prix, catégories et références.',
     icon: Package,
-    href: '/management/products-and-services',
+    href: '/management/product-services',
     subItems: [
       {
         title: 'Catégories',

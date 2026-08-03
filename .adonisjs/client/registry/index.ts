@@ -48,17 +48,11 @@ const routes = {
     tokens: [{"old":"/management","type":0,"val":"management","end":""}],
     types: placeholder as Registry['management']['types'],
   },
-  'journalisations.get': {
+  'journalisations.get_journalisations': {
     methods: ["GET","HEAD"],
     pattern: '/management/journalisations',
     tokens: [{"old":"/management/journalisations","type":0,"val":"management","end":""},{"old":"/management/journalisations","type":0,"val":"journalisations","end":""}],
-    types: placeholder as Registry['journalisations.get']['types'],
-  },
-  'management.products_and_services': {
-    methods: ["GET","HEAD"],
-    pattern: '/management/products-and-services',
-    tokens: [{"old":"/management/products-and-services","type":0,"val":"management","end":""},{"old":"/management/products-and-services","type":0,"val":"products-and-services","end":""}],
-    types: placeholder as Registry['management.products_and_services']['types'],
+    types: placeholder as Registry['journalisations.get_journalisations']['types'],
   },
   'users.get': {
     methods: ["GET","HEAD"],
@@ -119,6 +113,30 @@ const routes = {
     pattern: '/management/product-categories/:id',
     tokens: [{"old":"/management/product-categories/:id","type":0,"val":"management","end":""},{"old":"/management/product-categories/:id","type":0,"val":"product-categories","end":""},{"old":"/management/product-categories/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['product_categories.destroy']['types'],
+  },
+  'product_services.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/management/product-services',
+    tokens: [{"old":"/management/product-services","type":0,"val":"management","end":""},{"old":"/management/product-services","type":0,"val":"product-services","end":""}],
+    types: placeholder as Registry['product_services.index']['types'],
+  },
+  'product_services.store': {
+    methods: ["POST"],
+    pattern: '/management/product-services',
+    tokens: [{"old":"/management/product-services","type":0,"val":"management","end":""},{"old":"/management/product-services","type":0,"val":"product-services","end":""}],
+    types: placeholder as Registry['product_services.store']['types'],
+  },
+  'product_services.update': {
+    methods: ["PUT"],
+    pattern: '/management/product-services/:id',
+    tokens: [{"old":"/management/product-services/:id","type":0,"val":"management","end":""},{"old":"/management/product-services/:id","type":0,"val":"product-services","end":""},{"old":"/management/product-services/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['product_services.update']['types'],
+  },
+  'product_services.destroy': {
+    methods: ["DELETE"],
+    pattern: '/management/product-services/:id',
+    tokens: [{"old":"/management/product-services/:id","type":0,"val":"management","end":""},{"old":"/management/product-services/:id","type":0,"val":"product-services","end":""},{"old":"/management/product-services/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['product_services.destroy']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

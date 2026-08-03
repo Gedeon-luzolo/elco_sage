@@ -91,7 +91,7 @@ export interface Registry {
       errorResponse: unknown
     }
   }
-  'journalisations.get': {
+  'journalisations.get_journalisations': {
     methods: ["GET","HEAD"]
     pattern: '/management/journalisations'
     types: {
@@ -101,18 +101,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/journalisations/journalisations_controller').default['getJournalisations']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/journalisations/journalisations_controller').default['getJournalisations']>>>
-    }
-  }
-  'management.products_and_services': {
-    methods: ["GET","HEAD"]
-    pattern: '/management/products-and-services'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
     }
   }
   'users.get': {
@@ -233,6 +221,54 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories/product_categories_controller').default['destroy']>>>
+    }
+  }
+  'product_services.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/management/product-services'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['index']>>>
+    }
+  }
+  'product_services.store': {
+    methods: ["POST"]
+    pattern: '/management/product-services'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/product_service').createProductServiceValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/product_service').createProductServiceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'product_services.update': {
+    methods: ["PUT"]
+    pattern: '/management/product-services/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/product_service').updateProductServiceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/product_service').updateProductServiceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'product_services.destroy': {
+    methods: ["DELETE"]
+    pattern: '/management/product-services/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['destroy']>>>
     }
   }
 }
