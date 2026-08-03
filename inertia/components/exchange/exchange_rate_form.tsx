@@ -1,24 +1,16 @@
-import { Save } from 'lucide-react'
+﻿import { Save } from 'lucide-react'
 import { SubmitButton } from '~/components/common/submit_button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 
-
 interface ExchangeRateFormProps {
   errors: Record<string, string | undefined>
-  currentBuyRate?: number
-  currentSellRate?: number
   action: (formData: FormData) => void | Promise<void>
 }
 
 // Affiche le formulaire de mise a jour du taux courant.
-export function ExchangeRateForm({
-  errors,
-  currentBuyRate,
-  currentSellRate,
-  action,
-}: ExchangeRateFormProps) {
+export function ExchangeRateForm({ errors, action }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">
       <CardHeader>
@@ -30,16 +22,15 @@ export function ExchangeRateForm({
       <CardContent>
         <form key={'new-rate'} className="grid gap-5" action={action}>
           <div className="grid gap-2">
-            <Label htmlFor="usdToCdfBuyRate">Taux d&apos;achat</Label>
+            <Label htmlFor="exchangeRate">Taux de change</Label>
             <div className="relative">
               <Input
-                id="usdToCdfBuyRate"
-                name="usdToCdfBuyRate"
+                id="exchangeRate"
+                name="exchangeRate"
                 type="number"
                 min="0.0001"
                 step="0.0001"
                 className="h-10 pr-14"
-                defaultValue={currentBuyRate ?? ''}
                 placeholder="Ex. 2800"
                 required
               />
@@ -47,22 +38,21 @@ export function ExchangeRateForm({
                 CDF
               </span>
             </div>
-            {errors.usdToCdfBuyRate && (
-              <p className="text-xs text-destructive">{errors.usdToCdfBuyRate}</p>
+            {errors.exchangeRate && (
+              <p className="text-xs text-destructive">{errors.exchangeRate}</p>
             )}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="usdToCdfSellRate">Taux de vente</Label>
+            <Label htmlFor="sellRate">Taux de vente</Label>
             <div className="relative">
               <Input
-                id="usdToCdfSellRate"
-                name="usdToCdfSellRate"
+                id="sellRate"
+                name="sellRate"
                 type="number"
                 min="0.0001"
                 step="0.0001"
                 className="h-10 pr-14"
-                defaultValue={currentSellRate ?? ''}
                 placeholder="Ex. 2850"
                 required
               />
@@ -70,15 +60,13 @@ export function ExchangeRateForm({
                 CDF
               </span>
             </div>
-            {errors.usdToCdfSellRate && (
-              <p className="text-xs text-destructive">{errors.usdToCdfSellRate}</p>
-            )}
+            {errors.sellRate && <p className="text-xs text-destructive">{errors.sellRate}</p>}
           </div>
 
-          <SubmitButton 
-            className="justify-self-start" 
-            label="Enregistrer" 
-            icon={<Save className="size-4" />} 
+          <SubmitButton
+            className="justify-self-start"
+            label="Enregistrer"
+            icon={<Save className="size-4" />}
           />
         </form>
       </CardContent>

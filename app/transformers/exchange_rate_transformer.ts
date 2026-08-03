@@ -5,8 +5,8 @@ export default class ExchangeRateTransformer extends BaseTransformer<ExchangeRat
   toObject() {
     return {
       id: this.resource.id,
-      usdToCdfBuyRate: Number(this.resource.usdToCdfBuyRate),
-      usdToCdfSellRate: Number(this.resource.usdToCdfSellRate),
+      exchangeRate: Number(this.resource.exchangeRate),
+      sellRate: Number(this.resource.sellRate),
     }
   }
 

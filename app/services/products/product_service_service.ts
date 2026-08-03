@@ -47,18 +47,17 @@ export default class ProductServiceService {
    * Calcule priceUsd et priceCdf à partir du montant et de la devise renseignés.
    */
   private async calculatePrices(priceInput: number, currency: Currency) {
-    // Convertir le prix en nombre
     const amount = Number(priceInput)
 
-    // Convertir le prix en USD et CDF
+    // Si le prix est en USD, on convertit uniquement vers CDF
     if (currency === Currency.USD) {
-      const priceCdf = await exchangeRateService.convertUsdToCdf(amount, 'sell')
+      const priceCdf = await exchangeRateService.convertUsdToCdf(amount, 'buy')
       return { priceUsd: amount, priceCdf }
-      // Convertir  en franc
-    } else {
-      const priceUsd = await exchangeRateService.convertCdfToUsd(amount, 'sell')
-      return { priceUsd, priceCdf: amount }
     }
+
+    // Si le prix est en CDF, on convertit uniquement vers USD
+    const priceUsd = await exchangeRateService.convertCdfToUsd(amount, 'buy')
+    return { priceUsd, priceCdf: amount }
   }
 
   /**

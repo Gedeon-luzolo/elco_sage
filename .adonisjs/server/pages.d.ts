@@ -19,9 +19,9 @@ declare module '@adonisjs/inertia/types' {
     'home': ExtractProps<(typeof import('../../inertia/pages/home.tsx'))['default']>
     'journalisations/journalisations_page': ExtractProps<(typeof import('../../inertia/pages/journalisations/journalisations_page.tsx'))['default']>
     'management': ExtractProps<(typeof import('../../inertia/pages/management.tsx'))['default']>
+    'products/product_services_page': ExtractProps<(typeof import('../../inertia/pages/products/product_services_page.tsx'))['default']>
     'rates/rates_page': ExtractProps<(typeof import('../../inertia/pages/rates/rates_page.tsx'))['default']>
     'splash': ExtractProps<(typeof import('../../inertia/pages/splash.tsx'))['default']>
     'users/users_page': ExtractProps<(typeof import('../../inertia/pages/users/users_page.tsx'))['default']>
-    'products/product_services_page': ExtractProps<(typeof import('../../inertia/pages/products/product_services_page.tsx'))['default']>
   }
 }

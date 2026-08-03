@@ -25,8 +25,8 @@ export default class ExchangeRateService {
     const previousRate = await this.getCurrentRate()
 
     const exchangeRate = await ExchangeRate.create({
-      usdToCdfBuyRate: Number(payload.usdToCdfBuyRate),
-      usdToCdfSellRate: Number(payload.usdToCdfSellRate),
+      exchangeRate: Number(payload.exchangeRate),
+      sellRate: Number(payload.sellRate),
     })
 
     await journalisationService.create({
@@ -40,7 +40,7 @@ export default class ExchangeRateService {
 
   /**
    * Convertit un montant USD en CDF avec le dernier taux disponible.
-   * Le type permet de choisir le taux d'achat ou de vente.
+   * Le type permet de choisir le taux de change ou de vente.
    */
   async convertUsdToCdf(amount: number, type: ExchangeRateType) {
     const rate = await this.getRequiredCurrentRate()
@@ -69,13 +69,13 @@ export default class ExchangeRateService {
     return rate
   }
 
-  // Selectionne la valeur achat ou vente.
+  // Selectionne la valeur de change ou vente.
   private getRateValue(rate: ExchangeRate, type: ExchangeRateType) {
     if (type === 'buy') {
-      return Number(rate.usdToCdfBuyRate)
+      return Number(rate.exchangeRate)
     }
 
-    return Number(rate.usdToCdfSellRate)
+    return Number(rate.sellRate)
   }
 
   // Prepare un message lisible pour le journal.
@@ -83,9 +83,9 @@ export default class ExchangeRateService {
     const actorName = actor.fullName ?? actor.email
 
     if (!previousRate) {
-      return `Le taux USD/CDF a ete cree par ${actorName}. Achat: ${rate.usdToCdfBuyRate}, Vente: ${rate.usdToCdfSellRate}`
+      return `Le taux USD/CDF a ete cree par ${actorName}. Taux de change: ${rate.exchangeRate}, Vente: ${rate.sellRate}`
     }
 
-    return `Le taux USD/CDF a ete mis a jour par ${actorName}. Achat: ${previousRate.usdToCdfBuyRate} -> ${rate.usdToCdfBuyRate}, Vente: ${previousRate.usdToCdfSellRate} -> ${rate.usdToCdfSellRate}`
+    return `Le taux USD/CDF a ete mis a jour par ${actorName}. Taux de change: ${previousRate.exchangeRate} -> ${rate.exchangeRate}, Vente: ${previousRate.sellRate} -> ${rate.sellRate}`
   }
 }

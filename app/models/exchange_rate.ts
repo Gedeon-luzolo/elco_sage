@@ -9,10 +9,10 @@ export default class ExchangeRate extends BaseModel {
   declare id: string
 
   @column()
-  declare usdToCdfBuyRate: number
+  declare exchangeRate: number
 
   @column()
-  declare usdToCdfSellRate: number
+  declare sellRate: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

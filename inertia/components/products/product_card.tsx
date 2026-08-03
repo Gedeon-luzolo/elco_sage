@@ -2,6 +2,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import type { ProductServiceItem } from '~/types/product_service_types'
 
 export interface ProductCardProps {
@@ -58,8 +59,12 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
 
       {/* Prix USD et CDF */}
       <div className="flex flex-col text-sm">
-        <span className="font-semibold text-foreground text-base">${item.priceUsd.toFixed(2)}</span>
-        <span className="text-xs text-muted-foreground">{item.priceCdf.toLocaleString()} FC</span>
+        <span className="font-semibold text-foreground text-base">
+          {formatMoneyWithCurrency(item.priceUsd, 'USD')}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {formatMoneyWithCurrency(item.priceCdf, 'CDF')}
+        </span>
       </div>
 
       {/* Boutons d'action */}

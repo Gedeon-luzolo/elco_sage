@@ -1,4 +1,4 @@
-import { type Data } from '@generated/data'
+﻿import { type Data } from '@generated/data'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import {
@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { formatLongDate, formatShortTime } from '~/utils/date'
-import { numberFormatter } from '~/utils/format_number.utils'
+import { formatMoneyWithCurrency} from '~/utils/format_number.utils'
 
 type ExchangeRateHistory = Data.ExchangeRate.Variants['toHistory']
 
@@ -31,7 +31,7 @@ export function ExchangeRateHistoryTable({ exchangeRates }: ExchangeRateHistoryT
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Achat</TableHead>
+              <TableHead>Taux de change</TableHead>
               <TableHead>Vente</TableHead>
             </TableRow>
           </TableHeader>
@@ -53,10 +53,10 @@ export function ExchangeRateHistoryTable({ exchangeRates }: ExchangeRateHistoryT
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">
-                    {numberFormatter.format(exchangeRate.usdToCdfBuyRate)} CDF
+                    {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {numberFormatter.format(exchangeRate.usdToCdfSellRate)} CDF
+                    {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
                   </TableCell>
                 </TableRow>
               )

@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react'
+﻿import { router, usePage } from '@inertiajs/react'
 import { ArrowDownToLine, ArrowUpFromLine, Banknote } from 'lucide-react'
 import { type Data } from '@generated/data'
 import { ExchangeRateForm } from '~/components/exchange/exchange_rate_form'
@@ -7,7 +7,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/ca
 import { PageHeader } from '~/components/common/page_header'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type { InertiaProps } from '~/types'
-import { numberFormatter } from '~/utils/format_number.utils'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 type ExchangeRateHistory = Data.ExchangeRate.Variants['toHistory']
 
@@ -24,8 +24,8 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
     router.post(
       '/management/rates',
       {
-        usdToCdfBuyRate: Number(formData.get('usdToCdfBuyRate')),
-        usdToCdfSellRate: Number(formData.get('usdToCdfSellRate')),
+        exchangeRate: Number(formData.get('exchangeRate')),
+        sellRate: Number(formData.get('sellRate')),
       },
       { preserveScroll: true }
     )
@@ -48,10 +48,10 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
                   <ArrowDownToLine className="size-4" />
                 </span>
                 <div>
-                  <CardDescription>Taux d&apos;achat actuel</CardDescription>
+                  <CardDescription>Taux d&apos;échange actuel</CardDescription>
                   <CardTitle className="mt-1 text-2xl">
                     {currentRate
-                      ? `${numberFormatter.format(currentRate.usdToCdfBuyRate)} CDF`
+                      ? `${formatMoneyWithCurrency(currentRate.exchangeRate, 'CDF')}`
                       : 'Non defini'}
                   </CardTitle>
                 </div>
@@ -69,7 +69,7 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
                   <CardDescription>Taux de vente actuel</CardDescription>
                   <CardTitle className="mt-1 text-2xl">
                     {currentRate
-                      ? `${numberFormatter.format(currentRate.usdToCdfSellRate)} CDF`
+                      ? `${formatMoneyWithCurrency(currentRate.sellRate, 'CDF')}`
                       : 'Non defini'}
                   </CardTitle>
                 </div>
@@ -79,12 +79,7 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
         </section>
 
         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <ExchangeRateForm
-            action={saveRate}
-            errors={errors}
-            currentBuyRate={currentRate?.usdToCdfBuyRate}
-            currentSellRate={currentRate?.usdToCdfSellRate}
-          />
+          <ExchangeRateForm action={saveRate} errors={errors} />
           <ExchangeRateHistoryTable exchangeRates={exchangeRates} />
         </section>
       </section>

@@ -8,18 +8,18 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class ExchangeRateSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'updatedAt', 'usdToCdfBuyRate', 'usdToCdfSellRate'] as const
+  static $columns = ['createdAt', 'exchangeRate', 'id', 'sellRate', 'updatedAt'] as const
   $columns = ExchangeRateSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare exchangeRate: string
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare sellRate: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
-  @column()
-  declare usdToCdfBuyRate: string
-  @column()
-  declare usdToCdfSellRate: string
 }
 
 export class JournalisationSchema extends BaseModel {

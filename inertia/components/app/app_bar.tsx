@@ -1,9 +1,9 @@
-import { Link } from '@adonisjs/inertia/react'
+﻿import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
 import { LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { type Data } from '@generated/data'
-import { numberFormatter } from '~/utils/format_number.utils'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { Button } from '~/components/ui/button'
 
 interface AppBarProps {
@@ -55,10 +55,10 @@ export function AppBar({ user, exchangeRate }: AppBarProps) {
           {exchangeRate ? (
             <div className="flex min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:text-xs lg:flex-row lg:items-center lg:gap-4">
               <span>
-                Taux de vente : 1 USD = {numberFormatter.format(exchangeRate.usdToCdfSellRate)} CDF
+                Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
               </span>
               <span>
-                Taux achat : 1 USD = {numberFormatter.format(exchangeRate.usdToCdfBuyRate)} CDF
+                Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
               </span>
             </div>
           ) : (

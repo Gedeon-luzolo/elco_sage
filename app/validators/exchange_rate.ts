@@ -6,8 +6,8 @@ import type { InferInput } from '@vinejs/vine/types'
  * Les deux taux doivent rester positifs pour proteger les conversions.
  */
 export const createExchangeRateValidator = vine.create({
-  usdToCdfBuyRate: vine.number().positive(),
-  usdToCdfSellRate: vine.number().positive(),
+  exchangeRate: vine.number().positive(),
+  sellRate: vine.number().positive(),
 })
 
 export type CreateExchangeRateInput = InferInput<typeof createExchangeRateValidator>
