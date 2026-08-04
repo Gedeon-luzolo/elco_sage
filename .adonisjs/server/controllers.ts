@@ -19,6 +19,9 @@ export const controllers = {
   products: {
     ProductServices: () => import('#controllers/products/product_services_controller'),
   },
+  stock: {
+    StockMovements: () => import('#controllers/stock/stock_movements_controller'),
+  },
   users: {
     Users: () => import('#controllers/users/users_controller'),
   },

@@ -55,10 +55,10 @@ export function AppBar({ user, exchangeRate }: AppBarProps) {
           {exchangeRate ? (
             <div className="flex min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:text-xs lg:flex-row lg:items-center lg:gap-4">
               <span>
-                Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
+                Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
               </span>
               <span>
-                Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
+                Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
               </span>
             </div>
           ) : (

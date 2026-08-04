@@ -79,6 +79,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['destroy']>>>
     }
   }
+  'stock_movements.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/stock'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['index']>>>
+    }
+  }
+  'stock_movements.store': {
+    methods: ["POST"]
+    pattern: '/stock/movements'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'stock_movements.validate_physical': {
+    methods: ["POST"]
+    pattern: '/stock/validate-physical'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['validatePhysicalStock']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['validatePhysicalStock']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'management': {
     methods: ["GET","HEAD"]
     pattern: '/management'

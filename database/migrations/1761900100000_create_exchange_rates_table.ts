@@ -6,8 +6,8 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
-      table.decimal('usd_to_cdf_buy_rate', 15, 4).notNullable()
-      table.decimal('usd_to_cdf_sell_rate', 15, 4).notNullable()
+      table.decimal('exchange_rate', 15, 2).notNullable()
+      table.decimal('sell_rate', 15, 2).notNullable()
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

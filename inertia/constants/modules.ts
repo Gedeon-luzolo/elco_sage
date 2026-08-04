@@ -46,6 +46,7 @@ export const MODULES: NavigationModule[] = [
     title: 'Gestion de stock',
     description: 'Contrôler les entrées, sorties et niveaux disponibles.',
     icon: Boxes,
+    href: '/stock',
   },
   {
     title: 'Management',

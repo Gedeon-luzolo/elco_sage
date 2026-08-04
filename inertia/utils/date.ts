@@ -42,3 +42,6 @@ export const formatShortDate = (dateStr: string) => {
     return dateStr
   }
 }
+
+// Clé d'une date
+export const dateKey = new Date().toISOString().split('T')[0]

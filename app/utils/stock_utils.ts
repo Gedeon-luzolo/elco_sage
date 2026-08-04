@@ -1,4 +1,5 @@
 import type ProductService from '#models/product_service'
+import type { StockUnit } from '#types/stock'
 
 /**
  * Convertit une quantité en unité de base selon l'unité fournie
@@ -6,7 +7,7 @@ import type ProductService from '#models/product_service'
  */
 export function convertToBaseUnit(
   quantity: number,
-  unit: 'base' | 'packaging',
+  unit: StockUnit,
   product: ProductService
 ): number {
   if (unit === 'base') {

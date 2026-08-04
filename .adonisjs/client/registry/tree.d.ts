@@ -12,6 +12,11 @@ export interface ApiDefinition {
   auth: {
     verifyPassword: typeof routes['auth.verify_password']
   }
+  stockMovements: {
+    index: typeof routes['stock_movements.index']
+    store: typeof routes['stock_movements.store']
+    validatePhysical: typeof routes['stock_movements.validate_physical']
+  }
   management: typeof routes['management']
   journalisations: {
     getJournalisations: typeof routes['journalisations.get_journalisations']

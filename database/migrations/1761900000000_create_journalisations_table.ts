@@ -6,7 +6,16 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
-      table.enu('module', ['AUTHENTIFICATION', 'USERS']).notNullable()
+      table
+        .enu('module', [
+          'AUTHENTIFICATION',
+          'USERS',
+          'EXCHANGE_RATES',
+          'PRODUCT_CATEGORIES',
+          'PRODUCT_SERVICES',
+          'INVENTORY',
+        ])
+        .notNullable()
       table.text('message').notNullable()
       table.uuid('user_id').nullable().references('id').inTable('users').onDelete('SET NULL')
 

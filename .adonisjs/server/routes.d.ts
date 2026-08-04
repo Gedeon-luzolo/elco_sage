@@ -10,6 +10,9 @@ export type ScannedRoutes = {
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'stock_movements.index': { paramsTuple?: []; params?: {} }
+    'stock_movements.store': { paramsTuple?: []; params?: {} }
+    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -31,6 +34,7 @@ export type ScannedRoutes = {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'stock_movements.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -42,6 +46,7 @@ export type ScannedRoutes = {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'stock_movements.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -53,6 +58,8 @@ export type ScannedRoutes = {
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'stock_movements.store': { paramsTuple?: []; params?: {} }
+    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
     'product_categories.store': { paramsTuple?: []; params?: {} }

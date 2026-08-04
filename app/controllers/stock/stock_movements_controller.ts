@@ -1,5 +1,6 @@
+import type {} from '../../../.adonisjs/server/pages.js'
 import type { HttpContext } from '@adonisjs/core/http'
-import StockMovementService from '#services/inventory/stock_movement_service'
+import StockMovementService from '#services/stock/stock_movement_service'
 import {
   createStockMovementValidator,
   validatePhysicalStockValidator,
@@ -9,7 +10,7 @@ import { runAction } from '#utils/error_handler'
 const stockMovementService = new StockMovementService()
 
 // URL de redirection commune après toute mutation réussie
-const REDIRECT_URL = '/management/inventory'
+const REDIRECT_URL = '/stock'
 
 export default class StockMovementsController {
   /**
@@ -21,7 +22,7 @@ export default class StockMovementsController {
 
     const dailyStock = await stockMovementService.getDailyStock({ date })
 
-    return inertia.render('inventory/stock_movements_page', {
+    return (inertia.render as any)('stock/stock_movements_page', {
       stockItems: dailyStock,
       currentDate: date,
     })

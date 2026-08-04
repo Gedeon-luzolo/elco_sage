@@ -34,6 +34,9 @@ router
   .group(() => {
     registerAuthenticatedAuthRoutes()
 
+    // Routes de gestion de stock (accessible à tous les utilisateurs authentifiés)
+    registerStockMovementRoutes()
+
     router
       .group(() => {
         registerManagementRoutes()
@@ -41,7 +44,6 @@ router
         registerExchangeRateRoutes()
         registerProductCategoryRoutes()
         registerProductServiceRoutes()
-        registerStockMovementRoutes()
       })
       .prefix('management')
       .use(middleware.managementAccess())

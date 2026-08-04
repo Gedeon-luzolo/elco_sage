@@ -64,10 +64,10 @@ export default class StockMovementService {
           entries: movement.entries,
           availableStock: movement.availableStock,
           outputs: movement.outputs,
-          losses: movement.losses,
+          losses: movement.losses !== null ? movement.losses : null,
           theoreticalStock: movement.theoreticalStock,
-          physicalStock: movement.physicalStock,
-          variance: movement.variance,
+          physicalStock: movement.physicalStock !== null ? movement.physicalStock : null,
+          variance: movement.variance !== null ? movement.variance : null,
           isPhysicalStockValidated: movement.isPhysicalStockValidated,
         })
       } else {

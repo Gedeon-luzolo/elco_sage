@@ -42,6 +42,24 @@ const routes = {
     tokens: [{"old":"/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'stock_movements.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/stock',
+    tokens: [{"old":"/stock","type":0,"val":"stock","end":""}],
+    types: placeholder as Registry['stock_movements.index']['types'],
+  },
+  'stock_movements.store': {
+    methods: ["POST"],
+    pattern: '/stock/movements',
+    tokens: [{"old":"/stock/movements","type":0,"val":"stock","end":""},{"old":"/stock/movements","type":0,"val":"movements","end":""}],
+    types: placeholder as Registry['stock_movements.store']['types'],
+  },
+  'stock_movements.validate_physical': {
+    methods: ["POST"],
+    pattern: '/stock/validate-physical',
+    tokens: [{"old":"/stock/validate-physical","type":0,"val":"stock","end":""},{"old":"/stock/validate-physical","type":0,"val":"validate-physical","end":""}],
+    types: placeholder as Registry['stock_movements.validate_physical']['types'],
+  },
   'management': {
     methods: ["GET","HEAD"],
     pattern: '/management',

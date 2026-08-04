@@ -15,19 +15,19 @@ export default class extends BaseSchema {
       table.date('date').notNullable()
 
       // Stock initial (hérité du stock physique du jour précédent)
-      table.decimal('initial_stock', 15, 4).notNullable().defaultTo(0)
+      table.decimal('initial_stock', 15, 2).notNullable().defaultTo(0)
 
       // Entrées (achats, réceptions) - saisie manuelle
-      table.decimal('entries', 15, 4).notNullable().defaultTo(0)
+      table.decimal('entries', 15, 2).notNullable().defaultTo(0)
 
       // Sorties (ventes) - automatique via système de ventes (à implémenter)
-      table.decimal('outputs', 15, 4).notNullable().defaultTo(0)
+      table.decimal('outputs', 15, 2).notNullable().defaultTo(0)
 
       // Pertes (casse, vol, avarie) - saisie manuelle
-      table.decimal('losses', 15, 4).nullable().defaultTo(0)
+      table.decimal('losses', 15, 2).nullable().defaultTo(0)
 
       // Stock physique (inventaire réel) - saisie manuelle en fin de journée
-      table.decimal('physical_stock', 15, 4).nullable()
+      table.decimal('physical_stock', 15, 2).nullable()
 
       // Contrainte unique: 1 seul mouvement par produit par jour
       table.unique(['product_id', 'date'])

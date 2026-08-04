@@ -3,6 +3,7 @@ import { BaseModel, beforeCreate, belongsTo, column, computed } from '@adonisjs/
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import ProductService from '#models/product_service'
+import { decimalColumn } from '#utils/decimal_column'
 
 export default class StockMovement extends BaseModel {
   public static table = 'stock_movements'
@@ -17,23 +18,23 @@ export default class StockMovement extends BaseModel {
   declare date: DateTime
 
   /** Stock initial (hérité du stock physique du jour précédent) */
-  @column()
+  @column(decimalColumn)
   declare initialStock: number
 
   /** Entrées (achats, réceptions) - saisie manuelle */
-  @column()
+  @column(decimalColumn)
   declare entries: number
 
   /** Sorties (ventes) - automatique via système de ventes */
-  @column()
+  @column(decimalColumn)
   declare outputs: number
 
   /** Pertes (casse, vol, avarie) - saisie manuelle */
-  @column()
+  @column(decimalColumn)
   declare losses: number | null
 
   /** Stock physique (inventaire réel) - saisie manuelle en fin de journée */
-  @column()
+  @column(decimalColumn)
   declare physicalStock: number | null
 
   @column.dateTime({ autoCreate: true })
