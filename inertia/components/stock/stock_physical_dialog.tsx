@@ -21,57 +21,59 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import type { StockMovementItem, StockUnit } from '~/types/stock_types'
+import { formatDateLabel } from '~/utils/date'
 import { formatQuantityWithUnit, getConversionPreview } from '~/utils/stock'
 
 interface StockPhysicalDialogProps {
   open: boolean
   movement: StockMovementItem
-  selectedDate: string
   onClose: () => void
 }
 
-export function StockPhysicalDialog({
-  open,
-  movement,
-  selectedDate,
-  onClose,
-}: StockPhysicalDialogProps) {
+export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDialogProps) {
   const [physicalStockUnit, setPhysicalStockUnit] = useState<StockUnit>('base')
   const [lossesUnit, setLossesUnit] = useState<StockUnit>('base')
-  const [physicalStock, setPhysicalStock] = useState('')
-  const [losses, setLosses] = useState('')
+  const [physicalStock, setPhysicalStock] = useState(movement.physicalStock?.toString() ?? '')
+  const [losses, setLosses] = useState(movement.losses?.toString() ?? '')
 
+  const hasMovement = movement.id !== -1
   const hasPackaging = movement.productPackagingUnit && movement.productPackagingCapacity
   const physicalPreview = getConversionPreview(physicalStock, physicalStockUnit, movement)
   const lossesPreview = getConversionPreview(losses, lossesUnit, movement)
 
+  // Reinitialise l'etat local quand la mutation reussit ou quand l'utilisateur annule.
+  const closeDialog = () => {
+    setPhysicalStock('')
+    setLosses('')
+    setPhysicalStockUnit('base')
+    setLossesUnit('base')
+    onClose()
+  }
+
   const handleSubmit = (formData: FormData) => {
-    // Les champs venant des props ou de l'etat React ne sont pas dupliques en inputs caches.
-    // On construit le payload final ici pour garder le DOM limite aux champs visibles.
     const lossesValue = String(formData.get('losses') || '')
-    const payload: Record<string, string> = {
+    // Les champs visibles viennent du FormData, les champs de contexte viennent du mouvement courant.
+    const payload: Record<string, FormDataEntryValue> = {
+      ...Object.fromEntries(formData),
       productId: movement.productId,
-      date: selectedDate,
-      physicalStock: String(formData.get('physicalStock') || ''),
+      date: movement.date,
       physicalStockUnit,
     }
+    const options = { preserveScroll: true, onSuccess: closeDialog }
 
-    // Si aucune perte n'est saisie, on laisse le backend appliquer sa valeur par defaut.
+    // Si aucune perte n'est saisie, on n'envoie pas lossesUnit inutilement.
     if (lossesValue) {
-      payload.losses = lossesValue
       payload.lossesUnit = lossesUnit
+    } else {
+      delete payload.losses
     }
 
-    router.post('/stock/validate-physical', payload, {
-      preserveScroll: true,
-      onSuccess: () => {
-        setPhysicalStock('')
-        setLosses('')
-        setPhysicalStockUnit('base')
-        setLossesUnit('base')
-        onClose()
-      },
-    })
+    // id = -1 signifie qu'aucun mouvement n'existe encore en base pour cette date.
+    if (hasMovement) {
+      router.put(`/stock/validate-physical/${movement.id}`, payload, options)
+    } else {
+      router.post('/stock/validate-physical', payload, options)
+    }
   }
 
   return (
@@ -81,7 +83,7 @@ export function StockPhysicalDialog({
           <DialogTitle>Valider le stock physique</DialogTitle>
           <DialogDescription>
             Saisir le stock physique et les pertes pour {movement.productName} le{' '}
-            {new Date(selectedDate).toLocaleDateString('fr-FR')}.
+            {formatDateLabel(movement.date)}
           </DialogDescription>
         </DialogHeader>
 
@@ -198,8 +200,22 @@ export function StockPhysicalDialog({
             )}
           </div>
 
+          {/* Observation commune au mouvement : justification, correction ou remarque libre. */}
+          <div className="grid gap-2">
+            <Label htmlFor="physical-observation">Observation</Label>
+            <textarea
+              id="physical-observation"
+              name="observation"
+              defaultValue={movement.observation ?? ''}
+              maxLength={500}
+              rows={3}
+              placeholder="Ajouter une remarque utile..."
+              className="min-h-20 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+            />
+          </div>
+
           <DialogFooter className="pt-2">
-            <Button type="button" size="lg" variant="outline" onClick={onClose}>
+            <Button type="button" size="lg" variant="outline" onClick={closeDialog}>
               Annuler
             </Button>
             <SubmitButton size="lg" label="Valider" />

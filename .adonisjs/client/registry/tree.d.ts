@@ -15,7 +15,9 @@ export interface ApiDefinition {
   stockMovements: {
     index: typeof routes['stock_movements.index']
     store: typeof routes['stock_movements.store']
+    update: typeof routes['stock_movements.update']
     validatePhysical: typeof routes['stock_movements.validate_physical']
+    updatePhysical: typeof routes['stock_movements.update_physical']
   }
   management: typeof routes['management']
   journalisations: {

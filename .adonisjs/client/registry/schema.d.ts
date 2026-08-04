@@ -103,6 +103,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'stock_movements.update': {
+    methods: ["PUT"]
+    pattern: '/stock/movements/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'stock_movements.validate_physical': {
     methods: ["POST"]
     pattern: '/stock/validate-physical'
@@ -113,6 +125,18 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['validatePhysicalStock']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['validatePhysicalStock']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'stock_movements.update_physical': {
+    methods: ["PUT"]
+    pattern: '/stock/validate-physical/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['updatePhysicalStock']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['updatePhysicalStock']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'management': {

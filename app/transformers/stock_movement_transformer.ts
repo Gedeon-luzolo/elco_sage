@@ -17,6 +17,7 @@ export interface StockMovementDTO {
   theoreticalStock: number | null
   physicalStock: number | null
   variance: number | null
+  observation: string | null
   isPhysicalStockValidated: boolean
 }
 
@@ -42,6 +43,7 @@ export default class StockMovementTransformer {
       theoreticalStock: item.theoreticalStock,
       physicalStock: item.physicalStock,
       variance: item.variance,
+      observation: item.observation,
       isPhysicalStockValidated: item.isPhysicalStockValidated,
     }
   }

@@ -8,6 +8,14 @@ export function registerStockMovementRoutes() {
   router.post('/stock/movements', [StockMovementsController, 'store']).as('stock_movements.store')
 
   router
+    .put('/stock/movements/:id', [StockMovementsController, 'update'])
+    .as('stock_movements.update')
+
+  router
     .post('/stock/validate-physical', [StockMovementsController, 'validatePhysicalStock'])
     .as('stock_movements.validate_physical')
+
+  router
+    .put('/stock/validate-physical/:id', [StockMovementsController, 'updatePhysicalStock'])
+    .as('stock_movements.update_physical')
 }

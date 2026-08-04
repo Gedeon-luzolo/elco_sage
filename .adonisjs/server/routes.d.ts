@@ -12,7 +12,9 @@ export type ScannedRoutes = {
     'session.destroy': { paramsTuple?: []; params?: {} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'stock_movements.store': { paramsTuple?: []; params?: {} }
+    'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
+    'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -66,6 +68,8 @@ export type ScannedRoutes = {
     'product_services.store': { paramsTuple?: []; params?: {} }
   }
   PUT: {
+    'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

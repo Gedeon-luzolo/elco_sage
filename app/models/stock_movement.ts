@@ -37,6 +37,10 @@ export default class StockMovement extends BaseModel {
   @column(decimalColumn)
   declare physicalStock: number | null
 
+  /** Observation libre sur les imputations et corrections du mouvement */
+  @column()
+  declare observation: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

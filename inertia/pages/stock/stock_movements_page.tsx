@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react'
-import { ArrowLeft, Package, RefreshCw, Warehouse } from 'lucide-react'
+import { ArrowLeft, Package, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { EmptyState } from '~/components/common/empty_state'
@@ -18,6 +18,7 @@ import {
 import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
 import { formatQuantity, filterStockMovements } from '~/utils/stock'
+import { getLocalDateKey } from '~/utils/date'
 
 /**
  * Page principale de gestion des mouvements de stock journaliers.
@@ -29,6 +30,7 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
   const [selectedMovementId, setSelectedMovementId] = useState<string | null>(null)
   const [entryDialogOpen, setEntryDialogOpen] = useState(false)
   const [physicalDialogOpen, setPhysicalDialogOpen] = useState(false)
+  const todayKey = getLocalDateKey()
 
   // Filtrer les produits par recherche
   const filteredItems = filterStockMovements(stockItems, searchTerm)
@@ -48,8 +50,12 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
   }
 
   // Charger les données pour la date sélectionnée
-  const loadStockForDate = () => {
-    router.get('/stock', { date: selectedDate }, { preserveState: false, preserveScroll: false })
+  const changeSelectedDate = (date: string) => {
+    setSelectedDate(date)
+    setSelectedMovementId(null)
+    setEntryDialogOpen(false)
+    setPhysicalDialogOpen(false)
+    router.get('/stock', { date }, { preserveState: false, preserveScroll: false })
   }
 
   return (
@@ -72,13 +78,10 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
             <Input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              max={todayKey}
+              onChange={(e) => changeSelectedDate(e.target.value)}
               className="w-44"
             />
-            <Button type="button" onClick={loadStockForDate} variant="default" size="sm">
-              <RefreshCw className="mr-2 size-4" />
-              Charger
-            </Button>
           </div>
 
           <Input
@@ -205,7 +208,6 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
           <StockEntryDialog
             open={entryDialogOpen}
             movement={selectedMovement}
-            selectedDate={selectedDate}
             onClose={() => {
               setEntryDialogOpen(false)
             }}
@@ -217,7 +219,6 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
           <StockPhysicalDialog
             open={physicalDialogOpen}
             movement={selectedMovement}
-            selectedDate={selectedDate}
             onClose={() => {
               setPhysicalDialogOpen(false)
             }}

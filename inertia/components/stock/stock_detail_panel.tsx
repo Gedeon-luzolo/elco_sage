@@ -1,4 +1,4 @@
-import { Package, CheckCircle2, AlertTriangle, Plus, X } from 'lucide-react'
+import { AlertTriangle, ArrowDown, CheckCircle2, Pencil, X } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import type { StockMovementItem } from '~/types/stock_types'
 import { formatQuantityWithUnit, hasSignificantVariance } from '~/utils/stock'
@@ -12,8 +12,8 @@ export interface StockDetailPanelProps {
 }
 
 /**
- * Panneau de détails d'un mouvement de stock.
- * Affiche toutes les informations détaillées et les actions possibles.
+ * Panneau de details d'un mouvement de stock.
+ * Les actions restent visibles pour permettre une correction tant que le backend l'autorise.
  */
 export function StockDetailPanel({
   movement,
@@ -22,7 +22,6 @@ export function StockDetailPanel({
   onValidatePhysical,
 }: StockDetailPanelProps) {
   const hasMovement = movement.id !== -1
-  const isValidated = movement.isPhysicalStockValidated
   const hasVariance = hasSignificantVariance(movement)
 
   return (
@@ -34,38 +33,40 @@ export function StockDetailPanel({
           {movement.categoryName && (
             <p className="text-sm text-muted-foreground">{movement.categoryName}</p>
           )}
+          {movement.productPackagingUnit && movement.productPackagingCapacity && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              1 {movement.productPackagingUnit} = {movement.productPackagingCapacity}{' '}
+              {movement.productBaseUnit}s
+            </p>
+          )}
         </div>
 
         {/* Boutons d'action */}
         <div className="flex items-center gap-2">
-          {!isValidated && (
-            <>
-              {onCreateEntry && (
-                <Button
-                  type="button"
-                  onClick={() => onCreateEntry(movement)}
-                  size="sm"
-                  variant="outline"
-                  title="Enregistrer des entrées"
-                  className="size-8 p-0"
-                >
-                  <Plus className="size-4" />
-                </Button>
-              )}
+          {onCreateEntry && (
+            <Button
+              type="button"
+              onClick={() => onCreateEntry(movement)}
+              size="sm"
+              variant="outline"
+              title={hasMovement ? 'Corriger les entrees' : 'Enregistrer des entrees'}
+              className="size-8 p-0"
+            >
+              {hasMovement ? <Pencil className="size-4" /> : <ArrowDown className="size-4" />}
+            </Button>
+          )}
 
-              {hasMovement && onValidatePhysical && (
-                <Button
-                  type="button"
-                  onClick={() => onValidatePhysical(movement)}
-                  size="sm"
-                  variant="outline"
-                  title="Valider le stock physique"
-                  className="size-8 p-0"
-                >
-                  <CheckCircle2 className="size-4" />
-                </Button>
-              )}
-            </>
+          {hasMovement && onValidatePhysical && (
+            <Button
+              type="button"
+              onClick={() => onValidatePhysical(movement)}
+              size="sm"
+              variant="outline"
+              title="Valider le stock physique"
+              className="size-8 p-0"
+            >
+              <CheckCircle2 className="size-4" />
+            </Button>
           )}
 
           <Button type="button" variant="ghost" size="sm" onClick={onClose} className="size-8 p-0">
@@ -78,7 +79,7 @@ export function StockDetailPanel({
       <div className="space-y-4 p-4">
         {/* Informations détaillées */}
         <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
-          <h4 className="text-sm font-semibold text-foreground">Détails du stock</h4>
+          <h4 className="text-sm font-semibold text-foreground">Details du stock</h4>
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
@@ -159,23 +160,19 @@ export function StockDetailPanel({
                     </span>
                   </div>
                 )}
+
+                {movement.observation && (
+                  <div className="border-t border-border pt-3">
+                    <span className="text-muted-foreground">Observation :</span>
+                    <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
+                      {movement.observation}
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
-
-        {/* Conditionnement */}
-        {movement.productPackagingUnit && movement.productPackagingCapacity && (
-          <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Package className="size-4" />
-              <span>
-                1 {movement.productPackagingUnit} = {movement.productPackagingCapacity}{' '}
-                {movement.productBaseUnit}s
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

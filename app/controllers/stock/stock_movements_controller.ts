@@ -6,6 +6,7 @@ import {
   validatePhysicalStockValidator,
 } from '#validators/stock_movement'
 import { runAction } from '#utils/error_handler'
+import { todayDateKey } from '#utils/date_utils'
 
 const stockMovementService = new StockMovementService()
 
@@ -17,15 +18,24 @@ export default class StockMovementsController {
    * Affiche la page de gestion du stock journalier.
    * Par défaut, affiche le stock du jour.
    */
-  async index({ inertia, request }: HttpContext) {
-    const date = request.input('date', new Date().toISOString().split('T')[0])
+  async index({ inertia, request, response, session }: HttpContext) {
+    const date = request.input('date', todayDateKey())
 
-    const dailyStock = await stockMovementService.getDailyStock({ date })
+    try {
+      const dailyStock = await stockMovementService.getDailyStock({ date })
 
-    return (inertia.render as any)('stock/stock_movements_page', {
-      stockItems: dailyStock,
-      currentDate: date,
-    })
+      return (inertia.render as any)('stock/stock_movements_page', {
+        stockItems: dailyStock,
+        currentDate: date,
+      })
+    } catch (error) {
+      session.flash(
+        'error',
+        error instanceof Error ? error.message : 'Impossible de charger les mouvements de stock.'
+      )
+
+      return response.redirect().toPath(REDIRECT_URL)
+    }
   }
 
   /**
@@ -43,6 +53,20 @@ export default class StockMovementsController {
   }
 
   /**
+   * Corrige les entrÃ©es d'un mouvement existant.
+   */
+  async update(ctx: HttpContext) {
+    const actor = ctx.auth.getUserOrFail()
+    const payload = await ctx.request.validateUsing(createStockMovementValidator)
+
+    return runAction(ctx, () => stockMovementService.updateEntries(actor, ctx.params.id, payload), {
+      successMessage: 'Entrées de stock mises à jour avec succès.',
+      errorMessage: 'Impossible de mettre à jour les entrées de stock.',
+      redirectTo: REDIRECT_URL,
+    })
+  }
+
+  /**
    * Valide le stock physique et les pertes pour un produit à une date donnée.
    * Cette action débloque le jour suivant.
    */
@@ -55,5 +79,23 @@ export default class StockMovementsController {
       errorMessage: 'Impossible de valider le stock physique.',
       redirectTo: REDIRECT_URL,
     })
+  }
+
+  /**
+   * Corrige le stock physique et les pertes d'un mouvement existant.
+   */
+  async updatePhysicalStock(ctx: HttpContext) {
+    const actor = ctx.auth.getUserOrFail()
+    const payload = await ctx.request.validateUsing(validatePhysicalStockValidator)
+
+    return runAction(
+      ctx,
+      () => stockMovementService.updatePhysicalStock(actor, ctx.params.id, payload),
+      {
+        successMessage: 'Stock physique mis à jour avec succès.',
+        errorMessage: 'Impossible de mettre à  jour le stock physique.',
+        redirectTo: REDIRECT_URL,
+      }
+    )
   }
 }

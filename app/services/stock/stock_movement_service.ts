@@ -10,6 +10,7 @@ import type {
   ValidatePhysicalStockInput,
 } from '#validators/stock_movement'
 import { convertToBaseUnit } from '#utils/stock_utils'
+import { ensureDateIsNotFuture } from '#utils/date_utils'
 
 const journalisationService = new JournalisationService()
 
@@ -23,6 +24,8 @@ export default class StockMovementService {
    * Si un produit n'a pas de mouvement, retourne des champs vides avec id: -1
    */
   async getDailyStock({ date }: GetDailyStockParams): Promise<StockMovementDTO[]> {
+    ensureDateIsNotFuture(date)
+
     const dateMovement = new Date(date)
 
     // 1. Récupérer tous les produits actifs de type PRODUCT et les mouvements en parallèle
@@ -47,7 +50,7 @@ export default class StockMovementService {
     const result: StockMovementDTO[] = []
 
     for (const product of products) {
-      const movement = movements.find((m) => m.productId === product.id)
+      const movement = movements.find((item) => item.productId === product.id)
 
       if (movement) {
         // Produit avec mouvement existant
@@ -64,10 +67,11 @@ export default class StockMovementService {
           entries: movement.entries,
           availableStock: movement.availableStock,
           outputs: movement.outputs,
-          losses: movement.losses !== null ? movement.losses : null,
+          losses: movement.losses,
           theoreticalStock: movement.theoreticalStock,
-          physicalStock: movement.physicalStock !== null ? movement.physicalStock : null,
-          variance: movement.variance !== null ? movement.variance : null,
+          physicalStock: movement.physicalStock,
+          variance: movement.variance,
+          observation: movement.observation,
           isPhysicalStockValidated: movement.isPhysicalStockValidated,
         })
       } else {
@@ -76,15 +80,15 @@ export default class StockMovementService {
         const initialStock = await this.getLastValidatedPhysicalStock(product.id, dateMovement)
 
         result.push({
-          id: -1, // Signal: pas de mouvement en base
+          id: -1,
           productId: product.id,
           productName: product.name,
           productBaseUnit: product.baseUnit,
           productPackagingUnit: product.packagingUnit,
           productPackagingCapacity: product.packagingCapacity,
           categoryName: product.category?.name ?? null,
-          date: date,
-          initialStock: initialStock,
+          date,
+          initialStock,
           entries: null,
           availableStock: null,
           outputs: null,
@@ -92,6 +96,7 @@ export default class StockMovementService {
           theoreticalStock: null,
           physicalStock: null,
           variance: null,
+          observation: null,
           isPhysicalStockValidated: false,
         })
       }
@@ -105,8 +110,7 @@ export default class StockMovementService {
    * Retourne false si le stock physique du jour précédent n'est pas validé.
    */
   async canWorkOnDate(productId: string, date: string): Promise<boolean> {
-    const dateMovement = new Date(date)
-    const previousDate = DateTime.fromJSDate(dateMovement).minus({ days: 1 })
+    const previousDate = DateTime.fromJSDate(new Date(date)).minus({ days: 1 })
 
     // Récupérer le mouvement du jour précédent
     const previousMovement = await StockMovement.query()
@@ -125,115 +129,176 @@ export default class StockMovementService {
   }
 
   /**
-   * Crée ou met à jour un mouvement de stock pour une date donnée.
-   * Cette méthode ne gère QUE les entrées (pas les pertes ni le stock physique).
-   * Validation: le stock physique du jour précédent doit être validé.
+   * Cree les entrees du jour ou corrige les entrees existantes.
+   * La creation depend de la validation du jour precedent.
+   * La correction depend de l'absence de mouvement futur.
    */
   async createOrUpdate(actor: User, payload: CreateStockMovementInput) {
+    ensureDateIsNotFuture(payload.date)
+
+    // On cherche d'abord un mouvement existant pour eviter un doublon produit/date.
+    const existingMovement = await StockMovement.query()
+      .where('productId', payload.productId)
+      .where('date', DateTime.fromJSDate(new Date(payload.date)).toSQLDate()!)
+      .first()
+
+    // Un POST sur un mouvement deja existant devient une correction controlee.
+    if (existingMovement) {
+      return this.updateEntries(actor, existingMovement.id, payload)
+    }
+
+    // Le produit est requis pour convertir les quantites et construire les messages d'audit.
     const dateMovement = new Date(payload.date)
     const product = await ProductService.query()
       .select('id', 'name', 'baseUnit', 'packagingUnit', 'packagingCapacity')
       .where('id', payload.productId)
       .firstOrFail()
 
-    // Convertir la quantité saisie en unité de base
-    const entriesInBaseUnit = convertToBaseUnit(payload.entries, payload.unit, product)
-
-    // Vérifier si on peut travailler sur cette date
+    // Creation seulement si la journee precedente est cloturee par un stock physique.
     const canWork = await this.canWorkOnDate(payload.productId, payload.date)
     if (!canWork) {
       const previousDate = DateTime.fromJSDate(dateMovement)
         .minus({ days: 1 })
         .toFormat('dd/MM/yyyy')
 
-      // Erreur personnalisée avec la date
       throw new Error(
-        `Impossible d'effectuer cette opération. Le stock physique du ${previousDate} pour "${product.name}" n'a pas encore été validé.`
+        `Impossible d'effectuer cette opération. Le stock physique du ${previousDate} pour "${product.name}" n'a pas encore ete valide.`
       )
     }
 
-    // Récupérer le mouvement existant
-    let movement = await StockMovement.query()
-      .where('productId', payload.productId)
-      .where('date', DateTime.fromJSDate(dateMovement).toSQLDate()!)
-      .first()
-
-    // Calculer le stock initial (= dernier stock physique validé avant cette date)
+    // La base stocke toujours en unite de base, meme si l'utilisateur saisit en conditionnement.
+    const entriesInBaseUnit = convertToBaseUnit(payload.entries, payload.unit, product)
+    // Le stock initial reprend le dernier stock physique valide avant cette date.
     const initialStock = await this.getLastValidatedPhysicalStock(payload.productId, dateMovement)
+    // Une nouvelle ligne demarre avec sorties/pertes a zero; le physique sera impute ensuite.
+    const movement = await StockMovement.create({
+      productId: payload.productId,
+      date: DateTime.fromJSDate(dateMovement),
+      initialStock,
+      entries: entriesInBaseUnit,
+      outputs: 0,
+      losses: 0,
+      physicalStock: null,
+      observation: payload.observation || null,
+    })
 
-    // Message pour la journalisation avec l'unité d'origine
     const unitLabel = payload.unit === 'base' ? product.baseUnit : product.packagingUnit
     const quantityMessage = `${payload.entries} ${unitLabel}${payload.entries > 1 ? 's' : ''}`
 
-    if (movement) {
-      // Mise à jour
-      movement.entries = entriesInBaseUnit
-      await movement.save()
+    // L'audit garde la quantite dans l'unite saisie pour rester lisible.
+    await journalisationService.create({
+      module: JournalisationModule.INVENTORY,
+      message: `Mouvement de stock crée pour "${product.name}" le ${DateTime.fromJSDate(dateMovement).toFormat('dd/MM/yyyy')} : ${quantityMessage} en entree par ${actor.fullName ?? actor.email}.`,
+      user: actor,
+    })
 
-      // Journaliser l'opération
-      await journalisationService.create({
-        module: JournalisationModule.INVENTORY,
-        message: `Entrées de stock mises à jour pour "${product.name}" le ${DateTime.fromJSDate(dateMovement).toFormat('dd/MM/yyyy')} : ${quantityMessage} par ${actor.fullName ?? actor.email}.`,
-        user: actor,
-      })
-    } else {
-      // Création
-      movement = await StockMovement.create({
-        productId: payload.productId,
-        date: DateTime.fromJSDate(dateMovement),
-        initialStock,
-        entries: entriesInBaseUnit,
-        outputs: 0,
-        losses: 0,
-        physicalStock: null,
-      })
-
-      // Journaliser l'opération
-      await journalisationService.create({
-        module: JournalisationModule.INVENTORY,
-        message: `Mouvement de stock créé pour "${product.name}" le ${DateTime.fromJSDate(dateMovement).toFormat('dd/MM/yyyy')} : ${quantityMessage} en entrée par ${actor.fullName ?? actor.email}.`,
-        user: actor,
-      })
-    }
-
-    // Recalculer les autres champs après la mise à jour
     await movement.load('product')
     return movement
   }
 
   /**
-   * Valide le stock physique pour un produit à une date donnée.
-   * Les pertes sont saisies EN MÊME TEMPS que le stock physique.
-   * Cette action débloque les opérations du jour suivant.
+   * Corrige les entrees d'un mouvement existant.
+   * Refuse la correction si la chaine de stock a deja continue apres cette date.
    */
-  async validatePhysicalStock(actor: User, payload: ValidatePhysicalStockInput) {
-    const dateMovement = new Date(payload.date)
+  async updateEntries(actor: User, id: string, payload: CreateStockMovementInput) {
+    ensureDateIsNotFuture(payload.date)
+
+    // Le mouvement cible vient de l'URL PUT; le payload confirme produit/date.
+    const movement = await StockMovement.findOrFail(id)
     const product = await ProductService.query()
       .select('id', 'name', 'baseUnit', 'packagingUnit', 'packagingCapacity')
-      .where('id', payload.productId)
+      .where('id', movement.productId)
       .firstOrFail()
 
-    // Convertir le stock physique et les pertes en unité de base
+    // Evite de modifier un mouvement avec les donnees d'un autre produit ou d'une autre date.
+    this.ensurePayloadMatchesMovement(movement, payload.productId, payload.date)
+    // Des qu'un mouvement futur existe, la correction du passe est bloquee.
+    await this.ensureMovementCanBeEdited(movement, product.name)
+
+    // Conversion unique avant sauvegarde pour garder les calculs en unite de base.
+    const entriesInBaseUnit = convertToBaseUnit(payload.entries, payload.unit, product)
+    const unitLabel = payload.unit === 'base' ? product.baseUnit : product.packagingUnit
+    const quantityMessage = `${payload.entries} ${unitLabel}${payload.entries > 1 ? 's' : ''}`
+
+    movement.entries = entriesInBaseUnit
+    movement.observation = payload.observation || null
+    await movement.save()
+
+    // Trace la correction avec l'auteur et l'unite initialement saisie.
+    await journalisationService.create({
+      module: JournalisationModule.INVENTORY,
+      message: `Entrées de stock mises à jour pour "${product.name}" le ${movement.date.toFormat('dd/MM/yyyy')} : ${quantityMessage} par ${actor.fullName ?? actor.email}.`,
+      user: actor,
+    })
+
+    await movement.load('product')
+    return movement
+  }
+
+  /**
+   * Valide le stock physique et les pertes a partir du couple produit/date.
+   * Utilise par le POST lorsque le mouvement est retrouve depuis le payload.
+   */
+  async validatePhysicalStock(actor: User, payload: ValidatePhysicalStockInput) {
+    ensureDateIsNotFuture(payload.date)
+
+    // Le POST cible le mouvement par produit/date.
+    const dateMovement = new Date(payload.date)
+    const movement = await StockMovement.query()
+      .where('productId', payload.productId)
+      .where('date', DateTime.fromJSDate(dateMovement).toSQLDate()!)
+      .firstOrFail()
+
+    // La logique commune applique ensuite les verrous et conversions.
+    return this.applyPhysicalStock(actor, movement, payload)
+  }
+
+  /**
+   * Corrige le stock physique et les pertes par id de mouvement.
+   * Utilise par le PUT pour une correction explicite d'un mouvement existant.
+   */
+  async updatePhysicalStock(actor: User, id: string, payload: ValidatePhysicalStockInput) {
+    ensureDateIsNotFuture(payload.date)
+
+    // Le PUT cible le mouvement par id pour corriger une imputation existante.
+    const movement = await StockMovement.findOrFail(id)
+
+    // Protection contre une correction croisee entre deux mouvements.
+    this.ensurePayloadMatchesMovement(movement, payload.productId, payload.date)
+    return this.applyPhysicalStock(actor, movement, payload)
+  }
+
+  private async applyPhysicalStock(
+    actor: User,
+    movement: StockMovement,
+    payload: ValidatePhysicalStockInput
+  ) {
+    // Le produit donne les unites et la capacite de conditionnement.
+    const product = await ProductService.query()
+      .select('id', 'name', 'baseUnit', 'packagingUnit', 'packagingCapacity')
+      .where('id', movement.productId)
+      .firstOrFail()
+
+    // Si une journee plus recente existe, modifier ce physique casserait la chaine de stock.
+    await this.ensureMovementCanBeEdited(movement, product.name)
+
+    // Stock physique reel converti en unite de base avant persistance.
     const physicalStockInBaseUnit = convertToBaseUnit(
       payload.physicalStock,
       payload.physicalStockUnit,
       product
     )
 
+    // Les pertes sont optionnelles; absence de saisie = zero perte.
     // Qte perdue
     const lossesInBaseUnit = payload.losses
       ? convertToBaseUnit(payload.losses, payload.lossesUnit ?? 'base', product)
       : 0
 
-    // Récupérer le mouvement existant
-    const movement = await StockMovement.query()
-      .where('productId', payload.productId)
-      .where('date', DateTime.fromJSDate(dateMovement).toSQLDate()!)
-      .firstOrFail()
-
-    // Mettre à jour le stock physique ET les pertes
+    // Seuls les champs imputes en fin de journee sont modifies ici.
     movement.physicalStock = physicalStockInBaseUnit
     movement.losses = lossesInBaseUnit
+    movement.observation = payload.observation || null
     await movement.save()
 
     // Messages pour la journalisation avec les unités d'origine
@@ -242,6 +307,7 @@ export default class StockMovementService {
     const physicalMessage = `${payload.physicalStock} ${physicalUnitLabel}${payload.physicalStock > 1 ? 's' : ''}`
 
     // Créer le texte pour les qtes perdus
+    // Le detail des pertes est ajouté uniquement lorsqu'il existe.
     let lossesText = ''
     if (payload.losses) {
       const lossesUnitLabel =
@@ -250,9 +316,10 @@ export default class StockMovementService {
     }
 
     // Creer une notification
+    // Journalise l'imputation avec l'ecart calcule par le modele apres sauvegarde.
     await journalisationService.create({
       module: JournalisationModule.INVENTORY,
-      message: `Stock physique validé pour "${product.name}" le ${DateTime.fromJSDate(dateMovement).toFormat('dd/MM/yyyy')} : ${physicalMessage}.${lossesText} Écart: ${movement.variance ?? 0} ${product.baseUnit}(s). Par ${actor.fullName ?? actor.email}.`,
+      message: `Stock physique valide pour "${product.name}" le ${movement.date.toFormat('dd/MM/yyyy')} : ${physicalMessage}.${lossesText} Ecart: ${movement.variance ?? 0} ${product.baseUnit}(s). Par ${actor.fullName ?? actor.email}.`,
       user: actor,
     })
 
@@ -261,9 +328,32 @@ export default class StockMovementService {
     return movement
   }
 
+  // verifie que le payload correspond bien au mouvement cible pour eviter les corrections croisées
+  private ensurePayloadMatchesMovement(movement: StockMovement, productId: string, date: string) {
+    if (movement.productId !== productId || movement.date.toISODate() !== date) {
+      throw new Error('Les donnees envoyees ne correspondent pas au mouvement a modifier.')
+    }
+  }
+
+  private async ensureMovementCanBeEdited(movement: StockMovement, productName: string) {
+    // On cherche n'importe quel mouvement futur, pas seulement J+1, pour proteger les trous de date.
+    const nextMovement = await StockMovement.query()
+      .select('id', 'date')
+      .where('productId', movement.productId)
+      .where('date', '>', movement.date.toSQLDate()!)
+      .orderBy('date', 'asc')
+      .first()
+
+    // Si un mouvement futur existe, modifier le passe casserait son stock initial/theorique.
+    if (nextMovement) {
+      throw new Error(
+        `Impossible de modifier le mouvement du ${movement.date.toFormat('dd/MM/yyyy')} pour "${productName}". Un mouvement existe deja le ${nextMovement.date.toFormat('dd/MM/yyyy')}.`
+      )
+    }
+  }
+
   /**
-   * Récupère le dernier stock physique validé pour un produit avant une date donnée.
-   * Retourne 0 si aucun stock physique n'a été trouvé.
+   * Recupere le dernier stock physique valide avant une date donnee.
    */
   private async getLastValidatedPhysicalStock(
     productId: string,

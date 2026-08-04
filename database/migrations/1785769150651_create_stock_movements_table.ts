@@ -28,6 +28,9 @@ export default class extends BaseSchema {
 
       // Stock physique (inventaire réel) - saisie manuelle en fin de journée
       table.decimal('physical_stock', 15, 2).nullable()
+   
+   
+      table.text('observation').nullable()
 
       // Contrainte unique: 1 seul mouvement par produit par jour
       table.unique(['product_id', 'date'])

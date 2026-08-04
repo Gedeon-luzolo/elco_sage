@@ -19,6 +19,7 @@ export interface StockMovementItem {
   theoreticalStock: number | null
   physicalStock: number | null
   variance: number | null
+  observation: string | null
   isPhysicalStockValidated: boolean
 }
 
@@ -32,6 +33,7 @@ export interface StockFormState {
   date: string
   entries: number
   unit: StockUnit
+  observation?: string | null
 }
 
 export interface PhysicalStockFormState {
@@ -41,6 +43,7 @@ export interface PhysicalStockFormState {
   physicalStockUnit: StockUnit
   losses?: number
   lossesUnit?: StockUnit
+  observation?: string | null
 }
 
 export const EMPTY_STOCK_FORM: StockFormState = {

@@ -86,7 +86,7 @@ export class ProductServiceSchema extends BaseModel {
 }
 
 export class StockMovementSchema extends BaseModel {
-  static $columns = ['createdAt', 'date', 'entries', 'id', 'initialStock', 'losses', 'outputs', 'physicalStock', 'productId', 'updatedAt'] as const
+  static $columns = ['createdAt', 'date', 'entries', 'id', 'initialStock', 'losses', 'observation', 'outputs', 'physicalStock', 'productId', 'updatedAt'] as const
   $columns = StockMovementSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -100,6 +100,8 @@ export class StockMovementSchema extends BaseModel {
   declare initialStock: string
   @column()
   declare losses: string | null
+  @column()
+  declare observation: string | null
   @column()
   declare outputs: string
   @column()

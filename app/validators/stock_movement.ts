@@ -9,6 +9,7 @@ export const createStockMovementValidator = vine.create(
     productId: vine.string().uuid(),
     date: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/), // Format YYYY-MM-DD
     entries: vine.number().min(0),
+    observation: vine.string().trim().maxLength(500).nullable().optional(),
     unit: vine.enum(['base', 'packaging']), // 'base' = unité de base (feuilles), 'packaging' = conditionnement (rames)
   })
 )
@@ -25,6 +26,7 @@ export const validatePhysicalStockValidator = vine.create(
     physicalStock: vine.number().min(0),
     physicalStockUnit: vine.enum(['base', 'packaging']), // Unité du stock physique
     losses: vine.number().min(0).nullable().optional(),
+    observation: vine.string().trim().maxLength(500).nullable().optional(),
     lossesUnit: vine.enum(['base', 'packaging']).nullable().optional(), // Unité des pertes
   })
 )

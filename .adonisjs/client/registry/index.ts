@@ -54,11 +54,23 @@ const routes = {
     tokens: [{"old":"/stock/movements","type":0,"val":"stock","end":""},{"old":"/stock/movements","type":0,"val":"movements","end":""}],
     types: placeholder as Registry['stock_movements.store']['types'],
   },
+  'stock_movements.update': {
+    methods: ["PUT"],
+    pattern: '/stock/movements/:id',
+    tokens: [{"old":"/stock/movements/:id","type":0,"val":"stock","end":""},{"old":"/stock/movements/:id","type":0,"val":"movements","end":""},{"old":"/stock/movements/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['stock_movements.update']['types'],
+  },
   'stock_movements.validate_physical': {
     methods: ["POST"],
     pattern: '/stock/validate-physical',
     tokens: [{"old":"/stock/validate-physical","type":0,"val":"stock","end":""},{"old":"/stock/validate-physical","type":0,"val":"validate-physical","end":""}],
     types: placeholder as Registry['stock_movements.validate_physical']['types'],
+  },
+  'stock_movements.update_physical': {
+    methods: ["PUT"],
+    pattern: '/stock/validate-physical/:id',
+    tokens: [{"old":"/stock/validate-physical/:id","type":0,"val":"stock","end":""},{"old":"/stock/validate-physical/:id","type":0,"val":"validate-physical","end":""},{"old":"/stock/validate-physical/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['stock_movements.update_physical']['types'],
   },
   'management': {
     methods: ["GET","HEAD"],
