@@ -33,6 +33,14 @@ export const STATUS_FILTER_OPTIONS = [
 ] as const
 
 /**
+ * Options pre-formatees pour les selects qui soumettent un statut booleen.
+ */
+export const ACTIVE_STATUS_OPTIONS = [
+  { label: 'Actif', value: 'true' },
+  { label: 'Inactif', value: 'false' },
+] as const
+
+/**
  * Vérifie si un statut booléen correspond à un filtre de statut donné.
  *
  * @param isActive Statut booléen de l'entité (true/false)

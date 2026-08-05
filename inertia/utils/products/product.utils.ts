@@ -1,5 +1,32 @@
 import type { ProductCategoryItem } from '~/types/product_category_types'
+import type { StockUnit } from '~/types/stock_types'
 import { matchesStatusFilter, type StatusFilter } from '~/utils/status.utils'
+
+interface ProductUnitSource {
+  productBaseUnit: string
+  productPackagingUnit: string | null
+  productPackagingCapacity: number | null
+}
+
+export type ProductUnitOption = {
+  label: string
+  value: StockUnit
+}
+
+// Fonction pour vérifier si un produit a un conditionnement défini.
+export function hasProductPackaging(product: ProductUnitSource): boolean {
+  return Boolean(product.productPackagingUnit && product.productPackagingCapacity)
+}
+
+// Fonction pour obtenir les options d'unité d'un produit, en incluant l'unité de conditionnement si elle est définie.
+export function getProductUnitOptions(product: ProductUnitSource): ProductUnitOption[] {
+  return [
+    { label: product.productBaseUnit, value: 'base' },
+    ...(hasProductPackaging(product)
+      ? [{ label: product.productPackagingUnit as string, value: 'packaging' as const }]
+      : []),
+  ]
+}
 
 /**
  * Filtre la liste des catégories de produits selon la recherche textuelle et le statut d'activation.

@@ -20,6 +20,7 @@ import {
 } from '~/components/ui/select'
 import { CUSTOMER_TYPE_OPTIONS } from '~/constants/customers'
 import type { CustomerItem } from '~/types/customer_types'
+import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
 
 interface CustomerDialogProps {
   title: string
@@ -98,6 +99,7 @@ export function CustomerDialog({
               <Select
                 id="customer-type"
                 name="customerType"
+                items={CUSTOMER_TYPE_OPTIONS}
                 defaultValue={customer?.customerType ?? 'MALE'}
                 required
               >
@@ -145,14 +147,18 @@ export function CustomerDialog({
               <Select
                 id="customer-status"
                 name="isActive"
+                items={ACTIVE_STATUS_OPTIONS}
                 defaultValue={customer ? String(customer.isActive) : 'true'}
               >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">Actif</SelectItem>
-                  <SelectItem value="false">Inactif</SelectItem>
+                  {ACTIVE_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

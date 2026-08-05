@@ -20,7 +20,7 @@ import router from '@adonisjs/core/services/router'
 
 router
   .on('/')
-  .renderInertia('home', {})
+  .renderInertia('home/home', {})
   .as('home')
   .use(middleware.auth({ redirectTo: '/splash' }))
   .use(middleware.managementAccess())

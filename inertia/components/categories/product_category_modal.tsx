@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import type { ProductCategoryItem } from '~/types/product_category_types'
+import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
 
 interface ProductCategoryModalProps {
   title: string
@@ -81,14 +82,18 @@ export function ProductCategoryModal({
               <Select
                 id="category-status"
                 name="isActive"
+                items={ACTIVE_STATUS_OPTIONS}
                 defaultValue={category ? String(category.isActive) : 'true'}
               >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">Actif</SelectItem>
-                  <SelectItem value="false">Inactif</SelectItem>
+                  {ACTIVE_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

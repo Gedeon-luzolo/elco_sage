@@ -5,7 +5,7 @@ const JournalisationsController = () =>
 
 // Regroupe les routes du module management.
 export function registerManagementRoutes() {
-  router.on('/').renderInertia('management', {}).as('management')
+  router.on('/').renderInertia('management/management', {}).as('management')
   router
     .get('journalisations', [JournalisationsController, 'getJournalisations'])
 }

@@ -22,6 +22,7 @@ import {
 } from '~/components/ui/select'
 import type { StockMovementItem, StockUnit } from '~/types/stock_types'
 import { formatDateLabel } from '~/utils/date'
+import { getProductUnitOptions, hasProductPackaging } from '~/utils/products/product.utils'
 import { formatQuantityWithUnit, getConversionPreview } from '~/utils/stock'
 
 interface StockEntryDialogProps {
@@ -35,7 +36,8 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
   const [quantity, setQuantity] = useState<string>(movement.entries?.toString() ?? '')
 
   const hasMovement = movement.id !== -1
-  const hasPackaging = movement.productPackagingUnit && movement.productPackagingCapacity
+  const hasPackaging = hasProductPackaging(movement)
+  const unitOptions = getProductUnitOptions(movement)
   const conversionPreview = getConversionPreview(quantity, selectedUnit, movement)
 
   // Reinitialise l'etat local quand la mutation reussit ou quand l'utilisateur annule.
@@ -123,6 +125,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
             <div className="grid gap-2">
               <Label>Unite</Label>
               <Select
+                items={unitOptions}
                 value={selectedUnit}
                 onValueChange={(value) => setSelectedUnit(value as StockUnit)}
               >
@@ -130,10 +133,11 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="base">{movement.productBaseUnit}</SelectItem>
-                  {hasPackaging && (
-                    <SelectItem value="packaging">{movement.productPackagingUnit}</SelectItem>
-                  )}
+                  {unitOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

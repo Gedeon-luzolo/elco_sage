@@ -81,7 +81,12 @@ export function CreateUpdateUserDialog({
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="grid flex-1 gap-2">
               <Label htmlFor={`${title}-role`}>Role</Label>
-              <Select id={`${title}-role`} name="role" defaultValue={defaultValues.role}>
+              <Select
+                id={`${title}-role`}
+                name="role"
+                items={roleOptions}
+                defaultValue={defaultValues.role}
+              >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -97,7 +102,12 @@ export function CreateUpdateUserDialog({
 
             <div className="grid flex-1 gap-2">
               <Label htmlFor={`${title}-status`}>Statut</Label>
-              <Select id={`${title}-status`} name="status" defaultValue={defaultValues.status}>
+              <Select
+                id={`${title}-status`}
+                name="status"
+                items={statusOptions}
+                defaultValue={defaultValues.status}
+              >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>

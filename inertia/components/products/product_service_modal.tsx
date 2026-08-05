@@ -20,7 +20,13 @@ import {
 } from '~/components/ui/select'
 import type { ProductCategoryDTO } from '#transformers/product_category_transformer'
 import type { ProductServiceItem } from '~/types/product_service_types'
-import { Currency } from '#types/currency'
+import { CURRENCY_OPTIONS, Currency } from '~/utils/currency'
+import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
+
+const PRODUCT_TYPE_OPTIONS = [
+  { label: 'Produit (Article physique)', value: 'PRODUCT' },
+  { label: 'Service (Prestation)', value: 'SERVICE' },
+]
 
 interface ProductServiceModalProps {
   title: string
@@ -62,11 +68,13 @@ export function ProductServiceModal({
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(Currency.CDF)
 
   // État local contrôlé pour le montant du prix.
-  const [priceValue, setPriceValue] = useState<string | number>(
-    item ? item.priceCdf : ''
-  )
+  const [priceValue, setPriceValue] = useState<string | number>(item ? item.priceCdf : '')
 
   const isService = selectedType === 'SERVICE'
+  const categoryOptions = categories.map((category) => ({
+    label: category.name,
+    value: category.id,
+  }))
 
   /**
    * Lors du changement de devise, si un élément existe en édition,
@@ -103,6 +111,7 @@ export function ProductServiceModal({
               <Select
                 id="ps-type"
                 name="type"
+                items={PRODUCT_TYPE_OPTIONS}
                 defaultValue={selectedType}
                 onValueChange={(v) => setSelectedType(v as 'PRODUCT' | 'SERVICE')}
               >
@@ -110,8 +119,11 @@ export function ProductServiceModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PRODUCT">Produit (Article physique)</SelectItem>
-                  <SelectItem value="SERVICE">Service (Prestation)</SelectItem>
+                  {PRODUCT_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -124,7 +136,11 @@ export function ProductServiceModal({
                 name="name"
                 className="h-10 px-3"
                 defaultValue={item?.name ?? ''}
-                placeholder={isService ? 'ex: Impression N/B A4, Plastification...' : 'ex: Papier A4 80g, Encre noire...'}
+                placeholder={
+                  isService
+                    ? 'ex: Impression N/B A4, Plastification...'
+                    : 'ex: Papier A4 80g, Encre noire...'
+                }
                 required
               />
             </div>
@@ -135,15 +151,16 @@ export function ProductServiceModal({
               <Select
                 id="ps-category"
                 name="categoryId"
+                items={categoryOptions}
                 defaultValue={item?.categoryId ?? ''}
               >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue placeholder="Sélectionner une catégorie..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -153,7 +170,7 @@ export function ProductServiceModal({
             {/* Unité de base (Vente / Consommation) */}
             <div className="grid gap-2">
               <Label htmlFor="ps-base-unit">
-                {isService ? "Unité de facturation *" : "Unité de base *"}
+                {isService ? 'Unité de facturation *' : 'Unité de base *'}
               </Label>
               <Input
                 id="ps-base-unit"
@@ -172,14 +189,18 @@ export function ProductServiceModal({
                 <Select
                   id="ps-status"
                   name="isActive"
+                  items={ACTIVE_STATUS_OPTIONS}
                   defaultValue={String(item.isActive)}
                 >
                   <SelectTrigger className="h-10 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Actif</SelectItem>
-                    <SelectItem value="false">Inactif</SelectItem>
+                    {ACTIVE_STATUS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -199,7 +220,9 @@ export function ProductServiceModal({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="ps-packaging-capacity">Capacité (Unité de base par rame/carton)</Label>
+                  <Label htmlFor="ps-packaging-capacity">
+                    Capacité (Unité de base par rame/carton)
+                  </Label>
                   <Input
                     id="ps-packaging-capacity"
                     name="packagingCapacity"
@@ -219,6 +242,7 @@ export function ProductServiceModal({
               <Select
                 id="ps-currency"
                 name="currency"
+                items={CURRENCY_OPTIONS}
                 value={selectedCurrency}
                 onValueChange={handleCurrencyChange}
               >
@@ -226,9 +250,9 @@ export function ProductServiceModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(Currency).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                  {CURRENCY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

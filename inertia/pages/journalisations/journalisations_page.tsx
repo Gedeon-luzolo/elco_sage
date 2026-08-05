@@ -58,14 +58,6 @@ export default function JournalisationsPage({
     pageSize: JOURNALISATIONS_PAGE_SIZE,
   })
 
-  // Résout le libellé affiché dans le select au lieu de la valeur technique.
-  const getModuleLabel = (value: JournalisationModuleFilter | null) => {
-    return (
-      JOURNALISATION_MODULE_OPTIONS.find((option) => option.value === value)?.label ??
-      'Tous les modules'
-    )
-  }
-
   // Applique les filtres via Inertia; la pagination reste ensuite locale.
   const searchJournalisations = () => {
     setIsLoading(true)
@@ -107,11 +99,12 @@ export default function JournalisationsPage({
                   Module
                 </label>
                 <Select
+                  items={JOURNALISATION_MODULE_OPTIONS}
                   value={module}
                   onValueChange={(value) => setModule(value as JournalisationModuleFilter)}
                 >
                   <SelectTrigger id="journalisation-module" className="h-10 w-full">
-                    <SelectValue>{(value) => getModuleLabel(value)}</SelectValue>
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {JOURNALISATION_MODULE_OPTIONS.map((option) => (

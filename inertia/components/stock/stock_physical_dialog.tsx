@@ -22,6 +22,7 @@ import {
 } from '~/components/ui/select'
 import type { StockMovementItem, StockUnit } from '~/types/stock_types'
 import { formatDateLabel } from '~/utils/date'
+import { getProductUnitOptions, hasProductPackaging } from '~/utils/products/product.utils'
 import { formatQuantityWithUnit, getConversionPreview } from '~/utils/stock'
 
 interface StockPhysicalDialogProps {
@@ -37,7 +38,8 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
   const [losses, setLosses] = useState(movement.losses?.toString() ?? '')
 
   const hasMovement = movement.id !== -1
-  const hasPackaging = movement.productPackagingUnit && movement.productPackagingCapacity
+  const hasPackaging = hasProductPackaging(movement)
+  const unitOptions = getProductUnitOptions(movement)
   const physicalPreview = getConversionPreview(physicalStock, physicalStockUnit, movement)
   const lossesPreview = getConversionPreview(losses, lossesUnit, movement)
 
@@ -137,6 +139,7 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
             <div className="grid gap-2">
               <Label>Unite</Label>
               <Select
+                items={unitOptions}
                 value={physicalStockUnit}
                 onValueChange={(value) => setPhysicalStockUnit(value as StockUnit)}
               >
@@ -144,10 +147,11 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="base">{movement.productBaseUnit}</SelectItem>
-                  {hasPackaging && (
-                    <SelectItem value="packaging">{movement.productPackagingUnit}</SelectItem>
-                  )}
+                  {unitOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -178,6 +182,7 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
             <div className="grid gap-2">
               <Label>Unite</Label>
               <Select
+                items={unitOptions}
                 value={lossesUnit}
                 onValueChange={(value) => setLossesUnit(value as StockUnit)}
               >
@@ -185,10 +190,11 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="base">{movement.productBaseUnit}</SelectItem>
-                  {hasPackaging && (
-                    <SelectItem value="packaging">{movement.productPackagingUnit}</SelectItem>
-                  )}
+                  {unitOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
