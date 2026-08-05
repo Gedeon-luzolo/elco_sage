@@ -24,6 +24,14 @@ export interface ApiDefinition {
     validatePhysical: typeof routes['stock_movements.validate_physical']
     updatePhysical: typeof routes['stock_movements.update_physical']
   }
+  sales: {
+    cashSessions: {
+      create: typeof routes['sales.cash_sessions.create']
+      store: typeof routes['sales.cash_sessions.store']
+      close: typeof routes['sales.cash_sessions.close']
+    }
+    index: typeof routes['sales.index']
+  }
   management: typeof routes['management']
   journalisations: {
     getJournalisations: typeof routes['journalisations.get_journalisations']

@@ -12,6 +12,7 @@ export enum JournalisationModule {
   PRODUCT_SERVICES = 'PRODUCT_SERVICES',
   INVENTORY = 'INVENTORY',
   CUSTOMERS = 'CUSTOMERS',
+  SALES = 'SALES',
 }
 
 export default class Journalisation extends BaseModel {

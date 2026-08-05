@@ -175,6 +175,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['updatePhysicalStock']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'sales.cash_sessions.create': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/session/open'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['create']>>>
+    }
+  }
+  'sales.cash_sessions.store': {
+    methods: ["POST"]
+    pattern: '/sales/session/open'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/cash_session').openCashSessionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/cash_session').openCashSessionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'sales.cash_sessions.close': {
+    methods: ["POST"]
+    pattern: '/sales/session/close'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/cash_session').closeCashSessionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/cash_session').closeCashSessionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['close']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['close']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'sales.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['index']>>>
+    }
+  }
   'management': {
     methods: ["GET","HEAD"]
     pattern: '/management'

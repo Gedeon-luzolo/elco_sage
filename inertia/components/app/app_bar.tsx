@@ -1,17 +1,19 @@
 ﻿import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
-import { LogOut, UserRound } from 'lucide-react'
+import { DoorClosed, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { type Data } from '@generated/data'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { Button } from '~/components/ui/button'
+import type { CashSessionItem } from '~/types/cash_session_types'
 
 interface AppBarProps {
   user: Data.User
   exchangeRate: Data.ExchangeRate | undefined
+  currentCashSession: CashSessionItem | undefined
 }
 
-export function AppBar({ user, exchangeRate }: AppBarProps) {
+export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
@@ -32,6 +34,12 @@ export function AppBar({ user, exchangeRate }: AppBarProps) {
   }, [])
 
   const displayName = user.fullName!
+
+  // Dirige vers la future page de cloture de caisse.
+  const goToCashSessionClosing = () => {
+    setIsProfileMenuOpen(false)
+    router.visit('/sales/session/close')
+  }
 
   // Ferme la session depuis le menu profil.
   const logout = () => {
@@ -106,6 +114,23 @@ export function AppBar({ user, exchangeRate }: AppBarProps) {
               </Button>
 
               <div className="my-1 h-px bg-border" />
+
+              {currentCashSession && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="menuitem"
+                    className="w-full justify-start rounded-sm text-amber-700"
+                    onClick={goToCashSessionClosing}
+                  >
+                    <DoorClosed className="size-4" />
+                    Fermer la caisse
+                  </Button>
+
+                  <div className="my-1 h-px bg-border" />
+                </>
+              )}
 
               <Button
                 type="button"

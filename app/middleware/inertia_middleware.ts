@@ -1,11 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
+import CashSessionService from '#services/sales/cash_session_service'
+import CashSessionTransformer from '#transformers/cash_session_transformer'
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
 import ExchangeRateTransformer from '#transformers/exchange_rate_transformer'
 import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 
 const exchangeRateService = new ExchangeRateService()
+const cashSessionService = new CashSessionService()
 
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
   async share(ctx: HttpContext) {
@@ -25,6 +28,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
     const error = session?.flashMessages.get('error') as string
     const success = session?.flashMessages.get('success') as string
     const exchangeRate = auth?.user ? await exchangeRateService.getCurrentRate() : null
+    const currentCashSession = auth?.user
+      ? await cashSessionService.getOpenSessionForUser(auth.user.id)
+      : null
 
     /**
      * Data shared with all Inertia pages. Make sure you are using
@@ -39,6 +45,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       user: ctx.inertia.always(auth?.user ? UserTransformer.transform(auth.user) : undefined),
       exchangeRate: ctx.inertia.always(
         exchangeRate ? ExchangeRateTransformer.transform(exchangeRate) : undefined
+      ),
+      currentCashSession: ctx.inertia.always(
+        currentCashSession ? CashSessionTransformer.transformSingle(currentCashSession) : undefined
       ),
     }
   }

@@ -17,13 +17,15 @@ declare module '@adonisjs/inertia/types' {
     'customers/customers_page': ExtractProps<(typeof import('../../inertia/pages/customers/customers_page.tsx'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
     'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.tsx'))['default']>
+    'home/home': ExtractProps<(typeof import('../../inertia/pages/home/home.tsx'))['default']>
     'journalisations/journalisations_page': ExtractProps<(typeof import('../../inertia/pages/journalisations/journalisations_page.tsx'))['default']>
+    'management/management': ExtractProps<(typeof import('../../inertia/pages/management/management.tsx'))['default']>
     'products/product_services_page': ExtractProps<(typeof import('../../inertia/pages/products/product_services_page.tsx'))['default']>
     'rates/rates_page': ExtractProps<(typeof import('../../inertia/pages/rates/rates_page.tsx'))['default']>
+    'sales/cash_session_opening_page': ExtractProps<(typeof import('../../inertia/pages/sales/cash_session_opening_page.tsx'))['default']>
+    'sales/sales_page': ExtractProps<(typeof import('../../inertia/pages/sales/sales_page.tsx'))['default']>
     'splash': ExtractProps<(typeof import('../../inertia/pages/splash.tsx'))['default']>
     'stock/stock_movements_page': ExtractProps<(typeof import('../../inertia/pages/stock/stock_movements_page.tsx'))['default']>
     'users/users_page': ExtractProps<(typeof import('../../inertia/pages/users/users_page.tsx'))['default']>
-    'home/home': ExtractProps<(typeof import('../../inertia/pages/home/home.tsx'))['default']>
-    'management/management': ExtractProps<(typeof import('../../inertia/pages/management/management.tsx'))['default']>
   }
 }

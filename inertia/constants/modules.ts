@@ -36,6 +36,7 @@ export const MODULES: NavigationModule[] = [
     title: 'Gestion des ventes',
     description: 'Suivre les ventes, encaissements et opérations commerciales.',
     icon: ShoppingCart,
+    href: '/sales',
   },
   {
     title: 'Gestion des clients',

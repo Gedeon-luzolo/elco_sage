@@ -7,6 +7,33 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class CashSessionSchema extends BaseModel {
+  static $columns = ['closedAt', 'closingAmount', 'closingCurrency', 'createdAt', 'id', 'openedAt', 'openingAmount', 'openingCurrency', 'status', 'updatedAt', 'userId'] as const
+  $columns = CashSessionSchema.$columns
+  @column.dateTime()
+  declare closedAt: DateTime | null
+  @column()
+  declare closingAmount: string | null
+  @column()
+  declare closingCurrency: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare openedAt: DateTime
+  @column()
+  declare openingAmount: string
+  @column()
+  declare openingCurrency: string
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
 export class CustomerSchema extends BaseModel {
   static $columns = ['createdAt', 'customerType', 'email', 'fullName', 'id', 'isActive', 'phoneNumber', 'updatedAt'] as const
   $columns = CustomerSchema.$columns

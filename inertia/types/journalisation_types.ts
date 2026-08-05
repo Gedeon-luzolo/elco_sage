@@ -1,7 +1,15 @@
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
 // Modules connus côté backend pour le journal des actions.
-export type JournalisationModule = 'AUTHENTIFICATION' | 'USERS' | 'EXCHANGE_RATES'
+export type JournalisationModule =
+  | 'AUTHENTIFICATION'
+  | 'USERS'
+  | 'EXCHANGE_RATES'
+  | 'PRODUCT_CATEGORIES'
+  | 'PRODUCT_SERVICES'
+  | 'INVENTORY'
+  | 'CUSTOMERS'
+  | 'SALES'
 
 // Valeur utilisée uniquement par le filtre frontend pour afficher tous les modules.
 export type JournalisationModuleFilter = JournalisationModule | 'ALL'

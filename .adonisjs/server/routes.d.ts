@@ -18,6 +18,10 @@ export type ScannedRoutes = {
     'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'sales.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -41,6 +45,8 @@ export type ScannedRoutes = {
     'session.create': { paramsTuple?: []; params?: {} }
     'customers.index': { paramsTuple?: []; params?: {} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
+    'sales.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -54,6 +60,8 @@ export type ScannedRoutes = {
     'session.create': { paramsTuple?: []; params?: {} }
     'customers.index': { paramsTuple?: []; params?: {} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
+    'sales.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -68,6 +76,8 @@ export type ScannedRoutes = {
     'customers.store': { paramsTuple?: []; params?: {} }
     'stock_movements.store': { paramsTuple?: []; params?: {} }
     'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
     'product_categories.store': { paramsTuple?: []; params?: {} }

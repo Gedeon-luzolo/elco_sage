@@ -90,6 +90,30 @@ const routes = {
     tokens: [{"old":"/stock/validate-physical/:id","type":0,"val":"stock","end":""},{"old":"/stock/validate-physical/:id","type":0,"val":"validate-physical","end":""},{"old":"/stock/validate-physical/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['stock_movements.update_physical']['types'],
   },
+  'sales.cash_sessions.create': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/session/open',
+    tokens: [{"old":"/sales/session/open","type":0,"val":"sales","end":""},{"old":"/sales/session/open","type":0,"val":"session","end":""},{"old":"/sales/session/open","type":0,"val":"open","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.create']['types'],
+  },
+  'sales.cash_sessions.store': {
+    methods: ["POST"],
+    pattern: '/sales/session/open',
+    tokens: [{"old":"/sales/session/open","type":0,"val":"sales","end":""},{"old":"/sales/session/open","type":0,"val":"session","end":""},{"old":"/sales/session/open","type":0,"val":"open","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.store']['types'],
+  },
+  'sales.cash_sessions.close': {
+    methods: ["POST"],
+    pattern: '/sales/session/close',
+    tokens: [{"old":"/sales/session/close","type":0,"val":"sales","end":""},{"old":"/sales/session/close","type":0,"val":"session","end":""},{"old":"/sales/session/close","type":0,"val":"close","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.close']['types'],
+  },
+  'sales.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales',
+    tokens: [{"old":"/sales","type":0,"val":"sales","end":""}],
+    types: placeholder as Registry['sales.index']['types'],
+  },
   'management': {
     methods: ["GET","HEAD"],
     pattern: '/management',

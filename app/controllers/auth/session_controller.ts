@@ -1,4 +1,5 @@
 import { JournalisationModule } from '#models/journalisation'
+import { UserRole } from '#models/user'
 import AuthAttemptService from '#services/auth/auth_attempt_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { verifyPasswordValidator } from '#validators/auth/password'
@@ -42,7 +43,12 @@ export default class SessionController {
       user: result.user,
     })
 
-    return response.redirect().toRoute('home')
+    // La direction garde l'accueil de pilotage, les profils operationnels entrent dans le flux vente.
+    if ([UserRole.ADMIN, UserRole.DIRECTOR].includes(result.user.role)) {
+      return response.redirect().toRoute('home')
+    }
+
+    return response.redirect().toPath('/sales')
   }
 
   /**

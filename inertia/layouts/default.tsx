@@ -31,7 +31,13 @@ export default function Layout({ children }: { children: ReactElement<Data.Share
 
   return (
     <TooltipProvider>
-      {showAppBar && user && <AppBar user={user} exchangeRate={children.props.exchangeRate} />}
+      {showAppBar && user && (
+        <AppBar
+          user={user}
+          exchangeRate={children.props.exchangeRate}
+          currentCashSession={children.props.currentCashSession}
+        />
+      )}
       {children}
       <IdleScreen user={children.props.user} />
       <Toaster position="top-right" richColors />
@@ -41,5 +47,7 @@ export default function Layout({ children }: { children: ReactElement<Data.Share
 
 // Garde les ecrans auth et le module management sans barre globale.
 function isAppBarExcluded(url: string) {
-  return url.startsWith('/login') || url.startsWith('/splash') || url.startsWith('/management')
+  return (
+    url.startsWith('/login') || url.startsWith('/splash') || url.startsWith('/management')
+  )
 }
