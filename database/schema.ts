@@ -7,6 +7,27 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class CustomerSchema extends BaseModel {
+  static $columns = ['createdAt', 'customerType', 'email', 'fullName', 'id', 'isActive', 'phoneNumber', 'updatedAt'] as const
+  $columns = CustomerSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare customerType: string
+  @column()
+  declare email: string | null
+  @column()
+  declare fullName: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean
+  @column()
+  declare phoneNumber: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ExchangeRateSchema extends BaseModel {
   static $columns = ['createdAt', 'exchangeRate', 'id', 'sellRate', 'updatedAt'] as const
   $columns = ExchangeRateSchema.$columns

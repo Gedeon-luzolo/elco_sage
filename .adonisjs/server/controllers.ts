@@ -10,6 +10,9 @@ export const controllers = {
   categories: {
     ProductCategories: () => import('#controllers/categories/product_categories_controller'),
   },
+  customers: {
+    Customers: () => import('#controllers/customers/customers_controller'),
+  },
   exchangeRates: {
     ExchangeRates: () => import('#controllers/exchange_rates/exchange_rates_controller'),
   },

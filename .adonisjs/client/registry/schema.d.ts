@@ -79,6 +79,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/session_controller').default['destroy']>>>
     }
   }
+  'customers.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/customers'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['index']>>>
+    }
+  }
+  'customers.store': {
+    methods: ["POST"]
+    pattern: '/customers'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/customer').createCustomerValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/customer').createCustomerValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'customers.update': {
+    methods: ["PUT"]
+    pattern: '/customers/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/customer').updateCustomerValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/customer').updateCustomerValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customers/customers_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'stock_movements.index': {
     methods: ["GET","HEAD"]
     pattern: '/stock'

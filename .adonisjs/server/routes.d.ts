@@ -10,6 +10,9 @@ export type ScannedRoutes = {
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'customers.index': { paramsTuple?: []; params?: {} }
+    'customers.store': { paramsTuple?: []; params?: {} }
+    'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'stock_movements.store': { paramsTuple?: []; params?: {} }
     'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -36,6 +39,7 @@ export type ScannedRoutes = {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'customers.index': { paramsTuple?: []; params?: {} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
@@ -48,6 +52,7 @@ export type ScannedRoutes = {
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'customers.index': { paramsTuple?: []; params?: {} }
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
@@ -60,6 +65,7 @@ export type ScannedRoutes = {
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'customers.store': { paramsTuple?: []; params?: {} }
     'stock_movements.store': { paramsTuple?: []; params?: {} }
     'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
@@ -68,6 +74,7 @@ export type ScannedRoutes = {
     'product_services.store': { paramsTuple?: []; params?: {} }
   }
   PUT: {
+    'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

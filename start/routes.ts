@@ -9,6 +9,7 @@
 
 import { middleware } from '#start/kernel'
 import { registerAuthenticatedAuthRoutes, registerGuestAuthRoutes } from '#routes/auth_routes'
+import { registerCustomerRoutes } from '#routes/customer_routes'
 import { registerExchangeRateRoutes } from '#routes/exchange_rate_routes'
 import { registerManagementRoutes } from '#routes/management_routes'
 import { registerProductCategoryRoutes } from '#routes/product_category_routes'
@@ -33,6 +34,7 @@ router
 router
   .group(() => {
     registerAuthenticatedAuthRoutes()
+    registerCustomerRoutes()
 
     // Routes de gestion de stock (accessible à tous les utilisateurs authentifiés)
     registerStockMovementRoutes()

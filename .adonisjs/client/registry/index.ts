@@ -42,6 +42,24 @@ const routes = {
     tokens: [{"old":"/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'customers.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/customers',
+    tokens: [{"old":"/customers","type":0,"val":"customers","end":""}],
+    types: placeholder as Registry['customers.index']['types'],
+  },
+  'customers.store': {
+    methods: ["POST"],
+    pattern: '/customers',
+    tokens: [{"old":"/customers","type":0,"val":"customers","end":""}],
+    types: placeholder as Registry['customers.store']['types'],
+  },
+  'customers.update': {
+    methods: ["PUT"],
+    pattern: '/customers/:id',
+    tokens: [{"old":"/customers/:id","type":0,"val":"customers","end":""},{"old":"/customers/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['customers.update']['types'],
+  },
   'stock_movements.index': {
     methods: ["GET","HEAD"],
     pattern: '/stock',

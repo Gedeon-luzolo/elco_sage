@@ -38,9 +38,10 @@ export const MODULES: NavigationModule[] = [
     icon: ShoppingCart,
   },
   {
-    title: 'Gestion des produits & Services',
-    description: 'Administrer les articles, prix, catégories et références.',
-    icon: Package,
+    title: 'Gestion des clients',
+    description: 'Créer les fiches clients et suivre leur statut commercial.',
+    icon: Users,
+    href: '/customers',
   },
   {
     title: 'Gestion de stock',
