@@ -1,6 +1,5 @@
 import User from '#models/user'
-import { Currency } from '#types/currency'
-import { decimalColumn } from '#utils/decimal_column'
+import type { MoneyMap } from '#utils/money_map'
 import { randomUUID } from 'node:crypto'
 import { BaseModel, beforeCreate, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
@@ -29,17 +28,14 @@ export default class CashSession extends BaseModel {
   @column.dateTime()
   declare closedAt: DateTime | null
 
-  @column(decimalColumn)
-  declare openingAmount: number
+  @column()
+  declare systemAmounts: MoneyMap | null
 
   @column()
-  declare openingCurrency: Currency
-
-  @column(decimalColumn)
-  declare closingAmount: number | null
+  declare closingAmounts: MoneyMap | null
 
   @column()
-  declare closingCurrency: Currency | null
+  declare differenceAmounts: MoneyMap | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -1,11 +1,12 @@
-﻿import { Link } from '@adonisjs/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
 import { DoorClosed, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { type Data } from '@generated/data'
-import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { CashSessionClosingDialog } from '~/components/sales/cash_session_closing_dialog'
 import { Button } from '~/components/ui/button'
 import type { CashSessionItem } from '~/types/cash_session_types'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface AppBarProps {
   user: Data.User
@@ -16,6 +17,7 @@ interface AppBarProps {
 export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isClosingDialogOpen, setIsClosingDialogOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   // Ferme le menu profil quand l'utilisateur clique ailleurs.
@@ -35,10 +37,10 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
 
   const displayName = user.fullName!
 
-  // Dirige vers la future page de cloture de caisse.
-  const goToCashSessionClosing = () => {
+  // Ouvre le formulaire de cloture depuis le menu profil.
+  const openCashSessionClosingDialog = () => {
     setIsProfileMenuOpen(false)
-    router.visit('/sales/session/close')
+    setIsClosingDialogOpen(true)
   }
 
   // Ferme la session depuis le menu profil.
@@ -122,7 +124,7 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
                     variant="outline"
                     role="menuitem"
                     className="w-full justify-start rounded-sm text-amber-700"
-                    onClick={goToCashSessionClosing}
+                    onClick={openCashSessionClosingDialog}
                   >
                     <DoorClosed className="size-4" />
                     Fermer la caisse
@@ -147,6 +149,14 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
           )}
         </div>
       </div>
+
+      {currentCashSession && (
+        <CashSessionClosingDialog
+          open={isClosingDialogOpen}
+          currentCashSession={currentCashSession}
+          onOpenChange={setIsClosingDialogOpen}
+        />
+      )}
     </header>
   )
 }

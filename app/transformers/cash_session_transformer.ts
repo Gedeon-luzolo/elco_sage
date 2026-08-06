@@ -1,4 +1,6 @@
 import type CashSession from '#models/cash_session'
+import type { CashSessionSystemAmounts } from '#services/sales/cash_session_service'
+import { MoneyMapDTO, normalizeMoneyMap } from '#utils/money_map'
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
 export interface CashSessionDTO extends Record<string, JSONDataTypes> {
@@ -11,17 +13,19 @@ export interface CashSessionDTO extends Record<string, JSONDataTypes> {
   closedAt: string | null
   closingDate: string | null
   closingTime: string | null
-  openingAmount: number
-  openingCurrency: string
-  closingAmount: number | null
-  closingCurrency: string | null
+  systemAmounts: MoneyMapDTO
+  closingAmounts: MoneyMapDTO | null
+  differenceAmounts: MoneyMapDTO | null
 }
 
 export default class CashSessionTransformer {
   /**
    * Transforme une session de caisse pour les pages Inertia.
    */
-  public static transformSingle(item: CashSession): CashSessionDTO {
+  public static transformSingle(
+    item: CashSession,
+    systemAmounts?: CashSessionSystemAmounts
+  ): CashSessionDTO {
     return {
       id: item.id,
       userId: item.userId,
@@ -32,17 +36,19 @@ export default class CashSessionTransformer {
       closedAt: item.closedAt?.toISO() ?? null,
       closingDate: item.closedAt?.toISODate() ?? null,
       closingTime: item.closedAt?.toFormat('HH:mm') ?? null,
-      openingAmount: item.openingAmount,
-      openingCurrency: item.openingCurrency,
-      closingAmount: item.closingAmount,
-      closingCurrency: item.closingCurrency,
+      systemAmounts: normalizeMoneyMap(systemAmounts?.systemAmounts ?? item.systemAmounts),
+      closingAmounts: item.closingAmounts ? normalizeMoneyMap(item.closingAmounts) : null,
+      differenceAmounts: item.differenceAmounts ? normalizeMoneyMap(item.differenceAmounts) : null,
     }
   }
 
   /**
    * Transforme une session nullable pour simplifier le partage global.
    */
-  public static transformNullable(item: CashSession | null): CashSessionDTO | null {
-    return item ? this.transformSingle(item) : null
+  public static transformNullable(
+    item: CashSession | null,
+    systemAmounts?: CashSessionSystemAmounts
+  ): CashSessionDTO | null {
+    return item ? this.transformSingle(item, systemAmounts) : null
   }
 }

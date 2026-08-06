@@ -102,6 +102,12 @@ const routes = {
     tokens: [{"old":"/sales/session/open","type":0,"val":"sales","end":""},{"old":"/sales/session/open","type":0,"val":"session","end":""},{"old":"/sales/session/open","type":0,"val":"open","end":""}],
     types: placeholder as Registry['sales.cash_sessions.store']['types'],
   },
+  'sales.cash_sessions.system_amounts': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/session/system-amounts',
+    tokens: [{"old":"/sales/session/system-amounts","type":0,"val":"sales","end":""},{"old":"/sales/session/system-amounts","type":0,"val":"session","end":""},{"old":"/sales/session/system-amounts","type":0,"val":"system-amounts","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.system_amounts']['types'],
+  },
   'sales.cash_sessions.close': {
     methods: ["POST"],
     pattern: '/sales/session/close',

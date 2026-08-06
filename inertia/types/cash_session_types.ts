@@ -4,6 +4,8 @@ import type { ProductServiceDTO } from '#transformers/product_service_transforme
 import type { SaleItemRow } from '~/types/sale_types'
 import type { UserListItem } from '~/types/user_types'
 
+export type MoneyMap = Record<string, number>
+
 // Forme exposee au frontend pour la session de caisse courante.
 export type CashSessionItem = Record<string, JSONDataTypes> & {
   id: string
@@ -15,10 +17,9 @@ export type CashSessionItem = Record<string, JSONDataTypes> & {
   closedAt: string | null
   closingDate: string | null
   closingTime: string | null
-  openingAmount: number
-  openingCurrency: string
-  closingAmount: number | null
-  closingCurrency: string | null
+  systemAmounts: MoneyMap
+  closingAmounts: MoneyMap | null
+  differenceAmounts: MoneyMap | null
 }
 
 // Props de la page d'ouverture de caisse.

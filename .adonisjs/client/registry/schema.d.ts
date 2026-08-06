@@ -191,12 +191,24 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/sales/session/open'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/cash_session').openCashSessionValidator)>>
+      body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/cash_session').openCashSessionValidator)>>
+      query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['store']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['store']>>>
+    }
+  }
+  'sales.cash_sessions.system_amounts': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/session/system-amounts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['systemAmounts']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['systemAmounts']>>>
     }
   }
   'sales.cash_sessions.close': {

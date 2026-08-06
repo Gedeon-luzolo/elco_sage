@@ -8,26 +8,24 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class CashSessionSchema extends BaseModel {
-  static $columns = ['closedAt', 'closingAmount', 'closingCurrency', 'createdAt', 'id', 'openedAt', 'openingAmount', 'openingCurrency', 'status', 'updatedAt', 'userId'] as const
+  static $columns = ['closedAt', 'closingAmounts', 'createdAt', 'differenceAmounts', 'id', 'openedAt', 'status', 'systemAmounts', 'updatedAt', 'userId'] as const
   $columns = CashSessionSchema.$columns
   @column.dateTime()
   declare closedAt: DateTime | null
   @column()
-  declare closingAmount: string | null
-  @column()
-  declare closingCurrency: string | null
+  declare closingAmounts: any | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare differenceAmounts: any | null
   @column({ isPrimary: true })
   declare id: string
   @column.dateTime()
   declare openedAt: DateTime
   @column()
-  declare openingAmount: string
-  @column()
-  declare openingCurrency: string
-  @column()
   declare status: string
+  @column()
+  declare systemAmounts: any | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
@@ -199,7 +197,7 @@ export class SaleSchema extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare operatorId: string | null
+  declare operatorId: string
   @column()
   declare paymentType: string
   @column.dateTime()

@@ -28,6 +28,7 @@ export interface ApiDefinition {
     cashSessions: {
       create: typeof routes['sales.cash_sessions.create']
       store: typeof routes['sales.cash_sessions.store']
+      systemAmounts: typeof routes['sales.cash_sessions.system_amounts']
       close: typeof routes['sales.cash_sessions.close']
     }
     index: typeof routes['sales.index']
