@@ -223,6 +223,78 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['index']>>>
     }
   }
+  'sales.create': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/create'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['create']>>>
+    }
+  }
+  'sales.store': {
+    methods: ["POST"]
+    pattern: '/sales'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/sale').createSaleValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/sale').createSaleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'sales.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['show']>>>
+    }
+  }
+  'sales.cancel': {
+    methods: ["POST"]
+    pattern: '/sales/:id/cancel'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['cancel']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['cancel']>>>
+    }
+  }
+  'sales.recoveries.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/:saleId/recoveries'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { saleId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['index']>>>
+    }
+  }
+  'sales.recoveries.store': {
+    methods: ["POST"]
+    pattern: '/sales/:saleId/recoveries'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/sale_recovery').createSaleRecoveryValidator)>>
+      paramsTuple: [ParamValue]
+      params: { saleId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/sale_recovery').createSaleRecoveryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'management': {
     methods: ["GET","HEAD"]
     pattern: '/management'
@@ -377,6 +449,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['index']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['index']>>>
+    }
+  }
+  'product_services.active_for_sale': {
+    methods: ["GET","HEAD"]
+    pattern: '/management/product-services/active-services-for-sale'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['activeForSale']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/products/product_services_controller').default['activeForSale']>>>
     }
   }
   'product_services.store': {

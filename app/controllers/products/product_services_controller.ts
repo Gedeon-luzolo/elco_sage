@@ -1,8 +1,8 @@
 import type {} from '../../../.adonisjs/server/pages.d.ts'
-import ProductServiceService from '#services/products/product_service_service'
-import ProductServiceTransformer from '#transformers/product_service_transformer'
-import ProductCategoryTransformer from '#transformers/product_category_transformer'
 import ProductCategory from '#models/product_category'
+import ProductServiceService from '#services/products/product_service_service'
+import ProductCategoryTransformer from '#transformers/product_category_transformer'
+import ProductServiceTransformer from '#transformers/product_service_transformer'
 import { runAction } from '#utils/error_handler'
 import {
   createProductServiceValidator,
@@ -32,7 +32,19 @@ export default class ProductServicesController {
   }
 
   /**
-   * Crée un nouveau produit ou service.
+   * Retourne uniquement les services actifs disponibles a la vente.
+   */
+  async activeForSale({ response }: HttpContext) {
+    // Le module vente consomme seulement les prestations actives.
+    const services = await productServiceService.getActiveServicesForSale()
+
+    return response.ok({
+      services: ProductServiceTransformer.transform(services),
+    })
+  }
+
+  /**
+   * Cree un nouveau produit ou service.
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()

@@ -34,6 +34,7 @@ export default class UserService {
           [UserStatus.ACTIVE, UserStatus.INACTIVE, UserStatus.BLOCKED]
         )
       )
+      .whereNot('role', UserRole.ADMIN)
       .orderBy('createdAt', 'desc')
       .limit(limit)
 
@@ -45,6 +46,17 @@ export default class UserService {
       stats,
       statusDistribution: this.buildStatusDistribution(stats),
     }
+  }
+
+  /**
+   * Recupere les operateurs actifs selectionnables dans une vente.
+   */
+  async getActiveOperatorsForSale() {
+    // Toute personne active sauf l'admin peut etre selectionnee comme operateur de commande.
+    return User.query()
+      .whereNot('role', UserRole.ADMIN)
+      .where('status', UserStatus.ACTIVE)
+      .orderBy('fullName', 'asc')
   }
 
   /**

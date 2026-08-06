@@ -24,6 +24,7 @@ export const controllers = {
   },
   sales: {
     CashSessions: () => import('#controllers/sales/cash_sessions_controller'),
+    SaleRecoveries: () => import('#controllers/sales/sale_recoveries_controller'),
     Sales: () => import('#controllers/sales/sales_controller'),
   },
   stock: {

@@ -1,4 +1,4 @@
-import ProductService from '#models/product_service'
+import ProductService, { ProductServiceType } from '#models/product_service'
 import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
@@ -41,6 +41,18 @@ export default class ProductServiceService {
         serviceCount,
       },
     }
+  }
+
+  /**
+   * Recupere uniquement les services actifs disponibles a la vente.
+   */
+  async getActiveServicesForSale() {
+    // Le module vente ne vend pas les produits physiques, uniquement les prestations.
+    return ProductService.query()
+      .where('type', ProductServiceType.SERVICE)
+      .where('isActive', true)
+      .preload('category')
+      .orderBy('name', 'asc')
   }
 
   /**

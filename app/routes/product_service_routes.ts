@@ -8,6 +8,9 @@ export function registerProductServiceRoutes() {
     .get('product-services', [ProductServicesController, 'index'])
     .as('product_services.index')
   router
+    .get('product-services/active-services-for-sale', [ProductServicesController, 'activeForSale'])
+    .as('product_services.active_for_sale')
+  router
     .post('product-services', [ProductServicesController, 'store'])
     .as('product_services.store')
   router

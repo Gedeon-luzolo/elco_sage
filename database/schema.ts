@@ -133,6 +133,89 @@ export class ProductServiceSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class SaleItemSchema extends BaseModel {
+  static $columns = ['createdAt', 'currency', 'id', 'orderNumber', 'productServiceId', 'quantity', 'saleId', 'totalPrice', 'unitPrice', 'updatedAt'] as const
+  $columns = SaleItemSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare currency: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare orderNumber: string
+  @column()
+  declare productServiceId: string
+  @column()
+  declare quantity: string
+  @column()
+  declare saleId: string
+  @column()
+  declare totalPrice: string
+  @column()
+  declare unitPrice: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class SaleRecoverySchema extends BaseModel {
+  static $columns = ['amount', 'cashSessionId', 'createdAt', 'currency', 'id', 'receivedById', 'recoveredAt', 'saleId', 'updatedAt'] as const
+  $columns = SaleRecoverySchema.$columns
+  @column()
+  declare amount: string
+  @column()
+  declare cashSessionId: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare currency: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare receivedById: string
+  @column.dateTime()
+  declare recoveredAt: DateTime
+  @column()
+  declare saleId: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class SaleSchema extends BaseModel {
+  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
+  $columns = SaleSchema.$columns
+  @column()
+  declare additionNumber: string
+  @column()
+  declare cashSessionId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare currency: string
+  @column()
+  declare customerId: string | null
+  @column()
+  declare discountAmount: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare operatorId: string | null
+  @column()
+  declare paymentType: string
+  @column.dateTime()
+  declare saleDate: DateTime
+  @column()
+  declare sellerId: string
+  @column()
+  declare status: string
+  @column()
+  declare theoreticalAmount: string
+  @column()
+  declare totalAmount: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class StockMovementSchema extends BaseModel {
   static $columns = ['createdAt', 'date', 'entries', 'id', 'initialStock', 'losses', 'observation', 'outputs', 'physicalStock', 'productId', 'updatedAt'] as const
   $columns = StockMovementSchema.$columns

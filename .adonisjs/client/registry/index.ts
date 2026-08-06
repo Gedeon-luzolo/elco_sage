@@ -114,6 +114,42 @@ const routes = {
     tokens: [{"old":"/sales","type":0,"val":"sales","end":""}],
     types: placeholder as Registry['sales.index']['types'],
   },
+  'sales.create': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/create',
+    tokens: [{"old":"/sales/create","type":0,"val":"sales","end":""},{"old":"/sales/create","type":0,"val":"create","end":""}],
+    types: placeholder as Registry['sales.create']['types'],
+  },
+  'sales.store': {
+    methods: ["POST"],
+    pattern: '/sales',
+    tokens: [{"old":"/sales","type":0,"val":"sales","end":""}],
+    types: placeholder as Registry['sales.store']['types'],
+  },
+  'sales.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/:id',
+    tokens: [{"old":"/sales/:id","type":0,"val":"sales","end":""},{"old":"/sales/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['sales.show']['types'],
+  },
+  'sales.cancel': {
+    methods: ["POST"],
+    pattern: '/sales/:id/cancel',
+    tokens: [{"old":"/sales/:id/cancel","type":0,"val":"sales","end":""},{"old":"/sales/:id/cancel","type":1,"val":"id","end":""},{"old":"/sales/:id/cancel","type":0,"val":"cancel","end":""}],
+    types: placeholder as Registry['sales.cancel']['types'],
+  },
+  'sales.recoveries.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/:saleId/recoveries',
+    tokens: [{"old":"/sales/:saleId/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/:saleId/recoveries","type":1,"val":"saleId","end":""},{"old":"/sales/:saleId/recoveries","type":0,"val":"recoveries","end":""}],
+    types: placeholder as Registry['sales.recoveries.index']['types'],
+  },
+  'sales.recoveries.store': {
+    methods: ["POST"],
+    pattern: '/sales/:saleId/recoveries',
+    tokens: [{"old":"/sales/:saleId/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/:saleId/recoveries","type":1,"val":"saleId","end":""},{"old":"/sales/:saleId/recoveries","type":0,"val":"recoveries","end":""}],
+    types: placeholder as Registry['sales.recoveries.store']['types'],
+  },
   'management': {
     methods: ["GET","HEAD"],
     pattern: '/management',
@@ -191,6 +227,12 @@ const routes = {
     pattern: '/management/product-services',
     tokens: [{"old":"/management/product-services","type":0,"val":"management","end":""},{"old":"/management/product-services","type":0,"val":"product-services","end":""}],
     types: placeholder as Registry['product_services.index']['types'],
+  },
+  'product_services.active_for_sale': {
+    methods: ["GET","HEAD"],
+    pattern: '/management/product-services/active-services-for-sale',
+    tokens: [{"old":"/management/product-services/active-services-for-sale","type":0,"val":"management","end":""},{"old":"/management/product-services/active-services-for-sale","type":0,"val":"product-services","end":""},{"old":"/management/product-services/active-services-for-sale","type":0,"val":"active-services-for-sale","end":""}],
+    types: placeholder as Registry['product_services.active_for_sale']['types'],
   },
   'product_services.store': {
     methods: ["POST"],

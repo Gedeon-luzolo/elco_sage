@@ -31,6 +31,14 @@ export interface ApiDefinition {
       close: typeof routes['sales.cash_sessions.close']
     }
     index: typeof routes['sales.index']
+    create: typeof routes['sales.create']
+    store: typeof routes['sales.store']
+    show: typeof routes['sales.show']
+    cancel: typeof routes['sales.cancel']
+    recoveries: {
+      index: typeof routes['sales.recoveries.index']
+      store: typeof routes['sales.recoveries.store']
+    }
   }
   management: typeof routes['management']
   journalisations: {
@@ -54,6 +62,7 @@ export interface ApiDefinition {
   }
   productServices: {
     index: typeof routes['product_services.index']
+    activeForSale: typeof routes['product_services.active_for_sale']
     store: typeof routes['product_services.store']
     update: typeof routes['product_services.update']
     destroy: typeof routes['product_services.destroy']

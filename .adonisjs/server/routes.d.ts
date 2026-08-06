@@ -22,6 +22,12 @@ export type ScannedRoutes = {
     'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
+    'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.store': { paramsTuple?: []; params?: {} }
+    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.recoveries.index': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
+    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
@@ -35,6 +41,7 @@ export type ScannedRoutes = {
     'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_services.index': { paramsTuple?: []; params?: {} }
+    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
     'product_services.store': { paramsTuple?: []; params?: {} }
     'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_services.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -47,12 +54,16 @@ export type ScannedRoutes = {
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
+    'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.recoveries.index': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'product_categories.index': { paramsTuple?: []; params?: {} }
     'product_services.index': { paramsTuple?: []; params?: {} }
+    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
@@ -62,12 +73,16 @@ export type ScannedRoutes = {
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
+    'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.recoveries.index': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
     'users.get': { paramsTuple?: []; params?: {} }
     'exchange_rates.get': { paramsTuple?: []; params?: {} }
     'product_categories.index': { paramsTuple?: []; params?: {} }
     'product_services.index': { paramsTuple?: []; params?: {} }
+    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'session.store': { paramsTuple?: []; params?: {} }
@@ -78,6 +93,9 @@ export type ScannedRoutes = {
     'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'sales.store': { paramsTuple?: []; params?: {} }
+    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
     'product_categories.store': { paramsTuple?: []; params?: {} }

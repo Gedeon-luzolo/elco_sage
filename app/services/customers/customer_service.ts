@@ -29,6 +29,13 @@ export default class CustomerService {
   }
 
   /**
+   * Recupere les clients actifs selectionnables dans une vente.
+   */
+  async getActiveCustomersForSale() {
+    return Customer.query().where('isActive', true).orderBy('fullName', 'asc')
+  }
+
+  /**
    * Cree un nouveau customer actif par defaut.
    */
   async create(actor: User, payload: CreateCustomerInput) {

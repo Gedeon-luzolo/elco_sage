@@ -1,22 +1,37 @@
 import { Link } from '@adonisjs/inertia/react'
-import { Banknote, Plus, ShoppingCart } from 'lucide-react'
+import { Banknote, Eye, Plus, ShoppingCart } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
+import { SalesTable } from '~/components/sales/sales_table'
 import { Button } from '~/components/ui/button'
-import { Card } from '~/components/ui/card'
 import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
+import { formatDateLabel } from '~/utils/date'
 
-export default function SalesPage({ currentCashSession }: InertiaProps<SalesPageProps>) {
+export default function SalesPage({ currentCashSession, sales }: InertiaProps<SalesPageProps>) {
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(sales[0]?.id ?? null)
+
+  // La description de la page depend de l'etat de la session courante.
+  const pageDescription = currentCashSession?.openingDate
+    ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} a ${
+        currentCashSession.openingTime ?? '--:--'
+      }.`
+    : 'Lecture des ventes enregistrees dans la session de caisse courante.'
+
+  // La ligne selectionnee alimente le panneau de details.
+  const selectedSale = useMemo(
+    () => sales.find((sale) => sale.id === selectedSaleId) ?? null,
+    [sales, selectedSaleId]
+  )
+
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8 lg:px-10">
-        <PageHeader
-          title="Gestion des ventes"
-          description="Suivi des ventes et des operations de caisse."
-          icon={ShoppingCart}
-        >
+      <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
+        <PageHeader title="Gestion des ventes" description={pageDescription} icon={ShoppingCart}>
           {currentCashSession ? (
-            <Button type="button" disabled>
+            <Button render={<Link href="/sales/create" />}>
               <Plus className="size-4" />
               Nouvelle vente
             </Button>
@@ -28,9 +43,28 @@ export default function SalesPage({ currentCashSession }: InertiaProps<SalesPage
           )}
         </PageHeader>
 
-        <Card>
-          <p>Bientot disponible</p>
-        </Card>
+        {!currentCashSession ? (
+          <EmptyState
+            icon={Banknote}
+            title="Aucune caisse ouverte"
+            description="Ouvrez une session de caisse pour consulter les ventes de votre session."
+          />
+        ) : sales.length === 0 ? (
+          <EmptyState
+            icon={Eye}
+            title="Aucune vente dans cette session"
+            description="Les ventes enregistrees pendant cette session apparaitront ici."
+          />
+        ) : (
+          <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
+            <SalesTable
+              sales={sales}
+              selectedSaleId={selectedSaleId}
+              onSelectSale={setSelectedSaleId}
+            />
+            {selectedSale && <SaleDetailPanel sale={selectedSale} />}
+          </div>
+        )}
       </section>
     </main>
   )
