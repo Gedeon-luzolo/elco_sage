@@ -14,6 +14,8 @@ export default class extends BaseSchema {
           'PRODUCT_CATEGORIES',
           'PRODUCT_SERVICES',
           'INVENTORY',
+          'CUSTOMERS',
+          'SALES',
         ])
         .notNullable()
       table.text('message').notNullable()
