@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
 import { DebtStatusBadge } from '~/components/sales/debt_status_badge'
 import { DebtPaymentDialog } from '~/components/sales/debt_payment_dialog'
@@ -28,11 +29,12 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { usePaginated } from '~/hooks/use_paginated'
+import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import type { InertiaProps } from '~/types'
 import type { DebtItem, DebtsPageProps } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
-import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
+import { debtSearchFields, formatDebtSaleDate } from '~/utils/sales/debt.utils'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 
@@ -46,9 +48,19 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
   })
   const [isLoading, setIsLoading] = useState(false)
   const [selectedDebt, setSelectedDebt] = useState<DebtItem | null>(null)
+
+  // Utiliser un hook de recherche pour filtrer les dettes par client ou addition.
+  const {
+    search,
+    setSearch,
+    filteredItems: filteredDebts,
+  } = useSearch({
+    items: debts,
+    fields: debtSearchFields,
+  })
   // Utiliser un hook de pagination pour gérer la pagination locale des dettes chargées.
   const paginatedDebts = usePaginated<DebtItem>({
-    initialItems: debts,
+    initialItems: filteredDebts,
     pageSize: DEBTS_PAGE_SIZE,
   })
 
@@ -152,15 +164,24 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
               </div>
             </div>
 
-            {paginatedDebts.totalLoadedPages > 1 && (
-              <PaginationControls
-                canGoPrevious={paginatedDebts.canGoPrevious}
-                canGoNext={paginatedDebts.canGoNext}
-                pageSize={DEBTS_PAGE_SIZE}
-                onPrevious={paginatedDebts.goToPreviousPage}
-                onNext={paginatedDebts.goToNextPage}
+            <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Rechercher client ou addition..."
+                className="w-full lg:w-72"
               />
-            )}
+
+              {paginatedDebts.totalLoadedPages > 1 && (
+                <PaginationControls
+                  canGoPrevious={paginatedDebts.canGoPrevious}
+                  canGoNext={paginatedDebts.canGoNext}
+                  pageSize={DEBTS_PAGE_SIZE}
+                  onPrevious={paginatedDebts.goToPreviousPage}
+                  onNext={paginatedDebts.goToNextPage}
+                />
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <Table>

@@ -11,15 +11,38 @@ import {
 import { useMemo, useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchInput } from '~/components/common/search_input'
 import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
 import { SalesTable } from '~/components/sales/sales_table'
 import { Button } from '~/components/ui/button'
+import { PaginationControls } from '~/components/ui/pagination_controls'
+import { usePaginated } from '~/hooks/use_paginated'
+import { useSearch } from '~/hooks/use_search'
 import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
 import { formatDateLabel } from '~/utils/date'
+import { saleSearchFields } from '~/utils/sales/sale.utils'
+
+const SALES_PAGE_SIZE = 2
 
 export default function SalesPage({ currentCashSession, sales }: InertiaProps<SalesPageProps>) {
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(sales[0]?.id ?? null)
+
+  // Filtre les ventes de la session courante par addition, client ou bon de commande.
+  const {
+    search,
+    setSearch,
+    filteredItems: filteredSales,
+  } = useSearch({
+    items: sales,
+    fields: saleSearchFields,
+  })
+
+  // Pagine localement les ventes deja chargees apres application de la recherche.
+  const paginatedSales = usePaginated({
+    initialItems: filteredSales,
+    pageSize: SALES_PAGE_SIZE,
+  })
 
   // La description de la page depend de l'etat de la session courante.
   const pageDescription = currentCashSession?.openingDate
@@ -28,10 +51,16 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
       }.`
     : 'Lecture des ventes enregistrees dans la session de caisse courante.'
 
+  const effectiveSelectedSaleId = paginatedSales.visibleItems.some(
+    (sale) => sale.id === selectedSaleId
+  )
+    ? selectedSaleId
+    : (paginatedSales.visibleItems[0]?.id ?? null)
+
   // La ligne selectionnee alimente le panneau de details.
   const selectedSale = useMemo(
-    () => sales.find((sale) => sale.id === selectedSaleId) ?? null,
-    [sales, selectedSaleId]
+    () => paginatedSales.visibleItems.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
+    [paginatedSales.visibleItems, effectiveSelectedSaleId]
   )
 
   return (
@@ -96,13 +125,34 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
             description="Les ventes enregistrees pendant cette session apparaitront ici."
           />
         ) : (
-          <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
-            <SalesTable
-              sales={sales}
-              selectedSaleId={selectedSaleId}
-              onSelectSale={setSelectedSaleId}
-            />
-            {selectedSale && <SaleDetailPanel sale={selectedSale} />}
+          <div className="flex flex-col gap-4">
+            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Rechercher addition, client ou bon..."
+                className="w-full lg:w-80"
+              />
+
+              {paginatedSales.totalLoadedPages > 1 && (
+                <PaginationControls
+                  canGoPrevious={paginatedSales.canGoPrevious}
+                  canGoNext={paginatedSales.canGoNext}
+                  pageSize={SALES_PAGE_SIZE}
+                  onPrevious={paginatedSales.goToPreviousPage}
+                  onNext={paginatedSales.goToNextPage}
+                />
+              )}
+            </div>
+
+            <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
+              <SalesTable
+                sales={paginatedSales.visibleItems}
+                selectedSaleId={effectiveSelectedSaleId}
+                onSelectSale={setSelectedSaleId}
+              />
+              {selectedSale && <SaleDetailPanel sale={selectedSale} />}
+            </div>
           </div>
         )}
       </section>

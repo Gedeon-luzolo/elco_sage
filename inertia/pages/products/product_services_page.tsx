@@ -1,15 +1,16 @@
 import { router } from '@inertiajs/react'
-import { Package, Plus, Search, Settings, Wrench } from 'lucide-react'
+import { Package, Plus, Settings, Wrench } from 'lucide-react'
 import { useState } from 'react'
 import { ProductCard } from '~/components/products/product_card'
 import { ProductServiceModal } from '~/components/products/product_service_modal'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { EmptyState } from '~/components/common/empty_state'
-import { Input } from '~/components/ui/input'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { useSearch } from '~/hooks/use_search'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type { ProductServicesPageProps, ProductServiceItem } from '~/types/product_service_types'
 
@@ -30,18 +31,18 @@ export default function ProductServicesPage({
   const [selectedItem, setSelectedItem] = useState<ProductServiceItem | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [defaultModalType, setDefaultModalType] = useState<'PRODUCT' | 'SERVICE'>('PRODUCT')
-
-  /**
-   * Filtre la liste transmise selon le mot-clé saisi dans la barre de recherche.
-   */
-  const filterItems = (list: ProductServiceItem[]) => {
-    if (!search.trim()) return list
-    const q = search.toLowerCase()
-    return list.filter((i) => i.name.toLowerCase().includes(q))
-  }
-
-  const filteredProducts = filterItems(products)
-  const filteredServices = filterItems(services)
+  const { filteredItems: filteredProducts } = useSearch({
+    items: products,
+    fields: ['name'],
+    search,
+    onSearchChange: setSearch,
+  })
+  const { filteredItems: filteredServices } = useSearch({
+    items: services,
+    fields: ['name'],
+    search,
+    onSearchChange: setSearch,
+  })
 
   // Ouvre la boîte de dialogue en mode création avec un type par défaut ('PRODUCT' ou 'SERVICE').
   const openCreateModal = (type: 'PRODUCT' | 'SERVICE' = 'PRODUCT') => {
@@ -135,16 +136,14 @@ export default function ProductServicesPage({
         </div>
 
         {/* Barre de recherche globale par nom ou description */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="ps-search"
-            placeholder="Rechercher un produit ou service..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+        <SearchInput
+          id="ps-search"
+          value={search}
+          onChange={setSearch}
+          placeholder="Rechercher un produit ou service..."
+          className="max-w-sm"
+          inputClassName="h-8"
+        />
 
         {/* Système d'onglets séparant les Produits et les Services */}
         <Tabs defaultValue="products">

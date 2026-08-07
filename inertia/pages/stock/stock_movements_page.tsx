@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchInput } from '~/components/common/search_input'
 import { StockDetailPanel } from '~/components/stock/stock_detail_panel'
 import type { InventoryPageProps } from '~/types/stock_types'
 import { Input } from '~/components/ui/input'
@@ -15,9 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
+import { useSearch } from '~/hooks/use_search'
 import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
-import { formatQuantity, filterStockMovements } from '~/utils/stock'
+import { formatQuantity } from '~/utils/stock'
 import { getLocalDateKey } from '~/utils/date'
 
 /**
@@ -26,14 +28,18 @@ import { getLocalDateKey } from '~/utils/date'
  */
 export default function StockMovementsPage({ stockItems, currentDate }: InventoryPageProps) {
   const [selectedDate, setSelectedDate] = useState(currentDate)
-  const [searchTerm, setSearchTerm] = useState('')
   const [selectedMovementId, setSelectedMovementId] = useState<string | null>(null)
   const [entryDialogOpen, setEntryDialogOpen] = useState(false)
   const [physicalDialogOpen, setPhysicalDialogOpen] = useState(false)
   const todayKey = getLocalDateKey()
-
-  // Filtrer les produits par recherche
-  const filteredItems = filterStockMovements(stockItems, searchTerm)
+  const {
+    search: searchTerm,
+    setSearch: setSearchTerm,
+    filteredItems,
+  } = useSearch({
+    items: stockItems,
+    fields: ['productName'],
+  })
 
   // Trouver le mouvement sélectionné
   const selectedMovement = selectedMovementId
@@ -84,12 +90,12 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
             />
           </div>
 
-          <Input
-            type="search"
-            placeholder="Rechercher un produit..."
+          <SearchInput
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={setSearchTerm}
+            placeholder="Rechercher un produit..."
             className="max-w-xs"
+            inputClassName="h-8"
           />
         </section>
 

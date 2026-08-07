@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
 import { DebtStatusBadge } from '~/components/sales/debt_status_badge'
 import { Button } from '~/components/ui/button'
@@ -27,6 +28,7 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { usePaginated } from '~/hooks/use_paginated'
+import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import type { InertiaProps } from '~/types'
 import type { RecoveriesPageProps, RecoveryPaymentItem } from '~/types/debt_types'
@@ -34,7 +36,7 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { renderMoneyMap } from '~/utils/money_map.utils'
-import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
+import { formatDebtSaleDate, recoverySearchFields } from '~/utils/sales/debt.utils'
 
 const RECOVERIES_PAGE_SIZE = 10
 
@@ -48,9 +50,19 @@ export default function RecoveriesPage({
     initialEndDate: filters.endDate,
   })
   const [isLoading, setIsLoading] = useState(false)
+
+  // Utiliser un hook de recherche pour filtrer les paiements par client ou addition.
+  const {
+    search,
+    setSearch,
+    filteredItems: filteredRecoveries,
+  } = useSearch({
+    items: recoveries,
+    fields: recoverySearchFields,
+  })
   // Utiliser un hook de pagination pour gérer la pagination locale des paiements chargés.
   const paginatedRecoveries = usePaginated<RecoveryPaymentItem>({
-    initialItems: recoveries,
+    initialItems: filteredRecoveries,
     pageSize: RECOVERIES_PAGE_SIZE,
   })
 
@@ -160,15 +172,24 @@ export default function RecoveriesPage({
               </div>
             </div>
 
-            {paginatedRecoveries.totalLoadedPages > 1 && (
-              <PaginationControls
-                canGoPrevious={paginatedRecoveries.canGoPrevious}
-                canGoNext={paginatedRecoveries.canGoNext}
-                pageSize={RECOVERIES_PAGE_SIZE}
-                onPrevious={paginatedRecoveries.goToPreviousPage}
-                onNext={paginatedRecoveries.goToNextPage}
+            <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Rechercher client ou addition..."
+                className="w-full lg:w-72"
               />
-            )}
+
+              {paginatedRecoveries.totalLoadedPages > 1 && (
+                <PaginationControls
+                  canGoPrevious={paginatedRecoveries.canGoPrevious}
+                  canGoNext={paginatedRecoveries.canGoNext}
+                  pageSize={RECOVERIES_PAGE_SIZE}
+                  onPrevious={paginatedRecoveries.goToPreviousPage}
+                  onNext={paginatedRecoveries.goToNextPage}
+                />
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <Table>

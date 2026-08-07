@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react'
-import { CheckCircle2, Edit2, Plus, Search, Tags, Trash2, XCircle } from 'lucide-react'
+import { CheckCircle2, Edit2, Plus, Tags, Trash2, XCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ProductCategoryModal } from '~/components/categories/product_category_modal'
 import { Badge } from '~/components/ui/badge'
@@ -9,7 +9,8 @@ import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { StatCard } from '~/components/common/stat_card'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
-import { Input } from '~/components/ui/input'
+import { SearchInput } from '~/components/common/search_input'
+import { useSearch } from '~/hooks/use_search'
 import {
   Table,
   TableBody,
@@ -24,15 +25,21 @@ import type {
   ProductCategoriesPageProps,
 } from '~/types/product_category_types'
 import { formatShortDate } from '~/utils/date'
-import { filterProductCategories } from '~/utils/products/product.utils'
-import { StatusFilter } from '~/utils/status.utils'
+import { StatusFilter, matchesStatusFilter } from '~/utils/status.utils'
 
 export default function ProductCategoriesPage({ categories, stats }: ProductCategoriesPageProps) {
-  const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(StatusFilter.ALL)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ProductCategoryItem | null>(null)
   const [deletingCategory, setDeletingCategory] = useState<ProductCategoryItem | null>(null)
+  const {
+    search,
+    setSearch,
+    filteredItems: searchedCategories,
+  } = useSearch({
+    items: categories,
+    fields: ['name', 'description'],
+  })
 
   // Dérivé directement des props : ne change qu'après une action serveur.
   const statCards = [
@@ -52,8 +59,9 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
 
   // Filtre les catégories selon la recherche textuelle et le filtre de statut actif.
   const filteredCategories = useMemo(
-    () => filterProductCategories(categories, search, statusFilter),
-    [categories, search, statusFilter]
+    () =>
+      searchedCategories.filter((category) => matchesStatusFilter(category.isActive, statusFilter)),
+    [searchedCategories, statusFilter]
   )
 
   // Ouvre le modal en mode création avec un formulaire vierge.
@@ -137,16 +145,11 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
 
         {/* Barre de recherche et filtres de statut */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Rechercher une catégorie..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-10"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher une catégorie..."
+          />
 
           {/* Filtres rapides par statut */}
           <div className="flex items-center gap-2">
@@ -182,11 +185,11 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[250px]">Nom de la catégorie</TableHead>
+                <TableHead className="w-62.5">Nom de la catégorie</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-[120px]">Statut</TableHead>
-                <TableHead className="w-[140px]">Date de création</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-30">Statut</TableHead>
+                <TableHead className="w-30">Date de création</TableHead>
+                <TableHead className="w-30 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
