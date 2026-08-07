@@ -16,6 +16,8 @@ export interface CashSessionDTO extends Record<string, JSONDataTypes> {
   systemAmounts: MoneyMapDTO
   closingAmounts: MoneyMapDTO | null
   differenceAmounts: MoneyMapDTO | null
+  userName: string | null
+  userRole: string | null
 }
 
 export default class CashSessionTransformer {
@@ -39,7 +41,16 @@ export default class CashSessionTransformer {
       systemAmounts: normalizeMoneyMap(systemAmounts?.systemAmounts ?? item.systemAmounts),
       closingAmounts: item.closingAmounts ? normalizeMoneyMap(item.closingAmounts) : null,
       differenceAmounts: item.differenceAmounts ? normalizeMoneyMap(item.differenceAmounts) : null,
+      userName: item.user?.fullName ?? null,
+      userRole: item.user?.role ?? null,
     }
+  }
+
+  /**
+   * Transforme une liste de sessions de caisse.
+   */
+  public static transform(items: CashSession[]): CashSessionDTO[] {
+    return items.map((item) => this.transformSingle(item))
   }
 
   /**

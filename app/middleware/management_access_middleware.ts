@@ -1,8 +1,6 @@
-import { UserRole } from '#models/user'
+import { isManagementRole } from '#utils/user_role_utils'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-
-const MANAGEMENT_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR]
 
 export default class ManagementAccessMiddleware {
   /**
@@ -18,7 +16,7 @@ export default class ManagementAccessMiddleware {
       return ctx.response.redirect().toRoute('session.create')
     }
 
-    if (!MANAGEMENT_ROLES.includes(user.role)) {
+    if (!isManagementRole(user.role)) {
       // On ferme la session pour eviter une boucle login -> home -> 403.
       await ctx.auth.use('web').logout()
       ctx.session.forget('error')

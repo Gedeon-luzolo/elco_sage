@@ -175,6 +175,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock/stock_movements_controller').default['updatePhysicalStock']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'sales.cash_sessions.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/sessions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['index']>>>
+    }
+  }
   'sales.cash_sessions.create': {
     methods: ["GET","HEAD"]
     pattern: '/sales/session/open'

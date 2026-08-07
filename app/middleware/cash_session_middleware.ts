@@ -1,11 +1,10 @@
 import CashSessionService from '#services/sales/cash_session_service'
-import { UserRole } from '#models/user'
+import { isManagementRole } from '#utils/user_role_utils'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 
 const cashSessionService = new CashSessionService()
 const READ_METHODS = ['GET', 'HEAD']
-const MANAGEMENT_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR]
 const OPENING_PATHS = ['/sales/session/open']
 
 export default class CashSessionMiddleware {
@@ -32,7 +31,7 @@ export default class CashSessionMiddleware {
       return next()
     }
 
-    const isManagementUser = MANAGEMENT_ROLES.includes(user.role)
+    const isManagementUser = isManagementRole(user.role)
     const isReadRequest = READ_METHODS.includes(ctx.request.method())
 
     // Admin et directeur gardent l'acces lecture aux ventes meme sans caisse ouverte.

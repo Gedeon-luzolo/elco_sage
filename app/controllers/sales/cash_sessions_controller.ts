@@ -9,6 +9,27 @@ const cashSessionService = new CashSessionService()
 
 export default class CashSessionsController {
   /**
+   * Affiche les sessions de caisse accessibles a l'utilisateur courant.
+   */
+  async index({ auth, inertia, request }: HttpContext) {
+    const actor = auth.getUserOrFail()
+    const startDate = request.input('startDate')
+    const endDate = request.input('endDate')
+    const sessions = await cashSessionService.findVisibleSessions(actor, {
+      startDate,
+      endDate,
+    })
+
+    return (inertia.render as any)('sales/cash_sessions_page', {
+      sessions: CashSessionTransformer.transform(sessions),
+      filters: {
+        startDate: startDate ?? null,
+        endDate: endDate ?? null,
+      },
+    })
+  }
+
+  /**
    * Affiche l'ecran d'ouverture de caisse.
    */
   async create({ auth, inertia }: HttpContext) {

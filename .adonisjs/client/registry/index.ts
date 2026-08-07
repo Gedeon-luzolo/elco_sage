@@ -90,6 +90,12 @@ const routes = {
     tokens: [{"old":"/stock/validate-physical/:id","type":0,"val":"stock","end":""},{"old":"/stock/validate-physical/:id","type":0,"val":"validate-physical","end":""},{"old":"/stock/validate-physical/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['stock_movements.update_physical']['types'],
   },
+  'sales.cash_sessions.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/sessions',
+    tokens: [{"old":"/sales/sessions","type":0,"val":"sales","end":""},{"old":"/sales/sessions","type":0,"val":"sessions","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.index']['types'],
+  },
   'sales.cash_sessions.create': {
     methods: ["GET","HEAD"],
     pattern: '/sales/session/open',

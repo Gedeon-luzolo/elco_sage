@@ -2,7 +2,7 @@ import type { ProductServiceDTO } from '#transformers/product_service_transforme
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 import type { CurrencyCode } from '~/utils/currency'
 import { Currency } from '~/utils/currency'
-import { formatDateLabel, formatShortTime } from '~/utils/date'
+import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 export type SalePaymentType = 'CASH' | 'CREDIT' | 'OFFERED'
@@ -53,17 +53,14 @@ export function formatSaleMoney(value: number, currency: string) {
 
 // Formate la date/heure de vente pour les tableaux et details.
 export function formatSaleDate(value: string | null) {
-  if (!value) {
-    return '-'
-  }
-
-  const date = new Date(value)
-
-  return `${formatDateLabel(date)} a ${formatShortTime(date)}`
+  return formatDateTimeLabel(value)
 }
 
 // Retourne le prix du service selon la devise de vente selectionnee.
-export function getSaleServiceUnitPrice(service: SaleServiceOption | undefined, currency: CurrencyCode) {
+export function getSaleServiceUnitPrice(
+  service: SaleServiceOption | undefined,
+  currency: CurrencyCode
+) {
   if (!service) {
     return 0
   }
@@ -122,7 +119,9 @@ export function canSubmitSaleForm(form: SaleFormState) {
 // Prepare uniquement les lignes valides attendues par le backend.
 export function buildSaleItemsPayload(lines: SaleLineState[]) {
   return lines
-    .filter((line) => line.orderNumber.trim().length > 0 && line.productServiceId && line.quantity > 0)
+    .filter(
+      (line) => line.orderNumber.trim().length > 0 && line.productServiceId && line.quantity > 0
+    )
     .map((line) => ({
       orderNumber: line.orderNumber.trim(),
       productServiceId: line.productServiceId,

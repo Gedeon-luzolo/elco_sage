@@ -1,7 +1,7 @@
 import { JournalisationModule } from '#models/journalisation'
-import { UserRole } from '#models/user'
 import AuthAttemptService from '#services/auth/auth_attempt_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import { isManagementRole } from '#utils/user_role_utils'
 import { verifyPasswordValidator } from '#validators/auth/password'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -44,7 +44,7 @@ export default class SessionController {
     })
 
     // La direction garde l'accueil de pilotage, les profils operationnels entrent dans le flux vente.
-    if ([UserRole.ADMIN, UserRole.DIRECTOR].includes(result.user.role)) {
+    if (isManagementRole(result.user.role)) {
       return response.redirect().toRoute('home')
     }
 

@@ -1,5 +1,13 @@
 import { Link } from '@adonisjs/inertia/react'
-import { Banknote, CreditCard, Eye, HandCoins, Plus, ShoppingCart } from 'lucide-react'
+import {
+  Banknote,
+  CalendarDays,
+  CreditCard,
+  Eye,
+  HandCoins,
+  Plus,
+  ShoppingCart,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
@@ -37,6 +45,14 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
         >
           <>
             <Button
+              render={<Link href="/sales/sessions" />}
+              variant="outline"
+              className="bg-sky-600 text-white hover:bg-sky-500/80 hover:text-white"
+            >
+              <CalendarDays className="size-4" />
+              Rapport des Sessions
+            </Button>
+            <Button
               className="bg-red-800 text-white hover:bg-red-500/80 hover:text-white"
               render={<Link href="/sales/debts" />}
               variant="outline"
@@ -52,6 +68,7 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
               <HandCoins className="size-4" />
               Recouvrements
             </Button>
+
             {currentCashSession ? (
               <Button render={<Link href="/sales/create" />}>
                 <Plus className="size-4" />

@@ -36,6 +36,17 @@ export const formatShortTime = (date: Date) => {
   })
 }
 
+// Formate une date avec son heure courte: 07/08/2026 à 14:30.
+export const formatDateTimeLabel = (value: Date | string | null | undefined) => {
+  if (!value) {
+    return '-'
+  }
+
+  const date = value instanceof Date ? value : new Date(value)
+
+  return `${formatDateLabel(date)} à ${formatShortTime(date)}`
+}
+
 // Retourne une date locale au format yyyy-mm-dd pour les inputs date.
 export const getLocalDateKey = (date = new Date()) => {
   const year = date.getFullYear()

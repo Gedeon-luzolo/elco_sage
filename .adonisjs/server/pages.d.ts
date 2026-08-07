@@ -30,5 +30,6 @@ declare module '@adonisjs/inertia/types' {
     'stock/stock_movements_page': ExtractProps<(typeof import('../../inertia/pages/stock/stock_movements_page.tsx'))['default']>
     'users/users_page': ExtractProps<(typeof import('../../inertia/pages/users/users_page.tsx'))['default']>
     'sales/recoveries_page': ExtractProps<(typeof import('../../inertia/pages/sales/recoveries_page.tsx'))['default']>
+    'sales/cash_sessions_page': ExtractProps<(typeof import('../../inertia/pages/sales/cash_sessions_page.tsx'))['default']>
   }
 }

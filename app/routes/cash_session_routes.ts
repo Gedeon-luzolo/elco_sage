@@ -3,6 +3,7 @@ import router from '@adonisjs/core/services/router'
 const CashSessionsController = () => import('#controllers/sales/cash_sessions_controller')
 
 export function registerCashSessionRoutes() {
+  router.get('sales/sessions', [CashSessionsController, 'index']).as('sales.cash_sessions.index')
   router
     .get('sales/session/open', [CashSessionsController, 'create'])
     .as('sales.cash_sessions.create')

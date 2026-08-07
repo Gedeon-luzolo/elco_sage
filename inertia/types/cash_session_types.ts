@@ -20,11 +20,21 @@ export type CashSessionItem = Record<string, JSONDataTypes> & {
   systemAmounts: MoneyMap
   closingAmounts: MoneyMap | null
   differenceAmounts: MoneyMap | null
+  userName: string | null
+  userRole: string | null
 }
 
 // Props de la page d'ouverture de caisse.
 export interface CashSessionOpeningPageProps extends Record<string, JSONDataTypes> {
   currentCashSession: CashSessionItem | null
+}
+
+export interface CashSessionsPageProps extends Record<string, JSONDataTypes> {
+  sessions: CashSessionItem[]
+  filters: {
+    startDate: string | null
+    endDate: string | null
+  }
 }
 
 // Props de la premiere page du module vente.

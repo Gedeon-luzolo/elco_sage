@@ -5,7 +5,9 @@ import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { Currency } from '#types/currency'
+import { normalizeDateRange } from '#utils/date_utils'
 import { buildDifferenceMoneyMap, buildMoneyMap, type MoneyMap } from '#utils/money_map'
+import { isManagementRole } from '#utils/user_role_utils'
 import type { CloseCashSessionInput } from '#validators/cash_session'
 import { DateTime } from 'luxon'
 
@@ -13,6 +15,11 @@ const journalisationService = new JournalisationService()
 
 export interface CashSessionSystemAmounts {
   systemAmounts: MoneyMap
+}
+
+export interface FindCashSessionsParams {
+  startDate?: string
+  endDate?: string
 }
 
 export default class CashSessionService {
@@ -26,6 +33,27 @@ export default class CashSessionService {
       .where('status', CashSessionStatus.OPEN)
       .orderBy('openedAt', 'desc')
       .first()
+  }
+
+  /**
+   * Recupere les sessions de caisse visibles par l'utilisateur courant.
+   */
+  async findVisibleSessions(actor: User, params: FindCashSessionsParams = {}) {
+    const query = CashSession.query().preload('user').orderBy('openedAt', 'desc')
+
+    // Les admins et directeurs voient toutes les sessions; les autres voient uniquement les leurs.
+    if (!isManagementRole(actor.role)) {
+      query.where('userId', actor.id)
+    }
+
+    // La periode couvre les journees completes selectionnees.
+    if (params.startDate && params.endDate) {
+      const dateRange = normalizeDateRange(params.startDate, params.endDate)
+
+      query.whereBetween('openedAt', [dateRange.startDate, dateRange.endDate])
+    }
+
+    return query
   }
 
   /**
@@ -94,6 +122,7 @@ export default class CashSessionService {
     cashSession.differenceAmounts = differenceAmounts
     await cashSession.save()
 
+    // Journaliser l'operation
     await journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Session de caisse fermée par ${actor.fullName ?? actor.email}. Ecart: ${JSON.stringify(differenceAmounts)}.`,
