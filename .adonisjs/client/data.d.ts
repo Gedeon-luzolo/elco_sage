@@ -13,6 +13,7 @@ import type ExchangeRateTransformer from '#transformers/exchange_rate_transforme
 import type JournalisationTransformer from '#transformers/journalisation_transformer'
 import type ProductCategoryTransformer from '#transformers/product_category_transformer'
 import type ProductServiceTransformer from '#transformers/product_service_transformer'
+import type RecoveryPaymentTransformer from '#transformers/recovery_payment_transformer'
 import type SaleItemTransformer from '#transformers/sale_item_transformer'
 import type SaleRecoveryTransformer from '#transformers/sale_recovery_transformer'
 import type SaleTransformer from '#transformers/sale_transformer'
@@ -48,6 +49,10 @@ export namespace Data {
   export type ProductService = InferData<ProductServiceTransformer>
   export namespace ProductService {
     export type Variants = InferVariants<ProductServiceTransformer>
+  }
+  export type RecoveryPayment = InferData<RecoveryPaymentTransformer>
+  export namespace RecoveryPayment {
+    export type Variants = InferVariants<RecoveryPaymentTransformer>
   }
   export type SaleItem = InferData<SaleItemTransformer>
   export namespace SaleItem {

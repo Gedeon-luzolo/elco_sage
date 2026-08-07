@@ -132,11 +132,17 @@ const routes = {
     tokens: [{"old":"/sales/debts","type":0,"val":"sales","end":""},{"old":"/sales/debts","type":0,"val":"debts","end":""}],
     types: placeholder as Registry['sales.debts.index']['types'],
   },
-  'sales.debts.recoveries': {
+  'sales.recoveries.overview': {
     methods: ["GET","HEAD"],
     pattern: '/sales/recoveries',
     tokens: [{"old":"/sales/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/recoveries","type":0,"val":"recoveries","end":""}],
-    types: placeholder as Registry['sales.debts.recoveries']['types'],
+    types: placeholder as Registry['sales.recoveries.overview']['types'],
+  },
+  'sales.recoveries.store': {
+    methods: ["POST"],
+    pattern: '/sales/:saleId/recoveries',
+    tokens: [{"old":"/sales/:saleId/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/:saleId/recoveries","type":1,"val":"saleId","end":""},{"old":"/sales/:saleId/recoveries","type":0,"val":"recoveries","end":""}],
+    types: placeholder as Registry['sales.recoveries.store']['types'],
   },
   'sales.index': {
     methods: ["GET","HEAD"],
@@ -167,18 +173,6 @@ const routes = {
     pattern: '/sales/:id/cancel',
     tokens: [{"old":"/sales/:id/cancel","type":0,"val":"sales","end":""},{"old":"/sales/:id/cancel","type":1,"val":"id","end":""},{"old":"/sales/:id/cancel","type":0,"val":"cancel","end":""}],
     types: placeholder as Registry['sales.cancel']['types'],
-  },
-  'sales.recoveries.index': {
-    methods: ["GET","HEAD"],
-    pattern: '/sales/:saleId/recoveries',
-    tokens: [{"old":"/sales/:saleId/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/:saleId/recoveries","type":1,"val":"saleId","end":""},{"old":"/sales/:saleId/recoveries","type":0,"val":"recoveries","end":""}],
-    types: placeholder as Registry['sales.recoveries.index']['types'],
-  },
-  'sales.recoveries.store': {
-    methods: ["POST"],
-    pattern: '/sales/:saleId/recoveries',
-    tokens: [{"old":"/sales/:saleId/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/:saleId/recoveries","type":1,"val":"saleId","end":""},{"old":"/sales/:saleId/recoveries","type":0,"val":"recoveries","end":""}],
-    types: placeholder as Registry['sales.recoveries.store']['types'],
   },
   'management': {
     methods: ["GET","HEAD"],

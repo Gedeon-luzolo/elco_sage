@@ -1,4 +1,5 @@
 import type Sale from '#models/sale'
+import type SaleRecovery from '#models/sale_recovery'
 import type { MoneyMapDTO } from '#utils/money_map'
 
 export enum DebtStatus {
@@ -30,5 +31,22 @@ export interface DebtStats {
 
 export interface DebtOverview {
   debts: DebtSummary[]
+  stats: DebtStats
+}
+
+//Type pour les paiements de recouvrement
+export interface RecoveryPaymentSummary {
+  recovery: SaleRecovery
+  sale: Sale
+  debtTotalAmount: number
+  paidAmount: number
+  paidAfterAmount: number
+  remainingAmount: number
+  debtStatus: DebtStatus
+}
+
+//Type pour l'aperçu des paiements de recouvrement
+export interface RecoveryOverview {
+  recoveries: RecoveryPaymentSummary[]
   stats: DebtStats
 }

@@ -29,34 +29,40 @@ import {
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import type { InertiaProps } from '~/types'
-import type { DebtItem, DebtsPageProps } from '~/types/debt_types'
+import type { RecoveriesPageProps, RecoveryPaymentItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
+import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
 
 const RECOVERIES_PAGE_SIZE = 10
 
-export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<DebtsPageProps>) {
+export default function RecoveriesPage({
+  recoveries,
+  filters,
+  stats,
+}: InertiaProps<RecoveriesPageProps>) {
   const selectionDate = useSelectionDate({
     initialStartDate: filters.startDate,
     initialEndDate: filters.endDate,
   })
   const [isLoading, setIsLoading] = useState(false)
-  const paginatedRecoveries = usePaginated<DebtItem>({
-    initialItems: debts,
+  // Utiliser un hook de pagination pour gérer la pagination locale des paiements chargés.
+  const paginatedRecoveries = usePaginated<RecoveryPaymentItem>({
+    initialItems: recoveries,
     pageSize: RECOVERIES_PAGE_SIZE,
   })
 
   const statCards = [
     {
-      label: 'Dettes payées',
+      label: 'Nombre de paiements',
       value: stats.totalDebts,
       color: 'emerald' as const,
       icon: CheckCircle2,
     },
     {
-      label: 'Valeur des dettes',
+      label: 'Dettes concernées',
       value: renderMoneyMap(stats.totalDebtAmounts),
       color: 'blue' as const,
       icon: ReceiptText,
@@ -68,7 +74,7 @@ export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<D
       icon: HandCoins,
     },
     {
-      label: 'Reste à payer',
+      label: 'Reste actuel',
       value: renderMoneyMap(stats.remainingAmounts),
       color: 'neutral' as const,
       icon: CircleDollarSign,
@@ -96,7 +102,7 @@ export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<D
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Recouvrements de dettes"
-          description="Consulter les ventes à crédit déjà soldées sur la période sélectionnée."
+          description="Consulter l'historique des paiements associés aux dettes sur la période sélectionnée."
           icon={CheckCircle2}
           accentClassName="from-emerald-600 to-teal-600"
         >
@@ -146,10 +152,10 @@ export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<D
                 <Search className="size-5" />
               </span>
               <div>
-                <CardTitle>Dettes soldées</CardTitle>
+                <CardTitle>Historique des paiements</CardTitle>
                 <CardDescription>
                   Page {paginatedRecoveries.currentPage} - {paginatedRecoveries.loadedItemsCount}{' '}
-                  dette(s) chargée(s)
+                  paiement(s) chargé(s)
                 </CardDescription>
               </div>
             </div>
@@ -168,52 +174,56 @@ export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<D
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date de vente</TableHead>
+                  <TableHead>Date de paiement</TableHead>
+                  <TableHead>Agent</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Addition</TableHead>
-                  <TableHead className="text-right">Dette totale</TableHead>
+                  <TableHead>Date de vente</TableHead>
+                  <TableHead className="text-right">Montant payé</TableHead>
                   <TableHead className="text-right">Total payé</TableHead>
-                  <TableHead className="text-right">Reste</TableHead>
+                  <TableHead className="text-right">Reste après paiement</TableHead>
                   <TableHead>Statut</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedRecoveries.visibleItems.map((debt) => (
-                  <TableRow key={debt.sale.id}>
-                    <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
-                    <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
-                    <TableCell>{debt.sale.additionNumber}</TableCell>
-                    <TableCell className="text-right">
-                      {formatMoneyWithCurrency(
-                        debt.debtTotalAmount,
-                        debt.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
+                {paginatedRecoveries.visibleItems.map((payment) => (
+                  <TableRow key={payment.recovery.id}>
+                    <TableCell>{formatDateTimeLabel(payment.recovery.recoveredAt)}</TableCell>
+                    <TableCell>{payment.recovery.receivedByName ?? '-'}</TableCell>
+                    <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
+                    <TableCell>{payment.sale.additionNumber}</TableCell>
+                    <TableCell>{formatDebtSaleDate(payment.sale.saleDate)}</TableCell>
                     <TableCell className="text-right font-semibold">
                       {formatMoneyWithCurrency(
-                        debt.recoveredAmount,
-                        debt.sale.currency as CurrencyCode
+                        payment.paidAmount,
+                        payment.recovery.currency as CurrencyCode
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatMoneyWithCurrency(
-                        debt.remainingAmount,
-                        debt.sale.currency as CurrencyCode
+                        payment.paidAfterAmount,
+                        payment.sale.currency as CurrencyCode
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatMoneyWithCurrency(
+                        payment.remainingAmount,
+                        payment.sale.currency as CurrencyCode
                       )}
                     </TableCell>
                     <TableCell>
-                      <DebtStatusBadge status={debt.debtStatus} />
+                      <DebtStatusBadge status={payment.debtStatus} />
                     </TableCell>
                   </TableRow>
                 ))}
 
                 {paginatedRecoveries.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-64">
+                    <TableCell colSpan={9} className="h-64">
                       <EmptyState
                         icon={Search}
-                        title="Aucune dette payée trouvée"
-                        description="Aucune vente à crédit soldée ne correspond à cette période."
+                        title="Aucun paiement trouvé"
+                        description="Aucun paiement de dette ne correspond à cette période."
                         className="border-none bg-transparent shadow-none"
                       />
                     </TableCell>

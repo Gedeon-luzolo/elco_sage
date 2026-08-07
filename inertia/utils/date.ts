@@ -1,4 +1,4 @@
-// Formate une cle YYYY-MM-DD sans conversion timezone.
+// Formate une clé YYYY-MM-DD sans conversion timezone.
 export const formatDateKeyLabel = (dateKey: string) => {
   const [year, month, day] = dateKey.split('-')
 
@@ -9,7 +9,7 @@ export const formatDateKeyLabel = (dateKey: string) => {
   return `${day}/${month}/${year}`
 }
 
-// Formate une date en libelle court francais.
+// Formate une date en libellé court français.
 export const formatDateLabel = (date: Date | string) => {
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return formatDateKeyLabel(date)
@@ -18,7 +18,7 @@ export const formatDateLabel = (date: Date | string) => {
   return new Date(date).toLocaleDateString('fr-FR')
 }
 
-// Formate une date en libelle long francais.
+// Formate une date en libellé long français.
 export const formatLongDate = (date: Date) => {
   return date.toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -28,7 +28,7 @@ export const formatLongDate = (date: Date) => {
   })
 }
 
-// Formate une date en heure courte francaise.
+// Formate une date en heure courte française.
 export const formatShortTime = (date: Date) => {
   return date.toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -56,12 +56,12 @@ export const getLocalDateKey = (date = new Date()) => {
   return `${year}-${month}-${day}`
 }
 
-// Retourne le premier jour du mois de la date donnee.
+// Retourne le premier jour du mois de la date donnée.
 export const getStartOfMonth = (date: Date) => {
   return new Date(date.getFullYear(), date.getMonth(), 1)
 }
 
-// Formate une date en libelle court francais.
+// Formate une date en libellé court français.
 export const formatShortDate = (dateStr: string) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     return formatDateKeyLabel(dateStr)
@@ -78,5 +78,5 @@ export const formatShortDate = (dateStr: string) => {
   }
 }
 
-// Cle locale du jour pour les formulaires metier.
+// Clé locale du jour pour les formulaires métier.
 export const dateKey = getLocalDateKey()

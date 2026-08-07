@@ -56,18 +56,17 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
 
   // Les statistiques viennent du backend pour rester alignées avec la période filtrée.
   const statCards = [
-    { label: 'Dettes', value: stats.totalDebts, color: 'blue' as const, icon: ReceiptText },
+    {
+      label: 'Nombre de dettes',
+      value: stats.totalDebts,
+      color: 'blue' as const,
+      icon: ReceiptText,
+    },
     {
       label: 'Valeur des dettes',
       value: renderMoneyMap(stats.totalDebtAmounts),
       color: 'amber' as const,
       icon: CircleDollarSign,
-    },
-    {
-      label: 'Déjà payé',
-      value: renderMoneyMap(stats.recoveredAmounts),
-      color: 'emerald' as const,
-      icon: HandCoins,
     },
     {
       label: 'Reste à payer',
@@ -126,7 +125,7 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
           </Button>
         </PageHeader>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {statCards.map((stat) => (
             <StatCard
               key={stat.label}

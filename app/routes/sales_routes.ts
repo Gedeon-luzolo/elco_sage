@@ -6,6 +6,6 @@ import { registerSaleRoutes } from '#routes/sale_routes'
 export function registerSalesRoutes() {
   registerCashSessionRoutes()
   registerDebtRoutes()
-  registerSaleRoutes()
   registerSaleRecoveryRoutes()
+  registerSaleRoutes()
 }

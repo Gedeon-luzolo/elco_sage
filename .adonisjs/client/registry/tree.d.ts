@@ -35,17 +35,16 @@ export interface ApiDefinition {
     }
     debts: {
       index: typeof routes['sales.debts.index']
-      recoveries: typeof routes['sales.debts.recoveries']
+    }
+    recoveries: {
+      overview: typeof routes['sales.recoveries.overview']
+      store: typeof routes['sales.recoveries.store']
     }
     index: typeof routes['sales.index']
     create: typeof routes['sales.create']
     store: typeof routes['sales.store']
     show: typeof routes['sales.show']
     cancel: typeof routes['sales.cancel']
-    recoveries: {
-      index: typeof routes['sales.recoveries.index']
-      store: typeof routes['sales.recoveries.store']
-    }
   }
   management: typeof routes['management']
   journalisations: {

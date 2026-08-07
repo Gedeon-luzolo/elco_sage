@@ -5,8 +5,8 @@ const SaleRecoveriesController = () =>
 
 export function registerSaleRecoveryRoutes() {
   router
-    .get('sales/:saleId/recoveries', [SaleRecoveriesController, 'index'])
-    .as('sales.recoveries.index')
+    .get('sales/recoveries', [SaleRecoveriesController, 'overview'])
+    .as('sales.recoveries.overview')
   router
     .post('sales/:saleId/recoveries', [SaleRecoveriesController, 'store'])
     .as('sales.recoveries.store')

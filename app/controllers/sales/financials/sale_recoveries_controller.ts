@@ -1,5 +1,6 @@
+import type {} from '../../../../.adonisjs/server/pages.js'
 import SaleRecoveryService from '#services/sales/financials/sale_recovery_service'
-import SaleRecoveryTransformer from '#transformers/sale_recovery_transformer'
+import RecoveryPaymentTransformer from '#transformers/recovery_payment_transformer'
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { runAction } from '#utils/error_handler'
 import { createSaleRecoveryValidator } from '#validators/sale_recovery'
@@ -7,23 +8,34 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 const saleRecoveryService = new SaleRecoveryService()
 
-// URL de redirection par defaut apres recouvrement.
+// URL de redirection par défaut après recouvrement.
 const REDIRECT_URL = '/sales'
 
 export default class SaleRecoveriesController {
   /**
-   * Liste les recouvrements d'une vente.
+   * Affiche l'historique des paiements de dettes.
    */
-  async index({ params, response }: HttpContext) {
-    const recoveries = await saleRecoveryService.findBySale(params.saleId)
+  async overview({ inertia, request }: HttpContext) {
+    const startDate = request.input('startDate')
+    const endDate = request.input('endDate')
 
-    return response.ok({
-      recoveries: SaleRecoveryTransformer.transform(recoveries),
+    const overview = await saleRecoveryService.getOverview({
+      startDate,
+      endDate,
+    })
+
+    return (inertia.render as any)('sales/recoveries_page', {
+      recoveries: RecoveryPaymentTransformer.transform(overview.recoveries),
+      stats: overview.stats,
+      filters: {
+        startDate: startDate ?? null,
+        endDate: endDate ?? null,
+      },
     })
   }
 
   /**
-   * Enregistre un recouvrement sur une vente a credit.
+   * Enregistre un recouvrement sur une vente à crédit.
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
@@ -35,7 +47,7 @@ export default class SaleRecoveriesController {
       () =>
         saleRecoveryService.create(actor, ctx.params.saleId, payload as CreateSaleRecoveryInput),
       {
-        successMessage: 'Recouvrement enregistre avec succes.',
+        successMessage: 'Recouvrement enregistré avec succès.',
         errorMessage: "Impossible d'enregistrer ce recouvrement.",
         redirectTo,
       }
