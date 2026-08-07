@@ -103,7 +103,7 @@ export class ProductCategorySchema extends BaseModel {
 }
 
 export class ProductServiceSchema extends BaseModel {
-  static $columns = ['baseUnit', 'categoryId', 'createdAt', 'id', 'isActive', 'name', 'packagingCapacity', 'packagingUnit', 'priceCdf', 'priceUsd', 'type', 'updatedAt'] as const
+  static $columns = ['baseUnit', 'categoryId', 'createdAt', 'id', 'isActive', 'name', 'packagingCapacity', 'packagingUnit', 'priceCdf', 'priceUsd', 'stockProductId', 'type', 'updatedAt'] as const
   $columns = ProductServiceSchema.$columns
   @column()
   declare baseUnit: string
@@ -125,6 +125,8 @@ export class ProductServiceSchema extends BaseModel {
   declare priceCdf: string
   @column()
   declare priceUsd: string
+  @column()
+  declare stockProductId: string | null
   @column()
   declare type: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })

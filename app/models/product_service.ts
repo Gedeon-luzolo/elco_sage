@@ -19,6 +19,9 @@ export default class ProductService extends BaseModel {
   declare categoryId: string | null
 
   @column()
+  declare stockProductId: string | null
+
+  @column()
   declare type: ProductServiceType
 
   @column()
@@ -53,6 +56,9 @@ export default class ProductService extends BaseModel {
 
   @belongsTo(() => ProductCategory, { foreignKey: 'categoryId' })
   declare category: BelongsTo<typeof ProductCategory>
+
+  @belongsTo(() => ProductService, { foreignKey: 'stockProductId' })
+  declare stockProduct: BelongsTo<typeof ProductService>
 
   @beforeCreate()
   static assignUuid(productService: ProductService) {

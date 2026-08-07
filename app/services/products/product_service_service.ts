@@ -17,8 +17,11 @@ export default class ProductServiceService {
    * Récupère la liste des produits/services et les statistiques.
    */
   async getOverview() {
-    // Recuperer d'abord les produits et les services
-    const items = await ProductService.query().preload('category').orderBy('name', 'asc')
+    // Recuperer d'abord les produits et les services avec leurs relations d'affichage.
+    const items = await ProductService.query()
+      .preload('category')
+      .preload('stockProduct')
+      .orderBy('name', 'asc')
 
     // Separer les produits et les services
     const products = items.filter((i) => i.type === 'PRODUCT')
@@ -52,6 +55,7 @@ export default class ProductServiceService {
       .where('type', ProductServiceType.SERVICE)
       .where('isActive', true)
       .preload('category')
+      .preload('stockProduct')
       .orderBy('name', 'asc')
   }
 
@@ -87,16 +91,21 @@ export default class ProductServiceService {
       Number(payload.price),
       payload.currency as Currency
     )
+    const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
+
     // Creer le produit ou service
     const item = await ProductService.create({
       type: payload.type as any,
       name: payload.name,
       categoryId: payload.categoryId ?? null,
+      stockProductId,
       isActive: true,
       baseUnit: payload.baseUnit,
       packagingUnit: payload.packagingUnit ?? null,
       packagingCapacity:
-        payload.packagingCapacity != null ? Number(payload.packagingCapacity) : null,
+        payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
+          ? Number(payload.packagingCapacity)
+          : null,
       priceUsd,
       priceCdf,
     })
@@ -135,15 +144,19 @@ export default class ProductServiceService {
       Number(payload.price),
       payload.currency as Currency
     )
+    const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
 
     const previousName = item.name
     item.type = payload.type as any
     item.name = payload.name
     item.categoryId = payload.categoryId ?? null
+    item.stockProductId = stockProductId
     item.baseUnit = payload.baseUnit
     item.packagingUnit = payload.packagingUnit ?? null
     item.packagingCapacity =
-      payload.packagingCapacity != null ? Number(payload.packagingCapacity) : null
+      payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
+        ? Number(payload.packagingCapacity)
+        : null
     item.priceUsd = priceUsd
     item.priceCdf = priceCdf
     item.isActive = Boolean(payload.isActive)
@@ -176,5 +189,32 @@ export default class ProductServiceService {
     })
 
     return true
+  }
+
+  /**
+   * Determine le produit physique consomme par un service.
+   */
+  private async resolveStockProductId(type: string, stockProductId?: string | null) {
+    // Les produits physiques alimentent le stock, ils ne doivent pas pointer vers eux-memes.
+    if (type === ProductServiceType.PRODUCT) {
+      return null
+    }
+
+    if (!stockProductId) {
+      throw new Error('Selectionnez le produit de stock consomme par ce service.')
+    }
+
+    // Un service doit toujours consommer un article physique actif.
+    const product = await ProductService.query()
+      .where('id', stockProductId)
+      .where('type', ProductServiceType.PRODUCT)
+      .where('isActive', true)
+      .first()
+
+    if (!product) {
+      throw new Error('Le produit de stock selectionne est invalide ou inactif.')
+    }
+
+    return product.id
   }
 }

@@ -23,7 +23,7 @@ export default function CustomersPage({ customers, stats }: CustomersPageProps) 
     filteredItems: searchedCustomers,
   } = useSearch({
     items: customers,
-    fields: ['fullName', 'phoneNumber', 'email'],
+    fields: ['fullName', 'email'],
   })
 
   // Prepare les cartes de statistiques affichees en haut de page.

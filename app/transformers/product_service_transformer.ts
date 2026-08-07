@@ -6,6 +6,8 @@ export interface ProductServiceDTO {
   name: string
   categoryId: string | null
   categoryName: string | null
+  stockProductId: string | null
+  stockProductName: string | null
   isActive: boolean
   baseUnit: string
   packagingUnit: string | null
@@ -24,6 +26,8 @@ export default class ProductServiceTransformer {
       name: item.name,
       categoryId: item.categoryId,
       categoryName: item.category?.name ?? null,
+      stockProductId: item.stockProductId,
+      stockProductName: item.stockProduct?.name ?? null,
       isActive: item.isActive,
       baseUnit: item.baseUnit,
       packagingUnit: item.packagingUnit,

@@ -37,7 +37,7 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
       </div>
 
       {/* Détails des unités */}
-      <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
         {item.categoryName && (
           <div>
             Catégorie : <span className="font-medium text-foreground">{item.categoryName}</span>
@@ -46,6 +46,12 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
         <div>
           Unité : <span className="font-medium text-foreground">{item.baseUnit}</span>
         </div>
+
+        {!isProduct && item.stockProductName && (
+          <div className="text-sm text-violet-700 dark:text-violet-300">
+            Produit lié : <span className="font-semibold">{item.stockProductName}</span>
+          </div>
+        )}
 
         {isProduct && item.packagingUnit && item.packagingCapacity && (
           <div>

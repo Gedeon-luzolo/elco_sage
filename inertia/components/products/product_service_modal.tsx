@@ -35,6 +35,7 @@ interface ProductServiceModalProps {
   item: ProductServiceItem | null
   submitLabel: string
   categories: ProductCategoryDTO[]
+  products: ProductServiceItem[]
   defaultType?: 'PRODUCT' | 'SERVICE'
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
@@ -52,6 +53,7 @@ export function ProductServiceModal({
   item,
   submitLabel,
   categories,
+  products,
   defaultType = 'PRODUCT',
   onOpenChange,
   action,
@@ -74,6 +76,11 @@ export function ProductServiceModal({
   const categoryOptions = categories.map((category) => ({
     label: category.name,
     value: category.id,
+  }))
+  // Options pour le champ "Produit associé"
+  const productOptions = products.map((product) => ({
+    label: product.name,
+    value: product.id,
   }))
 
   /**
@@ -107,7 +114,7 @@ export function ProductServiceModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Type : Produit ou Service (Pleine largeur) */}
             <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="ps-type">Type d'article *</Label>
+              <Label htmlFor="ps-type">Type d&apos;article *</Label>
               <Select
                 id="ps-type"
                 name="type"
@@ -130,7 +137,7 @@ export function ProductServiceModal({
 
             {/* Nom de l'article */}
             <div className="grid gap-2">
-              <Label htmlFor="ps-name">Nom de l'article *</Label>
+              <Label htmlFor="ps-name">Nom de l&apos;article *</Label>
               <Input
                 id="ps-name"
                 name="name"
@@ -167,6 +174,30 @@ export function ProductServiceModal({
               </Select>
             </div>
 
+            {/* Produit physique consommé par le service pour les sorties de stock */}
+            {isService && (
+              <div className="grid gap-2">
+                <Label htmlFor="ps-stock-product">Produit lié *</Label>
+                <Select
+                  id="ps-stock-product"
+                  name="stockProductId"
+                  items={productOptions}
+                  defaultValue={item?.stockProductId ?? ''}
+                >
+                  <SelectTrigger className="h-10 w-full">
+                    <SelectValue placeholder="Sélectionner un produit..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Unité de base (Vente / Consommation) */}
             <div className="grid gap-2">
               <Label htmlFor="ps-base-unit">
@@ -185,7 +216,7 @@ export function ProductServiceModal({
             {/* Statut — visible uniquement en édition */}
             {isEditing && (
               <div className="grid gap-2">
-                <Label htmlFor="ps-status">Statut d'activation</Label>
+                <Label htmlFor="ps-status">Statut d&apos;activation</Label>
                 <Select
                   id="ps-status"
                   name="isActive"
@@ -261,7 +292,9 @@ export function ProductServiceModal({
 
             {/* Prix de vente (placé APPRÈS la devise, avec valeur contrôlée dynamiquement) */}
             <div className="grid gap-2">
-              <Label htmlFor="ps-price">Prix de vente *</Label>
+              <Label htmlFor="ps-price">
+                {isService ? 'Prix du Théorique*' : 'Prix unitaire *'}
+              </Label>
               <Input
                 id="ps-price"
                 name="price"

@@ -9,10 +9,14 @@ import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
+import { PaginationControls } from '~/components/ui/pagination_controls'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type { ProductServicesPageProps, ProductServiceItem } from '~/types/product_service_types'
+
+const PRODUCT_SERVICES_PAGE_SIZE = 20
 
 /**
  * Page principale de gestion des Produits et Services.
@@ -42,6 +46,15 @@ export default function ProductServicesPage({
     fields: ['name'],
     search,
     onSearchChange: setSearch,
+  })
+  // Pagination locale appliquée apres la recherche pour limiter chaque onglet a 20 cartes.
+  const paginatedProducts = usePaginated({
+    initialItems: filteredProducts,
+    pageSize: PRODUCT_SERVICES_PAGE_SIZE,
+  })
+  const paginatedServices = usePaginated({
+    initialItems: filteredServices,
+    pageSize: PRODUCT_SERVICES_PAGE_SIZE,
   })
 
   // Ouvre la boîte de dialogue en mode création avec un type par défaut ('PRODUCT' ou 'SERVICE').
@@ -74,7 +87,13 @@ export default function ProductServicesPage({
   // Soumet les données du formulaire de création ou d'édition vers le contrôleur backend via Inertia.
   const saveItem = (formData: FormData) => {
     const options = { preserveScroll: true, onSuccess: closeModal }
-    const payload = Object.fromEntries(formData)
+    const payload: Record<string, FormDataEntryValue | null> = Object.fromEntries(formData)
+
+    // Les Select sans valeur renvoient une chaine vide; le backend attend null pour les champs optionnels.
+    payload.categoryId = payload.categoryId || null
+    payload.stockProductId = payload.stockProductId || null
+    payload.packagingUnit = payload.packagingUnit || null
+    payload.packagingCapacity = payload.packagingCapacity || null
 
     if (selectedItem) {
       router.put(`/management/product-services/${selectedItem.id}`, payload, options)
@@ -173,16 +192,28 @@ export default function ProductServicesPage({
                 description="Cliquez sur « Nouveau Produit » pour ajouter un article physique au catalogue."
               />
             ) : (
-              <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {filteredProducts.map((item) => (
-                  <ProductCard
-                    key={item.id}
-                    item={item}
-                    onEdit={openEditModal}
-                    onDelete={openDeleteModal}
+              <>
+                {paginatedProducts.totalLoadedPages > 1 && (
+                  <PaginationControls
+                    canGoPrevious={paginatedProducts.canGoPrevious}
+                    canGoNext={paginatedProducts.canGoNext}
+                    pageSize={PRODUCT_SERVICES_PAGE_SIZE}
+                    onPrevious={paginatedProducts.goToPreviousPage}
+                    onNext={paginatedProducts.goToNextPage}
                   />
-                ))}
-              </div>
+                )}
+
+                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {paginatedProducts.visibleItems.map((item) => (
+                    <ProductCard
+                      key={item.id}
+                      item={item}
+                      onEdit={openEditModal}
+                      onDelete={openDeleteModal}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </TabsContent>
 
@@ -195,16 +226,28 @@ export default function ProductServicesPage({
                 description="Cliquez sur « Nouveau Service » pour ajouter une prestation au catalogue."
               />
             ) : (
-              <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {filteredServices.map((item) => (
-                  <ProductCard
-                    key={item.id}
-                    item={item}
-                    onEdit={openEditModal}
-                    onDelete={openDeleteModal}
+              <>
+                {paginatedServices.totalLoadedPages > 1 && (
+                  <PaginationControls
+                    canGoPrevious={paginatedServices.canGoPrevious}
+                    canGoNext={paginatedServices.canGoNext}
+                    pageSize={PRODUCT_SERVICES_PAGE_SIZE}
+                    onPrevious={paginatedServices.goToPreviousPage}
+                    onNext={paginatedServices.goToNextPage}
                   />
-                ))}
-              </div>
+                )}
+
+                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {paginatedServices.visibleItems.map((item) => (
+                    <ProductCard
+                      key={item.id}
+                      item={item}
+                      onEdit={openEditModal}
+                      onDelete={openDeleteModal}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </TabsContent>
         </Tabs>
@@ -223,6 +266,7 @@ export default function ProductServicesPage({
         item={selectedItem}
         submitLabel={selectedItem ? 'Enregistrer' : 'Créer'}
         categories={categories}
+        products={products}
         defaultType={defaultModalType}
         onOpenChange={(open) => {
           if (!open) closeModal()

@@ -16,6 +16,7 @@ export const createProductServiceValidator = vine.compile(
       .maxLength(150)
       .unique({ table: 'product_services', column: 'name' }),
     categoryId: vine.string().uuid().nullable().optional(),
+    stockProductId: vine.string().uuid().nullable().optional(),
     baseUnit: vine.string().trim().minLength(1).maxLength(50),
     packagingUnit: vine.string().trim().maxLength(50).nullable().optional(),
     packagingCapacity: vine.number().min(1).nullable().optional(),
@@ -34,6 +35,7 @@ export const updateProductServiceValidator = vine.compile(
     type: vine.enum(['PRODUCT', 'SERVICE']),
     name: vine.string().trim().minLength(2).maxLength(150),
     categoryId: vine.string().uuid().nullable().optional(),
+    stockProductId: vine.string().uuid().nullable().optional(),
     baseUnit: vine.string().trim().minLength(1).maxLength(50),
     packagingUnit: vine.string().trim().maxLength(50).nullable().optional(),
     packagingCapacity: vine.number().min(1).nullable().optional(),
