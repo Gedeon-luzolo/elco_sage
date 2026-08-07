@@ -231,8 +231,20 @@ export interface Registry {
       paramsTuple: []
       params: {}
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/debts_controller').default['index']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/debts_controller').default['index']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/financials/debts_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/financials/debts_controller').default['index']>>>
+    }
+  }
+  'sales.debts.recoveries': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/recoveries'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/financials/debts_controller').default['recoveries']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/financials/debts_controller').default['recoveries']>>>
     }
   }
   'sales.index': {
@@ -303,8 +315,8 @@ export interface Registry {
       paramsTuple: [ParamValue]
       params: { saleId: ParamValue }
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['index']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['index']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/financials/sale_recoveries_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/financials/sale_recoveries_controller').default['index']>>>
     }
   }
   'sales.recoveries.store': {
@@ -315,8 +327,8 @@ export interface Registry {
       paramsTuple: [ParamValue]
       params: { saleId: ParamValue }
       query: ExtractQuery<InferInput<(typeof import('#validators/sale_recovery').createSaleRecoveryValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['store']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sale_recoveries_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/financials/sale_recoveries_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/financials/sale_recoveries_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'management': {

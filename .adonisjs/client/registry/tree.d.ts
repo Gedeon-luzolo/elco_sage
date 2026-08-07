@@ -33,6 +33,7 @@ export interface ApiDefinition {
     }
     debts: {
       index: typeof routes['sales.debts.index']
+      recoveries: typeof routes['sales.debts.recoveries']
     }
     index: typeof routes['sales.index']
     create: typeof routes['sales.create']

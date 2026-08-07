@@ -30,7 +30,7 @@ export function PageHeader({
           {Icon && (
             <div
               className={cn(
-                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg',
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br shadow-lg',
                 accentClassName
               )}
             >

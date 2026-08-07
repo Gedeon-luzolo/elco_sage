@@ -1,9 +1,8 @@
 import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
-import type { Currency } from '#types/currency'
 import type { FindDebtsParams, DebtSummary, DebtStats, DebtOverview } from '#types/debt'
 import { DebtStatus } from '#types/debt'
 import { normalizeDateRange } from '#utils/date_utils'
-import { normalizeMoneyMap, type MoneyMap } from '#utils/money_map'
+import { normalizeMoneyMap, sumMoneyByCurrency } from '#utils/money_map'
 import { resolveDebtStatus } from '#utils/sale_debt.utils'
 
 export default class DebtService {
@@ -85,29 +84,29 @@ export default class DebtService {
   }
 
   private buildDebtStats(debts: DebtSummary[]): DebtStats {
-    const totalDebtAmounts = this.sumDebtsByCurrency(debts, 'debtTotalAmount')
-    const recoveredAmounts = this.sumDebtsByCurrency(debts, 'recoveredAmount')
-    const remainingAmounts = this.sumDebtsByCurrency(debts, 'remainingAmount')
+    // Somme les montants par devise sans formater les valeurs.
+    const totalDebtAmounts = sumMoneyByCurrency(
+      debts,
+      (debt) => debt.sale.currency,
+      (debt) => debt.debtTotalAmount
+    )
+    const recoveredAmounts = sumMoneyByCurrency(
+      debts,
+      (debt) => debt.sale.currency,
+      (debt) => debt.recoveredAmount
+    )
+    const remainingAmounts = sumMoneyByCurrency(
+      debts,
+      (debt) => debt.sale.currency,
+      (debt) => debt.remainingAmount
+    )
 
+    // Normalise la reponse pour que le frontend recoive toujours les memes cles de devise.
     return {
       totalDebts: debts.length,
       totalDebtAmounts: normalizeMoneyMap(totalDebtAmounts),
       recoveredAmounts: normalizeMoneyMap(recoveredAmounts),
       remainingAmounts: normalizeMoneyMap(remainingAmounts),
     }
-  }
-
-  private sumDebtsByCurrency(
-    debts: DebtSummary[],
-    amountKey: 'debtTotalAmount' | 'recoveredAmount' | 'remainingAmount'
-  ) {
-    return debts.reduce<MoneyMap>((amounts, debt) => {
-      const currency = debt.sale.currency as Currency
-
-      // Chaque montant reste dans sa devise d'origine: aucune conversion n'est appliquée.
-      amounts[currency] = Number(amounts[currency] ?? 0) + Number(debt[amountKey] || 0)
-
-      return amounts
-    }, {})
   }
 }

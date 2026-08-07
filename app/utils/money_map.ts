@@ -6,18 +6,6 @@ export type MoneyMap = Partial<Record<Currency, number>>
 // Forme DTO pour l'exposition via Inertia, qui ne doit jamais contenir de valeurs nulles.
 export type MoneyMapDTO = Record<string, number>
 
-// Version texte utilisée côté serveur, notamment dans les messages de journalisation.
-export function currencySymbol(currency: string) {
-  switch (currency) {
-    case Currency.USD:
-      return '$'
-    case Currency.CDF:
-      return 'FC'
-    default:
-      return currency
-  }
-}
-
 // Garantit que les deux devises attendues existent toujours dans les DTO exposés.
 export function normalizeMoneyMap(values: Record<string, number> | null | undefined): MoneyMap {
   return {
@@ -37,7 +25,24 @@ export function buildMoneyMap(values: Record<Currency, number | null | undefined
   }, {})
 }
 
-// Compare les montants comptés aux montants système, devise par devise.
+// Additionne une liste de montants en les groupant par devise.
+export function sumMoneyByCurrency<T>(
+  items: T[],
+  getCurrency: (item: T) => Currency | string,
+  getAmount: (item: T) => number
+): MoneyMap {
+  return items.reduce<MoneyMap>((amounts, item) => {
+    // La devise reste une clé de groupement: aucune conversion n'est faite ici.
+    const currency = getCurrency(item) as Currency
+
+    // Le backend renvoie seulement des nombres; le formatage reste côté frontend.
+    amounts[currency] = Number(amounts[currency] ?? 0) + Number(getAmount(item) || 0)
+
+    return amounts
+  }, {})
+}
+
+// Construit une map d'ecarts entre les montants comptés par le caissier et ceux calculés par le systeme.
 export function buildDifferenceMoneyMap(closingAmounts: MoneyMap, systemAmounts: MoneyMap) {
   return Object.entries(closingAmounts).reduce<MoneyMap>((differences, [currency, amount]) => {
     const currencyKey = currency as Currency
@@ -47,31 +52,4 @@ export function buildDifferenceMoneyMap(closingAmounts: MoneyMap, systemAmounts:
 
     return differences
   }, {})
-}
-
-// Rend une map monétaire en texte simple pour les logs: 240 $ + 110,000 FC.
-export function renderMoneyMap(values: MoneyMap | null | undefined) {
-  if (!values || typeof values !== 'object') {
-    return '0'
-  }
-
-  const entries = Object.values(Currency)
-    .map((currency) => [currency, values[currency]] as const)
-    .filter(([, amount]) => Number(amount) > 0)
-
-  if (entries.length === 0) {
-    return '-'
-  }
-
-  return entries
-    .map(([currency, amount]) => `${formatMoneyValue(amount)} ${currencySymbol(currency)}`)
-    .join(' + ')
-}
-
-// Garde le même format numérique que le frontend, sans dépendre de React.
-function formatMoneyValue(value: number | undefined) {
-  return Number(value ?? 0).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })
 }

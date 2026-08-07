@@ -1,4 +1,4 @@
-import SaleRecoveryService from '#services/sales/sale_recovery_service'
+import SaleRecoveryService from '#services/sales/financials/sale_recovery_service'
 import SaleRecoveryTransformer from '#transformers/sale_recovery_transformer'
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { runAction } from '#utils/error_handler'

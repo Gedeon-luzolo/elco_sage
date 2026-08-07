@@ -5,12 +5,7 @@ import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { Currency } from '#types/currency'
-import {
-  buildDifferenceMoneyMap,
-  buildMoneyMap,
-  renderMoneyMap,
-  type MoneyMap,
-} from '#utils/money_map'
+import { buildDifferenceMoneyMap, buildMoneyMap, type MoneyMap } from '#utils/money_map'
 import type { CloseCashSessionInput } from '#validators/cash_session'
 import { DateTime } from 'luxon'
 
@@ -101,7 +96,7 @@ export default class CashSessionService {
 
     await journalisationService.create({
       module: JournalisationModule.SALES,
-      message: `Session de caisse fermée par ${actor.fullName ?? actor.email}. Ecart: ${renderMoneyMap(differenceAmounts)}.`,
+      message: `Session de caisse fermée par ${actor.fullName ?? actor.email}. Ecart: ${JSON.stringify(differenceAmounts)}.`,
       user: actor,
     })
 

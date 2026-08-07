@@ -120,6 +120,12 @@ const routes = {
     tokens: [{"old":"/sales/debts","type":0,"val":"sales","end":""},{"old":"/sales/debts","type":0,"val":"debts","end":""}],
     types: placeholder as Registry['sales.debts.index']['types'],
   },
+  'sales.debts.recoveries': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/recoveries',
+    tokens: [{"old":"/sales/recoveries","type":0,"val":"sales","end":""},{"old":"/sales/recoveries","type":0,"val":"recoveries","end":""}],
+    types: placeholder as Registry['sales.debts.recoveries']['types'],
+  },
   'sales.index': {
     methods: ["GET","HEAD"],
     pattern: '/sales',

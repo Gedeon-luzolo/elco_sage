@@ -8,6 +8,7 @@ import type { InferData, InferVariants } from '@adonisjs/core/types/transformers
 import type { InferSharedProps } from '@adonisjs/inertia/types'
 import type CashSessionTransformer from '#transformers/cash_session_transformer'
 import type CustomerTransformer from '#transformers/customer_transformer'
+import type DebtTransformer from '#transformers/debt_transformer'
 import type ExchangeRateTransformer from '#transformers/exchange_rate_transformer'
 import type JournalisationTransformer from '#transformers/journalisation_transformer'
 import type ProductCategoryTransformer from '#transformers/product_category_transformer'
@@ -17,7 +18,6 @@ import type SaleRecoveryTransformer from '#transformers/sale_recovery_transforme
 import type SaleTransformer from '#transformers/sale_transformer'
 import type StockMovementTransformer from '#transformers/stock_movement_transformer'
 import type UserTransformer from '#transformers/user_transformer'
-import type DebtTransformer from '#transformers/debt_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
 export namespace Data {
@@ -28,6 +28,10 @@ export namespace Data {
   export type Customer = InferData<CustomerTransformer>
   export namespace Customer {
     export type Variants = InferVariants<CustomerTransformer>
+  }
+  export type Debt = InferData<DebtTransformer>
+  export namespace Debt {
+    export type Variants = InferVariants<DebtTransformer>
   }
   export type ExchangeRate = InferData<ExchangeRateTransformer>
   export namespace ExchangeRate {
@@ -64,10 +68,6 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
-  }
-  export type Debt = InferData<DebtTransformer>
-  export namespace Debt {
-    export type Variants = InferVariants<DebtTransformer>
   }
   export type SharedProps = InferSharedProps<InertiaMiddleware>
 }

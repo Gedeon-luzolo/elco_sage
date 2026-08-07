@@ -1,5 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
-import { Banknote, CreditCard, Eye, Plus, ShoppingCart } from 'lucide-react'
+import { Banknote, CreditCard, Eye, HandCoins, Plus, ShoppingCart } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
@@ -29,11 +29,28 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
-        <PageHeader title="Gestion des ventes" description={pageDescription} icon={ShoppingCart}>
+        <PageHeader
+          title="Gestion des ventes"
+          description={pageDescription}
+          icon={ShoppingCart}
+          accentClassName="bg-blue-800 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+        >
           <>
-            <Button className="bg-red-800 text-white hover:bg-red-500/80 hover:text-white" render={<Link href="/sales/debts" />} variant="outline">
+            <Button
+              className="bg-red-800 text-white hover:bg-red-500/80 hover:text-white"
+              render={<Link href="/sales/debts" />}
+              variant="outline"
+            >
               <CreditCard className="size-4" />
               Credits
+            </Button>
+            <Button
+              className="bg-emerald-600 text-white hover:bg-emerald-500/80 hover:text-white"
+              render={<Link href="/sales/recoveries" />}
+              variant="outline"
+            >
+              <HandCoins className="size-4" />
+              Recouvrements
             </Button>
             {currentCashSession ? (
               <Button render={<Link href="/sales/create" />}>

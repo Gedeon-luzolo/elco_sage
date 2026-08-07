@@ -4,7 +4,7 @@ import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import CashSessionService from '#services/sales/cash_session_service'
-import DebtService from '#services/sales/debt_service'
+import DebtService from '#services/sales/financials/debt_service'
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { DateTime } from 'luxon'
 

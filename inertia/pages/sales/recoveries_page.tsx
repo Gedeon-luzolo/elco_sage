@@ -2,19 +2,18 @@ import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
 import {
   ArrowLeft,
+  CheckCircle2,
   CircleDollarSign,
   CreditCard,
   HandCoins,
   ReceiptText,
   Search,
-  Wallet,
 } from 'lucide-react'
 import { useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { StatCard } from '~/components/common/stat_card'
 import { DebtStatusBadge } from '~/components/sales/debt_status_badge'
-import { DebtPaymentDialog } from '~/components/sales/debt_payment_dialog'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
@@ -32,56 +31,54 @@ import { useSelectionDate } from '~/hooks/use_selection_date'
 import type { InertiaProps } from '~/types'
 import type { DebtItem, DebtsPageProps } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
-import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { renderMoneyMap } from '~/utils/money_map.utils'
+import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
 
-const DEBTS_PAGE_SIZE = 10
+const RECOVERIES_PAGE_SIZE = 10
 
-export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsPageProps>) {
-  // Utiliser un hook pour gérer la sélection de période, avec des dates initiales provenant des filtres de la page.
+export default function RecoveriesPage({ debts, filters, stats }: InertiaProps<DebtsPageProps>) {
   const selectionDate = useSelectionDate({
     initialStartDate: filters.startDate,
     initialEndDate: filters.endDate,
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedDebt, setSelectedDebt] = useState<DebtItem | null>(null)
-  // Utiliser un hook de pagination pour gérer la pagination locale des dettes chargées.
-  const paginatedDebts = usePaginated<DebtItem>({
+  const paginatedRecoveries = usePaginated<DebtItem>({
     initialItems: debts,
-    pageSize: DEBTS_PAGE_SIZE,
+    pageSize: RECOVERIES_PAGE_SIZE,
   })
 
-  const redirectTo = `/sales/debts?startDate=${selectionDate.startDate}&endDate=${selectionDate.endDate}`
-
-  // Les statistiques viennent du backend pour rester alignées avec la période filtrée.
   const statCards = [
-    { label: 'Dettes', value: stats.totalDebts, color: 'blue' as const, icon: ReceiptText },
+    {
+      label: 'Dettes payées',
+      value: stats.totalDebts,
+      color: 'emerald' as const,
+      icon: CheckCircle2,
+    },
     {
       label: 'Valeur des dettes',
       value: renderMoneyMap(stats.totalDebtAmounts),
-      color: 'amber' as const,
-      icon: CircleDollarSign,
+      color: 'blue' as const,
+      icon: ReceiptText,
     },
     {
-      label: 'Déjà payé',
+      label: 'Total recouvré',
       value: renderMoneyMap(stats.recoveredAmounts),
-      color: 'emerald' as const,
+      color: 'teal' as const,
       icon: HandCoins,
     },
     {
       label: 'Reste à payer',
       value: renderMoneyMap(stats.remainingAmounts),
-      color: 'rose' as const,
-      icon: Wallet,
+      color: 'neutral' as const,
+      icon: CircleDollarSign,
     },
   ]
 
-  // Applique la période via Inertia; la pagination reste locale.
-  const searchDebts = () => {
+  const searchRecoveries = () => {
     setIsLoading(true)
     router.get(
-      '/sales/debts',
+      '/sales/recoveries',
       {
         startDate: selectionDate.startDate,
         endDate: selectionDate.endDate,
@@ -98,31 +95,35 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
     <main className="min-h-screen bg-muted/40 text-foreground">
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
-          title="Gestion des dettes"
-          description="Suivre les ventes à crédit et encaisser les paiements restants."
-          icon={CreditCard}
-          accentClassName="bg-red-800 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+          title="Recouvrements de dettes"
+          description="Consulter les ventes à crédit déjà soldées sur la période sélectionnée."
+          icon={CheckCircle2}
+          accentClassName="from-emerald-600 to-teal-600"
         >
           <PeriodSelector
             startDate={selectionDate.startDate}
             endDate={selectionDate.endDate}
             onDateChange={selectionDate.handleDateChange}
-            onSearch={searchDebts}
+            onSearch={searchRecoveries}
             isLoading={isLoading}
             className="w-full lg:w-auto"
             hideCardWrapper
           />
-          <Button render={<Link href="/sales" />} variant="outline">
-            <ArrowLeft className="size-4" />
-            Ventes
-          </Button>
           <Button
-            className="bg-emerald-600 text-white hover:bg-emerald-500/80 hover:text-white"
-            render={<Link href="/sales/recoveries" />}
+            className="bg-red-800 text-white hover:bg-red-500/80 hover:text-white"
+            render={<Link href="/sales/debts" />}
             variant="outline"
           >
-            <HandCoins className="size-4" />
-            Récouvrements
+            <CreditCard className="size-4" />
+            Dettes
+          </Button>
+          <Button
+            className="bg-blue-800 text-white hover:bg-blue-500/80 hover:text-white"
+            render={<Link href="/sales" />}
+            variant="outline"
+          >
+            <ArrowLeft className="size-4" />
+            Ventes
           </Button>
         </PageHeader>
 
@@ -145,21 +146,21 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                 <Search className="size-5" />
               </span>
               <div>
-                <CardTitle>Dettes en cours</CardTitle>
+                <CardTitle>Dettes soldées</CardTitle>
                 <CardDescription>
-                  Page {paginatedDebts.currentPage} - {paginatedDebts.loadedItemsCount} dette(s)
-                  chargée(s)
+                  Page {paginatedRecoveries.currentPage} - {paginatedRecoveries.loadedItemsCount}{' '}
+                  dette(s) chargée(s)
                 </CardDescription>
               </div>
             </div>
 
-            {paginatedDebts.totalLoadedPages > 1 && (
+            {paginatedRecoveries.totalLoadedPages > 1 && (
               <PaginationControls
-                canGoPrevious={paginatedDebts.canGoPrevious}
-                canGoNext={paginatedDebts.canGoNext}
-                pageSize={DEBTS_PAGE_SIZE}
-                onPrevious={paginatedDebts.goToPreviousPage}
-                onNext={paginatedDebts.goToNextPage}
+                canGoPrevious={paginatedRecoveries.canGoPrevious}
+                canGoNext={paginatedRecoveries.canGoNext}
+                pageSize={RECOVERIES_PAGE_SIZE}
+                onPrevious={paginatedRecoveries.goToPreviousPage}
+                onNext={paginatedRecoveries.goToNextPage}
               />
             )}
           </CardHeader>
@@ -171,14 +172,13 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                   <TableHead>Client</TableHead>
                   <TableHead>Addition</TableHead>
                   <TableHead className="text-right">Dette totale</TableHead>
-                  <TableHead className="text-right">Déjà payé</TableHead>
+                  <TableHead className="text-right">Total payé</TableHead>
                   <TableHead className="text-right">Reste</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedDebts.visibleItems.map((debt) => (
+                {paginatedRecoveries.visibleItems.map((debt) => (
                   <TableRow key={debt.sale.id}>
                     <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
                     <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
@@ -189,13 +189,13 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                         debt.sale.currency as CurrencyCode
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right font-semibold">
                       {formatMoneyWithCurrency(
                         debt.recoveredAmount,
                         debt.sale.currency as CurrencyCode
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="text-right">
                       {formatMoneyWithCurrency(
                         debt.remainingAmount,
                         debt.sale.currency as CurrencyCode
@@ -204,27 +204,16 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                     <TableCell>
                       <DebtStatusBadge status={debt.debtStatus} />
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-red-800"
-                        onClick={() => setSelectedDebt(debt)}
-                      >
-                        <CreditCard className="size-4" />
-                        Payer
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 ))}
 
-                {paginatedDebts.items.length === 0 && (
+                {paginatedRecoveries.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-64">
+                    <TableCell colSpan={7} className="h-64">
                       <EmptyState
                         icon={Search}
-                        title="Aucune dette trouvée"
-                        description="Aucune vente à crédit non soldée ne correspond à cette période."
+                        title="Aucune dette payée trouvée"
+                        description="Aucune vente à crédit soldée ne correspond à cette période."
                         className="border-none bg-transparent shadow-none"
                       />
                     </TableCell>
@@ -235,14 +224,6 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
           </CardContent>
         </Card>
       </section>
-
-      <DebtPaymentDialog
-        debt={selectedDebt}
-        redirectTo={redirectTo}
-        onOpenChange={(open) => {
-          if (!open) setSelectedDebt(null)
-        }}
-      />
     </main>
   )
 }
