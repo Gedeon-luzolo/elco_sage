@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface UsePaginatedParams<T> {
   initialItems: T[]
@@ -18,6 +18,11 @@ export function usePaginated<T>({ initialItems, pageSize = 10 }: UsePaginatedPar
 
   // Nombre de pages disponibles avec les lignes déjà chargées en mémoire.
   const totalLoadedPages = Math.max(1, Math.ceil(items.length / pageSize))
+
+  useEffect(() => {
+    setItems(initialItems)
+    setCurrentPage(1)
+  }, [initialItems])
 
   // Tranche réellement affichée dans le tableau pour la page courante.
   const visibleItems = useMemo(() => {

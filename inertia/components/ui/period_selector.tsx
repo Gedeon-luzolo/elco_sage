@@ -1,3 +1,4 @@
+import { todayDateKey } from '#utils/date_utils'
 import { Search } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
@@ -47,6 +48,7 @@ export function PeriodSelector({
           className="h-10"
           value={endDate}
           min={startDate}
+          max={todayDateKey()}
           onChange={(event) => onDateChange('end', event.target.value)}
         />
       </div>
@@ -58,6 +60,7 @@ export function PeriodSelector({
     </div>
   )
 
+  // cacher le wrapper Card si demandé, pour l'intégrer dans un autre composant Card.
   if (hideCardWrapper) {
     return <div className={className}>{content}</div>
   }

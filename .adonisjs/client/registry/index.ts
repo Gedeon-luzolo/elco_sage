@@ -114,6 +114,12 @@ const routes = {
     tokens: [{"old":"/sales/session/close","type":0,"val":"sales","end":""},{"old":"/sales/session/close","type":0,"val":"session","end":""},{"old":"/sales/session/close","type":0,"val":"close","end":""}],
     types: placeholder as Registry['sales.cash_sessions.close']['types'],
   },
+  'sales.debts.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/debts',
+    tokens: [{"old":"/sales/debts","type":0,"val":"sales","end":""},{"old":"/sales/debts","type":0,"val":"debts","end":""}],
+    types: placeholder as Registry['sales.debts.index']['types'],
+  },
   'sales.index': {
     methods: ["GET","HEAD"],
     pattern: '/sales',

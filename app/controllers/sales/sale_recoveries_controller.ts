@@ -7,7 +7,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 const saleRecoveryService = new SaleRecoveryService()
 
-// URL de redirection commune apres recouvrement.
+// URL de redirection par defaut apres recouvrement.
 const REDIRECT_URL = '/sales'
 
 export default class SaleRecoveriesController {
@@ -28,14 +28,16 @@ export default class SaleRecoveriesController {
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createSaleRecoveryValidator)
+    const redirectTo = ctx.request.input('redirectTo', REDIRECT_URL)
 
     return runAction(
       ctx,
-      () => saleRecoveryService.create(actor, ctx.params.saleId, payload as CreateSaleRecoveryInput),
+      () =>
+        saleRecoveryService.create(actor, ctx.params.saleId, payload as CreateSaleRecoveryInput),
       {
         successMessage: 'Recouvrement enregistre avec succes.',
         errorMessage: "Impossible d'enregistrer ce recouvrement.",
-        redirectTo: REDIRECT_URL,
+        redirectTo,
       }
     )
   }

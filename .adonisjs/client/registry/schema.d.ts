@@ -223,6 +223,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['close']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'sales.debts.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/debts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/debts_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/debts_controller').default['index']>>>
+    }
+  }
   'sales.index': {
     methods: ["GET","HEAD"]
     pattern: '/sales'

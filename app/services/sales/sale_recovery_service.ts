@@ -4,27 +4,32 @@ import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import CashSessionService from '#services/sales/cash_session_service'
+import DebtService from '#services/sales/debt_service'
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { DateTime } from 'luxon'
 
 const journalisationService = new JournalisationService()
 const cashSessionService = new CashSessionService()
+const debtService = new DebtService()
 
 export default class SaleRecoveryService {
   /**
    * Enregistre un recouvrement sur une vente a credit.
    */
   async create(actor: User, saleId: string, payload: CreateSaleRecoveryInput) {
-    const sale = await Sale.findOrFail(saleId)
+    const sale = await Sale.query().where('id', saleId).preload('recoveries').firstOrFail()
 
     // Les recouvrements concernent uniquement les ventes a credit encore actives.
     this.ensureSaleCanReceiveRecovery(sale)
+    this.ensureRecoveryCurrencyMatchesSale(sale, payload)
+    this.ensureRecoveryDoesNotExceedRemainingAmount(sale, payload)
 
     const cashSession = await cashSessionService.getOpenSessionForUser(actor.id)
     if (!cashSession) {
       throw new Error('Ouvrez une session de caisse avant de faire un recouvrement.')
     }
 
+    // Le recouvrement est enregistre dans la base de donnees.
     const recovery = await SaleRecovery.create({
       saleId: sale.id,
       cashSessionId: cashSession.id,
@@ -34,9 +39,10 @@ export default class SaleRecoveryService {
       recoveredAt: this.resolveRecoveredAt(payload.recoveredAt),
     })
 
+    // Le recouvrement est journalise pour l'audit.
     await journalisationService.create({
       module: JournalisationModule.SALES,
-      message: `Recouvrement de ${payload.amount} ${payload.currency} enregistre sur l'addition ${sale.additionNumber} par ${actor.fullName ?? actor.email}.`,
+      message: `Recouvrement de ${payload.amount} ${payload.currency} enregistré sur l'addition ${sale.additionNumber} par ${actor.fullName ?? actor.email}.`,
       user: actor,
     })
 
@@ -58,11 +64,28 @@ export default class SaleRecoveryService {
   // Refuse les recouvrements sur les ventes cash, offertes ou annulees.
   private ensureSaleCanReceiveRecovery(sale: Sale) {
     if (sale.status === SaleStatus.CANCELLED) {
-      throw new Error('Impossible de recouvrer une vente annulee.')
+      throw new Error('Impossible de recouvrer une vente annulée.')
     }
 
     if (sale.paymentType !== SalePaymentType.CREDIT) {
-      throw new Error('Les recouvrements sont reserves aux ventes a credit.')
+      throw new Error('Les recouvrements sont réservés aux ventes à crédit.')
+    }
+  }
+
+  // Une dette se paie dans la devise de la vente pour eviter les conversions implicites.
+  private ensureRecoveryCurrencyMatchesSale(sale: Sale, payload: CreateSaleRecoveryInput) {
+    if (payload.currency !== sale.currency) {
+      throw new Error('Le paiement doit etre effectue dans la devise de la vente.')
+    }
+  }
+
+  // Le montant encaisse ne peut pas depasser le reste du.
+  private ensureRecoveryDoesNotExceedRemainingAmount(sale: Sale, payload: CreateSaleRecoveryInput) {
+    const debt = debtService.buildDebtSummary(sale)
+    const recoveryAmount = Number(payload.amount)
+
+    if (recoveryAmount > debt.remainingAmount) {
+      throw new Error('Le paiement depasse le reste de la dette.')
     }
   }
 

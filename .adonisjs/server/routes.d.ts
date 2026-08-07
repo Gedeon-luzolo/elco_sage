@@ -22,6 +22,7 @@ export type ScannedRoutes = {
     'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'sales.debts.index': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
     'sales.store': { paramsTuple?: []; params?: {} }
@@ -55,6 +56,7 @@ export type ScannedRoutes = {
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'sales.debts.index': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
     'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -75,6 +77,7 @@ export type ScannedRoutes = {
     'stock_movements.index': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
     'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'sales.debts.index': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
     'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
