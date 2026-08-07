@@ -43,6 +43,25 @@ export function sumMoneyByCurrency<T>(
 }
 
 // Construit une map d'ecarts entre les montants comptés par le caissier et ceux calculés par le systeme.
+// Additionne plusieurs maps monetaires sans convertir les devises.
+export function sumMoneyMaps(...maps: Array<MoneyMap | null | undefined>): MoneyMap {
+  return maps.reduce<MoneyMap>((totals, map) => {
+    // Une map absente ne contribue pas au total.
+    if (!map) {
+      return totals
+    }
+
+    // Chaque entree garde sa devise d'origine.
+    for (const [currency, amount] of Object.entries(map)) {
+      const currencyKey = currency as Currency
+
+      totals[currencyKey] = Number(totals[currencyKey] ?? 0) + Number(amount ?? 0)
+    }
+
+    return totals
+  }, {})
+}
+
 export function buildDifferenceMoneyMap(closingAmounts: MoneyMap, systemAmounts: MoneyMap) {
   return Object.entries(closingAmounts).reduce<MoneyMap>((differences, [currency, amount]) => {
     const currencyKey = currency as Currency

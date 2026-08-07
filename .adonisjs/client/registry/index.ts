@@ -96,6 +96,12 @@ const routes = {
     tokens: [{"old":"/sales/sessions","type":0,"val":"sales","end":""},{"old":"/sales/sessions","type":0,"val":"sessions","end":""}],
     types: placeholder as Registry['sales.cash_sessions.index']['types'],
   },
+  'sales.cash_sessions.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/sessions/:id',
+    tokens: [{"old":"/sales/sessions/:id","type":0,"val":"sales","end":""},{"old":"/sales/sessions/:id","type":0,"val":"sessions","end":""},{"old":"/sales/sessions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['sales.cash_sessions.show']['types'],
+  },
   'sales.cash_sessions.create': {
     methods: ["GET","HEAD"],
     pattern: '/sales/session/open',

@@ -37,6 +37,24 @@ export interface CashSessionsPageProps extends Record<string, JSONDataTypes> {
   }
 }
 
+// Type pour les totaux d'un rapport de ventes, regroupes par devise.
+export type SaleReportTotals = Record<string, JSONDataTypes> & {
+  theoreticalAmounts: MoneyMap
+  discountAmounts: MoneyMap
+  cashAmounts: MoneyMap
+  debtAmounts: MoneyMap
+  realAmounts: MoneyMap
+  recoveryAmounts: MoneyMap
+  collectionAmounts: MoneyMap
+}
+
+// Props de la page de detail d'une session de caisse.
+export interface CashSessionDetailPageProps extends Record<string, JSONDataTypes> {
+  session: CashSessionItem
+  sales: SaleItemRow[]
+  totals: SaleReportTotals
+}
+
 // Props de la premiere page du module vente.
 export interface SalesPageProps extends Record<string, JSONDataTypes> {
   currentCashSession: CashSessionItem | null

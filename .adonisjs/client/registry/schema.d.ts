@@ -187,6 +187,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['index']>>>
     }
   }
+  'sales.cash_sessions.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/sessions/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/cash_sessions_controller').default['show']>>>
+    }
+  }
   'sales.cash_sessions.create': {
     methods: ["GET","HEAD"]
     pattern: '/sales/session/open'

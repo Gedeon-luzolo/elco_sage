@@ -1,11 +1,14 @@
 import type {} from '../../../.adonisjs/server/pages.d.ts'
 import CashSessionService from '#services/sales/cash_session_service'
+import SaleReportService from '#services/sales/sale_report_service'
 import CashSessionTransformer from '#transformers/cash_session_transformer'
+import SaleTransformer from '#transformers/sale_transformer'
 import { runAction } from '#utils/error_handler'
 import { closeCashSessionValidator } from '#validators/cash_session'
 import type { HttpContext } from '@adonisjs/core/http'
 
 const cashSessionService = new CashSessionService()
+const saleReportService = new SaleReportService()
 
 export default class CashSessionsController {
   /**
@@ -26,6 +29,20 @@ export default class CashSessionsController {
         startDate: startDate ?? null,
         endDate: endDate ?? null,
       },
+    })
+  }
+
+  /**
+   * Affiche le detail d'une session de caisse.
+   */
+  async show({ auth, inertia, params }: HttpContext) {
+    const actor = auth.getUserOrFail()
+    const report = await saleReportService.getSessionReport(actor, params.id)
+
+    return (inertia.render as any)('sales/cash_session_detail_page', {
+      session: CashSessionTransformer.transformSingle(report.session),
+      sales: SaleTransformer.transform(report.sales),
+      totals: report.totals,
     })
   }
 

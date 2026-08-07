@@ -21,13 +21,14 @@ export default function CashSessionsPage({
   sessions,
   filters,
 }: InertiaProps<CashSessionsPageProps>) {
-  // Hoooks pour gérer la sélection de dates et la pagination des sessions.
+  // Hooks pour gérer la sélection de dates et la pagination des sessions.
   const selectionDate = useSelectionDate({
     initialStartDate: filters.startDate,
     initialEndDate: filters.endDate,
   })
+
+  // State pour gérer le chargement.
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(sessions[0]?.id ?? null)
 
   // Hook pour gérer la pagination des sessions de caisse.
   const paginatedSessions = usePaginated<CashSessionItem>({
@@ -105,8 +106,7 @@ export default function CashSessionsPage({
                 <CashSessionCard
                   key={session.id}
                   session={session}
-                  selected={session.id === selectedSessionId}
-                  onSelect={() => setSelectedSessionId(session.id)}
+                  onSelect={() => router.get(`/sales/sessions/${session.id}`)}
                 />
               ))}
             </section>

@@ -4,6 +4,7 @@ const CashSessionsController = () => import('#controllers/sales/cash_sessions_co
 
 export function registerCashSessionRoutes() {
   router.get('sales/sessions', [CashSessionsController, 'index']).as('sales.cash_sessions.index')
+  router.get('sales/sessions/:id', [CashSessionsController, 'show']).as('sales.cash_sessions.show')
   router
     .get('sales/session/open', [CashSessionsController, 'create'])
     .as('sales.cash_sessions.create')
