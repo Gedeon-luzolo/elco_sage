@@ -26,7 +26,7 @@ export function SaleReportItemRow({ sale, item, saleIndex, isFirstLine }: SaleRe
         <span className="font-medium">{item.productService?.name ?? 'Service inconnu'}</span>
       </TableCell>
       <TableCell className="text-center">
-        {item.quantity} {item.productService?.baseUnit ?? ''}
+        {item.quantity} {item.productService?.stockProductBaseUnit ?? ''}
       </TableCell>
       <TableCell className="text-right">
         {formatMoneyWithCurrency(item.unitPrice, itemCurrency)}

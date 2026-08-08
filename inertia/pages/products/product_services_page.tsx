@@ -92,6 +92,7 @@ export default function ProductServicesPage({
     // Les Select sans valeur renvoient une chaine vide; le backend attend null pour les champs optionnels.
     payload.categoryId = payload.categoryId || null
     payload.stockProductId = payload.stockProductId || null
+    payload.baseUnit = payload.baseUnit || null
     payload.packagingUnit = payload.packagingUnit || null
     payload.packagingCapacity = payload.packagingCapacity || null
 

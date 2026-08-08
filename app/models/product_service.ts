@@ -32,7 +32,7 @@ export default class ProductService extends BaseModel {
 
   /** Unité de vente/consommation (ex: feuille, unité, heure) */
   @column()
-  declare baseUnit: string
+  declare baseUnit: string | null
 
   /** Unité de conditionnement (ex: rame, carton) — uniquement pour les PRODUCT */
   @column()

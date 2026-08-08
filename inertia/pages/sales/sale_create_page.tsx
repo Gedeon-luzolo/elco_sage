@@ -9,7 +9,7 @@ import {
   ShoppingCart,
   Trash2,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
 import { Button } from '~/components/ui/button'
@@ -32,8 +32,12 @@ import {
   canSubmitSaleForm,
   EMPTY_SALE_LINE,
   getSaleDiscountAmountFromPayableAmount,
+  getSaleLineService,
+  getSaleLineStockMessage,
   getSaleLineTotal,
   getSaleTheoreticalAmount,
+  hasSaleLineStockIssue,
+  hasSaleStockIssue,
   normalizeSalePayableAmount,
   SALE_PAYMENT_OPTIONS,
   type SaleLineState,
@@ -65,26 +69,29 @@ export default function SaleCreatePage({
     () => getSaleTheoreticalAmount(lines, serviceById, currency),
     [currency, lines, serviceById]
   )
-  const normalizedPayableAmount = normalizeSalePayableAmount(payableAmount, theoreticalAmount)
-  const discountAmount = getSaleDiscountAmountFromPayableAmount(theoreticalAmount, payableAmount)
-  const totalAmount = normalizedPayableAmount
-  const canSubmit = canSubmitSaleForm({
-    currentCashSessionId: currentCashSession?.id,
-    paymentType,
-    operatorId,
-    customerId,
-    discountAmount,
-    lines,
-  })
 
-  useEffect(() => {
-    if (!hasCustomPayableAmount) {
-      setPayableAmount(theoreticalAmount)
-      return
-    }
+  // Calcule le montant a payer effectif, en tenant compte d'un montant personnalise si l'utilisateur l'a saisi.
+  const effectivePayableAmount = hasCustomPayableAmount
+    ? normalizeSalePayableAmount(payableAmount, theoreticalAmount)
+    : theoreticalAmount
 
-    setPayableAmount((current) => normalizeSalePayableAmount(current, theoreticalAmount))
-  }, [hasCustomPayableAmount, theoreticalAmount])
+  // Calcule la remise a partir du montant a payer et du montant theorique.
+  const discountAmount = getSaleDiscountAmountFromPayableAmount(
+    theoreticalAmount,
+    effectivePayableAmount
+  )
+  const totalAmount = effectivePayableAmount
+  const hasStockIssue = hasSaleStockIssue(lines, serviceById)
+  // Verifie si le formulaire peut etre soumis, en tenant compte des champs requis et des problemes de stock.
+  const canSubmit =
+    canSubmitSaleForm({
+      currentCashSessionId: currentCashSession?.id,
+      paymentType,
+      operatorId,
+      customerId,
+      discountAmount,
+      lines,
+    }) && !hasStockIssue
 
   /**
    * Ajoute une ligne de service au formulaire.
@@ -130,7 +137,7 @@ export default function SaleCreatePage({
         customerId,
         operatorId,
         currency,
-        payableAmount: normalizedPayableAmount,
+        payableAmount: effectivePayableAmount,
         theoreticalAmount,
         lines,
       }),
@@ -158,7 +165,7 @@ export default function SaleCreatePage({
           <Card className="rounded-2xl">
             <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
               <Banknote className="size-5" />
-              Ouvrez une session de caisse avant d'enregistrer une vente.
+              Ouvrez une session de caisse avant d&apos;enregistrer une vente.
             </CardContent>
           </Card>
         ) : (
@@ -264,7 +271,10 @@ export default function SaleCreatePage({
               <Card className="rounded-2xl">
                 <CardContent className="space-y-3">
                   {lines.map((line, index) => {
+                    const selectedService = getSaleLineService(line, serviceById)
                     const lineTotal = getSaleLineTotal(line, serviceById, currency)
+                    const stockMessage = getSaleLineStockMessage(line, serviceById)
+                    const hasLineStockIssue = hasSaleLineStockIssue(line, serviceById)
 
                     return (
                       <div
@@ -286,7 +296,10 @@ export default function SaleCreatePage({
                           <Label>Service</Label>
                           <Select
                             items={saleServices.map((item) => ({
-                              label: item.name,
+                              label:
+                                item.saleAvailableStock === null
+                                  ? item.name
+                                  : `${item.name} - ${item.saleAvailableStock} ${item.stockProductBaseUnit ?? ''}`,
                               value: item.id,
                             }))}
                             value={line.productServiceId}
@@ -299,12 +312,24 @@ export default function SaleCreatePage({
                             </SelectTrigger>
                             <SelectContent>
                               {saleServices.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
+                                <SelectItem key={item.id} value={item.id} disabled={!item.canSell}>
                                   {item.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+
+                          {stockMessage && (
+                            <p
+                              className={`text-xs ${
+                                hasLineStockIssue
+                                  ? 'text-destructive'
+                                  : 'text-emerald-700 dark:text-emerald-300'
+                              }`}
+                            >
+                              {stockMessage}
+                            </p>
+                          )}
                         </div>
 
                         <div className="grid gap-2">
@@ -323,6 +348,7 @@ export default function SaleCreatePage({
                             <Input
                               type="number"
                               min="1"
+                              max={selectedService?.saleAvailableStock ?? undefined}
                               step="1"
                               value={line.quantity}
                               onChange={(event) =>
@@ -399,7 +425,7 @@ export default function SaleCreatePage({
                     type="number"
                     min="0"
                     step="0.01"
-                    value={payableAmount}
+                    value={effectivePayableAmount}
                     onChange={(event) => {
                       setHasCustomPayableAmount(true)
                       setPayableAmount(

@@ -1,5 +1,13 @@
 import type ProductService from '#models/product_service'
 
+type ProductServiceWithSaleStock = ProductService & {
+  saleStockSnapshot?: {
+    availableStock: number
+    canSell: boolean
+    blockingReason: string | null
+  } | null
+}
+
 export interface ProductServiceDTO {
   id: string
   type: string
@@ -8,8 +16,12 @@ export interface ProductServiceDTO {
   categoryName: string | null
   stockProductId: string | null
   stockProductName: string | null
+  stockProductBaseUnit: string | null
+  saleAvailableStock: number | null
+  canSell: boolean
+  stockBlockingReason: string | null
   isActive: boolean
-  baseUnit: string
+  baseUnit: string | null
   packagingUnit: string | null
   packagingCapacity: number | null
   priceUsd: number
@@ -20,6 +32,8 @@ export interface ProductServiceDTO {
 
 export default class ProductServiceTransformer {
   public static transformSingle(item: ProductService): ProductServiceDTO {
+    const saleStockSnapshot = (item as ProductServiceWithSaleStock).saleStockSnapshot ?? null
+
     return {
       id: item.id,
       type: item.type,
@@ -28,6 +42,10 @@ export default class ProductServiceTransformer {
       categoryName: item.category?.name ?? null,
       stockProductId: item.stockProductId,
       stockProductName: item.stockProduct?.name ?? null,
+      stockProductBaseUnit: item.stockProduct?.baseUnit ?? null,
+      saleAvailableStock: saleStockSnapshot?.availableStock ?? null,
+      canSell: saleStockSnapshot?.canSell ?? true,
+      stockBlockingReason: saleStockSnapshot?.blockingReason ?? null,
       isActive: item.isActive,
       baseUnit: item.baseUnit,
       packagingUnit: item.packagingUnit,

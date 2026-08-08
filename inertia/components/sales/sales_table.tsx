@@ -7,7 +7,8 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import type { SaleItemRow } from '~/types/sale_types'
-import { formatSaleMoney } from '~/utils/sales/sale.utils'
+import type { CurrencyCode } from '~/utils/currency'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface SalesTableProps {
   sales: SaleItemRow[]
@@ -52,13 +53,13 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
                   </TableCell>
                   <TableCell>{sale.customer?.fullName ?? '-'}</TableCell>
                   <TableCell className="text-right">
-                    {formatSaleMoney(sale.theoreticalAmount, sale.currency)}
+                    {formatMoneyWithCurrency(sale.theoreticalAmount, sale.currency as CurrencyCode)}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatSaleMoney(sale.discountAmount, sale.currency)}
+                    {formatMoneyWithCurrency(sale.discountAmount, sale.currency as CurrencyCode)}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {formatSaleMoney(sale.totalAmount, sale.currency)}
+                    {formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}
                   </TableCell>
                   <TableCell>{sale.paymentType}</TableCell>
                 </TableRow>

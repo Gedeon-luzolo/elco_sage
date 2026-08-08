@@ -43,9 +43,11 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
             Catégorie : <span className="font-medium text-foreground">{item.categoryName}</span>
           </div>
         )}
-        <div>
-          Unité : <span className="font-medium text-foreground">{item.baseUnit}</span>
-        </div>
+        {isProduct && (
+          <div>
+            Unité : <span className="font-medium text-foreground">{item.baseUnit}</span>
+          </div>
+        )}
 
         {!isProduct && item.stockProductName && (
           <div className="text-sm text-violet-700 dark:text-violet-300">

@@ -40,6 +40,8 @@ export default class SaleService {
     const discountAmount = Number(payload.discountAmount ?? 0)
     const theoreticalAmount = prepared.theoreticalAmount
     const totalAmount = theoreticalAmount - discountAmount
+    // La date de vente garde l'heure réelle ou celle envoyée par le formulaire.
+    const saleDate = this.resolveSaleDate(payload.saleDate)
 
     const cashSession = await saleValidationService.validateCreateSale({
       actor,
@@ -47,8 +49,11 @@ export default class SaleService {
       theoreticalAmount,
       discountAmount,
     })
+    // Les sorties stock suivent la date métier de la caisse, pas forcément la date système.
+    const stockDateKey = cashSession.openedAt.toISODate()!
 
     return db.transaction(async (trx) => {
+      // Le numéro d'addition est verrouillé dans la transaction pour éviter deux numéros identiques.
       const additionNumber = await this.generateAdditionNumber(trx)
 
       // L'entete porte les informations communes a toutes les lignes de vente.
@@ -60,7 +65,7 @@ export default class SaleService {
           sellerId: actor.id,
           paymentType: payload.paymentType,
           additionNumber,
-          saleDate: this.resolveSaleDate(payload.saleDate),
+          saleDate,
           currency: payload.currency,
           theoreticalAmount,
           discountAmount,
@@ -69,6 +74,10 @@ export default class SaleService {
         },
         { client: trx }
       )
+
+      // Les sorties de stock sont imputees dans la meme transaction que la vente.
+      // Si le stock échoue, l'entête de vente et les lignes sont rollback ensemble.
+      await saleItemService.consumeStockForSale(prepared.items, stockDateKey, trx)
 
       // Les lignes gardent seulement l'id du service et les montants calcules.
       await saleItemService.createManyForSale(sale.id, prepared.items, trx)
@@ -91,15 +100,54 @@ export default class SaleService {
    * Annule une vente sans la supprimer.
    */
   async cancel(actor: User, id: string) {
-    const sale = await Sale.findOrFail(id)
+    const sale = await db.transaction(async (trx) => {
+      // On recharge les lignes avec les produits consommés pour pouvoir restituer le stock.
+      const item = await Sale.query()
+        .useTransaction(trx)
+        .where('id', id)
+        .preload('items', (itemsQuery) => {
+          itemsQuery.preload('productService', (serviceQuery) => {
+            serviceQuery.preload('stockProduct')
+          })
+        })
+        .firstOrFail()
 
-    if (sale.status === SaleStatus.CANCELLED) {
-      return sale
-    }
+      // Si la vente est deja annulee, on ne fait rien et on retourne l'objet.
+      if (item.status === SaleStatus.CANCELLED) {
+        return item
+      }
 
-    // Une annulation conserve l'historique et retire la vente des totaux actifs.
-    sale.status = SaleStatus.CANCELLED
-    await sale.save()
+      // L'annulation retire les sorties de stock associees aux services vendus.
+      await saleItemService.restoreStockForCancelledSale(
+        item.items.map((saleItem) => {
+          // Les anciennes ventes doivent rester annulables seulement si leur service est encore correctement lié.
+          if (!saleItem.productService?.stockProduct) {
+            throw new Error(
+              `Le service de la ligne "${saleItem.orderNumber}" n'est pas lie a un produit de stock.`
+            )
+          }
+
+          return {
+            orderNumber: saleItem.orderNumber,
+            productServiceId: saleItem.productServiceId,
+            stockProduct: saleItem.productService.stockProduct,
+            quantity: saleItem.quantity,
+            currency: saleItem.currency,
+            unitPrice: saleItem.unitPrice,
+            totalPrice: saleItem.totalPrice,
+          }
+        }),
+        // La date de vente est utilisee pour restituer le stock a la date exacte de la vente.
+        item.saleDate.toISODate()!,
+        trx
+      )
+
+      // Une annulation conserve l'historique et retire la vente des totaux actifs.
+      item.status = SaleStatus.CANCELLED
+      await item.useTransaction(trx).save()
+
+      return item
+    })
 
     await journalisationService.create({
       module: JournalisationModule.SALES,
@@ -137,7 +185,7 @@ export default class SaleService {
     `)
     const nextNumber = Number(result.rows[0]?.next_number ?? 1)
 
-    return String(nextNumber).padStart(6, '0')
+    return String(nextNumber).padStart(5, '0')
   }
 
   // Convertit la date recue en DateTime, ou utilise l'heure serveur par defaut.

@@ -53,7 +53,7 @@ export default class StockMovementsController {
   }
 
   /**
-   * Corrige les entrÃ©es d'un mouvement existant.
+   * Corrige les entrées d'un mouvement existant.
    */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()

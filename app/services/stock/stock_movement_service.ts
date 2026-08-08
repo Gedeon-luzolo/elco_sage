@@ -11,11 +11,19 @@ import type {
 } from '#validators/stock_movement'
 import { convertToBaseUnit } from '#utils/stock_utils'
 import { ensureDateIsNotFuture } from '#utils/date_utils'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 const journalisationService = new JournalisationService()
 
 interface GetDailyStockParams {
   date: string // Format: YYYY-MM-DD
+}
+
+export interface SaleStockSnapshot {
+  productId: string
+  availableStock: number
+  canSell: boolean
+  blockingReason: string | null
 }
 
 export default class StockMovementService {
@@ -58,7 +66,7 @@ export default class StockMovementService {
           id: movement.id,
           productId: product.id,
           productName: product.name,
-          productBaseUnit: product.baseUnit,
+          productBaseUnit: product.baseUnit ?? '',
           productPackagingUnit: product.packagingUnit,
           productPackagingCapacity: product.packagingCapacity,
           categoryName: product.category?.name ?? null,
@@ -83,7 +91,7 @@ export default class StockMovementService {
           id: -1,
           productId: product.id,
           productName: product.name,
-          productBaseUnit: product.baseUnit,
+          productBaseUnit: product.baseUnit ?? '',
           productPackagingUnit: product.packagingUnit,
           productPackagingCapacity: product.packagingCapacity,
           categoryName: product.category?.name ?? null,
@@ -126,6 +134,158 @@ export default class StockMovementService {
 
     // Si le stock physique du jour précédent n'est pas validé, on bloque
     return previousMovement.isPhysicalStockValidated
+  }
+
+  /**
+   * Retourne le stock actuellement vendable pour un produit physique.
+   */
+  async getSaleStockSnapshot(product: ProductService, date: string): Promise<SaleStockSnapshot> {
+    ensureDateIsNotFuture(date)
+
+    // La vente est autorisee seulement si la chaine de stock precedente est cloturee.
+    // Exemple: si hier a été imputé mais pas validé physiquement, on bloque aujourd'hui.
+    const canWork = await this.canWorkOnDate(product.id, date)
+    if (!canWork) {
+      return {
+        productId: product.id,
+        availableStock: 0,
+        canSell: false,
+        blockingReason: `Le stock physique de la veille pour "${product.name}" n'a pas encore ete valide.`,
+      }
+    }
+
+    // Si le mouvement du jour existe, le stock vendable est le theorique courant.
+    const movement = await StockMovement.query()
+      .where('productId', product.id)
+      .where('date', DateTime.fromISO(date).toSQLDate()!)
+      .first()
+
+    if (movement) {
+      // Le stock vendable tient compte des ventes déjà passées et des pertes saisies.
+      const availableStock = Math.max(0, movement.theoreticalStock)
+
+      return {
+        productId: product.id,
+        availableStock,
+        canSell: availableStock > 0,
+        blockingReason:
+          availableStock > 0 ? null : `Le stock disponible pour "${product.name}" est epuise.`,
+      }
+    }
+
+    // Sans mouvement du jour, on part du dernier stock physique valide anterieur.
+    // Cela permet de vendre dès le matin même si aucune entrée n'a encore été saisie aujourd'hui.
+    const initialStock = await this.getLastValidatedPhysicalStock(product.id, new Date(date))
+
+    return {
+      productId: product.id,
+      availableStock: Math.max(0, initialStock),
+      canSell: initialStock > 0,
+      blockingReason: initialStock > 0 ? null : `Aucun stock disponible pour "${product.name}".`,
+    }
+  }
+
+  /**
+   * Impute une sortie de vente sur le mouvement de stock du jour.
+   */
+  async consumeForSale(
+    product: ProductService,
+    quantity: number,
+    date: string,
+    trx: TransactionClientContract
+  ) {
+    ensureDateIsNotFuture(date)
+
+    // On bloque avant toute ecriture si la veille n'est pas validee.
+    // Ce contrôle évite de baser les ventes du jour sur un stock initial encore incertain.
+    const canWork = await this.canWorkOnDate(product.id, date)
+    if (!canWork) {
+      throw new Error(
+        `Impossible de vendre "${product.name}". Le stock physique de la veille n'a pas encore ete valide.`
+      )
+    }
+
+    const movementDate = DateTime.fromJSDate(new Date(date))
+    // Le verrou FOR UPDATE protège le stock si deux ventes arrivent en même temps.
+    let movement = await StockMovement.query()
+      .useTransaction(trx)
+      .where('productId', product.id)
+      .where('date', movementDate.toSQLDate()!)
+      .forUpdate()
+      .first()
+
+    // Cree le mouvement du jour si la premiere operation de la journee est une vente.
+    if (!movement) {
+      // Le stock initial est le dernier stock physique validé avant la date de vente.
+      const initialStock = await this.getLastValidatedPhysicalStock(
+        product.id,
+        movementDate.toJSDate()
+      )
+
+      // entries reste à 0: on ne crée pas une entrée, seulement la ligne journalière de suivi.
+      movement = await StockMovement.create(
+        {
+          productId: product.id,
+          date: movementDate,
+          initialStock,
+          entries: 0,
+          outputs: 0,
+          losses: 0,
+          physicalStock: null,
+          observation: null,
+        },
+        { client: trx }
+      )
+    }
+
+    const nextOutputs = Number(movement.outputs || 0) + quantity
+    const nextTheoreticalStock =
+      Number(movement.initialStock || 0) +
+      Number(movement.entries || 0) -
+      nextOutputs -
+      Number(movement.losses || 0)
+
+    // La vente ne peut jamais rendre le stock theorique negatif.
+    // La validation se fait côté serveur pour bloquer toute manipulation du frontend.
+    if (nextTheoreticalStock < 0) {
+      throw new Error(`Stock insuffisant pour "${product.name}".`)
+    }
+
+    // outputs représente la somme des sorties vendues pour ce produit à cette date.
+    movement.outputs = nextOutputs
+    await movement.useTransaction(trx).save()
+
+    return movement
+  }
+
+  /**
+   * Retire une sortie de vente lors de l'annulation d'une vente.
+   */
+  async restoreForCancelledSale(
+    product: ProductService,
+    quantity: number,
+    date: string,
+    trx: TransactionClientContract
+  ) {
+    ensureDateIsNotFuture(date)
+
+    const movementDate = DateTime.fromJSDate(new Date(date))
+    // On verrouille aussi la restauration pour éviter une course avec une nouvelle vente.
+    const movement = await StockMovement.query()
+      .useTransaction(trx)
+      .where('productId', product.id)
+      .where('date', movementDate.toSQLDate()!)
+      .forUpdate()
+      .firstOrFail()
+
+    // Une correction du passe est bloquee si elle casserait un mouvement plus recent.
+    await this.ensureMovementCanBeEdited(movement, product.name)
+
+    // On évite une valeur négative si la vente a déjà été restaurée manuellement.
+    movement.outputs = Math.max(0, Number(movement.outputs || 0) - quantity)
+    await movement.useTransaction(trx).save()
+
+    return movement
   }
 
   /**

@@ -199,19 +199,21 @@ export function ProductServiceModal({
             )}
 
             {/* Unité de base (Vente / Consommation) */}
-            <div className="grid gap-2">
-              <Label htmlFor="ps-base-unit">
-                {isService ? 'Unité de facturation *' : 'Unité de base *'}
-              </Label>
-              <Input
-                id="ps-base-unit"
-                name="baseUnit"
-                className="h-10 px-3"
-                defaultValue={item?.baseUnit ?? ''}
-                placeholder={isService ? 'ex: unité, heure, page...' : 'ex: feuille, litre, kg...'}
-                required
-              />
-            </div>
+            {isService ? (
+              <Input type="hidden" name="baseUnit" value="" />
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="ps-base-unit">Unité de base *</Label>
+                <Input
+                  id="ps-base-unit"
+                  name="baseUnit"
+                  className="h-10 px-3"
+                  defaultValue={item?.baseUnit ?? ''}
+                  placeholder="ex: feuille, litre, kg..."
+                  required
+                />
+              </div>
+            )}
 
             {/* Statut — visible uniquement en édition */}
             {isEditing && (

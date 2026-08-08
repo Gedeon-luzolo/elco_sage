@@ -3,7 +3,11 @@ import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
+import StockMovementService, {
+  type SaleStockSnapshot,
+} from '#services/stock/stock_movement_service'
 import { Currency } from '#types/currency'
+import { todayDateKey } from '#utils/date_utils'
 import type {
   CreateProductServiceInput,
   UpdateProductServiceInput,
@@ -11,6 +15,11 @@ import type {
 
 const journalisationService = new JournalisationService()
 const exchangeRateService = new ExchangeRateService()
+const stockMovementService = new StockMovementService()
+
+export type ProductServiceWithSaleStock = ProductService & {
+  saleStockSnapshot?: SaleStockSnapshot | null
+}
 
 export default class ProductServiceService {
   /**
@@ -49,14 +58,29 @@ export default class ProductServiceService {
   /**
    * Recupere uniquement les services actifs disponibles a la vente.
    */
-  async getActiveServicesForSale() {
+  async getActiveServicesForSale(stockDate = todayDateKey()) {
     // Le module vente ne vend pas les produits physiques, uniquement les prestations.
-    return ProductService.query()
+    const services = await ProductService.query()
       .where('type', ProductServiceType.SERVICE)
       .where('isActive', true)
       .preload('category')
       .preload('stockProduct')
       .orderBy('name', 'asc')
+
+    // Le formulaire de vente doit afficher le stock du produit consomme par chaque service.
+    for (const service of services as ProductServiceWithSaleStock[]) {
+      // Un service bien configuré pointe vers le produit physique qui sera décrémenté à la vente.
+      service.saleStockSnapshot = service.stockProduct
+        ? await stockMovementService.getSaleStockSnapshot(service.stockProduct, stockDate)
+        : {
+            productId: service.id,
+            availableStock: 0,
+            canSell: false,
+            blockingReason: `Le service "${service.name}" n'est pas lie a un produit de stock.`,
+          }
+    }
+
+    return services
   }
 
   /**
@@ -91,7 +115,9 @@ export default class ProductServiceService {
       Number(payload.price),
       payload.currency as Currency
     )
+    // Pour un service, on valide ici le produit consommé avant de créer l'article.
     const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
+    const baseUnit = this.resolveBaseUnit(payload.type, payload.baseUnit)
 
     // Creer le produit ou service
     const item = await ProductService.create({
@@ -100,7 +126,7 @@ export default class ProductServiceService {
       categoryId: payload.categoryId ?? null,
       stockProductId,
       isActive: true,
-      baseUnit: payload.baseUnit,
+      baseUnit,
       packagingUnit: payload.packagingUnit ?? null,
       packagingCapacity:
         payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
@@ -144,14 +170,16 @@ export default class ProductServiceService {
       Number(payload.price),
       payload.currency as Currency
     )
+    // Si l'article devient un produit, le lien stock est nettoyé; si c'est un service, il est obligatoire.
     const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
+    const baseUnit = this.resolveBaseUnit(payload.type, payload.baseUnit)
 
     const previousName = item.name
     item.type = payload.type as any
     item.name = payload.name
     item.categoryId = payload.categoryId ?? null
     item.stockProductId = stockProductId
-    item.baseUnit = payload.baseUnit
+    item.baseUnit = baseUnit
     item.packagingUnit = payload.packagingUnit ?? null
     item.packagingCapacity =
       payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
@@ -200,6 +228,7 @@ export default class ProductServiceService {
       return null
     }
 
+    // Un service vendable doit savoir quel produit physique il consomme.
     if (!stockProductId) {
       throw new Error('Selectionnez le produit de stock consomme par ce service.')
     }
@@ -216,5 +245,21 @@ export default class ProductServiceService {
     }
 
     return product.id
+  }
+
+  /**
+   * Determine l'unite de base stockee selon le type d'article.
+   */
+  private resolveBaseUnit(type: string, baseUnit?: string | null) {
+    // Les services consomment l'unite de base du produit lie, donc leur propre unite est inutile.
+    if (type === ProductServiceType.SERVICE) {
+      return null
+    }
+
+    if (!baseUnit) {
+      throw new Error("Renseignez l'unite de base du produit.")
+    }
+
+    return baseUnit
   }
 }

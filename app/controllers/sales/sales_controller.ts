@@ -32,8 +32,9 @@ export default class SalesController {
 
     // Le formulaire utilise les memes listes que la page de lecture.
     const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
     const [saleServices, operators, customers] = await Promise.all([
-      productServiceService.getActiveServicesForSale(),
+      productServiceService.getActiveServicesForSale(stockDate),
       userService.getActiveOperatorsForSale(),
       customerService.getActiveCustomersForSale(),
     ])
@@ -56,8 +57,9 @@ export default class SalesController {
     const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
 
     // Les listes de services, operateurs et clients sont necessaires pour le formulaire de creation.
+    const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
     const [saleServices, operators, customers, currentSessionSales] = await Promise.all([
-      productServiceService.getActiveServicesForSale(),
+      productServiceService.getActiveServicesForSale(stockDate),
       userService.getActiveOperatorsForSale(),
       customerService.getActiveCustomersForSale(),
       currentCashSession ? saleService.findByCashSession(currentCashSession.id) : [],

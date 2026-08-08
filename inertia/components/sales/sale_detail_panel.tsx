@@ -1,5 +1,7 @@
 import type { SaleItemRow } from '~/types/sale_types'
-import { formatSaleDate, formatSaleMoney } from '~/utils/sales/sale.utils'
+import type { CurrencyCode } from '~/utils/currency'
+import { formatDateTimeLabel } from '~/utils/date'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface SaleDetailPanelProps {
   sale: SaleItemRow
@@ -13,7 +15,7 @@ export function SaleDetailPanel({ sale }: SaleDetailPanelProps) {
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
       <div className="sticky top-0 z-10 border-b border-border bg-card p-4">
         <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
-        <p className="text-sm text-muted-foreground">{formatSaleDate(sale.saleDate)}</p>
+        <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
       </div>
 
       <div className="space-y-4 p-4">
@@ -28,26 +30,37 @@ export function SaleDetailPanel({ sale }: SaleDetailPanelProps) {
         <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <DetailLine
             label="Montant theorique"
-            value={formatSaleMoney(sale.theoreticalAmount, sale.currency)}
+            value={formatMoneyWithCurrency(sale.theoreticalAmount, sale.currency as CurrencyCode)}
           />
-          <DetailLine label="Remise" value={formatSaleMoney(sale.discountAmount, sale.currency)} />
-          <DetailLine label="Total" value={formatSaleMoney(sale.totalAmount, sale.currency)} />
+          <DetailLine
+            label="Remise"
+            value={formatMoneyWithCurrency(sale.discountAmount, sale.currency as CurrencyCode)}
+          />
+          <DetailLine
+            label="Total"
+            value={formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}
+          />
         </div>
 
         <div className="rounded-lg border border-border bg-muted/40 p-4">
           <h4 className="text-sm font-semibold">Services vendus</h4>
           <div className="mt-3 space-y-3">
             {sale.items.map((item) => (
-              <div key={item.id} className="rounded-md border border-border bg-background p-3 text-sm">
+              <div
+                key={item.id}
+                className="rounded-md border border-border bg-background p-3 text-sm"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
                     <p className="text-xs text-muted-foreground">
                       Bon : {item.orderNumber} - Quantite : {item.quantity}{' '}
-                      {item.productService?.baseUnit ?? ''}
+                      {item.productService?.stockProductBaseUnit ?? ''}
                     </p>
                   </div>
-                  <p className="font-semibold">{formatSaleMoney(item.totalPrice, item.currency)}</p>
+                  <p className="font-semibold">
+                    {formatMoneyWithCurrency(item.totalPrice, item.currency as CurrencyCode)}
+                  </p>
                 </div>
               </div>
             ))}

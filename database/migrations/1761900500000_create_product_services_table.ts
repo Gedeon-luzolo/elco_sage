@@ -10,9 +10,15 @@ export default class extends BaseSchema {
       table.string('type').notNullable() // PRODUCT | SERVICE
       table.string('name').notNullable().unique()
       table.boolean('is_active').notNullable().defaultTo(true)
+      table
+        .uuid('stock_product_id')
+        .nullable()
+        .references('id')
+        .inTable(this.tableName)
+        .onDelete('SET NULL')
 
       // Unité de vente/consommation (ex: feuille, unité)
-      table.string('base_unit').notNullable()
+      table.string('base_unit').nullable()
       // Unité de conditionnement (ex: rame, carton) — uniquement pour les PRODUCT
       table.string('packaging_unit').nullable()
       // Quantité d'unités de base dans le conditionnement (ex: 500 feuilles par rame)
@@ -23,6 +29,8 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
+
+      table.index('stock_product_id')
     })
   }
 
