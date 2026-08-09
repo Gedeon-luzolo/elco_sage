@@ -12,6 +12,7 @@ import {
 } from '~/components/ui/card'
 import { MODULES } from '~/constants/modules'
 import { PageHeader } from '~/components/common/page_header'
+import { cn } from '~/lib/utils'
 import { type InertiaProps } from '~/types'
 
 export default function Home(props: InertiaProps) {
@@ -33,16 +34,25 @@ export default function Home(props: InertiaProps) {
             return (
               <Card
                 key={module.title}
-                className="rounded-2xl bg-background transition-colors hover:bg-card/80"
+                className="rounded-2xl bg-background shadow-sm transition-colors hover:bg-card/80"
               >
                 <CardHeader>
-                  <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-[#2b1810] text-amber-50">
+                  <div
+                    className={cn(
+                      'mb-4 flex size-11 items-center justify-center rounded-xl shadow-lg',
+                      module.color.icon
+                    )}
+                  >
                     <Icon className="size-5" aria-hidden="true" />
                   </div>
-                  <CardTitle>{module.title}</CardTitle>
+                  <CardTitle className={module.color.title}>{module.title}</CardTitle>
                   <CardDescription>{module.description}</CardDescription>
                   <CardAction>
-                    {module.isManagement && <Badge variant="secondary">Direction</Badge>}
+                    {module.isManagement && (
+                      <Badge variant="outline" className={module.color.badge}>
+                        Direction
+                      </Badge>
+                    )}
                   </CardAction>
                 </CardHeader>
                 <CardContent>
@@ -50,12 +60,16 @@ export default function Home(props: InertiaProps) {
                     <Button
                       render={<Link href={module.href} />}
                       variant="outline"
-                      className="w-full justify-center"
+                      className={cn('w-full justify-center', module.color.button)}
                     >
                       Ouvrir
                     </Button>
                   ) : (
-                    <Button variant="outline" className="w-full justify-center" type="button">
+                    <Button
+                      variant="outline"
+                      className={cn('w-full justify-center', module.color.button)}
+                      type="button"
+                    >
                       Ouvrir
                     </Button>
                   )}

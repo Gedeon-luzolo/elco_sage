@@ -15,6 +15,7 @@ import { SearchInput } from '~/components/common/search_input'
 import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
 import { SalesTable } from '~/components/sales/sales_table'
 import { Button } from '~/components/ui/button'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
@@ -70,7 +71,7 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
           title="Gestion des ventes"
           description={pageDescription}
           icon={ShoppingCart}
-          accentClassName="bg-blue-800 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+          accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
           <>
             <Button

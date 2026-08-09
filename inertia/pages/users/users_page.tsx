@@ -15,6 +15,7 @@ import {
   USER_STATUS_LABELS,
   USER_STATUS_OPTIONS,
 } from '~/constants/users'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import type {
   UserFormState,
   UserListItem,
@@ -95,6 +96,7 @@ export default function UsersPage({ users, stats, statusDistribution }: UsersPag
           title="Gestion des utilisateurs"
           description="Les 30 comptes les plus recents sont affiches."
           icon={Users}
+          accentClassName={MODULE_HEADER_ACCENTS.management}
         >
           <Button type="button" onClick={openCreateDialog}>
             <Plus className="size-4" />

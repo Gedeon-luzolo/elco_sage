@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react'
 import { motion } from 'framer-motion'
 import { LoaderCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { BrandLogo } from '~/components/brand/brand_logo'
 
 export default function Splash() {
   const [isLeaving, setIsLeaving] = useState(false)
@@ -28,7 +29,7 @@ export default function Splash() {
   }, [])
 
   return (
-    <main className="flex min-h-screen w-screen items-center justify-center bg-[#2b1810] px-6 py-10 text-amber-50">
+    <main className="flex min-h-screen w-screen items-center justify-center bg-[#031633] px-6 py-10 text-blue-50">
       <motion.section
         className="flex flex-col items-center text-center"
         initial={{ opacity: 0, scale: 0.96 }}
@@ -36,15 +37,15 @@ export default function Splash() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
       >
         <motion.div
-          className="flex size-28 items-center justify-center rounded-full border-4 border-amber-50 text-6xl font-bold"
+          className="flex size-32 items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-2 shadow-2xl shadow-blue-950/30"
           initial={{ opacity: 0, rotate: -8, scale: 0.85 }}
           animate={{ opacity: 1, rotate: 0, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.45, ease: 'easeOut' }}
         >
-          e
+          <BrandLogo className="h-full w-full object-contain" />
         </motion.div>
         <motion.h1
-          className="mt-8 text-6xl font-normal leading-none tracking-normal"
+          className="sr-only"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.35, ease: 'easeOut' }}
@@ -52,7 +53,7 @@ export default function Splash() {
           Elco Sage
         </motion.h1>
         <motion.p
-          className="mt-3 max-w-sm text-sm text-amber-50/75"
+          className="mt-8 max-w-sm text-sm text-blue-50/75"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.36, duration: 0.32, ease: 'easeOut' }}
@@ -64,7 +65,7 @@ export default function Splash() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.55, duration: 0.25 }}
         >
-          <LoaderCircle className="mt-10 size-7 animate-spin text-amber-50/80" aria-hidden="true" />
+          <LoaderCircle className="mt-10 size-7 animate-spin text-blue-50/80" aria-hidden="true" />
         </motion.div>
       </motion.section>
     </main>

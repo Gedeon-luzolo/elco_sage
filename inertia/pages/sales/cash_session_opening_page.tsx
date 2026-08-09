@@ -20,7 +20,7 @@ export default function CashSessionOpeningPage({
       <Card className="w-full max-w-md rounded-2xl border-border bg-card shadow-md">
         <CardContent className="flex flex-col items-center gap-8 px-6 py-8 text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-full bg-[#2b1810] text-amber-50">
+            <div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <Banknote className="size-7" />
             </div>
 

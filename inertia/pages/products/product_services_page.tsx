@@ -11,6 +11,7 @@ import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
 import { ManagementLayout } from '~/layouts/management_layout'
@@ -141,6 +142,7 @@ export default function ProductServicesPage({
           title="Produits & Services"
           description="Gérez le catalogue des articles, les services et leurs tarifs proposés par votre imprimerie."
           icon={Settings}
+          accentClassName={MODULE_HEADER_ACCENTS.management}
         >
           <Button type="button" onClick={() => openCreateModal()}>
             <Plus className="mr-2 size-4" />

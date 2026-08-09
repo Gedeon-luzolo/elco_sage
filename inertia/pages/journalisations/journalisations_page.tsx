@@ -7,6 +7,7 @@ import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import {
   Select,
   SelectContent,
@@ -84,6 +85,7 @@ export default function JournalisationsPage({
           title="Journalisation"
           description={`Les actions chargées sont affichées par page de ${JOURNALISATIONS_PAGE_SIZE}.`}
           icon={History}
+          accentClassName={MODULE_HEADER_ACCENTS.management}
         />
 
         <Card className="bg-background">

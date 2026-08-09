@@ -8,6 +8,7 @@ import { StatCard } from '~/components/common/stat_card'
 import { CustomerCard } from '~/components/customers/customer_card'
 import { CustomerDialog } from '~/components/customers/customer_dialog'
 import { Button } from '~/components/ui/button'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { useSearch } from '~/hooks/use_search'
 import type { CustomerItem, CustomersPageProps } from '~/types/customer_types'
 import { StatusFilter, matchesStatusFilter } from '~/utils/status.utils'
@@ -74,6 +75,7 @@ export default function CustomersPage({ customers, stats }: CustomersPageProps) 
           title="Gestion des clients"
           description="Creez les fiches clients et gardez une trace de leur statut."
           icon={Users}
+          accentClassName={MODULE_HEADER_ACCENTS.customers}
         >
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" onClick={() => router.visit('/')}>

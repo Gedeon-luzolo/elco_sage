@@ -53,7 +53,7 @@ export function PeriodSelector({
         />
       </div>
 
-      <Button type="button" size="lg" disabled={isLoading} onClick={onSearch}>
+      <Button variant="outline" type="button" size="lg" disabled={isLoading} onClick={onSearch}>
         <Search className="size-4" />
         {isLoading ? 'Chargement...' : 'Chercher'}
       </Button>

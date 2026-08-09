@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
 import { Button } from '~/components/ui/button'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -154,6 +155,7 @@ export default function SaleCreatePage({
           title="Nouvelle vente"
           description="Enregistrer une vente de services dans la session de caisse courante."
           icon={ShoppingCart}
+          accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
           <Button type="button" variant="outline" onClick={() => router.visit('/sales')}>
             <ArrowLeft className="size-4" />

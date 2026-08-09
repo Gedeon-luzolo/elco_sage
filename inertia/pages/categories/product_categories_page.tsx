@@ -10,6 +10,7 @@ import { StatCard } from '~/components/common/stat_card'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
 import { SearchInput } from '~/components/common/search_input'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { useSearch } from '~/hooks/use_search'
 import {
   Table,
@@ -122,6 +123,7 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
           title="Catégories des produits & Services"
           description="Organisez les différents produits et services proposés par votre imprimerie."
           icon={Tags}
+          accentClassName={MODULE_HEADER_ACCENTS.management}
         >
           <Button type="button" onClick={openCreateModal}>
             <Plus className="size-4" />

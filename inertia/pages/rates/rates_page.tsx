@@ -5,6 +5,7 @@ import { ExchangeRateForm } from '~/components/exchange/exchange_rate_form'
 import { ExchangeRateHistoryTable } from '~/components/exchange/exchange_rate_history_table'
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PageHeader } from '~/components/common/page_header'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type { InertiaProps } from '~/types'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
@@ -38,6 +39,7 @@ export default function RatesPage({ exchangeRates }: RatesPageProps) {
           title="Gestion des taux"
           description="Definir les taux USD vers CDF utilises dans toute l'application."
           icon={Banknote}
+          accentClassName={MODULE_HEADER_ACCENTS.management}
         />
 
         <section className="grid gap-3 sm:grid-cols-2">

@@ -3,6 +3,7 @@ import { router } from '@inertiajs/react'
 import { DoorClosed, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { type Data } from '@generated/data'
+import { BrandLogo } from '~/components/brand/brand_logo'
 import { CashSessionClosingDialog } from '~/components/sales/cash_session_closing_dialog'
 import { Button } from '~/components/ui/button'
 import type { CashSessionItem } from '~/types/cash_session_types'
@@ -54,10 +55,10 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
   return (
     <header className="flex min-h-16 w-full items-center justify-between border-b border-border bg-background px-4 py-3 text-foreground shadow-sm sm:px-6">
       <Link href="/" className="flex min-w-0 items-center gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#2b1810] text-xl font-bold text-amber-50">
-          e
+        <span className="flex h-11 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-sm ring-1 ring-blue-100">
+          <BrandLogo className="h-full w-full object-contain" />
         </span>
-        <span className="truncate text-sm font-semibold sm:text-base">Elco Sage</span>
+        <span className="sr-only">Elco Sage</span>
       </Link>
 
       <div className="flex min-w-0 items-center justify-end gap-3 sm:gap-4">
@@ -123,7 +124,7 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
                     type="button"
                     variant="outline"
                     role="menuitem"
-                    className="w-full justify-start rounded-sm text-amber-700"
+                    className="w-full justify-start rounded-sm text-blue-700"
                     onClick={openCashSessionClosingDialog}
                   >
                     <DoorClosed className="size-4" />

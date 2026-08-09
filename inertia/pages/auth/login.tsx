@@ -1,6 +1,7 @@
 import { Form } from '@adonisjs/inertia/react'
 import { motion } from 'framer-motion'
 import { Lock, Mail } from 'lucide-react'
+import { BrandLogo } from '~/components/brand/brand_logo'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -12,7 +13,7 @@ const formItemVariants = {
 
 export default function Login() {
   return (
-    <main className="flex min-h-screen w-screen items-center justify-center bg-[#2b1810] px-6 py-10 text-amber-50">
+    <main className="flex min-h-screen w-screen items-center justify-center bg-[#031633] px-6 py-10 text-blue-50">
       <motion.section
         className="flex w-full max-w-sm flex-col items-center"
         initial="hidden"
@@ -26,21 +27,21 @@ export default function Login() {
         }}
       >
         <motion.div
-          className="flex size-24 items-center justify-center rounded-full border-4 border-amber-50 text-5xl font-bold"
+          className="flex size-32 items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-2 shadow-2xl shadow-blue-950/30"
           variants={formItemVariants}
           transition={{ duration: 0.32, ease: 'easeOut' }}
         >
-          e
+          <BrandLogo className="h-full w-full object-contain" />
         </motion.div>
         <motion.h1
-          className="mt-7 text-center text-6xl font-normal leading-none tracking-normal"
+          className="sr-only"
           variants={formItemVariants}
           transition={{ duration: 0.32, ease: 'easeOut' }}
         >
           Elco Sage
         </motion.h1>
         <motion.p
-          className="mt-3 text-center text-sm text-amber-50/75"
+          className="mt-7 text-center text-sm text-blue-50/75"
           variants={formItemVariants}
           transition={{ duration: 0.32, ease: 'easeOut' }}
         >
@@ -50,7 +51,10 @@ export default function Login() {
         <Form route="session.store" className="mt-10 flex w-full flex-col gap-4">
           {({ errors, processing }) => (
             <>
-              <motion.div variants={formItemVariants} transition={{ duration: 0.32, ease: 'easeOut' }}>
+              <motion.div
+                variants={formItemVariants}
+                transition={{ duration: 0.32, ease: 'easeOut' }}
+              >
                 <Label className="sr-only" htmlFor="email">
                   Adresse email
                 </Label>
@@ -68,10 +72,13 @@ export default function Login() {
                     required
                   />
                 </div>
-                {errors.email && <p className="mt-2 text-sm text-amber-200">{errors.email}</p>}
+                {errors.email && <p className="mt-2 text-sm text-blue-100">{errors.email}</p>}
               </motion.div>
 
-              <motion.div variants={formItemVariants} transition={{ duration: 0.32, ease: 'easeOut' }}>
+              <motion.div
+                variants={formItemVariants}
+                transition={{ duration: 0.32, ease: 'easeOut' }}
+              >
                 <Label className="sr-only" htmlFor="password">
                   Mot de passe
                 </Label>
@@ -89,20 +96,21 @@ export default function Login() {
                     required
                   />
                 </div>
-                {errors.password && (
-                  <p className="mt-2 text-sm text-amber-200">{errors.password}</p>
-                )}
+                {errors.password && <p className="mt-2 text-sm text-blue-100">{errors.password}</p>}
               </motion.div>
 
               {errors.E_INVALID_CREDENTIALS && (
-                <p className="text-sm text-amber-200">{errors.E_INVALID_CREDENTIALS}</p>
+                <p className="text-sm text-blue-100">{errors.E_INVALID_CREDENTIALS}</p>
               )}
 
-              <motion.div variants={formItemVariants} transition={{ duration: 0.32, ease: 'easeOut' }}>
+              <motion.div
+                variants={formItemVariants}
+                transition={{ duration: 0.32, ease: 'easeOut' }}
+              >
                 <Button
                   type="submit"
                   disabled={processing}
-                  className="mt-7 h-12 w-full rounded-xl bg-orange-900 px-5 text-base text-white hover:bg-[#0c4b2b]"
+                  className="mt-7 h-12 w-full rounded-xl bg-primary px-5 text-base text-primary-foreground hover:bg-blue-700"
                 >
                   {processing && (
                     <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />

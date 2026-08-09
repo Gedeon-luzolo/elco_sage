@@ -19,6 +19,7 @@ import {
 import { useSearch } from '~/hooks/use_search'
 import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { formatQuantity } from '~/utils/stock'
 import { getLocalDateKey } from '~/utils/date'
 
@@ -71,6 +72,7 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
           title="Gestion de stock"
           description="Enregistrer les entrées quotidiennes et valider les stocks physiques."
           icon={Warehouse}
+          accentClassName={MODULE_HEADER_ACCENTS.stock}
         >
           <Button type="button" variant="outline" onClick={() => router.visit('/')}>
             <ArrowLeft className="mr-2 size-4" />

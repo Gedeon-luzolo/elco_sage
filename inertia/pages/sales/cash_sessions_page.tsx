@@ -8,6 +8,7 @@ import { CashSessionCard, CashSessionCardSkeleton } from '~/components/sales/cas
 import { Button } from '~/components/ui/button'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
+import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import type { InertiaProps } from '~/types'
@@ -60,7 +61,7 @@ export default function CashSessionsPage({
           title="Sessions de caisse"
           description="Consulter les rapports de caisse par période."
           icon={CalendarDays}
-          accentClassName="from-sky-600 to-cyan-600"
+          accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
           <PeriodSelector
             startDate={selectionDate.startDate}

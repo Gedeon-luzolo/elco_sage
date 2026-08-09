@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, LoaderCircle, Lock, X } from 'lucide-react'
 import { useState } from 'react'
+import { BrandLogo } from '~/components/brand/brand_logo'
 import { UserProfileBadge } from '~/components/auth/user_profile_badge'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -39,7 +40,9 @@ function LockedContent({ idle, user }: LockedContentProps) {
     >
       <div
         className={`absolute -inset-10 transition-all duration-500 ${
-          isPasswordPromptVisible ? 'scale-110 blur-2xl brightness-75' : 'scale-100 blur-0 brightness-100'
+          isPasswordPromptVisible
+            ? 'scale-110 blur-2xl brightness-75'
+            : 'scale-100 blur-0 brightness-100'
         }`}
       >
         <img
@@ -58,8 +61,8 @@ function LockedContent({ idle, user }: LockedContentProps) {
         }`}
       >
         <div className="absolute left-6 top-6 flex items-center gap-3 md:left-12 md:top-8">
-          <div className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-white/10 text-2xl font-bold backdrop-blur-md">
-            e
+          <div className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white/90 p-1 shadow-lg shadow-black/20">
+            <BrandLogo className="h-full w-full object-contain" />
           </div>
           <div>
             <p className="text-2xl font-bold leading-none text-white/85">Elco Sage</p>
