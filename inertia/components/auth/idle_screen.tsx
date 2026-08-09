@@ -6,7 +6,6 @@ import { UserProfileBadge } from '~/components/auth/user_profile_badge'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useIdle } from '~/hooks/useIdle'
-import bgIdleUrl from '~/images/bg-iddle.webp'
 import { type Data } from '@generated/data'
 
 interface IdleScreenProps {
@@ -39,21 +38,13 @@ function LockedContent({ idle, user }: LockedContentProps) {
       onClick={() => setIsPasswordPromptVisible(true)}
     >
       <div
-        className={`absolute -inset-10 transition-all duration-500 ${
-          isPasswordPromptVisible
-            ? 'scale-110 blur-2xl brightness-75'
-            : 'scale-100 blur-0 brightness-100'
+        className={`absolute inset-0 bg-[#031633] transition-all duration-500 ${
+          isPasswordPromptVisible ? 'scale-105 brightness-75' : 'scale-100 brightness-100'
         }`}
-      >
-        <img
-          src={bgIdleUrl}
-          alt="Fond d'ecran de l'ecran verrouille"
-          aria-hidden="true"
-          className="size-full object-cover blur-sm"
-        />
-      </div>
-      <div className="absolute inset-0 bg-black/35" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_34%,rgba(0,0,0,0.35)_100%)]" />
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,76,255,0.45)_0%,rgba(3,22,51,0.92)_52%,rgba(0,9,26,0.98)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,102,255,0.34)_0%,rgba(0,52,148,0.18)_28%,rgba(0,0,0,0.42)_100%)]" />
+      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:56px_56px]" />
 
       <div
         className={`absolute inset-0 transition-all duration-500 ${
@@ -61,9 +52,17 @@ function LockedContent({ idle, user }: LockedContentProps) {
         }`}
       >
         <div className="absolute left-6 top-6 flex items-center gap-3 md:left-12 md:top-8">
-          <div className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white/90 p-1 shadow-lg shadow-black/20">
+          <motion.div
+            className="flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white/90 p-1 shadow-lg shadow-blue-950/30"
+            animate={{
+              y: [0, -4, 0],
+              rotate: [0, -3, 3, 0],
+              scale: [1, 1.04, 1],
+            }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
             <BrandLogo className="h-full w-full object-contain" />
-          </div>
+          </motion.div>
           <div>
             <p className="text-2xl font-bold leading-none text-white/85">Elco Sage</p>
             <p className="mt-1 text-xs text-white/65">Session securisee</p>
@@ -122,9 +121,9 @@ function LockedContent({ idle, user }: LockedContentProps) {
 
             <div className="w-full">
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-white/70" />
                 <Input
-                  className="h-12 rounded-xl border-white/25 bg-white/20 pl-10 text-lg text-white placeholder:text-white/60 backdrop-blur-md focus-visible:border-white/70 focus-visible:ring-white/30"
+                  className="relative z-0 h-12 rounded-xl border-white/25 bg-white/20 pl-10 text-lg text-white placeholder:text-white/60 backdrop-blur-md focus-visible:border-white/70 focus-visible:ring-white/30"
                   type="password"
                   value={idle.password}
                   placeholder="Mot de passe"
