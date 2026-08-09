@@ -1,18 +1,20 @@
 import UserService from '#services/users/user_service'
 import UserTransformer from '#transformers/user_transformer'
 import { createUserValidator, updateUserValidator } from '#validators/user'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-const userService = new UserService()
-
+@inject()
 export default class UsersController {
+  constructor(private userService: UserService) {}
+
   /**
    * Affiche la page de gestion des utilisateurs.
    * Recupere la liste, les stats et la distribution par statut ensemble.
    * Le service garde la responsabilite d'optimiser la requete SQL.
    */
   async getUsers({ inertia }: HttpContext) {
-    const overview = await userService.getUsersOverview(30)
+    const overview = await this.userService.getUsersOverview(30)
 
     return inertia.render('users/users_page', {
       users: UserTransformer.transform(overview.users),
@@ -37,7 +39,7 @@ export default class UsersController {
 
     try {
       // Le service gere la regle de role et l'attribution du mot de passe initial.
-      const result = await userService.create(actor, payload)
+      const result = await this.userService.create(actor, payload)
 
       session.flash(
         'success',
@@ -72,7 +74,7 @@ export default class UsersController {
     })
 
     try {
-      await userService.update(actor, params.id, payload)
+      await this.userService.update(actor, params.id, payload)
 
       session.flash('success', 'Utilisateur mis a jour')
       return response.redirect().toRoute('users.get')
@@ -98,7 +100,7 @@ export default class UsersController {
     }
 
     try {
-      await userService.delete(actor, params.id)
+      await this.userService.delete(actor, params.id)
 
       session.flash('success', 'Utilisateur supprime')
       return response.redirect().toRoute('users.get')

@@ -4,8 +4,7 @@ import { SalePaymentType } from '#models/sale'
 import User, { UserRole, UserStatus } from '#models/user'
 import CashSessionService from '#services/sales/cash_session_service'
 import type { CreateSaleInput } from '#types/sales'
-
-const cashSessionService = new CashSessionService()
+import { inject } from '@adonisjs/core'
 
 interface ValidateCreateSaleProps {
   actor: User
@@ -14,7 +13,10 @@ interface ValidateCreateSaleProps {
   discountAmount: number
 }
 
+@inject()
 export default class SaleValidationService {
+  constructor(private cashSessionService: CashSessionService) {}
+
   /**
    * Valide toutes les contraintes metier avant la creation d'une vente.
    */
@@ -42,7 +44,7 @@ export default class SaleValidationService {
    */
   private async resolveOpenCashSession(actor: User, cashSessionId?: string): Promise<CashSession> {
     // On lit la session depuis le serveur, pas depuis une valeur de confiance frontend.
-    const cashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const cashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
     if (!cashSession) {
       throw new Error('Ouvrez une session de caisse avant de creer une vente.')

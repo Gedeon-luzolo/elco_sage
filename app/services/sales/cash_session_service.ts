@@ -9,9 +9,8 @@ import { normalizeDateRange } from '#utils/date_utils'
 import { buildDifferenceMoneyMap, buildMoneyMap, type MoneyMap } from '#utils/money_map'
 import { isManagementRole } from '#utils/user_role_utils'
 import type { CloseCashSessionInput } from '#validators/cash_session'
+import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
-
-const journalisationService = new JournalisationService()
 
 export interface CashSessionSystemAmounts {
   systemAmounts: MoneyMap
@@ -22,7 +21,10 @@ export interface FindCashSessionsParams {
   endDate?: string
 }
 
+@inject()
 export default class CashSessionService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Recupere la session de caisse ouverte pour un utilisateur.
    */
@@ -79,7 +81,7 @@ export default class CashSessionService {
     })
 
     // Journaliser l'operation
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Session de caisse ouverte par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -123,7 +125,7 @@ export default class CashSessionService {
     await cashSession.save()
 
     // Journaliser l'operation
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Session de caisse fermée par ${actor.fullName ?? actor.email}. Ecart: ${JSON.stringify(differenceAmounts)}.`,
       user: actor,

@@ -3,10 +3,12 @@ import ExchangeRate, { type ExchangeRateType } from '#models/exchange_rate'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type { CreateExchangeRateInput } from '#validators/exchange_rate'
+import { inject } from '@adonisjs/core'
 
-const journalisationService = new JournalisationService()
-
+@inject()
 export default class ExchangeRateService {
+  constructor(private journalisationService: JournalisationService) {}
+
   // Recupere le dernier taux encode.
   async getCurrentRate() {
     return ExchangeRate.query().orderBy('createdAt', 'desc').first()
@@ -29,7 +31,7 @@ export default class ExchangeRateService {
       sellRate: Number(payload.sellRate),
     })
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.EXCHANGE_RATES,
       message: this.buildJournalMessage(actor, exchangeRate, previousRate),
       user: actor,

@@ -1,10 +1,10 @@
 import { JournalisationModule } from '#models/journalisation'
 import User, { UserStatus } from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import { inject } from '@adonisjs/core'
 import hash from '@adonisjs/core/services/hash'
 
 const MAX_FAILED_LOGIN_ATTEMPTS = 3
-const journalisationService = new JournalisationService()
 
 export type LoginAttemptResult =
   | {
@@ -16,7 +16,10 @@ export type LoginAttemptResult =
       message: string
     }
 
+@inject()
 export default class AuthAttemptService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Verifie une tentative de connexion complete.
    * Retourne un user connectable uniquement si le compte est actif.
@@ -80,7 +83,7 @@ export default class AuthAttemptService {
       await user.save()
 
       // Journalise le blocage automatique après les échecs de connexion.
-      await journalisationService.create({
+      await this.journalisationService.create({
         module: JournalisationModule.AUTHENTIFICATION,
         message: `Le compte de ${user.fullName ?? user.email} a ete automatiquement bloque apres ${MAX_FAILED_LOGIN_ATTEMPTS} tentatives de connexion echouees`,
         user,

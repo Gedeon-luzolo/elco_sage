@@ -1,13 +1,16 @@
 import CashSessionService from '#services/sales/cash_session_service'
 import { isManagementRole } from '#utils/user_role_utils'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 
-const cashSessionService = new CashSessionService()
 const READ_METHODS = ['GET', 'HEAD']
 const OPENING_PATHS = ['/sales/session/open']
 
+@inject()
 export default class CashSessionMiddleware {
+  constructor(private cashSessionService: CashSessionService) {}
+
   /**
    * Controle l'acces au module vente selon la session de caisse active.
    * Les profils direction peuvent consulter sans session, mais pas ecrire.
@@ -26,7 +29,7 @@ export default class CashSessionMiddleware {
       return next()
     }
 
-    const openSession = await cashSessionService.getOpenSessionForUser(user.id)
+    const openSession = await this.cashSessionService.getOpenSessionForUser(user.id)
     if (openSession) {
       return next()
     }

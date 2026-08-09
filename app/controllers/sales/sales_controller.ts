@@ -12,18 +12,22 @@ import { runAction } from '#utils/error_handler'
 import { createSaleValidator } from '#validators/sale'
 import UserTransformer from '#transformers/user_transformer'
 import SaleService from '#services/sales/sale_service'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-
-const cashSessionService = new CashSessionService()
-const productServiceService = new ProductServiceService()
-const userService = new UserService()
-const customerService = new CustomerService()
-const saleService = new SaleService()
 
 // URL de redirection commune apres mutation de vente.
 const REDIRECT_URL = '/sales'
 
+@inject()
 export default class SalesController {
+  constructor(
+    private cashSessionService: CashSessionService,
+    private productServiceService: ProductServiceService,
+    private userService: UserService,
+    private customerService: CustomerService,
+    private saleService: SaleService
+  ) {}
+
   /**
    * Affiche le formulaire de creation d'une vente.
    */
@@ -31,12 +35,12 @@ export default class SalesController {
     const actor = auth.getUserOrFail()
 
     // Le formulaire utilise les memes listes que la page de lecture.
-    const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
     const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
     const [saleServices, operators, customers] = await Promise.all([
-      productServiceService.getActiveServicesForSale(stockDate),
-      userService.getActiveOperatorsForSale(),
-      customerService.getActiveCustomersForSale(),
+      this.productServiceService.getActiveServicesForSale(stockDate),
+      this.userService.getActiveOperatorsForSale(),
+      this.customerService.getActiveCustomersForSale(),
     ])
 
     return (inertia.render as any)('sales/sale_create_page', {
@@ -54,15 +58,15 @@ export default class SalesController {
     const actor = auth.getUserOrFail()
 
     // La premiere version pose le cadre des sessions avant la saisie des ventes.
-    const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
     // Les listes de services, operateurs et clients sont necessaires pour le formulaire de creation.
     const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
     const [saleServices, operators, customers, currentSessionSales] = await Promise.all([
-      productServiceService.getActiveServicesForSale(stockDate),
-      userService.getActiveOperatorsForSale(),
-      customerService.getActiveCustomersForSale(),
-      currentCashSession ? saleService.findByCashSession(currentCashSession.id) : [],
+      this.productServiceService.getActiveServicesForSale(stockDate),
+      this.userService.getActiveOperatorsForSale(),
+      this.customerService.getActiveCustomersForSale(),
+      currentCashSession ? this.saleService.findByCashSession(currentCashSession.id) : [],
     ])
 
     return (inertia.render as any)('sales/sales_page', {
@@ -78,7 +82,7 @@ export default class SalesController {
    * Retourne le detail d'une vente.
    */
   async show({ params, response }: HttpContext) {
-    const sale = await saleService.findById(params.id)
+    const sale = await this.saleService.findById(params.id)
 
     return response.ok({
       sale: SaleTransformer.transformSingle(sale),
@@ -92,7 +96,7 @@ export default class SalesController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createSaleValidator)
 
-    return runAction(ctx, () => saleService.create(actor, payload as CreateSaleInput), {
+    return runAction(ctx, () => this.saleService.create(actor, payload as CreateSaleInput), {
       successMessage: 'Vente enregistree avec succes.',
       errorMessage: "Impossible d'enregistrer cette vente.",
       redirectTo: (sale) => `${REDIRECT_URL}?printSaleId=${sale.id}`,
@@ -105,7 +109,7 @@ export default class SalesController {
   async cancel(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 
-    return runAction(ctx, () => saleService.cancel(actor, ctx.params.id), {
+    return runAction(ctx, () => this.saleService.cancel(actor, ctx.params.id), {
       successMessage: 'Vente annulee avec succes.',
       errorMessage: "Impossible d'annuler cette vente.",
       redirectTo: REDIRECT_URL,

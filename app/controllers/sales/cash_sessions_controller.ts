@@ -5,12 +5,16 @@ import CashSessionTransformer from '#transformers/cash_session_transformer'
 import SaleTransformer from '#transformers/sale_transformer'
 import { runAction } from '#utils/error_handler'
 import { closeCashSessionValidator } from '#validators/cash_session'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-const cashSessionService = new CashSessionService()
-const saleReportService = new SaleReportService()
-
+@inject()
 export default class CashSessionsController {
+  constructor(
+    private cashSessionService: CashSessionService,
+    private saleReportService: SaleReportService
+  ) {}
+
   /**
    * Affiche les sessions de caisse accessibles a l'utilisateur courant.
    */
@@ -18,7 +22,7 @@ export default class CashSessionsController {
     const actor = auth.getUserOrFail()
     const startDate = request.input('startDate')
     const endDate = request.input('endDate')
-    const sessions = await cashSessionService.findVisibleSessions(actor, {
+    const sessions = await this.cashSessionService.findVisibleSessions(actor, {
       startDate,
       endDate,
     })
@@ -37,7 +41,7 @@ export default class CashSessionsController {
    */
   async show({ auth, inertia, params }: HttpContext) {
     const actor = auth.getUserOrFail()
-    const report = await saleReportService.getSessionReport(actor, params.id)
+    const report = await this.saleReportService.getSessionReport(actor, params.id)
 
     return (inertia.render as any)('sales/cash_session_detail_page', {
       session: CashSessionTransformer.transformSingle(report.session),
@@ -53,7 +57,7 @@ export default class CashSessionsController {
     const actor = auth.getUserOrFail()
 
     // Si une session existe deja, la page propose simplement de continuer.
-    const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
     return (inertia.render as any)('sales/cash_session_opening_page', {
       currentCashSession: CashSessionTransformer.transformNullable(currentCashSession),
@@ -65,7 +69,7 @@ export default class CashSessionsController {
    */
   async systemAmounts({ auth, response }: HttpContext) {
     const actor = auth.getUserOrFail()
-    const currentCashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
     // Si aucune session n'est ouverte, on ne peut pas calculer les montants systeme.
     if (!currentCashSession) {
@@ -73,7 +77,7 @@ export default class CashSessionsController {
     }
 
     // Calculer les montants systeme pour la session ouverte.
-    return response.ok(await cashSessionService.computeSystemAmounts(currentCashSession))
+    return response.ok(await this.cashSessionService.computeSystemAmounts(currentCashSession))
   }
 
   /**
@@ -82,7 +86,7 @@ export default class CashSessionsController {
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 
-    return runAction(ctx, () => cashSessionService.open(actor), {
+    return runAction(ctx, () => this.cashSessionService.open(actor), {
       successMessage: 'Session de caisse ouverte avec succes.',
       errorMessage: "Impossible d'ouvrir la session de caisse.",
       redirectTo: '/sales',
@@ -96,7 +100,7 @@ export default class CashSessionsController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(closeCashSessionValidator)
 
-    return runAction(ctx, () => cashSessionService.close(actor, payload), {
+    return runAction(ctx, () => this.cashSessionService.close(actor, payload), {
       successMessage: 'Session de caisse fermee avec succes.',
       errorMessage: 'Impossible de fermer la session de caisse.',
       redirectTo: '/sales/session/open',

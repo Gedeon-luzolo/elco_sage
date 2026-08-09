@@ -12,16 +12,20 @@ import type {
   CreateProductServiceInput,
   UpdateProductServiceInput,
 } from '#validators/product_service'
-
-const journalisationService = new JournalisationService()
-const exchangeRateService = new ExchangeRateService()
-const stockMovementService = new StockMovementService()
+import { inject } from '@adonisjs/core'
 
 export type ProductServiceWithSaleStock = ProductService & {
   saleStockSnapshot?: SaleStockSnapshot | null
 }
 
+@inject()
 export default class ProductServiceService {
+  constructor(
+    private journalisationService: JournalisationService,
+    private exchangeRateService: ExchangeRateService,
+    private stockMovementService: StockMovementService
+  ) {}
+
   /**
    * Récupère la liste des produits/services et les statistiques.
    */
@@ -71,7 +75,7 @@ export default class ProductServiceService {
     for (const service of services as ProductServiceWithSaleStock[]) {
       // Un service bien configuré pointe vers le produit physique qui sera décrémenté à la vente.
       service.saleStockSnapshot = service.stockProduct
-        ? await stockMovementService.getSaleStockSnapshot(service.stockProduct, stockDate)
+        ? await this.stockMovementService.getSaleStockSnapshot(service.stockProduct, stockDate)
         : {
             productId: service.id,
             availableStock: 0,
@@ -91,12 +95,12 @@ export default class ProductServiceService {
 
     // Si le prix est en USD, on convertit uniquement vers CDF
     if (currency === Currency.USD) {
-      const priceCdf = await exchangeRateService.convertUsdToCdf(amount, 'buy')
+      const priceCdf = await this.exchangeRateService.convertUsdToCdf(amount, 'buy')
       return { priceUsd: amount, priceCdf }
     }
 
     // Si le prix est en CDF, on convertit uniquement vers USD
-    const priceUsd = await exchangeRateService.convertCdfToUsd(amount, 'buy')
+    const priceUsd = await this.exchangeRateService.convertCdfToUsd(amount, 'buy')
     return { priceUsd, priceCdf: amount }
   }
 
@@ -137,7 +141,7 @@ export default class ProductServiceService {
     })
 
     // Enregistrer la journalisation
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_SERVICES,
       message: `Le produit/service "${item.name}" a été créé par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -192,7 +196,7 @@ export default class ProductServiceService {
     await item.save()
 
     // Enregistrer la journalisation
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_SERVICES,
       message: `Le produit/service "${previousName}" a été mis à jour par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -210,7 +214,7 @@ export default class ProductServiceService {
 
     await item.delete()
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_SERVICES,
       message: `Le produit/service "${itemName}" a été supprimé par ${actor.fullName ?? actor.email}.`,
       user: actor,

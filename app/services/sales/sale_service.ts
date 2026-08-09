@@ -5,15 +5,19 @@ import JournalisationService from '#services/journalisation/journalisation_servi
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
 import type { CreateSaleInput } from '#types/sales'
+import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 
-const journalisationService = new JournalisationService()
-const saleItemService = new SaleItemService()
-const saleValidationService = new SaleValidationService()
-
+@inject()
 export default class SaleService {
+  constructor(
+    private journalisationService: JournalisationService,
+    private saleItemService: SaleItemService,
+    private saleValidationService: SaleValidationService
+  ) {}
+
   /**
    * Recupere les ventes d'une session de caisse.
    */
@@ -36,14 +40,14 @@ export default class SaleService {
    */
   async create(actor: User, payload: CreateSaleInput) {
     // Les lignes sont preparees avant la transaction pour valider les services et calculer les prix.
-    const prepared = await saleItemService.prepareItems(payload.items, payload.currency)
+    const prepared = await this.saleItemService.prepareItems(payload.items, payload.currency)
     const discountAmount = Number(payload.discountAmount ?? 0)
     const theoreticalAmount = prepared.theoreticalAmount
     const totalAmount = theoreticalAmount - discountAmount
     // La date de vente garde l'heure réelle ou celle envoyée par le formulaire.
     const saleDate = this.resolveSaleDate(payload.saleDate)
 
-    const cashSession = await saleValidationService.validateCreateSale({
+    const cashSession = await this.saleValidationService.validateCreateSale({
       actor,
       payload,
       theoreticalAmount,
@@ -77,12 +81,12 @@ export default class SaleService {
 
       // Les sorties de stock sont imputees dans la meme transaction que la vente.
       // Si le stock échoue, l'entête de vente et les lignes sont rollback ensemble.
-      await saleItemService.consumeStockForSale(prepared.items, stockDateKey, trx)
+      await this.saleItemService.consumeStockForSale(prepared.items, stockDateKey, trx)
 
       // Les lignes gardent seulement l'id du service et les montants calcules.
-      await saleItemService.createManyForSale(sale.id, prepared.items, trx)
+      await this.saleItemService.createManyForSale(sale.id, prepared.items, trx)
 
-      await journalisationService.create({
+      await this.journalisationService.create({
         module: JournalisationModule.SALES,
         message: `Addition ${sale.additionNumber} creee par ${actor.fullName ?? actor.email}.`,
         user: actor,
@@ -118,7 +122,7 @@ export default class SaleService {
       }
 
       // L'annulation retire les sorties de stock associees aux services vendus.
-      await saleItemService.restoreStockForCancelledSale(
+      await this.saleItemService.restoreStockForCancelledSale(
         item.items.map((saleItem) => {
           // Les anciennes ventes doivent rester annulables seulement si leur service est encore correctement lié.
           if (!saleItem.productService?.stockProduct) {
@@ -149,7 +153,7 @@ export default class SaleService {
       return item
     })
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Addition ${sale.additionNumber} annulee par ${actor.fullName ?? actor.email}.`,
       user: actor,

@@ -1,14 +1,16 @@
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
 import ExchangeRateTransformer from '#transformers/exchange_rate_transformer'
 import { createExchangeRateValidator } from '#validators/exchange_rate'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-const exchangeRateService = new ExchangeRateService()
-
+@inject()
 export default class ExchangeRatesController {
+  constructor(private exchangeRateService: ExchangeRateService) {}
+
   // Affiche le taux courant et les vingt dernieres modifications.
   async getExchangeRates({ inertia }: HttpContext) {
-    const exchangeRates = await exchangeRateService.getHistory(20)
+    const exchangeRates = await this.exchangeRateService.getHistory(20)
 
     return inertia.render('rates/rates_page', {
       exchangeRates: ExchangeRateTransformer.transform(exchangeRates).useVariant('toHistory'),
@@ -31,7 +33,7 @@ export default class ExchangeRatesController {
 
     try {
       // Creation du taux
-      await exchangeRateService.create(actor, payload)
+      await this.exchangeRateService.create(actor, payload)
 
       session.flash('success', 'Taux de change mis a jour')
       return response.redirect().toRoute('exchange_rates.get')

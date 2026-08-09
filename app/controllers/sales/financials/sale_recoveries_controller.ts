@@ -4,14 +4,16 @@ import RecoveryPaymentTransformer from '#transformers/recovery_payment_transform
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { runAction } from '#utils/error_handler'
 import { createSaleRecoveryValidator } from '#validators/sale_recovery'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-
-const saleRecoveryService = new SaleRecoveryService()
 
 // URL de redirection par défaut après recouvrement.
 const REDIRECT_URL = '/sales'
 
+@inject()
 export default class SaleRecoveriesController {
+  constructor(private saleRecoveryService: SaleRecoveryService) {}
+
   /**
    * Affiche l'historique des paiements de dettes.
    */
@@ -19,7 +21,7 @@ export default class SaleRecoveriesController {
     const startDate = request.input('startDate')
     const endDate = request.input('endDate')
 
-    const overview = await saleRecoveryService.getOverview({
+    const overview = await this.saleRecoveryService.getOverview({
       startDate,
       endDate,
     })
@@ -45,7 +47,11 @@ export default class SaleRecoveriesController {
     return runAction(
       ctx,
       () =>
-        saleRecoveryService.create(actor, ctx.params.saleId, payload as CreateSaleRecoveryInput),
+        this.saleRecoveryService.create(
+          actor,
+          ctx.params.saleId,
+          payload as CreateSaleRecoveryInput
+        ),
       {
         successMessage: 'Recouvrement enregistré avec succès.',
         errorMessage: "Impossible d'enregistrer ce recouvrement.",

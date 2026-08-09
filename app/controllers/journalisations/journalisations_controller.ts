@@ -1,11 +1,13 @@
 import { JournalisationModule } from '#models/journalisation'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import JournalisationTransformer from '#transformers/journalisation_transformer'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-const journalisationService = new JournalisationService()
-
+@inject()
 export default class JournalisationsController {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Affiche le journal des actions du back-office.
    * Les filtres restent simples pour lire les derniers évènements par module et période.
@@ -16,7 +18,7 @@ export default class JournalisationsController {
     const endDate = request.input('endDate')
 
     // Récupère les entrées de journalisation avec les filtres appliqués.
-    const journalisations = await journalisationService.findAllBatch({
+    const journalisations = await this.journalisationService.findAllBatch({
       module: this.normalizeModule(module),
       startDate,
       endDate,

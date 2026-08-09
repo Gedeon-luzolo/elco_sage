@@ -11,9 +11,8 @@ import type {
 } from '#validators/stock_movement'
 import { convertToBaseUnit } from '#utils/stock_utils'
 import { ensureDateIsNotFuture } from '#utils/date_utils'
+import { inject } from '@adonisjs/core'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
-
-const journalisationService = new JournalisationService()
 
 interface GetDailyStockParams {
   date: string // Format: YYYY-MM-DD
@@ -26,7 +25,10 @@ export interface SaleStockSnapshot {
   blockingReason: string | null
 }
 
+@inject()
 export default class StockMovementService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Récupère tous les produits avec leurs mouvements pour une date donnée.
    * Si un produit n'a pas de mouvement, retourne des champs vides avec id: -1
@@ -346,7 +348,7 @@ export default class StockMovementService {
     const quantityMessage = `${payload.entries} ${unitLabel}${payload.entries > 1 ? 's' : ''}`
 
     // L'audit garde la quantite dans l'unite saisie pour rester lisible.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.INVENTORY,
       message: `Mouvement de stock crée pour "${product.name}" le ${DateTime.fromJSDate(dateMovement).toFormat('dd/MM/yyyy')} : ${quantityMessage} en entree par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -385,7 +387,7 @@ export default class StockMovementService {
     await movement.save()
 
     // Trace la correction avec l'auteur et l'unite initialement saisie.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.INVENTORY,
       message: `Entrées de stock mises à jour pour "${product.name}" le ${movement.date.toFormat('dd/MM/yyyy')} : ${quantityMessage} par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -477,7 +479,7 @@ export default class StockMovementService {
 
     // Creer une notification
     // Journalise l'imputation avec l'ecart calcule par le modele apres sauvegarde.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.INVENTORY,
       message: `Stock physique valide pour "${product.name}" le ${movement.date.toFormat('dd/MM/yyyy')} : ${physicalMessage}.${lossesText} Ecart: ${movement.variance ?? 0} ${product.baseUnit}(s). Par ${actor.fullName ?? actor.email}.`,
       user: actor,

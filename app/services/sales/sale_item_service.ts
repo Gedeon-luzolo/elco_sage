@@ -7,11 +7,13 @@ import type {
   PreparedSaleItemInput,
   PreparedSaleItemsResult,
 } from '#types/sales'
+import { inject } from '@adonisjs/core'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
-const stockMovementService = new StockMovementService()
-
+@inject()
 export default class SaleItemService {
+  constructor(private stockMovementService: StockMovementService) {}
+
   /**
    * Prepare les lignes d'une vente a partir des services vendables.
    */
@@ -119,7 +121,7 @@ export default class SaleItemService {
 
     // Chaque produit est débité une seule fois, dans la transaction de vente.
     for (const { product, quantity } of quantitiesByProduct.values()) {
-      await stockMovementService.consumeForSale(product, quantity, date, trx)
+      await this.stockMovementService.consumeForSale(product, quantity, date, trx)
     }
   }
 
@@ -146,7 +148,7 @@ export default class SaleItemService {
 
     // La restauration reste transactionnelle avec l'annulation de la vente.
     for (const { product, quantity } of quantitiesByProduct.values()) {
-      await stockMovementService.restoreForCancelledSale(product, quantity, date, trx)
+      await this.stockMovementService.restoreForCancelledSale(product, quantity, date, trx)
     }
   }
 

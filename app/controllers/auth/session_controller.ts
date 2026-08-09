@@ -3,12 +3,16 @@ import AuthAttemptService from '#services/auth/auth_attempt_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { isManagementRole } from '#utils/user_role_utils'
 import { verifyPasswordValidator } from '#validators/auth/password'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
-const authAttemptService = new AuthAttemptService()
-const journalisationService = new JournalisationService()
-
+@inject()
 export default class SessionController {
+  constructor(
+    private authAttemptService: AuthAttemptService,
+    private journalisationService: JournalisationService
+  ) {}
+
   /**
    * Affiche le formulaire de connexion Inertia.
    * Cette route reste reservee aux visiteurs via le middleware guest.
@@ -27,7 +31,7 @@ export default class SessionController {
     const { email, password } = request.only(['email', 'password'])
 
     // Le service renvoie soit un utilisateur connectable, soit un message metier.
-    const result = await authAttemptService.attempt(email, password)
+    const result = await this.authAttemptService.attempt(email, password)
 
     if (!result.success) {
       session.flash('error', result.message)
@@ -37,7 +41,7 @@ export default class SessionController {
     // La session Adonis est creee seulement apres les controles de securite.
     await auth.use('web').login(result.user)
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.AUTHENTIFICATION,
       message: `${result.user.fullName ?? result.user.email} vient de se connectéé au systeme`,
       user: result.user,
@@ -66,7 +70,7 @@ export default class SessionController {
     const payload = await request.validateUsing(verifyPasswordValidator)
 
     // On verifie le password courant sans toucher au compteur failedLoginAttempts.
-    const valid = await authAttemptService.verifyCurrentPassword(user, payload.password)
+    const valid = await this.authAttemptService.verifyCurrentPassword(user, payload.password)
 
     return response.ok({ valid })
   }
@@ -80,7 +84,7 @@ export default class SessionController {
     const user = auth.user
 
     if (user) {
-      await journalisationService.create({
+      await this.journalisationService.create({
         module: JournalisationModule.AUTHENTIFICATION,
         message: `${user.fullName ?? user.email} vient de se deconnecter du systeme`,
         user,

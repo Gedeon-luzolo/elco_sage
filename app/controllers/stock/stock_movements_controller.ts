@@ -7,13 +7,15 @@ import {
 } from '#validators/stock_movement'
 import { runAction } from '#utils/error_handler'
 import { todayDateKey } from '#utils/date_utils'
-
-const stockMovementService = new StockMovementService()
+import { inject } from '@adonisjs/core'
 
 // URL de redirection commune après toute mutation réussie
 const REDIRECT_URL = '/stock'
 
+@inject()
 export default class StockMovementsController {
+  constructor(private stockMovementService: StockMovementService) {}
+
   /**
    * Affiche la page de gestion du stock journalier.
    * Par défaut, affiche le stock du jour.
@@ -22,7 +24,7 @@ export default class StockMovementsController {
     const date = request.input('date', todayDateKey())
 
     try {
-      const dailyStock = await stockMovementService.getDailyStock({ date })
+      const dailyStock = await this.stockMovementService.getDailyStock({ date })
 
       return (inertia.render as any)('stock/stock_movements_page', {
         stockItems: dailyStock,
@@ -45,7 +47,7 @@ export default class StockMovementsController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createStockMovementValidator)
 
-    return runAction(ctx, () => stockMovementService.createOrUpdate(actor, payload), {
+    return runAction(ctx, () => this.stockMovementService.createOrUpdate(actor, payload), {
       successMessage: 'Entrées de stock enregistrées avec succès.',
       errorMessage: "Impossible d'enregistrer les entrées de stock.",
       redirectTo: REDIRECT_URL,
@@ -59,11 +61,15 @@ export default class StockMovementsController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createStockMovementValidator)
 
-    return runAction(ctx, () => stockMovementService.updateEntries(actor, ctx.params.id, payload), {
-      successMessage: 'Entrées de stock mises à jour avec succès.',
-      errorMessage: 'Impossible de mettre à jour les entrées de stock.',
-      redirectTo: REDIRECT_URL,
-    })
+    return runAction(
+      ctx,
+      () => this.stockMovementService.updateEntries(actor, ctx.params.id, payload),
+      {
+        successMessage: 'Entrées de stock mises à jour avec succès.',
+        errorMessage: 'Impossible de mettre à jour les entrées de stock.',
+        redirectTo: REDIRECT_URL,
+      }
+    )
   }
 
   /**
@@ -74,7 +80,7 @@ export default class StockMovementsController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(validatePhysicalStockValidator)
 
-    return runAction(ctx, () => stockMovementService.validatePhysicalStock(actor, payload), {
+    return runAction(ctx, () => this.stockMovementService.validatePhysicalStock(actor, payload), {
       successMessage: 'Stock physique validé avec succès.',
       errorMessage: 'Impossible de valider le stock physique.',
       redirectTo: REDIRECT_URL,
@@ -90,7 +96,7 @@ export default class StockMovementsController {
 
     return runAction(
       ctx,
-      () => stockMovementService.updatePhysicalStock(actor, ctx.params.id, payload),
+      () => this.stockMovementService.updatePhysicalStock(actor, ctx.params.id, payload),
       {
         successMessage: 'Stock physique mis à jour avec succès.',
         errorMessage: 'Impossible de mettre à  jour le stock physique.',

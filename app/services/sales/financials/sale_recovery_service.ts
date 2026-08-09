@@ -15,13 +15,17 @@ import type { CreateSaleRecoveryInput } from '#types/sales'
 import { normalizeDateRange } from '#utils/date_utils'
 import { normalizeMoneyMap, sumMoneyByCurrency } from '#utils/money_map'
 import { resolveDebtStatus } from '#utils/sale_debt.utils'
+import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
 
-const journalisationService = new JournalisationService()
-const cashSessionService = new CashSessionService()
-const debtService = new DebtService()
-
+@inject()
 export default class SaleRecoveryService {
+  constructor(
+    private journalisationService: JournalisationService,
+    private cashSessionService: CashSessionService,
+    private debtService: DebtService
+  ) {}
+
   /**
    * Enregistre un recouvrement sur une vente à crédit.
    */
@@ -33,7 +37,7 @@ export default class SaleRecoveryService {
     this.ensureRecoveryCurrencyMatchesSale(sale, payload)
     this.ensureRecoveryDoesNotExceedRemainingAmount(sale, payload)
 
-    const cashSession = await cashSessionService.getOpenSessionForUser(actor.id)
+    const cashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
     if (!cashSession) {
       throw new Error('Ouvrez une session de caisse avant de faire un recouvrement.')
     }
@@ -49,7 +53,7 @@ export default class SaleRecoveryService {
     })
 
     // Le recouvrement est journalisé pour conserver une trace d'audit lisible.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Recouvrement de ${payload.amount} ${payload.currency} enregistré sur l'addition ${sale.additionNumber} par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -228,7 +232,7 @@ export default class SaleRecoveryService {
 
   // Le montant encaissé ne peut pas dépasser le reste dû.
   private ensureRecoveryDoesNotExceedRemainingAmount(sale: Sale, payload: CreateSaleRecoveryInput) {
-    const debt = debtService.buildDebtSummary(sale)
+    const debt = this.debtService.buildDebtSummary(sale)
     const recoveryAmount = Number(payload.amount)
 
     if (recoveryAmount > debt.remainingAmount) {

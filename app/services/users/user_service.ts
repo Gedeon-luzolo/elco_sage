@@ -8,13 +8,16 @@ import type {
   UserStatusDistribution,
 } from '#types/users'
 import type { CreateUserInput, UpdateUserInput } from '#validators/user'
+import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 
 const DEFAULT_USER_PASSWORD = '12345678'
 const USER_CREATION_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR]
-const journalisationService = new JournalisationService()
 
+@inject()
 export default class UserService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Recupere les donnees principales de la page utilisateurs en une seule requete.
    * La liste reste limitee aux comptes recents, mais les compteurs couvrent toute la table.
@@ -78,7 +81,7 @@ export default class UserService {
     })
 
     // Journalise la création du nouveau compte utilisateur.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.USERS,
       message: `Le compte ${user.fullName ?? user.email} a ete cree par ${actor.fullName ?? actor.email}`,
       user,
@@ -116,7 +119,7 @@ export default class UserService {
     await user.save()
 
     // Journalise la mise à jour du compte utilisateur.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.USERS,
       message: `Le compte ${user.fullName ?? user.email} a ete mis a jour par ${actor.fullName ?? actor.email}`,
       user,
@@ -140,7 +143,7 @@ export default class UserService {
     const user = await User.findOrFail(userId)
 
     // Journalise la suppression avant que le compte ne disparaisse.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.USERS,
       message: `Le compte ${user.fullName ?? user.email} a ete supprime par ${actor.fullName ?? actor.email}`,
       user,

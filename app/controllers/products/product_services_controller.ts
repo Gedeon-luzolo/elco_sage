@@ -8,19 +8,21 @@ import {
   createProductServiceValidator,
   updateProductServiceValidator,
 } from '#validators/product_service'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-
-const productServiceService = new ProductServiceService()
 
 // URL de redirection commune après toute mutation réussie.
 const REDIRECT_URL = '/management/product-services'
 
+@inject()
 export default class ProductServicesController {
+  constructor(private productServiceService: ProductServiceService) {}
+
   /**
    * Affiche la liste des produits et services.
    */
   async index({ inertia }: HttpContext) {
-    const overview = await productServiceService.getOverview()
+    const overview = await this.productServiceService.getOverview()
     const categories = await ProductCategory.query().where('is_active', true).orderBy('name', 'asc')
 
     return (inertia.render as any)('products/product_services_page', {
@@ -36,7 +38,7 @@ export default class ProductServicesController {
    */
   async activeForSale({ response }: HttpContext) {
     // Le module vente consomme seulement les prestations actives.
-    const services = await productServiceService.getActiveServicesForSale()
+    const services = await this.productServiceService.getActiveServicesForSale()
 
     return response.ok({
       services: ProductServiceTransformer.transform(services),
@@ -50,15 +52,11 @@ export default class ProductServicesController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createProductServiceValidator)
 
-    return runAction(
-      ctx,
-      () => productServiceService.create(actor, payload),
-      {
-        successMessage: (item) => `"${item.name}" créé avec succès.`,
-        errorMessage: 'Impossible de créer cet article.',
-        redirectTo: REDIRECT_URL,
-      }
-    )
+    return runAction(ctx, () => this.productServiceService.create(actor, payload), {
+      successMessage: (item) => `"${item.name}" créé avec succès.`,
+      errorMessage: 'Impossible de créer cet article.',
+      redirectTo: REDIRECT_URL,
+    })
   }
 
   /**
@@ -68,15 +66,11 @@ export default class ProductServicesController {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(updateProductServiceValidator)
 
-    return runAction(
-      ctx,
-      () => productServiceService.update(actor, ctx.params.id, payload),
-      {
-        successMessage: '"${payload.name}" mis à jour avec succès.',
-        errorMessage: 'Impossible de mettre à jour cet article.',
-        redirectTo: REDIRECT_URL,
-      }
-    )
+    return runAction(ctx, () => this.productServiceService.update(actor, ctx.params.id, payload), {
+      successMessage: '"${payload.name}" mis à jour avec succès.',
+      errorMessage: 'Impossible de mettre à jour cet article.',
+      redirectTo: REDIRECT_URL,
+    })
   }
 
   /**
@@ -85,14 +79,10 @@ export default class ProductServicesController {
   async destroy(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 
-    return runAction(
-      ctx,
-      () => productServiceService.delete(actor, ctx.params.id),
-      {
-        successMessage: 'Article supprimé.',
-        errorMessage: 'Suppression impossible.',
-        redirectTo: REDIRECT_URL,
-      }
-    )
+    return runAction(ctx, () => this.productServiceService.delete(actor, ctx.params.id), {
+      successMessage: 'Article supprimé.',
+      errorMessage: 'Suppression impossible.',
+      redirectTo: REDIRECT_URL,
+    })
   }
 }

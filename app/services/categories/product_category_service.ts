@@ -6,10 +6,12 @@ import type {
   CreateProductCategoryInput,
   UpdateProductCategoryInput,
 } from '#validators/product_category'
+import { inject } from '@adonisjs/core'
 
-const journalisationService = new JournalisationService()
-
+@inject()
 export default class ProductCategoryService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Récupère la liste des catégories et des statistiques générales.
    */
@@ -41,7 +43,7 @@ export default class ProductCategoryService {
       isActive: true,
     })
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_CATEGORIES,
       message: `La catégorie de service "${category.name}" a été créée par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -77,7 +79,7 @@ export default class ProductCategoryService {
 
     await category.save()
 
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_CATEGORIES,
       message: `La catégorie "${previousName}" a été mise à jour par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -97,7 +99,7 @@ export default class ProductCategoryService {
     await category.delete()
 
     // Créer une notification
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.PRODUCT_CATEGORIES,
       message: `La catégorie "${categoryName}" a été supprimée par ${actor.fullName ?? actor.email}.`,
       user: actor,

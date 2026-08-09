@@ -3,10 +3,12 @@ import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type { CreateCustomerInput, UpdateCustomerInput } from '#validators/customer'
+import { inject } from '@adonisjs/core'
 
-const journalisationService = new JournalisationService()
-
+@inject()
 export default class CustomerService {
+  constructor(private journalisationService: JournalisationService) {}
+
   /**
    * Recupere la liste des customers et les statistiques.
    */
@@ -65,7 +67,7 @@ export default class CustomerService {
     })
 
     // Enregistrer la journalisation.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.CUSTOMERS,
       message: `Le client "${customer.fullName}" a ete cree par ${actor.fullName ?? actor.email}.`,
       user: actor,
@@ -111,7 +113,7 @@ export default class CustomerService {
     await customer.save()
 
     // Enregistrer la journalisation.
-    await journalisationService.create({
+    await this.journalisationService.create({
       module: JournalisationModule.CUSTOMERS,
       message: `Le client "${previousName}" a ete mis a jour par ${actor.fullName ?? actor.email}.`,
       user: actor,

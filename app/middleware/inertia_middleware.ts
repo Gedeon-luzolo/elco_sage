@@ -6,11 +6,17 @@ import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
 import ExchangeRateTransformer from '#transformers/exchange_rate_transformer'
 import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
+import { inject } from '@adonisjs/core'
 
-const exchangeRateService = new ExchangeRateService()
-const cashSessionService = new CashSessionService()
-
+@inject()
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
+  constructor(
+    private exchangeRateService: ExchangeRateService,
+    private cashSessionService: CashSessionService
+  ) {
+    super()
+  }
+
   async share(ctx: HttpContext) {
     /**
      * The share method is called everytime an Inertia page is rendered. In
@@ -27,9 +33,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
      */
     const error = session?.flashMessages.get('error') as string
     const success = session?.flashMessages.get('success') as string
-    const exchangeRate = auth?.user ? await exchangeRateService.getCurrentRate() : null
+    const exchangeRate = auth?.user ? await this.exchangeRateService.getCurrentRate() : null
     const currentCashSession = auth?.user
-      ? await cashSessionService.getOpenSessionForUser(auth.user.id)
+      ? await this.cashSessionService.getOpenSessionForUser(auth.user.id)
       : null
 
     /**
