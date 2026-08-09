@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, LoaderCircle, Lock, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrandLogo } from '~/components/brand/brand_logo'
 import { UserProfileBadge } from '~/components/auth/user_profile_badge'
 import { Button } from '~/components/ui/button'
@@ -25,6 +25,35 @@ interface LockedContentProps {
 function LockedContent({ idle, user }: LockedContentProps) {
   const [isPasswordPromptVisible, setIsPasswordPromptVisible] = useState(false)
 
+  useEffect(() => {
+    //Si le prompt est deja visible, on ne veut pas le reouvrir avec un raccourci clavier.
+    if (isPasswordPromptVisible) {
+      return
+    }
+
+    const openPasswordPromptFromKeyboard = (event: KeyboardEvent) => {
+      // Si on appuie sur une touche avec un modificateur (Alt, Ctrl, Cmd), on ne veut pas ouvrir le prompt.
+      if (event.altKey || event.ctrlKey || event.metaKey) {
+        return
+      }
+      // On ouvre le prompt si l'utilisateur appuie sur une touche de caractere (lettre, chiffre, symbole).
+      setIsPasswordPromptVisible(true)
+
+      // On met a jour le mot de passe avec la touche appuyee, pour que l'utilisateur puisse commencer a taper directement.
+      if (event.key.length === 1) {
+        idle.setPassword(event.key)
+      }
+    }
+
+    // On ouvre le prompt si l'utilisateur appuie sur une touche de caractere (lettre, chiffre, symbole).
+    window.addEventListener('keydown', openPasswordPromptFromKeyboard)
+
+    // Nettoyage de l'event listener quand le composant est demonte ou que le prompt devient visible.
+    return () => {
+      window.removeEventListener('keydown', openPasswordPromptFromKeyboard)
+    }
+  }, [idle, isPasswordPromptVisible])
+
   return (
     <motion.div
       className="fixed inset-0 z-9999 flex cursor-pointer items-center justify-center overflow-hidden text-white"
@@ -44,7 +73,7 @@ function LockedContent({ idle, user }: LockedContentProps) {
       />
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,76,255,0.45)_0%,rgba(3,22,51,0.92)_52%,rgba(0,9,26,0.98)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,102,255,0.34)_0%,rgba(0,52,148,0.18)_28%,rgba(0,0,0,0.42)_100%)]" />
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:56px_56px]" />
+      <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-size-[56px_56px]" />
 
       <div
         className={`absolute inset-0 transition-all duration-500 ${
@@ -119,7 +148,13 @@ function LockedContent({ idle, user }: LockedContentProps) {
           >
             <UserProfileBadge user={user} className="mb-8" showRole={false} />
 
-            <div className="w-full">
+            <form
+              className="w-full"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void idle.verifyPassword()
+              }}
+            >
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-white/70" />
                 <Input
@@ -129,12 +164,6 @@ function LockedContent({ idle, user }: LockedContentProps) {
                   placeholder="Mot de passe"
                   autoFocus
                   onChange={(event) => idle.setPassword(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      // Le raccourci valide le mot de passe sans bouton supplementaire.
-                      void idle.verifyPassword()
-                    }
-                  }}
                 />
               </div>
               {idle.error && (
@@ -143,10 +172,9 @@ function LockedContent({ idle, user }: LockedContentProps) {
               <div className="mt-4 flex items-center gap-3">
                 <Button
                   className="h-12 flex-1 rounded-xl border-white/70 bg-transparent text-white/80 hover:bg-white/10 hover:text-white"
-                  type="button"
+                  type="submit"
                   variant="outline"
                   disabled={idle.isVerifying}
-                  onClick={() => void idle.verifyPassword()}
                 >
                   {idle.isVerifying ? (
                     <LoaderCircle className="size-4 animate-spin" />
@@ -156,7 +184,7 @@ function LockedContent({ idle, user }: LockedContentProps) {
                   Deverrouiller
                 </Button>
               </div>
-            </div>
+            </form>
 
             <button
               className="mt-32 flex flex-col items-center gap-2 text-white/80 transition-colors hover:text-white"
