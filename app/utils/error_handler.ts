@@ -7,11 +7,7 @@ import type { HttpContext } from '@adonisjs/core/http'
  * @param error L'erreur interceptée
  * @param fallbackMessage Le message d'erreur par défaut si l'erreur n'a pas de message explicite
  */
-export function handleControllerError(
-  ctx: HttpContext,
-  error: unknown,
-  fallbackMessage: string
-) {
+export function handleControllerError(ctx: HttpContext, error: unknown, fallbackMessage: string) {
   // Utilise le message de l'erreur si disponible, sinon le message générique fourni par le controleur.
   const message = error instanceof Error ? error.message : fallbackMessage
 
@@ -35,7 +31,7 @@ export async function runAction<T>(
   options: {
     successMessage?: string | ((result: T) => string)
     errorMessage: string
-    redirectTo: string
+    redirectTo: string | ((result: T) => string)
   }
 ) {
   try {
@@ -54,7 +50,10 @@ export async function runAction<T>(
     }
 
     // Redirige vers l'URL précisée par le controleur appelant.
-    return ctx.response.redirect().toPath(options.redirectTo)
+    const redirectTo =
+      typeof options.redirectTo === 'function' ? options.redirectTo(result) : options.redirectTo
+
+    return ctx.response.redirect().toPath(redirectTo)
   } catch (error) {
     // Délègue la gestion de l'erreur au handler centralisé.
     return handleControllerError(ctx, error, options.errorMessage)

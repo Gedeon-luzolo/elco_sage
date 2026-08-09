@@ -1,5 +1,4 @@
-export const IDLE_TIMEOUT_MS = 1 * 1000 // 40 minutes
-// export const IDLE_TIMEOUT_MS = 40 * 60 * 1000 // 40 minutes
+export const IDLE_TIMEOUT_MS = 40 * 60 * 1000 // 40 minutes
 
 export const IDLE_ACTIVITY_EVENTS = [
   'mousemove',

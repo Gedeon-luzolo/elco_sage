@@ -8,16 +8,18 @@ import {
   Plus,
   ShoppingCart,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
 import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
 import { SalesTable } from '~/components/sales/sales_table'
+import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { usePaginated } from '~/hooks/use_paginated'
+import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useSearch } from '~/hooks/use_search'
 import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
@@ -27,7 +29,11 @@ import { saleSearchFields } from '~/utils/sales/sale.utils'
 const SALES_PAGE_SIZE = 2
 
 export default function SalesPage({ currentCashSession, sales }: InertiaProps<SalesPageProps>) {
-  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(sales[0]?.id ?? null)
+  const printSaleId = new URLSearchParams(window.location.search).get('printSaleId')
+  // La vente selectionnee est identifiee par son ID. On initialise la selection a printSaleId si present, sinon a la premiere vente chargee.²
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(
+    printSaleId ?? sales[0]?.id ?? null
+  )
 
   // Filtre les ventes de la session courante par addition, client ou bon de commande.
   const {
@@ -60,12 +66,27 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
 
   // La ligne selectionnee alimente le panneau de details.
   const selectedSale = useMemo(
-    () => paginatedSales.visibleItems.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
-    [paginatedSales.visibleItems, effectiveSelectedSaleId]
+    () => sales.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
+    [sales, effectiveSelectedSaleId]
   )
+  // Le callback pour selectionner une vente a ete memorise pour eviter de recrer la fonction a chaque rendu.
+  const selectSaleForPrint = useCallback((saleId: string) => setSelectedSaleId(saleId), [])
+
+  // Utiliser le hook usePrintInvoice pour preparer l'impression du ticket thermique.
+  const { printInvoice, receiptRef } = usePrintInvoice({
+    selectedSale,
+    onSelectSale: selectSaleForPrint,
+  })
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
+      <div className="fixed left-[10000px] top-0" aria-hidden="true">
+        {/* Le ticket reste monte hors ecran pour que react-to-print puisse le lire via ref. */}
+        <div ref={receiptRef} className="bg-white">
+          {selectedSale && <ThermalSaleReceipt sale={selectedSale} />}
+        </div>
+      </div>
+
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Gestion des ventes"
@@ -152,7 +173,7 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
                 selectedSaleId={effectiveSelectedSaleId}
                 onSelectSale={setSelectedSaleId}
               />
-              {selectedSale && <SaleDetailPanel sale={selectedSale} />}
+              {selectedSale && <SaleDetailPanel sale={selectedSale} onPrintSale={printInvoice} />}
             </div>
           </div>
         )}

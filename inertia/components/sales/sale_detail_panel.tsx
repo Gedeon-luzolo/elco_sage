@@ -1,3 +1,5 @@
+import { Printer } from 'lucide-react'
+import { Button } from '~/components/ui/button'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
@@ -5,17 +7,30 @@ import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface SaleDetailPanelProps {
   sale: SaleItemRow
+  onPrintSale?: (sale: SaleItemRow) => void
 }
 
 /**
  * Panneau de detail d'une vente selectionnee.
  */
-export function SaleDetailPanel({ sale }: SaleDetailPanelProps) {
+export function SaleDetailPanel({ sale, onPrintSale }: SaleDetailPanelProps) {
   return (
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-      <div className="sticky top-0 z-10 border-b border-border bg-card p-4">
-        <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
-        <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
+      <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-card p-4">
+        <div>
+          <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
+          <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          onClick={() => onPrintSale?.(sale)}
+        >
+          <Printer className="size-4" />
+          Imprimer
+        </Button>
       </div>
 
       <div className="space-y-4 p-4">

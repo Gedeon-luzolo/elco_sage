@@ -95,7 +95,7 @@ export default class SalesController {
     return runAction(ctx, () => saleService.create(actor, payload as CreateSaleInput), {
       successMessage: 'Vente enregistree avec succes.',
       errorMessage: "Impossible d'enregistrer cette vente.",
-      redirectTo: REDIRECT_URL,
+      redirectTo: (sale) => `${REDIRECT_URL}?printSaleId=${sale.id}`,
     })
   }
 
