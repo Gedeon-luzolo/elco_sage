@@ -1,5 +1,6 @@
 import { Link } from '@adonisjs/inertia/react'
 import {
+  ArrowLeft,
   Banknote,
   CalendarDays,
   CreditCard,
@@ -25,11 +26,17 @@ import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
 import { formatDateLabel } from '~/utils/date'
 import { saleSearchFields } from '~/utils/sales/sale.utils'
+import { isManagementRole } from '~/utils/user_role.utils'
 
 const SALES_PAGE_SIZE = 2
 
-export default function SalesPage({ currentCashSession, sales }: InertiaProps<SalesPageProps>) {
+export default function SalesPage({
+  currentCashSession,
+  sales,
+  user,
+}: InertiaProps<SalesPageProps>) {
   const printSaleId = new URLSearchParams(window.location.search).get('printSaleId')
+  const isManagementUser = isManagementRole(user?.role)
   // La vente selectionnee est identifiee par son ID. On initialise la selection a printSaleId si present, sinon a la premiere vente chargee.²
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(
     printSaleId ?? sales[0]?.id ?? null
@@ -95,6 +102,12 @@ export default function SalesPage({ currentCashSession, sales }: InertiaProps<Sa
           accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
           <>
+            {isManagementUser && (
+              <Button render={<Link href="/" />} variant="outline">
+                <ArrowLeft className="size-4" />
+                Retour accueil
+              </Button>
+            )}
             <Button
               render={<Link href="/sales/sessions" />}
               variant="outline"

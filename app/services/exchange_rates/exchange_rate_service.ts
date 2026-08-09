@@ -1,22 +1,33 @@
 import { JournalisationModule } from '#models/journalisation'
 import ExchangeRate, { type ExchangeRateType } from '#models/exchange_rate'
 import type User from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type { CreateExchangeRateInput } from '#validators/exchange_rate'
 import { inject } from '@adonisjs/core'
 
 @inject()
 export default class ExchangeRateService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   // Recupere le dernier taux encode.
   async getCurrentRate() {
-    return ExchangeRate.query().orderBy('createdAt', 'desc').first()
+    return this.cacheService.remember(CacheKeys.exchangeRates.current, CacheTtl.ONE_MONTH, () =>
+      ExchangeRate.query().orderBy('createdAt', 'desc').first()
+    )
   }
 
   // Recupere les derniers taux pour l'historique du back-office.
   async getHistory(limit = 10) {
-    return ExchangeRate.query().orderBy('createdAt', 'desc').limit(limit)
+    return this.cacheService.remember(
+      CacheKeys.exchangeRates.history(limit),
+      CacheTtl.ONE_MONTH,
+      () => ExchangeRate.query().orderBy('createdAt', 'desc').limit(limit)
+    )
   }
 
   /**
@@ -36,6 +47,10 @@ export default class ExchangeRateService {
       message: this.buildJournalMessage(actor, exchangeRate, previousRate),
       user: actor,
     })
+
+    // Invalider le cache pour forcer la lecture depuis la base de données
+    this.cacheService.forgetByPrefix(CacheKeys.exchangeRates.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
 
     return exchangeRate
   }

@@ -1,6 +1,8 @@
 import ProductCategory from '#models/product_category'
 import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type {
   CreateProductCategoryInput,
@@ -10,26 +12,43 @@ import { inject } from '@adonisjs/core'
 
 @inject()
 export default class ProductCategoryService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Récupère la liste des catégories et des statistiques générales.
    */
   async getCategoriesOverview() {
-    const categories = await ProductCategory.query().orderBy('name', 'asc')
+    // On utilise un cache d'une durée plus longue pour les catégories, car elles changent rarement.
+    return this.cacheService.remember(
+      CacheKeys.productCategories.overview,
+      CacheTtl.ONE_MONTH,
+      async () => {
+        const categories = await ProductCategory.query().orderBy('name', 'asc')
 
-    const total = categories.length
-    const activeCount = categories.filter((c) => c.isActive).length
-    const inactiveCount = total - activeCount
+        const total = categories.length
+        const activeCount = categories.filter((c) => c.isActive).length
+        const inactiveCount = total - activeCount
 
-    return {
-      categories,
-      stats: {
-        total,
-        activeCount,
-        inactiveCount,
-      },
-    }
+        return {
+          categories,
+          stats: {
+            total,
+            activeCount,
+            inactiveCount,
+          },
+        }
+      }
+    )
+  }
+
+  // Récupère la liste des catégories actives pour les produits/services vendables.
+  async getActiveCategories() {
+    return this.cacheService.remember(CacheKeys.productCategories.active, CacheTtl.ONE_MONTH, () =>
+      ProductCategory.query().where('is_active', true).orderBy('name', 'asc')
+    )
   }
 
   /**
@@ -48,6 +67,8 @@ export default class ProductCategoryService {
       message: `La catégorie de service "${category.name}" a été créée par ${actor.fullName ?? actor.email}.`,
       user: actor,
     })
+
+    this.invalidateCategoryCache()
 
     return category
   }
@@ -85,6 +106,8 @@ export default class ProductCategoryService {
       user: actor,
     })
 
+    this.invalidateCategoryCache()
+
     return category
   }
 
@@ -105,6 +128,14 @@ export default class ProductCategoryService {
       user: actor,
     })
 
+    this.invalidateCategoryCache()
+
     return true
+  }
+
+  // Invalide le cache des catégories et services pour forcer la lecture depuis la base de données.
+  private invalidateCategoryCache() {
+    this.cacheService.forgetByPrefix(CacheKeys.productCategories.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
   }
 }

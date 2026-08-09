@@ -3,6 +3,8 @@ import { JournalisationModule } from '#models/journalisation'
 import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
 import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
+import { CacheKeys } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { Currency } from '#types/currency'
 import { normalizeDateRange } from '#utils/date_utils'
@@ -23,7 +25,10 @@ export interface FindCashSessionsParams {
 
 @inject()
 export default class CashSessionService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Recupere la session de caisse ouverte pour un utilisateur.
@@ -87,6 +92,9 @@ export default class CashSessionService {
       user: actor,
     })
 
+    // Invalider le cache pour forcer la lecture depuis la base de données
+    this.invalidateCashSessionDomains()
+
     return cashSession
   }
 
@@ -131,7 +139,15 @@ export default class CashSessionService {
       user: actor,
     })
 
+    this.invalidateCashSessionDomains()
+
     return cashSession
+  }
+
+  // Invalide le cache des domaines dependants de la session de caisse pour forcer la lecture depuis la base de données.
+  private invalidateCashSessionDomains() {
+    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
   }
 
   /**

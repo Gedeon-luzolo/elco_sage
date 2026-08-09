@@ -1,5 +1,5 @@
 import type {} from '../../../.adonisjs/server/pages.d.ts'
-import ProductCategory from '#models/product_category'
+import ProductCategoryService from '#services/categories/product_category_service'
 import ProductServiceService from '#services/products/product_service_service'
 import ProductCategoryTransformer from '#transformers/product_category_transformer'
 import ProductServiceTransformer from '#transformers/product_service_transformer'
@@ -16,14 +16,17 @@ const REDIRECT_URL = '/management/product-services'
 
 @inject()
 export default class ProductServicesController {
-  constructor(private productServiceService: ProductServiceService) {}
+  constructor(
+    private productServiceService: ProductServiceService,
+    private productCategoryService: ProductCategoryService
+  ) {}
 
   /**
    * Affiche la liste des produits et services.
    */
   async index({ inertia }: HttpContext) {
     const overview = await this.productServiceService.getOverview()
-    const categories = await ProductCategory.query().where('is_active', true).orderBy('name', 'asc')
+    const categories = await this.productCategoryService.getActiveCategories()
 
     return (inertia.render as any)('products/product_services_page', {
       products: ProductServiceTransformer.transform(overview.products),

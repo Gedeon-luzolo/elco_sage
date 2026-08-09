@@ -1,6 +1,8 @@
 import { JournalisationModule } from '#models/journalisation'
 import Sale, { SaleStatus } from '#models/sale'
 import type User from '#models/user'
+import { CacheKeys } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
@@ -15,7 +17,8 @@ export default class SaleService {
   constructor(
     private journalisationService: JournalisationService,
     private saleItemService: SaleItemService,
-    private saleValidationService: SaleValidationService
+    private saleValidationService: SaleValidationService,
+    private cacheService: CacheService
   ) {}
 
   /**
@@ -56,7 +59,7 @@ export default class SaleService {
     // Les sorties stock suivent la date métier de la caisse, pas forcément la date système.
     const stockDateKey = cashSession.openedAt.toISODate()!
 
-    return db.transaction(async (trx) => {
+    const createdSale = await db.transaction(async (trx) => {
       // Le numéro d'addition est verrouillé dans la transaction pour éviter deux numéros identiques.
       const additionNumber = await this.generateAdditionNumber(trx)
 
@@ -98,6 +101,10 @@ export default class SaleService {
 
       return sale
     })
+
+    this.invalidateSaleDomains()
+
+    return createdSale
   }
 
   /**
@@ -159,7 +166,17 @@ export default class SaleService {
       user: actor,
     })
 
+    this.invalidateSaleDomains()
+
     return sale
+  }
+
+  // Invalide le cache des ventes, recouvrements et sessions de caisse pour forcer la lecture depuis la base de données.
+  private invalidateSaleDomains() {
+    this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
   }
 
   /**

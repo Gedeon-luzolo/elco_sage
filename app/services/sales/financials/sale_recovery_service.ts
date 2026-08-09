@@ -2,6 +2,8 @@ import { JournalisationModule } from '#models/journalisation'
 import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
 import SaleRecovery from '#models/sale_recovery'
 import type User from '#models/user'
+import { CacheKeys } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import CashSessionService from '#services/sales/cash_session_service'
 import DebtService from '#services/sales/financials/debt_service'
@@ -23,7 +25,8 @@ export default class SaleRecoveryService {
   constructor(
     private journalisationService: JournalisationService,
     private cashSessionService: CashSessionService,
-    private debtService: DebtService
+    private debtService: DebtService,
+    private cacheService: CacheService
   ) {}
 
   /**
@@ -59,7 +62,16 @@ export default class SaleRecoveryService {
       user: actor,
     })
 
+    this.invalidateRecoveryDomains()
+
     return recovery
+  }
+
+  // Invalide le cache des recouvrements, dettes et sessions de caisse pour forcer la lecture depuis la base de données.
+  private invalidateRecoveryDomains() {
+    this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
   }
 
   /**

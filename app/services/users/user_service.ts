@@ -1,5 +1,7 @@
 import { JournalisationModule } from '#models/journalisation'
 import User, { UserRole, UserStatus } from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type {
   CreatedUserResult,
@@ -16,7 +18,10 @@ const USER_CREATION_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR]
 
 @inject()
 export default class UserService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Recupere les donnees principales de la page utilisateurs en une seule requete.
@@ -24,6 +29,13 @@ export default class UserService {
    * Les compteurs SQL evitent de charger tous les utilisateurs en memoire.
    */
   async getUsersOverview(limit = 30): Promise<UserOverview> {
+    return this.cacheService.remember(CacheKeys.users.overview(limit), CacheTtl.ONE_MONTH, () =>
+      this.buildUsersOverview(limit)
+    )
+  }
+
+  // Construit les données de la page utilisateurs en une seule requete SQL.s
+  private async buildUsersOverview(limit: number): Promise<UserOverview> {
     const users = await User.query()
       .select('users.*')
       .select(
@@ -56,10 +68,15 @@ export default class UserService {
    */
   async getActiveOperatorsForSale() {
     // Toute personne active sauf l'admin peut etre selectionnee comme operateur de commande.
-    return User.query()
-      .whereNot('role', UserRole.ADMIN)
-      .where('status', UserStatus.ACTIVE)
-      .orderBy('fullName', 'asc')
+    return this.cacheService.remember(
+      CacheKeys.users.activeOperatorsForSale,
+      CacheTtl.ONE_MONTH,
+      () =>
+        User.query()
+          .whereNot('role', UserRole.ADMIN)
+          .where('status', UserStatus.ACTIVE)
+          .orderBy('fullName', 'asc')
+    )
   }
 
   /**
@@ -86,6 +103,8 @@ export default class UserService {
       message: `Le compte ${user.fullName ?? user.email} a ete cree par ${actor.fullName ?? actor.email}`,
       user,
     })
+
+    this.invalidateUserCache()
 
     return {
       user,
@@ -125,6 +144,8 @@ export default class UserService {
       user,
     })
 
+    this.invalidateUserCache()
+
     return user
   }
 
@@ -149,6 +170,12 @@ export default class UserService {
       user,
     })
     await user.delete()
+    this.invalidateUserCache()
+  }
+
+  // Invalide le cache des utilisateurs pour forcer la lecture depuis la base de données.
+  private invalidateUserCache() {
+    this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
   }
 
   // Verifie que l'acteur peut creer des utilisateurs.

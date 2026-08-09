@@ -1,5 +1,7 @@
 import { JournalisationModule } from '#models/journalisation'
 import User, { UserStatus } from '#models/user'
+import { CacheKeys } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { inject } from '@adonisjs/core'
 import hash from '@adonisjs/core/services/hash'
@@ -18,7 +20,10 @@ export type LoginAttemptResult =
 
 @inject()
 export default class AuthAttemptService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Verifie une tentative de connexion complete.
@@ -81,6 +86,7 @@ export default class AuthAttemptService {
     if (user.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
       user.status = UserStatus.BLOCKED
       await user.save()
+      this.invalidateUserCache()
 
       // Journalise le blocage automatique après les échecs de connexion.
       await this.journalisationService.create({
@@ -93,6 +99,7 @@ export default class AuthAttemptService {
     }
 
     await user.save()
+    this.invalidateUserCache()
     return this.failed('Email ou mot de passe incorrect')
   }
 
@@ -109,6 +116,12 @@ export default class AuthAttemptService {
     // Le compteur ne doit pas survivre a une authentification reussie.
     user.failedLoginAttempts = 0
     await user.save()
+    this.invalidateUserCache()
+  }
+
+  // Invalide le cache des utilisateurs pour forcer la lecture depuis la base de donnees.
+  private invalidateUserCache() {
+    this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
   }
 
   /**

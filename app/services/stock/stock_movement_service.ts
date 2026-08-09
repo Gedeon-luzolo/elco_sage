@@ -2,6 +2,8 @@ import StockMovement from '#models/stock_movement'
 import ProductService, { ProductServiceType } from '#models/product_service'
 import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { DateTime } from 'luxon'
 import type { StockMovementDTO } from '#transformers/stock_movement_transformer'
@@ -27,7 +29,10 @@ export interface SaleStockSnapshot {
 
 @inject()
 export default class StockMovementService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Récupère tous les produits avec leurs mouvements pour une date donnée.
@@ -36,6 +41,13 @@ export default class StockMovementService {
   async getDailyStock({ date }: GetDailyStockParams): Promise<StockMovementDTO[]> {
     ensureDateIsNotFuture(date)
 
+    return this.cacheService.remember(CacheKeys.stock.daily(date), CacheTtl.MEDIUM, () =>
+      this.buildDailyStock(date)
+    )
+  }
+
+  // Construit la liste des mouvements de stock pour une date donnée.
+  private async buildDailyStock(date: string): Promise<StockMovementDTO[]> {
     const dateMovement = new Date(date)
 
     // 1. Récupérer tous les produits actifs de type PRODUCT et les mouvements en parallèle
@@ -144,6 +156,18 @@ export default class StockMovementService {
   async getSaleStockSnapshot(product: ProductService, date: string): Promise<SaleStockSnapshot> {
     ensureDateIsNotFuture(date)
 
+    return this.cacheService.remember(
+      CacheKeys.stock.saleSnapshot(date, product.id),
+      CacheTtl.MEDIUM,
+      () => this.buildSaleStockSnapshot(product, date)
+    )
+  }
+
+  // Construit le snapshot du stock vendable pour un produit à une date donnée.
+  private async buildSaleStockSnapshot(
+    product: ProductService,
+    date: string
+  ): Promise<SaleStockSnapshot> {
     // La vente est autorisee seulement si la chaine de stock precedente est cloturee.
     // Exemple: si hier a été imputé mais pas validé physiquement, on bloque aujourd'hui.
     const canWork = await this.canWorkOnDate(product.id, date)
@@ -256,6 +280,7 @@ export default class StockMovementService {
     // outputs représente la somme des sorties vendues pour ce produit à cette date.
     movement.outputs = nextOutputs
     await movement.useTransaction(trx).save()
+    this.invalidateStockDate(date)
 
     return movement
   }
@@ -286,6 +311,7 @@ export default class StockMovementService {
     // On évite une valeur négative si la vente a déjà été restaurée manuellement.
     movement.outputs = Math.max(0, Number(movement.outputs || 0) - quantity)
     await movement.useTransaction(trx).save()
+    this.invalidateStockDate(date)
 
     return movement
   }
@@ -355,6 +381,7 @@ export default class StockMovementService {
     })
 
     await movement.load('product')
+    this.invalidateStockDate(payload.date)
     return movement
   }
 
@@ -394,6 +421,7 @@ export default class StockMovementService {
     })
 
     await movement.load('product')
+    this.invalidateStockDate(payload.date)
     return movement
   }
 
@@ -487,10 +515,17 @@ export default class StockMovementService {
 
     // Recalculer les autres champs après la mise à jour
     await movement.load('product')
+    this.invalidateStockDate(payload.date)
     return movement
   }
 
-  // verifie que le payload correspond bien au mouvement cible pour eviter les corrections croisées
+  // invalide le cache des mouvements de stock et des snapshots de vente pour forcer la lecture depuis la base de données.
+  private invalidateStockDate(date: string) {
+    this.cacheService.forget(CacheKeys.stock.daily(date))
+    this.cacheService.forgetByPrefix(CacheKeys.stock.saleSnapshotByDatePrefix(date))
+    this.cacheService.forget(CacheKeys.productServices.activeForSale(date))
+  }
+
   private ensurePayloadMatchesMovement(movement: StockMovement, productId: string, date: string) {
     if (movement.productId !== productId || movement.date.toISODate() !== date) {
       throw new Error('Les donnees envoyees ne correspondent pas au mouvement a modifier.')

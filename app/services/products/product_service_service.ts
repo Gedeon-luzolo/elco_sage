@@ -1,6 +1,8 @@
 import ProductService, { ProductServiceType } from '#models/product_service'
 import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
 import StockMovementService, {
@@ -23,13 +25,20 @@ export default class ProductServiceService {
   constructor(
     private journalisationService: JournalisationService,
     private exchangeRateService: ExchangeRateService,
-    private stockMovementService: StockMovementService
+    private stockMovementService: StockMovementService,
+    private cacheService: CacheService
   ) {}
 
   /**
    * Récupère la liste des produits/services et les statistiques.
    */
   async getOverview() {
+    return this.cacheService.remember(CacheKeys.productServices.overview, CacheTtl.ONE_MONTH, () =>
+      this.buildOverview()
+    )
+  }
+
+  private async buildOverview() {
     // Recuperer d'abord les produits et les services avec leurs relations d'affichage.
     const items = await ProductService.query()
       .preload('category')
@@ -63,6 +72,14 @@ export default class ProductServiceService {
    * Recupere uniquement les services actifs disponibles a la vente.
    */
   async getActiveServicesForSale(stockDate = todayDateKey()) {
+    return this.cacheService.remember(
+      CacheKeys.productServices.activeForSale(stockDate),
+      CacheTtl.MEDIUM,
+      () => this.buildActiveServicesForSale(stockDate)
+    )
+  }
+
+  private async buildActiveServicesForSale(stockDate: string) {
     // Le module vente ne vend pas les produits physiques, uniquement les prestations.
     const services = await ProductService.query()
       .where('type', ProductServiceType.SERVICE)
@@ -147,6 +164,9 @@ export default class ProductServiceService {
       user: actor,
     })
 
+    // Invalider le cache pour forcer la lecture depuis la base de données
+    this.invalidateProductServiceCache()
+
     return item
   }
 
@@ -202,6 +222,8 @@ export default class ProductServiceService {
       user: actor,
     })
 
+    this.invalidateProductServiceCache()
+
     return item
   }
 
@@ -220,7 +242,16 @@ export default class ProductServiceService {
       user: actor,
     })
 
+    // Invalider le cache pour forcer la lecture depuis la base de données
+    this.invalidateProductServiceCache()
+
     return true
+  }
+
+  // Invalide le cache des produits et services pour forcer la lecture depuis la base de données.
+  private invalidateProductServiceCache() {
+    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
   }
 
   /**

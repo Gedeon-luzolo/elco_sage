@@ -1,18 +1,29 @@
 import Customer from '#models/customer'
 import { JournalisationModule } from '#models/journalisation'
 import type User from '#models/user'
+import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
+import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type { CreateCustomerInput, UpdateCustomerInput } from '#validators/customer'
 import { inject } from '@adonisjs/core'
 
 @inject()
 export default class CustomerService {
-  constructor(private journalisationService: JournalisationService) {}
+  constructor(
+    private journalisationService: JournalisationService,
+    private cacheService: CacheService
+  ) {}
 
   /**
    * Recupere la liste des customers et les statistiques.
    */
   async getOverview() {
+    return this.cacheService.remember(CacheKeys.customers.overview, CacheTtl.ONE_MONTH, () =>
+      this.buildOverview()
+    )
+  }
+
+  private async buildOverview() {
     // Recuperer les customers du plus recent au plus ancien.
     const customers = await Customer.query().orderBy('created_at', 'desc')
 
@@ -34,7 +45,9 @@ export default class CustomerService {
    * Recupere les clients actifs selectionnables dans une vente.
    */
   async getActiveCustomersForSale() {
-    return Customer.query().where('isActive', true).orderBy('fullName', 'asc')
+    return this.cacheService.remember(CacheKeys.customers.activeForSale, CacheTtl.ONE_MONTH, () =>
+      Customer.query().where('isActive', true).orderBy('fullName', 'asc')
+    )
   }
 
   /**
@@ -72,6 +85,8 @@ export default class CustomerService {
       message: `Le client "${customer.fullName}" a ete cree par ${actor.fullName ?? actor.email}.`,
       user: actor,
     })
+
+    this.invalidateCustomerCache()
 
     return customer
   }
@@ -119,7 +134,13 @@ export default class CustomerService {
       user: actor,
     })
 
+    this.invalidateCustomerCache()
+
     return customer
+  }
+
+  private invalidateCustomerCache() {
+    this.cacheService.forgetByPrefix(CacheKeys.customers.prefix)
   }
 
   // Verifie que l'email n'est pas deja porte par un autre customer.
