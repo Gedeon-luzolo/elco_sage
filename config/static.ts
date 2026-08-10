@@ -27,6 +27,14 @@ const staticServerConfig = defineConfig({
    * Policy for files starting with a dot.
    */
   dotFiles: 'ignore',
+
+  // Crre des custom  header pour le service worker
+  headers: (path) => {
+    if (path.endsWith('sw.js')) {
+      return { 'Service-Worker-Allowed': '/' }
+    }
+    return {}
+  },
 })
 
 export default staticServerConfig
