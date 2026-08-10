@@ -10,6 +10,7 @@ import {
   Search,
 } from 'lucide-react'
 import { useState } from 'react'
+import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
@@ -145,115 +146,121 @@ export default function RecoveriesPage({
           </Button>
         </PageHeader>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {statCards.map((stat) => (
-            <StatCard
-              key={stat.label}
-              label={stat.label}
-              value={stat.value}
-              color={stat.color}
-              icon={stat.icon}
-            />
-          ))}
-        </section>
-
-        <Card className="bg-background">
-          <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-md bg-muted">
-                <Search className="size-5" />
-              </span>
-              <div>
-                <CardTitle>Historique des paiements</CardTitle>
-                <CardDescription>
-                  Page {paginatedRecoveries.currentPage} - {paginatedRecoveries.loadedItemsCount}{' '}
-                  paiement(s) chargé(s)
-                </CardDescription>
-              </div>
-            </div>
-
-            <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Rechercher client ou addition..."
-                className="w-full lg:w-72"
-              />
-
-              {paginatedRecoveries.totalLoadedPages > 1 && (
-                <PaginationControls
-                  canGoPrevious={paginatedRecoveries.canGoPrevious}
-                  canGoNext={paginatedRecoveries.canGoNext}
-                  pageSize={RECOVERIES_PAGE_SIZE}
-                  onPrevious={paginatedRecoveries.goToPreviousPage}
-                  onNext={paginatedRecoveries.goToNextPage}
+        {isLoading ? (
+          <DataLoader title="Chargement des recouvrements..." />
+        ) : (
+          <>
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {statCards.map((stat) => (
+                <StatCard
+                  key={stat.label}
+                  label={stat.label}
+                  value={stat.value}
+                  color={stat.color}
+                  icon={stat.icon}
                 />
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date de paiement</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Addition</TableHead>
-                  <TableHead>Date de vente</TableHead>
-                  <TableHead className="text-right">Montant payé</TableHead>
-                  <TableHead className="text-right">Total payé</TableHead>
-                  <TableHead className="text-right">Reste après paiement</TableHead>
-                  <TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedRecoveries.visibleItems.map((payment) => (
-                  <TableRow key={payment.recovery.id}>
-                    <TableCell>{formatDateTimeLabel(payment.recovery.recoveredAt)}</TableCell>
-                    <TableCell>{payment.recovery.receivedByName ?? '-'}</TableCell>
-                    <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
-                    <TableCell>{payment.sale.additionNumber}</TableCell>
-                    <TableCell>{formatDebtSaleDate(payment.sale.saleDate)}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatMoneyWithCurrency(
-                        payment.paidAmount,
-                        payment.recovery.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatMoneyWithCurrency(
-                        payment.paidAfterAmount,
-                        payment.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatMoneyWithCurrency(
-                        payment.remainingAmount,
-                        payment.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DebtStatusBadge status={payment.debtStatus} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+              ))}
+            </section>
 
-                {paginatedRecoveries.items.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={9} className="h-64">
-                      <EmptyState
-                        icon={Search}
-                        title="Aucun paiement trouvé"
-                        description="Aucun paiement de dette ne correspond à cette période."
-                        className="border-none bg-transparent shadow-none"
-                      />
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            <Card className="bg-background">
+              <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 items-center justify-center rounded-md bg-muted">
+                    <Search className="size-5" />
+                  </span>
+                  <div>
+                    <CardTitle>Historique des paiements</CardTitle>
+                    <CardDescription>
+                      Page {paginatedRecoveries.currentPage} -{' '}
+                      {paginatedRecoveries.loadedItemsCount} paiement(s) chargé(s)
+                    </CardDescription>
+                  </div>
+                </div>
+
+                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+                  <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Rechercher client ou addition..."
+                    className="w-full lg:w-72"
+                  />
+
+                  {paginatedRecoveries.totalLoadedPages > 1 && (
+                    <PaginationControls
+                      canGoPrevious={paginatedRecoveries.canGoPrevious}
+                      canGoNext={paginatedRecoveries.canGoNext}
+                      pageSize={RECOVERIES_PAGE_SIZE}
+                      onPrevious={paginatedRecoveries.goToPreviousPage}
+                      onNext={paginatedRecoveries.goToNextPage}
+                    />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date de paiement</TableHead>
+                      <TableHead>Agent</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Addition</TableHead>
+                      <TableHead>Date de vente</TableHead>
+                      <TableHead className="text-right">Montant payé</TableHead>
+                      <TableHead className="text-right">Total payé</TableHead>
+                      <TableHead className="text-right">Reste après paiement</TableHead>
+                      <TableHead>Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedRecoveries.visibleItems.map((payment) => (
+                      <TableRow key={payment.recovery.id}>
+                        <TableCell>{formatDateTimeLabel(payment.recovery.recoveredAt)}</TableCell>
+                        <TableCell>{payment.recovery.receivedByName ?? '-'}</TableCell>
+                        <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
+                        <TableCell>{payment.sale.additionNumber}</TableCell>
+                        <TableCell>{formatDebtSaleDate(payment.sale.saleDate)}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {formatMoneyWithCurrency(
+                            payment.paidAmount,
+                            payment.recovery.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatMoneyWithCurrency(
+                            payment.paidAfterAmount,
+                            payment.sale.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatMoneyWithCurrency(
+                            payment.remainingAmount,
+                            payment.sale.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <DebtStatusBadge status={payment.debtStatus} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    {paginatedRecoveries.items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="h-64">
+                          <EmptyState
+                            icon={Search}
+                            title="Aucun paiement trouvé"
+                            description="Aucun paiement de dette ne correspond à cette période."
+                            className="border-none bg-transparent shadow-none"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </section>
     </main>
   )

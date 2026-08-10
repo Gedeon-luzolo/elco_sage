@@ -10,6 +10,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { useState } from 'react'
+import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
@@ -137,123 +138,129 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
           </Button>
         </PageHeader>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {statCards.map((stat) => (
-            <StatCard
-              key={stat.label}
-              label={stat.label}
-              value={stat.value}
-              color={stat.color}
-              icon={stat.icon}
-            />
-          ))}
-        </section>
-
-        <Card className="bg-background">
-          <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-md bg-muted">
-                <Search className="size-5" />
-              </span>
-              <div>
-                <CardTitle>Dettes en cours</CardTitle>
-                <CardDescription>
-                  Page {paginatedDebts.currentPage} - {paginatedDebts.loadedItemsCount} dette(s)
-                  chargée(s)
-                </CardDescription>
-              </div>
-            </div>
-
-            <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Rechercher client ou addition..."
-                className="w-full lg:w-72"
-              />
-
-              {paginatedDebts.totalLoadedPages > 1 && (
-                <PaginationControls
-                  canGoPrevious={paginatedDebts.canGoPrevious}
-                  canGoNext={paginatedDebts.canGoNext}
-                  pageSize={DEBTS_PAGE_SIZE}
-                  onPrevious={paginatedDebts.goToPreviousPage}
-                  onNext={paginatedDebts.goToNextPage}
+        {isLoading ? (
+          <DataLoader title="Chargement des dettes..." />
+        ) : (
+          <>
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {statCards.map((stat) => (
+                <StatCard
+                  key={stat.label}
+                  label={stat.label}
+                  value={stat.value}
+                  color={stat.color}
+                  icon={stat.icon}
                 />
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date de vente</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Addition</TableHead>
-                  <TableHead className="text-right">Dette totale</TableHead>
-                  <TableHead className="text-right">Déjà payé</TableHead>
-                  <TableHead className="text-right">Reste</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedDebts.visibleItems.map((debt) => (
-                  <TableRow key={debt.sale.id}>
-                    <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
-                    <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
-                    <TableCell>{debt.sale.additionNumber}</TableCell>
-                    <TableCell className="text-right">
-                      {formatMoneyWithCurrency(
-                        debt.debtTotalAmount,
-                        debt.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatMoneyWithCurrency(
-                        debt.recoveredAmount,
-                        debt.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatMoneyWithCurrency(
-                        debt.remainingAmount,
-                        debt.sale.currency as CurrencyCode
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DebtStatusBadge status={debt.debtStatus} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-red-800"
-                        onClick={() => setSelectedDebt(debt)}
-                      >
-                        <CreditCard className="size-4" />
-                        Payer
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+              ))}
+            </section>
 
-                {paginatedDebts.items.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="h-64">
-                      <EmptyState
-                        icon={Search}
-                        title="Aucune dette trouvée"
-                        description="Aucune vente à crédit non soldée ne correspond à cette période."
-                        className="border-none bg-transparent shadow-none"
-                      />
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            <Card className="bg-background">
+              <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 items-center justify-center rounded-md bg-muted">
+                    <Search className="size-5" />
+                  </span>
+                  <div>
+                    <CardTitle>Dettes en cours</CardTitle>
+                    <CardDescription>
+                      Page {paginatedDebts.currentPage} - {paginatedDebts.loadedItemsCount} dette(s)
+                      chargée(s)
+                    </CardDescription>
+                  </div>
+                </div>
+
+                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+                  <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Rechercher client ou addition..."
+                    className="w-full lg:w-72"
+                  />
+
+                  {paginatedDebts.totalLoadedPages > 1 && (
+                    <PaginationControls
+                      canGoPrevious={paginatedDebts.canGoPrevious}
+                      canGoNext={paginatedDebts.canGoNext}
+                      pageSize={DEBTS_PAGE_SIZE}
+                      onPrevious={paginatedDebts.goToPreviousPage}
+                      onNext={paginatedDebts.goToNextPage}
+                    />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date de vente</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Addition</TableHead>
+                      <TableHead className="text-right">Dette totale</TableHead>
+                      <TableHead className="text-right">Déjà payé</TableHead>
+                      <TableHead className="text-right">Reste</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedDebts.visibleItems.map((debt) => (
+                      <TableRow key={debt.sale.id}>
+                        <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
+                        <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
+                        <TableCell>{debt.sale.additionNumber}</TableCell>
+                        <TableCell className="text-right">
+                          {formatMoneyWithCurrency(
+                            debt.debtTotalAmount,
+                            debt.sale.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatMoneyWithCurrency(
+                            debt.recoveredAmount,
+                            debt.sale.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {formatMoneyWithCurrency(
+                            debt.remainingAmount,
+                            debt.sale.currency as CurrencyCode
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <DebtStatusBadge status={debt.debtStatus} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="bg-red-800"
+                            onClick={() => setSelectedDebt(debt)}
+                          >
+                            <CreditCard className="size-4" />
+                            Payer
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    {paginatedDebts.items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={8} className="h-64">
+                          <EmptyState
+                            icon={Search}
+                            title="Aucune dette trouvée"
+                            description="Aucune vente à crédit non soldée ne correspond à cette période."
+                            className="border-none bg-transparent shadow-none"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </section>
 
       <DebtPaymentDialog

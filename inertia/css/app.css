@@ -163,4 +163,9 @@ body {
   ::-webkit-scrollbar-track {
     background-color: #031633;
   }
+
+  #nprogress .bar {
+    height: 5px !important;
+    background: #2563eb;
+  }
 }

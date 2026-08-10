@@ -2,9 +2,10 @@ import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
 import { ArrowLeft, CalendarDays, Search } from 'lucide-react'
 import { useState } from 'react'
+import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
-import { CashSessionCard, CashSessionCardSkeleton } from '~/components/sales/cash_session_card'
+import { CashSessionCard } from '~/components/sales/cash_session_card'
 import { Button } from '~/components/ui/button'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
@@ -16,7 +17,6 @@ import type { CashSessionItem } from '~/types/cash_session_types'
 import type { CashSessionsPageProps } from '~/types/cash_session_types'
 
 const CASH_SESSIONS_PAGE_SIZE = 20
-const CASH_SESSIONS_SKELETON_COUNT = 20
 
 export default function CashSessionsPage({
   sessions,
@@ -79,11 +79,7 @@ export default function CashSessionsPage({
         </PageHeader>
 
         {isLoading ? (
-          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            {Array.from({ length: CASH_SESSIONS_SKELETON_COUNT }).map((_, index) => (
-              <CashSessionCardSkeleton key={index} />
-            ))}
-          </section>
+          <DataLoader title="Chargement des sessions..." />
         ) : paginatedSessions.items.length === 0 ? (
           <EmptyState
             icon={Search}

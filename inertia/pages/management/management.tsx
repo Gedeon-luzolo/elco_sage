@@ -14,6 +14,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { useState } from 'react'
+import { DataLoader } from '~/components/common/data_loader'
 import { StatCard } from '~/components/common/stat_card'
 import { DashboardChartsTab } from '~/components/management/dashboard/dashboard_charts_tab'
 import { DashboardPeriodicReportTab } from '~/components/management/dashboard/dashboard_periodic_report_tab'
@@ -130,6 +131,9 @@ export default function ManagementPage({
             hideCardWrapper
           />
         </div>
+
+        {/*  si c'est en cours de chargement, on affiche le loader de données */}
+        {isLoading && <DataLoader title="Chargement du dashboard" />}
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {mainStats.map((stat) => (
