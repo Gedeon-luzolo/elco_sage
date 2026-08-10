@@ -15,7 +15,7 @@ export function useSelectionDate({
 }: UseSelectionDateParams = {}) {
   const now = new Date()
 
-  //
+  // Gère la date de début avec le début du mois par défaut.
   const [startDate, setStartDate] = useState(
     initialStartDate ?? getLocalDateKey(getStartOfMonth(now))
   )

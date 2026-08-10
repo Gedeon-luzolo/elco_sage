@@ -19,6 +19,9 @@ export const controllers = {
   journalisations: {
     Journalisations: () => import('#controllers/journalisations/journalisations_controller'),
   },
+  management: {
+    Dashboard: () => import('#controllers/management/dashboard_controller'),
+  },
   products: {
     ProductServices: () => import('#controllers/products/product_services_controller'),
   },

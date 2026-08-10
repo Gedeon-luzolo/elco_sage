@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
 
+export const BUSINESS_TIME_ZONE = 'Africa/Kinshasa'
+
 export interface NormalizedDateRange {
   startDate: Date
   endDate: Date
@@ -7,12 +9,17 @@ export interface NormalizedDateRange {
 
 // Date locale du jour au format YYYY-MM-DD.
 export function todayDateKey(): string {
-  return DateTime.now().toISODate()!
+  return DateTime.now().setZone(BUSINESS_TIME_ZONE).toISODate()!
 }
 
 // Parse une cle YYYY-MM-DD comme une date locale sans heure.
 export function dateKeyToDay(date: string): DateTime {
-  return DateTime.fromISO(date).startOf('day')
+  return DateTime.fromISO(date, { zone: BUSINESS_TIME_ZONE }).startOf('day')
+}
+
+// Convertit une DateTime en cle de jour metier.
+export function dateTimeToDateKey(date: DateTime): string {
+  return date.setZone(BUSINESS_TIME_ZONE).toISODate()!
 }
 
 // Refuse les dates futures en comparant uniquement les jours locaux, sans heure.
@@ -28,7 +35,7 @@ export function ensureDateIsNotFuture(date: string) {
 // Normalise une plage pour couvrir les journees completes.
 export function normalizeDateRange(startDate: string, endDate: string): NormalizedDateRange {
   return {
-    startDate: DateTime.fromISO(startDate).startOf('day').toJSDate(),
-    endDate: DateTime.fromISO(endDate).endOf('day').toJSDate(),
+    startDate: dateKeyToDay(startDate).toJSDate(),
+    endDate: dateKeyToDay(endDate).endOf('day').toJSDate(),
   }
 }

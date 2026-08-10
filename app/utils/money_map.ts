@@ -25,6 +25,16 @@ export function buildMoneyMap(values: Record<Currency, number | null | undefined
   }, {})
 }
 
+// Retourne une map monetaire normalisee avec toutes les devises attendues.
+export function emptyMoneyMap(): MoneyMapDTO {
+  return normalizeMoneyMap({}) as MoneyMapDTO
+}
+
+// Ajoute un montant dans une map monetaire normalisée
+export function addMoneyAmount(amounts: MoneyMapDTO, currency: Currency | string, value: number) {
+  amounts[currency] = Number(amounts[currency] ?? 0) + Number(value || 0)
+}
+
 // Additionne une liste de montants en les groupant par devise.
 export function sumMoneyByCurrency<T>(
   items: T[],
