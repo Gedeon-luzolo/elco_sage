@@ -13,6 +13,7 @@ interface StockReportAccumulator {
   productName: string
   categoryName: string | null
   baseUnit: string | null
+  materialCostCdf: number
   periodInitialStock: number
   totalEntries: number
   periodStock: number
@@ -49,7 +50,7 @@ export default class StockReportService {
       .whereBetween('date', [startDateKey, endDateKey])
       .preload('product', (productQuery) => {
         productQuery
-          .select('id', 'name', 'baseUnit', 'categoryId')
+          .select('id', 'name', 'baseUnit', 'categoryId', 'materialCostCdf')
           .preload('category', (categoryQuery) => categoryQuery.select('id', 'name'))
       })
       .orderBy('date', 'asc')
@@ -80,21 +81,32 @@ export default class StockReportService {
     }
 
     return [...reportByProduct.values()]
-      .map((report) => ({
-        productId: report.productId,
-        productName: report.productName,
-        categoryName: report.categoryName,
-        baseUnit: report.baseUnit,
-        periodInitialStock: report.periodInitialStock,
-        totalEntries: report.totalEntries,
+      .map((report) => {
         // Le stock de période représente le stock disponible avant sorties et pertes.
-        periodStock: report.periodInitialStock + report.totalEntries,
-        totalOutputs: report.totalOutputs,
-        totalLosses: report.totalLosses,
-        finalTheoreticalStock: report.finalTheoreticalStock,
-        lastPhysicalStock: report.lastPhysicalStock,
-        finalVariance: report.finalVariance,
-      }))
+        const periodStock = report.periodInitialStock + report.totalEntries
+
+        return {
+          productId: report.productId,
+          productName: report.productName,
+          categoryName: report.categoryName,
+          baseUnit: report.baseUnit,
+          periodInitialStock: report.periodInitialStock,
+          totalEntries: report.totalEntries,
+          periodStock,
+          periodStockValueCdf: periodStock * report.materialCostCdf,
+          totalOutputs: report.totalOutputs,
+          outputsValueCdf: report.totalOutputs * report.materialCostCdf,
+          totalLosses: report.totalLosses,
+          lossesValueCdf: report.totalLosses * report.materialCostCdf,
+          finalTheoreticalStock: report.finalTheoreticalStock,
+          lastPhysicalStock: report.lastPhysicalStock,
+          physicalStockValueCdf:
+            report.lastPhysicalStock === null
+              ? null
+              : report.lastPhysicalStock * report.materialCostCdf,
+          finalVariance: report.finalVariance,
+        }
+      })
       .sort((first, second) => first.productName.localeCompare(second.productName))
   }
 
@@ -118,6 +130,7 @@ export default class StockReportService {
       productName: movement.product?.name ?? 'Produit',
       categoryName: movement.product?.category?.name ?? null,
       baseUnit: movement.product?.baseUnit ?? null,
+      materialCostCdf: Number(movement.product?.materialCostCdf || 0),
       periodInitialStock: Number(movement.initialStock || 0),
       totalEntries: 0,
       periodStock: Number(movement.initialStock || 0),
@@ -149,10 +162,15 @@ export default class StockReportService {
         periodInitialStock: totals.periodInitialStock + row.periodInitialStock,
         totalEntries: totals.totalEntries + row.totalEntries,
         periodStock: totals.periodStock + row.periodStock,
+        periodStockValueCdf: totals.periodStockValueCdf + row.periodStockValueCdf,
         totalOutputs: totals.totalOutputs + row.totalOutputs,
+        outputsValueCdf: totals.outputsValueCdf + row.outputsValueCdf,
         totalLosses: totals.totalLosses + row.totalLosses,
+        lossesValueCdf: totals.lossesValueCdf + row.lossesValueCdf,
         finalTheoreticalStock: totals.finalTheoreticalStock + row.finalTheoreticalStock,
         lastPhysicalStock: totals.lastPhysicalStock! + Number(row.lastPhysicalStock || 0),
+        physicalStockValueCdf:
+          totals.physicalStockValueCdf! + Number(row.physicalStockValueCdf || 0),
         finalVariance: totals.finalVariance! + Number(row.finalVariance || 0),
       }),
       {
@@ -163,10 +181,14 @@ export default class StockReportService {
         periodInitialStock: 0,
         totalEntries: 0,
         periodStock: 0,
+        periodStockValueCdf: 0,
         totalOutputs: 0,
+        outputsValueCdf: 0,
         totalLosses: 0,
+        lossesValueCdf: 0,
         finalTheoreticalStock: 0,
         lastPhysicalStock: rows.length === 0 ? 0 : null,
+        physicalStockValueCdf: rows.length === 0 ? 0 : null,
         finalVariance: rows.length === 0 ? 0 : null,
       }
     )
@@ -176,6 +198,8 @@ export default class StockReportService {
       ...totals,
       lastPhysicalStock:
         rows.length === 0 || allRowsHavePhysicalStock ? totals.lastPhysicalStock : null,
+      physicalStockValueCdf:
+        rows.length === 0 || allRowsHavePhysicalStock ? totals.physicalStockValueCdf : null,
       finalVariance: rows.length === 0 || allRowsHaveVariance ? totals.finalVariance : null,
     }
   }

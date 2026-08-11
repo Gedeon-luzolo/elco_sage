@@ -12,6 +12,7 @@ import { runAction } from '#utils/error_handler'
 import { createSaleValidator } from '#validators/sale'
 import UserTransformer from '#transformers/user_transformer'
 import SaleService from '#services/sales/sale_service'
+import { dateTimeToDateKey } from '#utils/date_utils'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -36,7 +37,9 @@ export default class SalesController {
 
     // Le formulaire utilise les memes listes que la page de lecture.
     const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
-    const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
+    const stockDate = currentCashSession
+      ? dateTimeToDateKey(currentCashSession.openedAt)
+      : undefined
     const [saleServices, operators, customers] = await Promise.all([
       this.productServiceService.getActiveServicesForSale(stockDate),
       this.userService.getActiveOperatorsForSale(),
@@ -61,7 +64,9 @@ export default class SalesController {
     const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
     // Les listes de services, operateurs et clients sont necessaires pour le formulaire de creation.
-    const stockDate = currentCashSession?.openedAt.toISODate() ?? undefined
+    const stockDate = currentCashSession
+      ? dateTimeToDateKey(currentCashSession.openedAt)
+      : undefined
     const [saleServices, operators, customers, currentSessionSales] = await Promise.all([
       this.productServiceService.getActiveServicesForSale(stockDate),
       this.userService.getActiveOperatorsForSale(),

@@ -60,20 +60,52 @@ export function DashboardStockReportTab({ stockReport }: DashboardStockReportTab
                 />
               )}
 
-              <Table>
-                <TableHeader>
+              <Table className="border border-border">
+                <TableHeader className="[&_tr]:border-border">
                   <TableRow>
-                    <TableHead>Produits</TableHead>
-                    <TableHead>Catégories</TableHead>
-                    <TableHead>Unité</TableHead>
-                    <TableHead className="text-right">Initial</TableHead>
-                    <TableHead className="text-right">Entrées</TableHead>
-                    <TableHead className="text-right">Stock période</TableHead>
-                    <TableHead className="text-right">Sorties</TableHead>
-                    <TableHead className="text-right">Pertes</TableHead>
-                    <TableHead className="text-right">Théorique final</TableHead>
-                    <TableHead className="text-right">Physique</TableHead>
-                    <TableHead className="text-right">Écart</TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border">
+                      Produits
+                    </TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border">
+                      Catégories
+                    </TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border">
+                      Unité
+                    </TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border text-right">
+                      SI
+                    </TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border text-right">
+                      Entrées
+                    </TableHead>
+                    <TableHead colSpan={2} className="border-r border-border text-center">
+                      Stock période
+                    </TableHead>
+                    <TableHead colSpan={2} className="border-r border-border text-center">
+                      Sorties
+                    </TableHead>
+                    <TableHead colSpan={2} className="border-r border-border text-center">
+                      Pertes
+                    </TableHead>
+                    <TableHead rowSpan={2} className="border-r border-border text-right">
+                      Stock Théo
+                    </TableHead>
+                    <TableHead colSpan={2} className="border-r border-border text-center">
+                      Stock final
+                    </TableHead>
+                    <TableHead rowSpan={2} className="text-right">
+                      Écart
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="border-r border-border text-right">Qté</TableHead>
+                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
+                    <TableHead className="border-r border-border text-right">Qté</TableHead>
+                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
+                    <TableHead className="border-r border-border text-right">Qté</TableHead>
+                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
+                    <TableHead className="border-r border-border text-right">Qté</TableHead>
+                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -77,10 +77,14 @@ export interface DashboardStockReportRow {
   periodInitialStock: number
   totalEntries: number
   periodStock: number
+  periodStockValueCdf: number
   totalOutputs: number
+  outputsValueCdf: number
   totalLosses: number
+  lossesValueCdf: number
   finalTheoreticalStock: number
   lastPhysicalStock: number | null
+  physicalStockValueCdf: number | null
   finalVariance: number | null
 }
 

@@ -7,6 +7,7 @@ import JournalisationService from '#services/journalisation/journalisation_servi
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
 import type { CreateSaleInput } from '#types/sales'
+import { dateTimeToDateKey } from '#utils/date_utils'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -57,7 +58,7 @@ export default class SaleService {
       discountAmount,
     })
     // Les sorties stock suivent la date métier de la caisse, pas forcément la date système.
-    const stockDateKey = cashSession.openedAt.toISODate()!
+    const stockDateKey = dateTimeToDateKey(cashSession.openedAt)
 
     const createdSale = await db.transaction(async (trx) => {
       // Le numéro d'addition est verrouillé dans la transaction pour éviter deux numéros identiques.
@@ -149,7 +150,7 @@ export default class SaleService {
           }
         }),
         // La date de vente est utilisee pour restituer le stock a la date exacte de la vente.
-        item.saleDate.toISODate()!,
+        dateTimeToDateKey(item.saleDate),
         trx
       )
 
