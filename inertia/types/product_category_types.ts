@@ -15,6 +15,5 @@ export interface ProductCategoriesPageProps {
 
 export interface ProductCategoryFormData {
   name: string
-  description?: string
   isActive?: boolean
 }

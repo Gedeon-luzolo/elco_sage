@@ -56,7 +56,7 @@ export default class ProductCategoriesController {
     // Le middleware auth garantit que l'utilisateur est connecté avant d'arriver ici.
     const actor = ctx.auth.getUserOrFail()
 
-    // Valide les champs modifiables (nom, description, statut).
+    // Valide les champs modifiables (nom et statut).
     const payload = await ctx.request.validateUsing(updateProductCategoryValidator)
 
     // Délègue la mise à jour au service en passant l'ID extrait de l'URL.

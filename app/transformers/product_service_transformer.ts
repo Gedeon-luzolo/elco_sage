@@ -26,6 +26,8 @@ export interface ProductServiceDTO {
   packagingCapacity: number | null
   priceUsd: number
   priceCdf: number
+  materialCostUsd: number
+  materialCostCdf: number
   createdAt: string
   updatedAt: string | null
 }
@@ -52,6 +54,8 @@ export default class ProductServiceTransformer {
       packagingCapacity: item.packagingCapacity,
       priceUsd: Number(item.priceUsd),
       priceCdf: Number(item.priceCdf),
+      materialCostUsd: Number(item.materialCostUsd),
+      materialCostCdf: Number(item.materialCostCdf),
       createdAt: item.createdAt.toISO() ?? item.createdAt.toString(),
       updatedAt: item.updatedAt ? (item.updatedAt.toISO() ?? item.updatedAt.toString()) : null,
     }

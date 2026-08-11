@@ -12,9 +12,6 @@ export default class ProductCategory extends BaseModel {
   declare name: string
 
   @column()
-  declare description: string | null
-
-  @column()
   declare isActive: boolean
 
   @column.dateTime({ autoCreate: true })

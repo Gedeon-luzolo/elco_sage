@@ -21,6 +21,7 @@ import {
 import type { ProductCategoryDTO } from '#transformers/product_category_transformer'
 import type { ProductServiceItem } from '~/types/product_service_types'
 import { CURRENCY_OPTIONS, Currency } from '~/utils/currency'
+import { getItemPriceForCurrency } from '~/utils/products/product.utils'
 import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
 
 const PRODUCT_TYPE_OPTIONS = [
@@ -70,7 +71,9 @@ export function ProductServiceModal({
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(Currency.CDF)
 
   // État local contrôlé pour le montant du prix.
-  const [priceValue, setPriceValue] = useState<string | number>(item ? item.priceCdf : '')
+  const [priceValue, setPriceValue] = useState<string | number>(
+    item ? getItemPriceForCurrency(item, Currency.CDF) : ''
+  )
 
   const isService = selectedType === 'SERVICE'
   const categoryOptions = categories.map((category) => ({
@@ -92,7 +95,22 @@ export function ProductServiceModal({
     setSelectedCurrency(value)
 
     if (item) {
-      setPriceValue(value === Currency.USD ? item.priceUsd : item.priceCdf)
+      setPriceValue(getItemPriceForCurrency(item, value))
+    }
+  }
+
+  /**
+   * Synchronise le prix affiché quand le type change en édition.
+   */
+  const handleTypeChange = (value: string | null) => {
+    if (!value) return
+
+    const nextType = value as 'PRODUCT' | 'SERVICE'
+
+    setSelectedType(nextType)
+
+    if (item) {
+      setPriceValue(getItemPriceForCurrency(item, selectedCurrency))
     }
   }
 
@@ -120,7 +138,7 @@ export function ProductServiceModal({
                 name="type"
                 items={PRODUCT_TYPE_OPTIONS}
                 defaultValue={selectedType}
-                onValueChange={(v) => setSelectedType(v as 'PRODUCT' | 'SERVICE')}
+                onValueChange={handleTypeChange}
               >
                 <SelectTrigger className="h-10 w-full">
                   <SelectValue />
@@ -292,10 +310,10 @@ export function ProductServiceModal({
               </Select>
             </div>
 
-            {/* Prix de vente (placé APPRÈS la devise, avec valeur contrôlée dynamiquement) */}
+            {/* Prix utile selon le type: vente pour service, achat pour produit */}
             <div className="grid gap-2">
               <Label htmlFor="ps-price">
-                {isService ? 'Prix du Théorique*' : 'Prix unitaire *'}
+                {isService ? 'Prix de vente ' : "Prix d'achat du conditionnement *"}
               </Label>
               <Input
                 id="ps-price"

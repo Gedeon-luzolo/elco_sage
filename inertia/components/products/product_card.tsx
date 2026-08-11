@@ -20,6 +20,7 @@ export interface ProductCardProps {
  */
 export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
   const isProduct = item.type === 'PRODUCT'
+  const priceLabel = isProduct ? "Prix d'achat" : 'Prix de vente'
 
   return (
     <div
@@ -67,12 +68,19 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
 
       {/* Prix USD et CDF */}
       <div className="flex flex-col text-sm">
+        <span className="text-xs text-muted-foreground">{priceLabel}</span>
         <span className="font-semibold text-foreground text-base">
           {formatMoneyWithCurrency(item.priceUsd, 'USD')}
         </span>
         <span className="text-xs text-muted-foreground">
           {formatMoneyWithCurrency(item.priceCdf, 'CDF')}
         </span>
+        {isProduct && (
+          <span className="mt-1 text-xs text-muted-foreground">
+            Coût matière : {formatMoneyWithCurrency(item.materialCostUsd, 'USD')} /{' '}
+            {formatMoneyWithCurrency(item.materialCostCdf, 'CDF')}
+          </span>
+        )}
       </div>
 
       {/* Boutons d'action */}

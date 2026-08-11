@@ -64,17 +64,6 @@ export function ProductCategoryModal({
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="category-description">Description</Label>
-            <Input
-              id="category-description"
-              name="description"
-              className="h-10 px-3"
-              defaultValue={category?.description ?? ''}
-              placeholder="Brève description des travaux ou services associés..."
-            />
-          </div>
-
           {/* Le statut est visible uniquement en édition : en création il vaut true par défaut côté service. */}
           {isEditing && (
             <div className="grid gap-2">

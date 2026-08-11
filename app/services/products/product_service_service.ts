@@ -105,20 +105,49 @@ export default class ProductServiceService {
   }
 
   /**
-   * Calcule priceUsd et priceCdf à partir du montant et de la devise renseignés.
+   * Calcule un montant en USD et CDF à partir de la devise renseignée.
    */
-  private async calculatePrices(priceInput: number, currency: Currency) {
+  private async calculateCurrencyPrices(priceInput: number, currency: Currency) {
     const amount = Number(priceInput)
 
     // Si le prix est en USD, on convertit uniquement vers CDF
     if (currency === Currency.USD) {
-      const priceCdf = await this.exchangeRateService.convertUsdToCdf(amount, 'buy')
-      return { priceUsd: amount, priceCdf }
+      const cdf = await this.exchangeRateService.convertUsdToCdf(amount, 'buy')
+      return { usd: amount, cdf }
     }
 
     // Si le prix est en CDF, on convertit uniquement vers USD
-    const priceUsd = await this.exchangeRateService.convertCdfToUsd(amount, 'buy')
-    return { priceUsd, priceCdf: amount }
+    const usd = await this.exchangeRateService.convertCdfToUsd(amount, 'buy')
+    return { usd, cdf: amount }
+  }
+
+  /**
+   * Calcule le prix principal et le coût matière unitaire.
+   */
+  private buildPriceFields(
+    type: string,
+    prices: { usd: number; cdf: number },
+    packagingCapacity?: number | null
+  ) {
+    // Pour un service, le prix est un prix de vente et il n'a pas de coût matière direct.
+    if (type === ProductServiceType.SERVICE) {
+      return {
+        priceUsd: prices.usd,
+        priceCdf: prices.cdf,
+        materialCostUsd: 0,
+        materialCostCdf: 0,
+      }
+    }
+
+    // Pour un produit, le prix saisi est celui du conditionnement.
+    const materialCostDivider = Number(packagingCapacity || 1)
+
+    return {
+      priceUsd: prices.usd,
+      priceCdf: prices.cdf,
+      materialCostUsd: prices.usd / materialCostDivider,
+      materialCostCdf: prices.cdf / materialCostDivider,
+    }
   }
 
   /**
@@ -132,9 +161,18 @@ export default class ProductServiceService {
     }
 
     // Calculer les prix
-    const { priceUsd, priceCdf } = await this.calculatePrices(
+    const prices = await this.calculateCurrencyPrices(
       Number(payload.price),
       payload.currency as Currency
+    )
+
+    // Builder le prix selon le type
+    const priceFields = this.buildPriceFields(
+      payload.type,
+      prices,
+      payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
+        ? Number(payload.packagingCapacity)
+        : null
     )
     // Pour un service, on valide ici le produit consommé avant de créer l'article.
     const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
@@ -153,8 +191,7 @@ export default class ProductServiceService {
         payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
           ? Number(payload.packagingCapacity)
           : null,
-      priceUsd,
-      priceCdf,
+      ...priceFields,
     })
 
     // Enregistrer la journalisation
@@ -190,9 +227,18 @@ export default class ProductServiceService {
     }
 
     // Appliquer le calccul de prix
-    const { priceUsd, priceCdf } = await this.calculatePrices(
+    const prices = await this.calculateCurrencyPrices(
       Number(payload.price),
       payload.currency as Currency
+    )
+
+    // Builder le prix seelon le type
+    const priceFields = this.buildPriceFields(
+      payload.type,
+      prices,
+      payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
+        ? Number(payload.packagingCapacity)
+        : null
     )
     // Si l'article devient un produit, le lien stock est nettoyé; si c'est un service, il est obligatoire.
     const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
@@ -209,8 +255,10 @@ export default class ProductServiceService {
       payload.packagingCapacity !== null && payload.packagingCapacity !== undefined
         ? Number(payload.packagingCapacity)
         : null
-    item.priceUsd = priceUsd
-    item.priceCdf = priceCdf
+    item.priceUsd = priceFields.priceUsd
+    item.priceCdf = priceFields.priceCdf
+    item.materialCostUsd = priceFields.materialCostUsd
+    item.materialCostCdf = priceFields.materialCostCdf
     item.isActive = Boolean(payload.isActive)
 
     await item.save()

@@ -57,7 +57,6 @@ export default class ProductCategoryService {
   async create(actor: User, payload: CreateProductCategoryInput) {
     const category = await ProductCategory.create({
       name: payload.name,
-      description: payload.description ?? null,
       // Le statut est toujours initialisé à true à la création — le payload ne le contient pas.
       isActive: true,
     })
@@ -94,7 +93,6 @@ export default class ProductCategoryService {
 
     const previousName = category.name
     category.name = payload.name
-    category.description = payload.description ?? null
     // isActive est obligatoire dans le payload d'édition — on l'applique directement.
     category.isActive = Boolean(payload.isActive)
 

@@ -13,7 +13,6 @@ export const createProductCategoryValidator = vine.compile(
       .minLength(2)
       .maxLength(100)
       .unique({ table: 'product_categories', column: 'name' }),
-    description: vine.string().trim().maxLength(500).nullable().optional(),
   })
 )
 
@@ -26,7 +25,6 @@ export type CreateProductCategoryInput = InferInput<typeof createProductCategory
 export const updateProductCategoryValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(100),
-    description: vine.string().trim().maxLength(500).nullable().optional(),
     isActive: vine.boolean(),
   })
 )

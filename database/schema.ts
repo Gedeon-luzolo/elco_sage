@@ -86,12 +86,10 @@ export class JournalisationSchema extends BaseModel {
 }
 
 export class ProductCategorySchema extends BaseModel {
-  static $columns = ['createdAt', 'description', 'id', 'isActive', 'name', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isActive', 'name', 'updatedAt'] as const
   $columns = ProductCategorySchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
-  @column()
-  declare description: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
@@ -103,7 +101,7 @@ export class ProductCategorySchema extends BaseModel {
 }
 
 export class ProductServiceSchema extends BaseModel {
-  static $columns = ['baseUnit', 'categoryId', 'createdAt', 'id', 'isActive', 'name', 'packagingCapacity', 'packagingUnit', 'priceCdf', 'priceUsd', 'stockProductId', 'type', 'updatedAt'] as const
+  static $columns = ['baseUnit', 'categoryId', 'createdAt', 'id', 'isActive', 'materialCostCdf', 'materialCostUsd', 'name', 'packagingCapacity', 'packagingUnit', 'priceCdf', 'priceUsd', 'stockProductId', 'type', 'updatedAt'] as const
   $columns = ProductServiceSchema.$columns
   @column()
   declare baseUnit: string | null
@@ -115,6 +113,10 @@ export class ProductServiceSchema extends BaseModel {
   declare id: string
   @column()
   declare isActive: boolean
+  @column()
+  declare materialCostCdf: string
+  @column()
+  declare materialCostUsd: string
   @column()
   declare name: string
   @column()

@@ -48,6 +48,12 @@ export default class ProductService extends BaseModel {
   @column()
   declare priceCdf: number
 
+  @column()
+  declare materialCostUsd: number
+
+  @column()
+  declare materialCostCdf: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

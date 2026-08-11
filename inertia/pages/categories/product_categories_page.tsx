@@ -39,7 +39,7 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
     filteredItems: searchedCategories,
   } = useSearch({
     items: categories,
-    fields: ['name', 'description'],
+    fields: ['name'],
   })
 
   // Dérivé directement des props : ne change qu'après une action serveur.
@@ -92,7 +92,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
       // En édition, isActive est présent dans le form et explicitement envoyé.
       const payload = {
         name: String(formData.get('name') || ''),
-        description: String(formData.get('description') || ''),
         isActive: formData.get('isActive') === 'true',
       }
       router.put(`/management/product-categories/${editingCategory.id}`, payload, options)
@@ -100,7 +99,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
       // En création, isActive est absent du form — le backend le fixe à true par défaut.
       const payload = {
         name: String(formData.get('name') || ''),
-        description: String(formData.get('description') || ''),
       }
       router.post('/management/product-categories', payload, options)
     }
@@ -188,7 +186,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
             <TableHeader>
               <TableRow>
                 <TableHead className="w-62.5">Nom de la catégorie</TableHead>
-                <TableHead>Description</TableHead>
                 <TableHead className="w-30">Statut</TableHead>
                 <TableHead className="w-30">Date de création</TableHead>
                 <TableHead className="w-30 text-right">Actions</TableHead>
@@ -197,7 +194,7 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
             <TableBody>
               {filteredCategories.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-64">
+                  <TableCell colSpan={4} className="h-64">
                     <EmptyState
                       icon={Tags}
                       title="Aucune catégorie trouvée"
@@ -210,11 +207,6 @@ export default function ProductCategoriesPage({ categories, stats }: ProductCate
                 filteredCategories.map((cat) => (
                   <TableRow key={cat.id}>
                     <TableCell className="font-semibold text-foreground">{cat.name}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm max-w-md truncate">
-                      {cat.description || (
-                        <span className="italic text-muted-foreground/60">Aucune description</span>
-                      )}
-                    </TableCell>
                     <TableCell>
                       {cat.isActive ? (
                         <Badge
