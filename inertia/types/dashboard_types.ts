@@ -69,6 +69,28 @@ export interface DashboardStaffProductivity extends Record<string, JSONDataTypes
   totals: DashboardStaffProductivityRow
 }
 
+// Type frontend pour une ligne du rapport de stock par produit sur une période.
+export interface DashboardStockReportRow extends Record<string, JSONDataTypes> {
+  productId: string
+  productName: string
+  categoryName: string | null
+  baseUnit: string | null
+  periodInitialStock: number
+  totalEntries: number
+  periodStock: number
+  totalOutputs: number
+  totalLosses: number
+  finalTheoreticalStock: number
+  lastPhysicalStock: number | null
+  finalVariance: number | null
+}
+
+// Type frontend pour les données de stock avec la ligne total.
+export interface DashboardStockReport extends Record<string, JSONDataTypes> {
+  rows: DashboardStockReportRow[]
+  totals: DashboardStockReportRow
+}
+
 // Type frontend pour une ligne du rapport périodique des ventes.
 export interface DashboardPeriodicReport extends Record<string, JSONDataTypes> {
   date: string
@@ -95,4 +117,5 @@ export interface ManagementDashboardPageProps extends Record<string, JSONDataTyp
   paymentDistribution: DashboardPaymentDistribution[]
   topServices: DashboardTopService[]
   staffProductivity: DashboardStaffProductivity
+  stockReport: DashboardStockReport
 }

@@ -34,11 +34,15 @@ export default function ManagementPage({
   periodicReports,
   topServices,
   staffProductivity,
+  stockReport,
 }: InertiaProps<ManagementDashboardPageProps>) {
+  // Hook pour selectionner la date
   const selectionDate = useSelectionDate({
     initialStartDate: period.startDate,
     initialEndDate: period.endDate,
   })
+
+  // Etat de chargement
   const [isLoading, setIsLoading] = useState(false)
 
   // Recharge le dashboard avec la période sélectionnée.
@@ -168,7 +172,7 @@ export default function ManagementPage({
           </TabsList>
 
           <DashboardPeriodicReportTab periodicReports={periodicReports} />
-          <DashboardStockReportTab />
+          <DashboardStockReportTab stockReport={stockReport} />
           <DashboardStaffProductivityTab staffProductivity={staffProductivity} />
           <DashboardChartsTab stats={stats} topServices={topServices} />
         </Tabs>

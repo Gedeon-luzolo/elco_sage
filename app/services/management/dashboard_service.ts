@@ -3,6 +3,7 @@ import SaleRecovery from '#models/sale_recovery'
 import DashboardStatsService from '#services/management/dashboard_stats_service'
 import PeriodicReportService from '#services/management/periodic_report_service'
 import StaffProductivityService from '#services/management/staff_productivity_service'
+import StockReportService from '#services/management/stock_report_service'
 import type { DashboardOverview, DashboardPeriod } from '#types/dashboard'
 import { Currency } from '#types/currency'
 import { dateKeyToDay, normalizeDateRange, todayDateKey } from '#utils/date_utils'
@@ -18,7 +19,8 @@ export default class DashboardService {
   constructor(
     private periodicReportService: PeriodicReportService,
     private dashboardStatsService: DashboardStatsService,
-    private staffProductivityService: StaffProductivityService
+    private staffProductivityService: StaffProductivityService,
+    private stockReportService: StockReportService
   ) {}
 
   /**
@@ -33,9 +35,13 @@ export default class DashboardService {
     const range = normalizeDateRange(period.startDate, period.endDate)
 
     // Les données brutes communes sont chargées une seule fois pour éviter les agrégats SQL répétés.
-    const [reportSales, reportRecoveries] = await Promise.all([
+    const [reportSales, reportRecoveries, stockReport] = await Promise.all([
       this.getReportSales(range.startDate, range.endDate),
       this.getReportRecoveries(range.startDate, range.endDate),
+      this.stockReportService.buildReport({
+        startDate: range.startDate,
+        endDate: range.endDate,
+      }),
     ])
 
     // Les cards principales sont calculées en mémoire depuis les mêmes ventes/recouvrements.
@@ -68,7 +74,6 @@ export default class DashboardService {
       sales: reportSales,
       recoveries: reportRecoveries,
     })
-
     return {
       period,
       stats,
@@ -77,6 +82,7 @@ export default class DashboardService {
       paymentDistribution,
       topServices,
       staffProductivity,
+      stockReport,
     }
   }
 
