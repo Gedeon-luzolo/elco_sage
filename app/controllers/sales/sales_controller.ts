@@ -12,7 +12,8 @@ import { runAction } from '#utils/error_handler'
 import { createSaleValidator } from '#validators/sale'
 import UserTransformer from '#transformers/user_transformer'
 import SaleService from '#services/sales/sale_service'
-import { dateTimeToDateKey } from '#utils/date_utils'
+import { dateTimeToDateKey, todayDateKey } from '#utils/date_utils'
+import { isManagementRole } from '#utils/user_role_utils'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -60,18 +61,34 @@ export default class SalesController {
   async index({ auth, inertia }: HttpContext) {
     const actor = auth.getUserOrFail()
 
-    // La premiere version pose le cadre des sessions avant la saisie des ventes.
+    // Ce flag pilote uniquement la lecture: un manager consulte les ventes du jour.
+    const isManagementUser = isManagementRole(actor.role)
+    // Les caissiers lisent leur caisse; les managers lisent les ventes de la journee.
     const currentCashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
 
-    // Les listes de services, operateurs et clients sont necessaires pour le formulaire de creation.
+    // Le stock affiché suit la session du caissier si elle existe, sinon la journée métier courante.
     const stockDate = currentCashSession
       ? dateTimeToDateKey(currentCashSession.openedAt)
-      : undefined
-    const [saleServices, operators, customers, currentSessionSales] = await Promise.all([
+      : todayDateKey()
+    let visibleSalesPromise
+
+    // Si l'utilisateur a une caisse ouverte, sa session devient la vue prioritaire.
+    if (currentCashSession) {
+      visibleSalesPromise = this.saleService.findByCashSession(currentCashSession.id)
+      // Sans caisse ouverte, les managers auditent les ventes du jour.
+    } else if (isManagementUser) {
+      visibleSalesPromise = this.saleService.findByBusinessDate(todayDateKey())
+      // Sans session ouverte, un caissier n'a aucune vente courante à afficher.
+    } else {
+      visibleSalesPromise = Promise.resolve([])
+    }
+
+    // Les listes annexes restent chargées en parallèle avec les ventes visibles.
+    const [saleServices, operators, customers, visibleSales] = await Promise.all([
       this.productServiceService.getActiveServicesForSale(stockDate),
       this.userService.getActiveOperatorsForSale(),
       this.customerService.getActiveCustomersForSale(),
-      currentCashSession ? this.saleService.findByCashSession(currentCashSession.id) : [],
+      visibleSalesPromise,
     ])
 
     return (inertia.render as any)('sales/sales_page', {
@@ -79,7 +96,7 @@ export default class SalesController {
       saleServices: ProductServiceTransformer.transform(saleServices),
       operators: UserTransformer.transform(operators),
       customers: CustomerTransformer.transform(customers),
-      sales: SaleTransformer.transform(currentSessionSales),
+      sales: SaleTransformer.transform(visibleSales),
     })
   }
 
@@ -114,10 +131,20 @@ export default class SalesController {
   async cancel(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 
-    return runAction(ctx, () => this.saleService.cancel(actor, ctx.params.id), {
-      successMessage: 'Vente annulee avec succes.',
-      errorMessage: "Impossible d'annuler cette vente.",
-      redirectTo: REDIRECT_URL,
-    })
+    return runAction(
+      ctx,
+      () => {
+        if (!isManagementRole(actor.role)) {
+          throw new Error('Seuls les profils de gestion peuvent annuler une vente.')
+        }
+
+        return this.saleService.cancel(actor, ctx.params.id)
+      },
+      {
+        successMessage: 'Vente annulee avec succes.',
+        errorMessage: "Impossible d'annuler cette vente.",
+        redirectTo: REDIRECT_URL,
+      }
+    )
   }
 }

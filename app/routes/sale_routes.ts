@@ -7,5 +7,5 @@ export function registerSaleRoutes() {
   router.get('sales/create', [SalesController, 'create']).as('sales.create')
   router.post('sales', [SalesController, 'store']).as('sales.store')
   router.get('sales/:id', [SalesController, 'show']).as('sales.show')
-  router.post('sales/:id/cancel', [SalesController, 'cancel']).as('sales.cancel')
+  router.patch('sales/:id/cancel', [SalesController, 'cancel']).as('sales.cancel')
 }

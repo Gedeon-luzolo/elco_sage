@@ -107,7 +107,6 @@ export type ScannedRoutes = {
     'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
     'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'sales.store': { paramsTuple?: []; params?: {} }
-    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
     'exchange_rates.store': { paramsTuple?: []; params?: {} }
     'product_categories.store': { paramsTuple?: []; params?: {} }
@@ -120,6 +119,9 @@ export type ScannedRoutes = {
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+  }
+  PATCH: {
+    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
     'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

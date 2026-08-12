@@ -1,4 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
+import { router } from '@inertiajs/react'
 import {
   ArrowLeft,
   Banknote,
@@ -17,6 +18,7 @@ import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
 import { SalesTable } from '~/components/sales/sales_table'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
+import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { usePaginated } from '~/hooks/use_paginated'
@@ -24,6 +26,7 @@ import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useSearch } from '~/hooks/use_search'
 import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
+import type { SaleItemRow } from '~/types/sale_types'
 import { formatDateLabel } from '~/utils/date'
 import { saleSearchFields } from '~/utils/sales/sale.utils'
 import { isManagementRole } from '~/utils/user_role.utils'
@@ -37,10 +40,12 @@ export default function SalesPage({
 }: InertiaProps<SalesPageProps>) {
   const printSaleId = new URLSearchParams(window.location.search).get('printSaleId')
   const isManagementUser = isManagementRole(user?.role)
+  const canCreateSale = Boolean(currentCashSession && currentCashSession.userId === user?.id)
   // La vente selectionnee est identifiee par son ID. On initialise la selection a printSaleId si present, sinon a la premiere vente chargee.²
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(
     printSaleId ?? sales[0]?.id ?? null
   )
+  const [saleToCancel, setSaleToCancel] = useState<SaleItemRow | null>(null)
 
   // Filtre les ventes de la session courante par addition, client ou bon de commande.
   const {
@@ -58,12 +63,17 @@ export default function SalesPage({
     pageSize: SALES_PAGE_SIZE,
   })
 
-  // La description de la page depend de l'etat de la session courante.
-  const pageDescription = currentCashSession?.openingDate
+  const cashierSessionDescription = currentCashSession?.openingDate
     ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} a ${
         currentCashSession.openingTime ?? '--:--'
       }.`
-    : 'Lecture des ventes enregistrees dans la session de caisse courante.'
+    : ''
+  const managerDailyDescription = "Lecture des ventes enregistrées aujourd'hui."
+  const shouldShowManagerDailyDescription = isManagementUser && !currentCashSession
+  // La description distingue la lecture manager par jour et la lecture caissier par session.
+  const pageDescription = shouldShowManagerDailyDescription
+    ? managerDailyDescription
+    : cashierSessionDescription
 
   const effectiveSelectedSaleId = paginatedSales.visibleItems.some(
     (sale) => sale.id === selectedSaleId
@@ -84,6 +94,20 @@ export default function SalesPage({
     selectedSale,
     onSelectSale: selectSaleForPrint,
   })
+
+  // Confirme l'annulation d'une vente par un profil de gestion.
+  const confirmCancelSale = () => {
+    if (!saleToCancel) return
+
+    router.patch(
+      `/sales/${saleToCancel.id}/cancel`,
+      {},
+      {
+        preserveScroll: true,
+        onSuccess: () => setSaleToCancel(null),
+      }
+    )
+  }
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
@@ -133,21 +157,21 @@ export default function SalesPage({
               Recouvrements
             </Button>
 
-            {currentCashSession ? (
+            {canCreateSale ? (
               <Button render={<Link href="/sales/create" />}>
                 <Plus className="size-4" />
                 Nouvelle vente
               </Button>
-            ) : (
+            ) : !currentCashSession ? (
               <Button render={<Link href="/sales/session/open" />} variant="outline">
                 <Banknote className="size-4" />
                 Ouvrir une caisse
               </Button>
-            )}
+            ) : null}
           </>
         </PageHeader>
 
-        {!currentCashSession ? (
+        {!currentCashSession && !isManagementUser ? (
           <EmptyState
             icon={Banknote}
             title="Aucune caisse ouverte"
@@ -156,8 +180,14 @@ export default function SalesPage({
         ) : sales.length === 0 ? (
           <EmptyState
             icon={Eye}
-            title="Aucune vente dans cette session"
-            description="Les ventes enregistrees pendant cette session apparaitront ici."
+            title={
+              isManagementUser ? "Aucune vente aujourd'hui" : 'Aucune vente dans cette session'
+            }
+            description={
+              isManagementUser
+                ? "Les ventes enregistrées aujourd'hui apparaitront ici."
+                : 'Les ventes enregistrees pendant cette session apparaitront ici.'
+            }
           />
         ) : (
           <div className="flex flex-col gap-4">
@@ -186,11 +216,31 @@ export default function SalesPage({
                 selectedSaleId={effectiveSelectedSaleId}
                 onSelectSale={setSelectedSaleId}
               />
-              {selectedSale && <SaleDetailPanel sale={selectedSale} onPrintSale={printInvoice} />}
+              {selectedSale && (
+                <SaleDetailPanel
+                  sale={selectedSale}
+                  canCancelSale={isManagementUser}
+                  onPrintSale={printInvoice}
+                  onCancelSale={setSaleToCancel}
+                />
+              )}
             </div>
           </div>
         )}
       </section>
+
+      <ConfirmationDialog
+        open={Boolean(saleToCancel)}
+        title="Annuler cette vente ?"
+        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée et les sorties de stock associées seront restaurées.`}
+        confirmLabel="Annuler la vente"
+        variant="destructive"
+        onOpenChange={(open) => {
+          if (!open) setSaleToCancel(null)
+        }}
+        onCancel={() => setSaleToCancel(null)}
+        onConfirm={confirmCancelSale}
+      />
     </main>
   )
 }

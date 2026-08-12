@@ -6,6 +6,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
 
 const READ_METHODS = ['GET', 'HEAD']
 const OPENING_PATHS = ['/sales/session/open']
+const SALE_CANCEL_PATH_PATTERN = /^\/sales\/[^/]+\/cancel$/
 
 @inject()
 export default class CashSessionMiddleware {
@@ -36,13 +37,20 @@ export default class CashSessionMiddleware {
 
     const isManagementUser = isManagementRole(user.role)
     const isReadRequest = READ_METHODS.includes(ctx.request.method())
+    const isSaleCancelRequest =
+      ctx.request.method() === 'PATCH' && SALE_CANCEL_PATH_PATTERN.test(requestPath)
 
     // Admin et directeur gardent l'acces lecture aux ventes meme sans caisse ouverte.
     if (isManagementUser && isReadRequest) {
       return next()
     }
 
-    // Les ecritures restent bloquees cote serveur quand aucune caisse n'est ouverte.
+    // Admin et directeur peuvent annuler une vente depuis un autre poste sans ouvrir leur propre caisse.
+    if (isManagementUser && isSaleCancelRequest) {
+      return next()
+    }
+
+    // Les ecritures restent bloquées cote serveur quand aucune caisse n'est ouverte.
     if (isManagementUser) {
       ctx.session.flash('error', 'Ouvrez une session de caisse avant de modifier les ventes.')
       return ctx.response.redirect().back()

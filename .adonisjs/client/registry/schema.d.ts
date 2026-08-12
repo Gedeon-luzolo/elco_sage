@@ -332,7 +332,7 @@ export interface Registry {
     }
   }
   'sales.cancel': {
-    methods: ["POST"]
+    methods: ["PATCH"]
     pattern: '/sales/:id/cancel'
     types: {
       body: {}

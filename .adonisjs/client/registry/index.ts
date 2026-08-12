@@ -169,7 +169,7 @@ const routes = {
     types: placeholder as Registry['sales.show']['types'],
   },
   'sales.cancel': {
-    methods: ["POST"],
+    methods: ["PATCH"],
     pattern: '/sales/:id/cancel',
     tokens: [{"old":"/sales/:id/cancel","type":0,"val":"sales","end":""},{"old":"/sales/:id/cancel","type":1,"val":"id","end":""},{"old":"/sales/:id/cancel","type":0,"val":"cancel","end":""}],
     types: placeholder as Registry['sales.cancel']['types'],

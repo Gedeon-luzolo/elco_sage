@@ -1,4 +1,4 @@
-import { Printer } from 'lucide-react'
+import { Printer, XCircle } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
@@ -7,13 +7,22 @@ import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface SaleDetailPanelProps {
   sale: SaleItemRow
+  canCancelSale?: boolean
   onPrintSale?: (sale: SaleItemRow) => void
+  onCancelSale?: (sale: SaleItemRow) => void
 }
 
 /**
  * Panneau de detail d'une vente selectionnee.
  */
-export function SaleDetailPanel({ sale, onPrintSale }: SaleDetailPanelProps) {
+export function SaleDetailPanel({
+  sale,
+  canCancelSale = false,
+  onPrintSale,
+  onCancelSale,
+}: SaleDetailPanelProps) {
+  const isCancelled = sale.status === 'CANCELLED'
+
   return (
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
       <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-card p-4">
@@ -21,16 +30,24 @@ export function SaleDetailPanel({ sale, onPrintSale }: SaleDetailPanelProps) {
           <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
           <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="shrink-0"
-          onClick={() => onPrintSale?.(sale)}
-        >
-          <Printer className="size-4" />
-          Imprimer
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => onPrintSale?.(sale)}>
+            <Printer className="size-4" />
+            Imprimer
+          </Button>
+
+          {canCancelSale && !isCancelled && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => onCancelSale?.(sale)}
+            >
+              <XCircle className="size-4" />
+              Annuler
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4 p-4">

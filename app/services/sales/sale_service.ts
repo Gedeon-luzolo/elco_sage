@@ -7,7 +7,7 @@ import JournalisationService from '#services/journalisation/journalisation_servi
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
 import type { CreateSaleInput } from '#types/sales'
-import { dateTimeToDateKey } from '#utils/date_utils'
+import { dateKeyToDay, dateTimeToDateKey } from '#utils/date_utils'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -29,6 +29,29 @@ export default class SaleService {
     // Les relations permettent de lire client, vendeur, operateur et services sans snapshot.
     return Sale.query()
       .where('cashSessionId', cashSessionId)
+      .where('status', SaleStatus.ACTIVE)
+      .preload('customer')
+      .preload('operator')
+      .preload('seller')
+      .preload('items', (itemsQuery) => {
+        itemsQuery.preload('productService')
+      })
+      .preload('recoveries')
+      .orderBy('saleDate', 'desc')
+  }
+
+  /**
+   * Recupere les ventes d'une journee metier.
+   */
+  async findByBusinessDate(date: string) {
+    // La clé YYYY-MM-DD est convertie en bornes de journée dans le fuseau métier.
+    const startDate = dateKeyToDay(date).toJSDate()
+    const endDate = dateKeyToDay(date).endOf('day').toJSDate()
+
+    // Les managers lisent les ventes du jour, toutes caisses confondues.
+    return Sale.query()
+      .where('status', SaleStatus.ACTIVE)
+      .whereBetween('saleDate', [startDate, endDate])
       .preload('customer')
       .preload('operator')
       .preload('seller')
@@ -122,6 +145,7 @@ export default class SaleService {
             serviceQuery.preload('stockProduct')
           })
         })
+        .preload('cashSession')
         .firstOrFail()
 
       // Si la vente est deja annulee, on ne fait rien et on retourne l'objet.
@@ -149,8 +173,8 @@ export default class SaleService {
             totalPrice: saleItem.totalPrice,
           }
         }),
-        // La date de vente est utilisee pour restituer le stock a la date exacte de la vente.
-        dateTimeToDateKey(item.saleDate),
+        // La restitution utilise la meme date metier de caisse que la creation de vente.
+        dateTimeToDateKey(item.cashSession.openedAt),
         trx
       )
 
