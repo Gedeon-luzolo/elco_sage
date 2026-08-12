@@ -6,6 +6,7 @@ import {
   CircleDollarSign,
   CreditCard,
   HandCoins,
+  Printer,
   ReceiptText,
   Search,
 } from 'lucide-react'
@@ -13,31 +14,24 @@ import { useState } from 'react'
 import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { PrintReportHeader } from '~/components/common/print_report_header'
 import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
-import { DebtStatusBadge } from '~/components/sales/debt_status_badge'
+import { RecoveriesTable } from '~/components/sales/recoveries_table'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '~/components/ui/table'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
+import { useSimplePrint } from '~/hooks/use_simple_print'
 import type { InertiaProps } from '~/types'
 import type { RecoveriesPageProps, RecoveryPaymentItem } from '~/types/debt_types'
-import type { CurrencyCode } from '~/utils/currency'
-import { formatDateTimeLabel } from '~/utils/date'
-import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { formatDateLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
-import { formatDebtSaleDate, recoverySearchFields } from '~/utils/sales/debt.utils'
+import { recoverySearchFields } from '~/utils/sales/debt.utils'
 
 const RECOVERIES_PAGE_SIZE = 10
 
@@ -51,21 +45,25 @@ export default function RecoveriesPage({
     initialEndDate: filters.endDate,
   })
   const [isLoading, setIsLoading] = useState(false)
+  const { PrintContainer, handlePrint } = useSimplePrint()
 
-  // Utiliser un hook de recherche pour filtrer les paiements par client ou addition.
   const {
     search,
     setSearch,
     filteredItems: filteredRecoveries,
+    hasSearch,
   } = useSearch({
     items: recoveries,
     fields: recoverySearchFields,
   })
-  // Utiliser un hook de pagination pour gérer la pagination locale des paiements chargés.
+
   const paginatedRecoveries = usePaginated<RecoveryPaymentItem>({
     initialItems: filteredRecoveries,
     pageSize: RECOVERIES_PAGE_SIZE,
   })
+
+  // Sans recherche, l'impression ignore la pagination frontend et reprend tout le jeu chargé.
+  const recoveriesToPrint = hasSearch ? filteredRecoveries : recoveries
 
   const statCards = [
     {
@@ -112,6 +110,16 @@ export default function RecoveriesPage({
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
+      <PrintContainer>
+        <PrintReportHeader
+          title="Rapport des recouvrements"
+          description={`Période du ${formatDateLabel(selectionDate.startDate)} au ${formatDateLabel(
+            selectionDate.endDate
+          )}${hasSearch ? ` - Recherche: ${search.trim()}` : ''}`}
+        />
+        <RecoveriesTable recoveries={recoveriesToPrint} showStatusBadge={false} />
+      </PrintContainer>
+
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Recouvrements de dettes"
@@ -184,6 +192,15 @@ export default function RecoveriesPage({
                     placeholder="Rechercher client ou addition..."
                     className="w-full lg:w-72"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePrint}
+                    disabled={recoveriesToPrint.length === 0}
+                  >
+                    <Printer className="size-4" />
+                    Imprimer
+                  </Button>
 
                   {paginatedRecoveries.totalLoadedPages > 1 && (
                     <PaginationControls
@@ -197,53 +214,9 @@ export default function RecoveriesPage({
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date de paiement</TableHead>
-                      <TableHead>Agent</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Addition</TableHead>
-                      <TableHead>Date de vente</TableHead>
-                      <TableHead className="text-right">Montant payé</TableHead>
-                      <TableHead className="text-right">Total payé</TableHead>
-                      <TableHead className="text-right">Reste après paiement</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedRecoveries.visibleItems.map((payment) => (
-                      <TableRow key={payment.recovery.id}>
-                        <TableCell>{formatDateTimeLabel(payment.recovery.recoveredAt)}</TableCell>
-                        <TableCell>{payment.recovery.receivedByName ?? '-'}</TableCell>
-                        <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
-                        <TableCell>{payment.sale.additionNumber}</TableCell>
-                        <TableCell>{formatDebtSaleDate(payment.sale.saleDate)}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {formatMoneyWithCurrency(
-                            payment.paidAmount,
-                            payment.recovery.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatMoneyWithCurrency(
-                            payment.paidAfterAmount,
-                            payment.sale.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatMoneyWithCurrency(
-                            payment.remainingAmount,
-                            payment.sale.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <DebtStatusBadge status={payment.debtStatus} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-
-                    {paginatedRecoveries.items.length === 0 && (
+                {paginatedRecoveries.items.length === 0 ? (
+                  <Table>
+                    <TableBody>
                       <TableRow>
                         <TableCell colSpan={9} className="h-64">
                           <EmptyState
@@ -254,9 +227,11 @@ export default function RecoveriesPage({
                           />
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <RecoveriesTable recoveries={paginatedRecoveries.visibleItems} />
+                )}
               </CardContent>
             </Card>
           </>

@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   CreditCard,
   HandCoins,
+  Printer,
   ReceiptText,
   Search,
   Wallet,
@@ -13,61 +14,59 @@ import { useState } from 'react'
 import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
+import { PrintReportHeader } from '~/components/common/print_report_header'
 import { SearchInput } from '~/components/common/search_input'
 import { StatCard } from '~/components/common/stat_card'
-import { DebtStatusBadge } from '~/components/sales/debt_status_badge'
 import { DebtPaymentDialog } from '~/components/sales/debt_payment_dialog'
+import { DebtsTable } from '~/components/sales/debts_table'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '~/components/ui/table'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
+import { useSimplePrint } from '~/hooks/use_simple_print'
 import type { InertiaProps } from '~/types'
 import type { DebtItem, DebtsPageProps } from '~/types/debt_types'
-import type { CurrencyCode } from '~/utils/currency'
-import { debtSearchFields, formatDebtSaleDate } from '~/utils/sales/debt.utils'
-import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { formatDateLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
+import { debtSearchFields } from '~/utils/sales/debt.utils'
 
 const DEBTS_PAGE_SIZE = 10
 
 export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsPageProps>) {
-  // Utiliser un hook pour gérer la sélection de période, avec des dates initiales provenant des filtres de la page.
   const selectionDate = useSelectionDate({
     initialStartDate: filters.startDate,
     initialEndDate: filters.endDate,
   })
   const [isLoading, setIsLoading] = useState(false)
   const [selectedDebt, setSelectedDebt] = useState<DebtItem | null>(null)
+  const { PrintContainer, handlePrint } = useSimplePrint({
+    orientation: 'portrait',
+  })
 
-  // Utiliser un hook de recherche pour filtrer les dettes par client ou addition.
   const {
     search,
     setSearch,
     filteredItems: filteredDebts,
+    hasSearch,
   } = useSearch({
     items: debts,
     fields: debtSearchFields,
   })
-  // Utiliser un hook de pagination pour gérer la pagination locale des dettes chargées.
+
   const paginatedDebts = usePaginated<DebtItem>({
     initialItems: filteredDebts,
     pageSize: DEBTS_PAGE_SIZE,
   })
 
+  // L'écran reste paginé, mais l'impression reprend tout si aucune recherche n'est active.
+  const debtsToPrint = hasSearch ? filteredDebts : debts
+
   const redirectTo = `/sales/debts?startDate=${selectionDate.startDate}&endDate=${selectionDate.endDate}`
 
-  // Les statistiques viennent du backend pour rester alignées avec la période filtrée.
   const statCards = [
     {
       label: 'Nombre de dettes',
@@ -89,7 +88,6 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
     },
   ]
 
-  // Applique la période via Inertia; la pagination reste locale.
   const searchDebts = () => {
     setIsLoading(true)
     router.get(
@@ -108,6 +106,16 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
+      <PrintContainer>
+        <PrintReportHeader
+          title="Rapport des dettes"
+          description={`Période du ${formatDateLabel(selectionDate.startDate)} au ${formatDateLabel(
+            selectionDate.endDate
+          )}${hasSearch ? ` - Recherche: ${search.trim()}` : ''}`}
+        />
+        <DebtsTable debts={debtsToPrint} showActions={false} showStatusBadge={false} />
+      </PrintContainer>
+
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Gestion des dettes"
@@ -134,7 +142,7 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
             variant="outline"
           >
             <HandCoins className="size-4" />
-            Récouvrements
+            Recouvrements
           </Button>
         </PageHeader>
 
@@ -176,6 +184,15 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                     placeholder="Rechercher client ou addition..."
                     className="w-full lg:w-72"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePrint}
+                    disabled={debtsToPrint.length === 0}
+                  >
+                    <Printer className="size-4" />
+                    Imprimer
+                  </Button>
 
                   {paginatedDebts.totalLoadedPages > 1 && (
                     <PaginationControls
@@ -189,61 +206,9 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date de vente</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Addition</TableHead>
-                      <TableHead className="text-right">Dette totale</TableHead>
-                      <TableHead className="text-right">Déjà payé</TableHead>
-                      <TableHead className="text-right">Reste</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedDebts.visibleItems.map((debt) => (
-                      <TableRow key={debt.sale.id}>
-                        <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
-                        <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
-                        <TableCell>{debt.sale.additionNumber}</TableCell>
-                        <TableCell className="text-right">
-                          {formatMoneyWithCurrency(
-                            debt.debtTotalAmount,
-                            debt.sale.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatMoneyWithCurrency(
-                            debt.recoveredAmount,
-                            debt.sale.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {formatMoneyWithCurrency(
-                            debt.remainingAmount,
-                            debt.sale.currency as CurrencyCode
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <DebtStatusBadge status={debt.debtStatus} />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            type="button"
-                            size="sm"
-                            className="bg-red-800"
-                            onClick={() => setSelectedDebt(debt)}
-                          >
-                            <CreditCard className="size-4" />
-                            Payer
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-
-                    {paginatedDebts.items.length === 0 && (
+                {paginatedDebts.items.length === 0 ? (
+                  <Table>
+                    <TableBody>
                       <TableRow>
                         <TableCell colSpan={8} className="h-64">
                           <EmptyState
@@ -254,9 +219,11 @@ export default function DebtsPage({ debts, filters, stats }: InertiaProps<DebtsP
                           />
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <DebtsTable debts={paginatedDebts.visibleItems} onSelectDebt={setSelectedDebt} />
+                )}
               </CardContent>
             </Card>
           </>

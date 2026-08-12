@@ -1,44 +1,67 @@
-import { Package } from 'lucide-react'
+import { Package, Printer } from 'lucide-react'
 import { EmptyState } from '~/components/common/empty_state'
-import { StockReportRow } from '~/components/stock/stock_report_row'
+import { PrintReportHeader } from '~/components/common/print_report_header'
+import { DashboardStockReportTable } from '~/components/management/dashboard/dashboard_stock_report_table'
+import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { TabsContent } from '~/components/ui/tabs'
-import {
-  Table,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
 import { usePaginated } from '~/hooks/use_paginated'
-import type { DashboardStockReport, DashboardStockReportRow } from '~/types/dashboard_types'
+import { useSimplePrint } from '~/hooks/use_simple_print'
+import type {
+  DashboardPeriod,
+  DashboardStockReport,
+  DashboardStockReportRow,
+} from '~/types/dashboard_types'
+import { formatDateLabel } from '~/utils/date'
 
 const STOCK_REPORT_PAGE_SIZE = 10
 
 interface DashboardStockReportTabProps {
+  period: DashboardPeriod
   stockReport: DashboardStockReport
 }
 
 /**
  * Affiche le rapport de stock agrégé sur la période du dashboard.
  */
-export function DashboardStockReportTab({ stockReport }: DashboardStockReportTabProps) {
-  // La pagination reste locale car les lignes sont déjà chargées par le dashboard.
+export function DashboardStockReportTab({ period, stockReport }: DashboardStockReportTabProps) {
+  // L'écran est paginé, l'impression reprend toutes les lignes chargées de la période.
   const paginatedReport = usePaginated<DashboardStockReportRow>({
     initialItems: stockReport.rows,
     pageSize: STOCK_REPORT_PAGE_SIZE,
   })
+  const { PrintContainer, handlePrint } = useSimplePrint()
 
   return (
     <TabsContent value="stock-report">
+      <PrintContainer>
+        <PrintReportHeader
+          title="Rapport de stock"
+          description={`Période du ${formatDateLabel(period.startDate)} au ${formatDateLabel(
+            period.endDate
+          )}`}
+        />
+        <DashboardStockReportTable rows={stockReport.rows} totals={stockReport.totals} />
+      </PrintContainer>
+
       <Card className="bg-background">
-        <CardHeader>
-          <CardTitle>Rapport de stock</CardTitle>
-          <CardDescription>
-            Entrées, sorties, pertes et écarts par produit sur la période.
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle>Rapport de stock</CardTitle>
+            <CardDescription>
+              Entrées, sorties, pertes et écarts par produit sur la période.
+            </CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handlePrint}
+            disabled={paginatedReport.items.length === 0}
+          >
+            <Printer className="size-4" />
+            Imprimer
+          </Button>
         </CardHeader>
         <CardContent>
           {paginatedReport.items.length === 0 ? (
@@ -60,63 +83,10 @@ export function DashboardStockReportTab({ stockReport }: DashboardStockReportTab
                 />
               )}
 
-              <Table className="border border-border">
-                <TableHeader className="[&_tr]:border-border">
-                  <TableRow>
-                    <TableHead rowSpan={2} className="border-r border-border">
-                      Produits
-                    </TableHead>
-                    <TableHead rowSpan={2} className="border-r border-border">
-                      Catégories
-                    </TableHead>
-                    <TableHead rowSpan={2} className="border-r border-border">
-                      Unité
-                    </TableHead>
-                    <TableHead rowSpan={2} className="border-r border-border text-right">
-                      SI
-                    </TableHead>
-                    <TableHead rowSpan={2} className="border-r border-border text-right">
-                      Entrées
-                    </TableHead>
-                    <TableHead colSpan={2} className="border-r border-border text-center">
-                      Stock période
-                    </TableHead>
-                    <TableHead colSpan={2} className="border-r border-border text-center">
-                      Sorties
-                    </TableHead>
-                    <TableHead colSpan={2} className="border-r border-border text-center">
-                      Pertes
-                    </TableHead>
-                    <TableHead rowSpan={2} className="border-r border-border text-right">
-                      Stock Théo
-                    </TableHead>
-                    <TableHead colSpan={2} className="border-r border-border text-center">
-                      Stock final
-                    </TableHead>
-                    <TableHead rowSpan={2} className="text-right">
-                      Écart
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="border-r border-border text-right">Qté</TableHead>
-                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
-                    <TableHead className="border-r border-border text-right">Qté</TableHead>
-                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
-                    <TableHead className="border-r border-border text-right">Qté</TableHead>
-                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
-                    <TableHead className="border-r border-border text-right">Qté</TableHead>
-                    <TableHead className="border-r border-border text-right">Valeur</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedReport.visibleItems.map((row) => (
-                    <StockReportRow key={row.productId} row={row} />
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <StockReportRow row={stockReport.totals} isTotal />
-                </TableFooter>
-              </Table>
+              <DashboardStockReportTable
+                rows={paginatedReport.visibleItems}
+                totals={stockReport.totals}
+              />
             </>
           )}
         </CardContent>

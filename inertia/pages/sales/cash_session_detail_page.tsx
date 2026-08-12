@@ -1,19 +1,11 @@
 import { Link } from '@adonisjs/inertia/react'
-import { ArrowLeft, ReceiptText, UserRound } from 'lucide-react'
-import { SaleReportEmptySaleRow } from '~/components/sales/sale_report/sale_report_empty_sale_row'
-import { SaleReportItemRow } from '~/components/sales/sale_report/sale_report_item_row'
+import { ArrowLeft, Printer, ReceiptText, UserRound } from 'lucide-react'
+import { PrintReportHeader } from '~/components/common/print_report_header'
+import { SaleReportTable } from '~/components/sales/sale_report/sale_report_table'
 import { TotalText } from '~/components/sales/sale_report/total_text'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
+import { useSimplePrint } from '~/hooks/use_simple_print'
 import type { InertiaProps } from '~/types'
 import type { CashSessionDetailPageProps } from '~/types/cash_session_types'
 import { formatDateTimeLabel } from '~/utils/date'
@@ -24,8 +16,22 @@ export default function CashSessionDetailPage({
   sales,
   totals,
 }: InertiaProps<CashSessionDetailPageProps>) {
+  const { PrintContainer, handlePrint } = useSimplePrint()
+
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
+      <PrintContainer>
+        <PrintReportHeader
+          title="Rapport journalier des ventes"
+          description={`Caissier: ${
+            session.userName ?? 'Utilisateur'
+          } - Ouverture: ${formatDateTimeLabel(session.openedAt)} - Fermeture: ${formatDateTimeLabel(
+            session.closedAt
+          )}`}
+        />
+        <SaleReportTable sales={sales} totals={totals} />
+      </PrintContainer>
+
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <Card className="bg-background">
           <CardContent className="flex flex-col gap-3 py-4 xl:flex-row xl:items-center xl:justify-between">
@@ -52,7 +58,7 @@ export default function CashSessionDetailPage({
         </Card>
 
         <Card className="bg-background">
-          <CardHeader>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-md bg-muted">
                 <ReceiptText className="size-5" />
@@ -64,60 +70,13 @@ export default function CashSessionDetailPage({
                 </CardDescription>
               </div>
             </div>
+            <Button type="button" variant="outline" onClick={handlePrint}>
+              <Printer className="size-4" />
+              Imprimer
+            </Button>
           </CardHeader>
           <CardContent>
-            <Table className="text-sm">
-              <TableHeader className="bg-black/50 text-white [&_th]:text-white [&_tr]:border-black">
-                <TableRow>
-                  <TableHead className="w-12">N°</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>N° Add</TableHead>
-                  <TableHead>N° BC</TableHead>
-                  <TableHead>Clients</TableHead>
-                  <TableHead>Services</TableHead>
-                  <TableHead className="text-center">Qté</TableHead>
-                  <TableHead className="text-right">PU</TableHead>
-                  <TableHead className="text-right">Total théorique</TableHead>
-                  <TableHead className="text-right">Remise</TableHead>
-                  <TableHead className="text-right">Total réel</TableHead>
-                  <TableHead>Opérateurs</TableHead>
-                  <TableHead>Paiements</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {/* Faire le flattening des ventes */}
-                {sales.flatMap((sale, saleIndex) =>
-                  sale.items.length > 0
-                    ? sale.items.map((item, itemIndex) => (
-                        <SaleReportItemRow
-                          key={item.id}
-                          sale={sale}
-                          item={item}
-                          saleIndex={saleIndex}
-                          isFirstLine={itemIndex === 0}
-                        />
-                      ))
-                    : [<SaleReportEmptySaleRow key={sale.id} sale={sale} saleIndex={saleIndex} />]
-                )}
-              </TableBody>
-              <TableFooter className="border-black bg-black/50 text-white [&_td]:text-white">
-                <TableRow>
-                  <TableCell colSpan={8} className="font-semibold">
-                    Totaux généraux
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {renderMoneyMap(totals.theoreticalAmounts)}
-                  </TableCell>
-                  <TableCell className="text-right font-bold text-red-200">
-                    {renderMoneyMap(totals.discountAmounts)}
-                  </TableCell>
-                  <TableCell className="text-right font-bold text-green-200">
-                    {renderMoneyMap(totals.realAmounts)}
-                  </TableCell>
-                  <TableCell colSpan={2} />
-                </TableRow>
-              </TableFooter>
-            </Table>
+            <SaleReportTable sales={sales} totals={totals} />
           </CardContent>
         </Card>
 
