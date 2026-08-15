@@ -1,5 +1,6 @@
 import { useRef, type FC, type ReactNode } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { formatDateTimeLabel } from '~/utils/date'
 
 interface UseSimplePrintOptions {
   orientation?: 'landscape' | 'portrait'
@@ -33,6 +34,9 @@ export function useSimplePrint(options: UseSimplePrintOptions = {}): UseSimplePr
         style={{ colorScheme: 'light' }}
       >
         {children}
+        <footer className="mt-10  pt-2 text-right text-black">
+          Imprimé le {formatDateTimeLabel(new Date())}
+        </footer>
       </div>
     </div>
   )
