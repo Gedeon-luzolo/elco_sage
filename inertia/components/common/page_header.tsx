@@ -45,7 +45,11 @@ export function PageHeader({
       </div>
 
       {/* Slot droit : bouton Créer, filtres, etc. */}
-      {children && <div className="flex items-center gap-2">{children}</div>}
+      {children && (
+        <div className="flex w-full flex-row flex-wrap items-center gap-2 md:w-auto md:justify-end">
+          {children}
+        </div>
+      )}
     </header>
   )
 }

@@ -25,13 +25,20 @@ export function SaleDetailPanel({
 
   return (
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-      <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-card p-4">
-        <div>
+      <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border bg-card p-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
           <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => onPrintSale?.(sale)}>
+        {/* Actions tactiles : pleine largeur en mobile, compactes en desktop. */}
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => onPrintSale?.(sale)}
+          >
             <Printer className="size-4" />
             Imprimer
           </Button>
@@ -41,6 +48,7 @@ export function SaleDetailPanel({
               type="button"
               variant="destructive"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={() => onCancelSale?.(sale)}
             >
               <XCircle className="size-4" />
@@ -82,15 +90,15 @@ export function SaleDetailPanel({
                 key={item.id}
                 className="rounded-md border border-border bg-background p-3 text-sm"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                  <div className="min-w-0">
                     <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
                     <p className="text-xs text-muted-foreground">
                       Bon : {item.orderNumber} - Quantite : {item.quantity}{' '}
                       {item.productService?.stockProductBaseUnit ?? ''}
                     </p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="shrink-0 font-semibold">
                     {formatMoneyWithCurrency(item.totalPrice, item.currency as CurrencyCode)}
                   </p>
                 </div>
@@ -107,7 +115,7 @@ function DetailLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
+      <span className="min-w-0 text-right font-medium">{value}</span>
     </div>
   )
 }

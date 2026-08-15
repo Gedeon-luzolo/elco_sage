@@ -151,7 +151,7 @@ export default function ManagementPage({
           ))}
         </section>
 
-        <Tabs defaultValue="sales-report" className="gap-4">
+        <Tabs defaultValue="sales-report" className="gap-6 gap-y-14 md:gap-y-4">
           <TabsList className="grid h-auto w-full grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             <TabsTrigger value="sales-report">
               <ClipboardList className="size-4" />

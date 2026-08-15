@@ -81,14 +81,14 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
         </PageHeader>
 
         {/* Barre de contrôle */}
-        <section className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+        <section className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <div className="flex min-w-0 items-center gap-2">
             <Input
               type="date"
               value={selectedDate}
               max={todayKey}
               onChange={(e) => changeSelectedDate(e.target.value)}
-              className="w-44"
+              className="w-full sm:w-44"
             />
           </div>
 
@@ -96,7 +96,7 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Rechercher un produit..."
-            className="max-w-xs"
+            className="w-full max-w-none sm:max-w-xs"
             inputClassName="h-8"
           />
         </section>
@@ -111,7 +111,25 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_450px]">
             {/* Tableau maître */}
-            <div className="h-[70vh] overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            {/* Liste mobile : évite le tableau horizontal sur petit écran. */}
+            <div className="grid gap-3 md:hidden">
+              {filteredItems.map((item) => {
+                const hasMovement = item.id !== -1
+                const isSelected = selectedMovementId === item.productId
+
+                return (
+                  <StockMobileCard
+                    key={item.productId}
+                    item={item}
+                    hasMovement={hasMovement}
+                    isSelected={isSelected}
+                    onSelect={() => setSelectedMovementId(item.productId)}
+                  />
+                )
+              })}
+            </div>
+
+            <div className="hidden h-[70vh] overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block">
               <div className="h-full overflow-y-auto">
                 <Table>
                   <TableHeader>
@@ -234,5 +252,87 @@ export default function StockMovementsPage({ stockItems, currentDate }: Inventor
         )}
       </section>
     </main>
+  )
+}
+
+function StockMobileCard({
+  item,
+  hasMovement,
+  isSelected,
+  onSelect,
+}: {
+  item: InventoryPageProps['stockItems'][number]
+  hasMovement: boolean
+  isSelected: boolean
+  onSelect: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`grid w-full gap-3 rounded-lg border p-3 text-left transition-colors ${
+        isSelected
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+          : 'border-border bg-card hover:border-primary/50'
+      } ${!hasMovement ? 'opacity-70' : ''}`}
+      onClick={onSelect}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">{item.productName}</p>
+          <p className="truncate text-xs text-muted-foreground">{item.categoryName || '—'}</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          {item.productBaseUnit}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <StockMobileMetric label="Initial" value={formatQuantity(item.initialStock)} />
+        <StockMobileMetric label="Entrées" value={formatQuantity(item.entries)} accent="blue" />
+        <StockMobileMetric label="Disponible" value={formatQuantity(item.availableStock)} strong />
+        <StockMobileMetric label="Sorties" value={formatQuantity(item.outputs)} accent="red" />
+        <StockMobileMetric label="Théorique" value={formatQuantity(item.theoreticalStock)} strong />
+        <StockMobileMetric
+          label="Écart"
+          value={item.variance === null ? '-' : formatQuantity(item.variance)}
+          accent={item.variance !== null && Math.abs(item.variance) > 0 ? 'amber' : 'emerald'}
+          strong
+        />
+      </div>
+    </button>
+  )
+}
+
+function StockMobileMetric({
+  label,
+  value,
+  accent,
+  strong = false,
+}: {
+  label: string
+  value: string | number
+  accent?: 'blue' | 'red' | 'amber' | 'emerald'
+  strong?: boolean
+}) {
+  const accentClassName = accent
+    ? {
+        blue: 'text-blue-600',
+        red: 'text-red-600',
+        amber: 'text-amber-600',
+        emerald: 'text-emerald-600',
+      }[accent]
+    : 'text-foreground'
+
+  return (
+    <div className="min-w-0 rounded-md bg-muted/40 px-2 py-1.5">
+      <p className="truncate text-[11px] text-muted-foreground">{label}</p>
+      <p
+        className={`truncate text-xs ${accentClassName} ${
+          strong ? 'font-semibold' : 'font-medium'
+        }`}
+      >
+        {value}
+      </p>
+    </div>
   )
 }

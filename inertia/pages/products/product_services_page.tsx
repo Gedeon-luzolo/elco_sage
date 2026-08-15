@@ -172,14 +172,14 @@ export default function ProductServicesPage({
           <TabsList className="w-full">
             <TabsTrigger
               value="products"
-              className="flex-1 gap-2 data-active:bg-primary data-active:text-white"
+              className="flex-1 gap-2"
             >
               <Package className="size-4" />
               Produits ({filteredProducts.length})
             </TabsTrigger>
             <TabsTrigger
               value="services"
-              className="flex-1 gap-2 data-active:bg-primary data-active:text-white"
+              className="flex-1 gap-2"
             >
               <Wrench className="size-4" />
               Services ({filteredServices.length})

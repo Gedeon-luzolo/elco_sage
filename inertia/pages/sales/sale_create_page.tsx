@@ -376,28 +376,33 @@ export default function SaleCreatePage({
                           </div>
                         </div>
 
-                        <div className="flex items-end">
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => removeLine(index)}
-                            title="Retirer la ligne"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
+                        {/* Actions de ligne groupées sur mobile, séparées dans la grille desktop. */}
+                        <div className="grid grid-cols-2 gap-2 lg:contents">
+                          <div className="flex items-end">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="w-full lg:w-8"
+                              onClick={() => removeLine(index)}
+                              title="Retirer la ligne"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
 
-                        <div className="flex items-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={addLine}
-                            title="Ajouter une ligne"
-                          >
-                            <Plus className="size-4" />
-                          </Button>
+                          <div className="flex items-end">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="w-full lg:w-8"
+                              onClick={addLine}
+                              title="Ajouter une ligne"
+                            >
+                              <Plus className="size-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )

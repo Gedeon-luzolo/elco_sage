@@ -127,21 +127,27 @@ export default function SalesPage({
         >
           <>
             {isManagementUser && (
-              <Button render={<Link href="/" />} variant="outline">
+              <Button
+                render={<Link href="/" />}
+                variant="outline"
+                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
+              >
                 <ArrowLeft className="size-4" />
-                Retour accueil
+                <span className="sm:hidden">Accueil</span>
+                <span className="hidden sm:inline">Retour accueil</span>
               </Button>
             )}
             <Button
               render={<Link href="/sales/sessions" />}
               variant="outline"
-              className="bg-sky-600 text-white hover:bg-sky-500/80 hover:text-white"
+              className="min-w-0 basis-[30%] bg-sky-600 px-2 text-xs text-white hover:bg-sky-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
             >
               <CalendarDays className="size-4" />
-              Rapport des Sessions
+              <span className="sm:hidden">Sessions</span>
+              <span className="hidden sm:inline">Rapport des Sessions</span>
             </Button>
             <Button
-              className="bg-red-800 text-white hover:bg-red-500/80 hover:text-white"
+              className="min-w-0 basis-[30%] bg-red-800 px-2 text-xs text-white hover:bg-red-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
               render={<Link href="/sales/debts" />}
               variant="outline"
             >
@@ -149,23 +155,33 @@ export default function SalesPage({
               Credits
             </Button>
             <Button
-              className="bg-emerald-600 text-white hover:bg-emerald-500/80 hover:text-white"
+              className="min-w-0 basis-[30%] bg-emerald-600 px-2 text-xs text-white hover:bg-emerald-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
               render={<Link href="/sales/recoveries" />}
               variant="outline"
             >
               <HandCoins className="size-4" />
-              Recouvrements
+              <span className="sm:hidden">Recouv.</span>
+              <span className="hidden sm:inline">Recouvrements</span>
             </Button>
 
             {canCreateSale ? (
-              <Button render={<Link href="/sales/create" />}>
+              <Button
+                render={<Link href="/sales/create" />}
+                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
+              >
                 <Plus className="size-4" />
-                Nouvelle vente
+                <span className="sm:hidden">Vente</span>
+                <span className="hidden sm:inline">Nouvelle vente</span>
               </Button>
             ) : !currentCashSession ? (
-              <Button render={<Link href="/sales/session/open" />} variant="outline">
+              <Button
+                render={<Link href="/sales/session/open" />}
+                variant="outline"
+                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
+              >
                 <Banknote className="size-4" />
-                Ouvrir une caisse
+                <span className="sm:hidden">Caisse</span>
+                <span className="hidden sm:inline">Ouvrir une caisse</span>
               </Button>
             ) : null}
           </>

@@ -28,8 +28,8 @@ export function StockDetailPanel({
   return (
     <div className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
       {/* En-tête */}
-      <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-card p-4">
-        <div className="flex-1">
+      <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border bg-card p-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold text-foreground">{movement.productName}</h3>
           {movement.categoryName && (
             <p className="text-sm text-muted-foreground">{movement.categoryName}</p>
@@ -42,8 +42,8 @@ export function StockDetailPanel({
           )}
         </div>
 
-        {/* Boutons d'action */}
-        <div className="flex items-center gap-2">
+        {/* Actions tactiles : grille mobile, boutons compacts en desktop. */}
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
           {onCreateEntry && (
             <Button
               type="button"
@@ -51,7 +51,7 @@ export function StockDetailPanel({
               size="sm"
               variant="outline"
               title={hasEntries ? 'Corriger les entrées' : 'Enregistrer des entrées'}
-              className="size-8 p-0"
+              className="h-8 w-full p-0 sm:w-8"
             >
               {hasEntries ? <Pencil className="size-4" /> : <ArrowDown className="size-4" />}
             </Button>
@@ -64,13 +64,19 @@ export function StockDetailPanel({
               size="sm"
               variant="outline"
               title="Valider le stock physique"
-              className="size-8 p-0"
+              className="h-8 w-full p-0 sm:w-8"
             >
               <CheckCircle2 className="size-4" />
             </Button>
           )}
 
-          <Button type="button" variant="ghost" size="sm" onClick={onClose} className="size-8 p-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-full p-0 sm:w-8"
+          >
             <X className="size-5" />
           </Button>
         </div>
