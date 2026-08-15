@@ -1,6 +1,7 @@
 import { Package, Printer } from 'lucide-react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PrintReportHeader } from '~/components/common/print_report_header'
+import { DashboardPrintStatsSection } from '~/components/management/dashboard/dashboard_print_stats_section'
 import { DashboardStockReportTable } from '~/components/management/dashboard/dashboard_stock_report_table'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -14,6 +15,7 @@ import type {
   DashboardStockReportRow,
 } from '~/types/dashboard_types'
 import { formatDateLabel } from '~/utils/date'
+import { formatMoneyWithCurrency, formatNumber } from '~/utils/format_number.utils'
 
 const STOCK_REPORT_PAGE_SIZE = 10
 
@@ -41,6 +43,32 @@ export function DashboardStockReportTab({ period, stockReport }: DashboardStockR
           description={`Période du ${formatDateLabel(period.startDate)} au ${formatDateLabel(
             period.endDate
           )}`}
+        />
+        <DashboardPrintStatsSection
+          stats={[
+            { label: 'Entrées', value: formatNumber(stockReport.totals.totalEntries) },
+            { label: 'Sorties', value: formatNumber(stockReport.totals.totalOutputs) },
+            { label: 'Pertes', value: formatNumber(stockReport.totals.totalLosses) },
+            {
+              label: 'Valeur stock période',
+              value: formatMoneyWithCurrency(stockReport.totals.periodStockValueCdf, 'CDF'),
+            },
+            {
+              label: 'Valeur stock final',
+              value:
+                stockReport.totals.physicalStockValueCdf === null
+                  ? '-'
+                  : formatMoneyWithCurrency(stockReport.totals.physicalStockValueCdf, 'CDF'),
+            },
+            {
+              label: 'Écart',
+              value:
+                stockReport.totals.finalVariance === null
+                  ? '-'
+                  : formatNumber(stockReport.totals.finalVariance),
+              emphasis: true,
+            },
+          ]}
         />
         <DashboardStockReportTable rows={stockReport.rows} totals={stockReport.totals} />
       </PrintContainer>

@@ -171,7 +171,11 @@ export default function ManagementPage({
             </TabsTrigger>
           </TabsList>
 
-          <DashboardPeriodicReportTab period={period} periodicReports={periodicReports} />
+          <DashboardPeriodicReportTab
+            period={period}
+            stats={stats}
+            periodicReports={periodicReports}
+          />
           <DashboardStockReportTab period={period} stockReport={stockReport} />
           <DashboardStaffProductivityTab staffProductivity={staffProductivity} />
           <DashboardChartsTab stats={stats} topServices={topServices} />

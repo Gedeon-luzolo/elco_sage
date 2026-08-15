@@ -1,6 +1,7 @@
 import { ClipboardList, Printer } from 'lucide-react'
 import { EmptyState } from '~/components/common/empty_state'
 import { PrintReportHeader } from '~/components/common/print_report_header'
+import { DashboardPrintStatsSection } from '~/components/management/dashboard/dashboard_print_stats_section'
 import { DashboardPeriodicReportTable } from '~/components/management/dashboard/dashboard_periodic_report_table'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -8,13 +9,15 @@ import { PaginationControls } from '~/components/ui/pagination_controls'
 import { TabsContent } from '~/components/ui/tabs'
 import { usePaginated } from '~/hooks/use_paginated'
 import { useSimplePrint } from '~/hooks/use_simple_print'
-import type { DashboardPeriod, DashboardPeriodicReport } from '~/types/dashboard_types'
+import type { DashboardPeriod, DashboardPeriodicReport, DashboardStats } from '~/types/dashboard_types'
 import { formatDateLabel } from '~/utils/date'
+import { renderMoneyMap } from '~/utils/money_map.utils'
 
 const PERIODIC_REPORT_PAGE_SIZE = 10
 
 interface DashboardPeriodicReportTabProps {
   period: DashboardPeriod
+  stats: DashboardStats
   periodicReports: DashboardPeriodicReport[]
 }
 
@@ -23,6 +26,7 @@ interface DashboardPeriodicReportTabProps {
  */
 export function DashboardPeriodicReportTab({
   period,
+  stats,
   periodicReports,
 }: DashboardPeriodicReportTabProps) {
   // L'écran est paginé, l'impression reprend toutes les lignes chargées de la période.
@@ -40,6 +44,29 @@ export function DashboardPeriodicReportTab({
           description={`Période du ${formatDateLabel(period.startDate)} au ${formatDateLabel(
             period.endDate
           )}`}
+        />
+        <DashboardPrintStatsSection
+          stats={[
+            {
+              label: "Chiffre d'affaires théorique",
+              value: renderMoneyMap(stats.theoreticalAmounts),
+            },
+            { label: 'Offerts', value: renderMoneyMap(stats.offeredAmounts) },
+            { label: 'Remise', value: renderMoneyMap(stats.discountAmounts) },
+            {
+              label: "Chiffre d'affaires réel",
+              value: renderMoneyMap(stats.realAmounts),
+              emphasis: true,
+            },
+            { label: 'Dettes', value: renderMoneyMap(stats.remainingDebtAmounts) },
+            { label: 'Cash', value: renderMoneyMap(stats.cashAmounts) },
+            { label: 'Recouvrement', value: renderMoneyMap(stats.recoveryAmounts) },
+            {
+              label: 'Total encaissements',
+              value: renderMoneyMap(stats.collectionAmounts),
+              emphasis: true,
+            },
+          ]}
         />
         <DashboardPeriodicReportTable reports={periodicReports} />
       </PrintContainer>
