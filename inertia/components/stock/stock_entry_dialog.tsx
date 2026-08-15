@@ -36,6 +36,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
   const [quantity, setQuantity] = useState<string>(movement.entries?.toString() ?? '')
 
   const hasMovement = movement.id !== -1
+  const hasEntries = Number(movement.entries || 0) > 0
   const hasPackaging = hasProductPackaging(movement)
   const unitOptions = getProductUnitOptions(movement)
   const conversionPreview = getConversionPreview(quantity, selectedUnit, movement)
@@ -69,9 +70,9 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Enregistrer des entrees</DialogTitle>
+          <DialogTitle>{hasEntries ? 'Corriger les entrées' : 'Créer une entrée'}</DialogTitle>
           <DialogDescription>
-            Saisir les quantites entrees en stock pour {movement.productName} le{' '}
+            Saisir les quantités entrées en stock pour {movement.productName} le{' '}
             {formatDateLabel(movement.date)}
           </DialogDescription>
         </DialogHeader>
@@ -107,7 +108,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
           {/* Quantite entree et unite de saisie sur la meme ligne. */}
           <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
             <div className="grid gap-2">
-              <Label htmlFor="entries">Quantite entree *</Label>
+              <Label htmlFor="entries">Quantité entrée *</Label>
               <Input
                 id="entries"
                 name="entries"
@@ -167,7 +168,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
             <Button type="button" size="lg" variant="outline" onClick={closeDialog}>
               Annuler
             </Button>
-            <SubmitButton size="lg" label="Enregistrer" />
+            <SubmitButton size="lg" label={hasEntries ? 'Corriger' : 'Créer'} />
           </DialogFooter>
         </form>
       </DialogContent>

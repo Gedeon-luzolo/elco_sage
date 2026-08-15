@@ -196,12 +196,14 @@ export default class SaleService {
     return sale
   }
 
-  // Invalide le cache des ventes, recouvrements et sessions de caisse pour forcer la lecture depuis la base de données.
+  // Invalide les domaines impactés par une vente: finances, caisse et stock consommable.
   private invalidateSaleDomains() {
     this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
     this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
     this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
     this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
+    this.cacheService.forgetByPrefix(CacheKeys.productServices.activeForSalePrefix)
   }
 
   /**

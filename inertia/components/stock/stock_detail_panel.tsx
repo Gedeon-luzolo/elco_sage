@@ -22,6 +22,7 @@ export function StockDetailPanel({
   onValidatePhysical,
 }: StockDetailPanelProps) {
   const hasMovement = movement.id !== -1
+  const hasEntries = Number(movement.entries || 0) > 0
   const hasVariance = hasSignificantVariance(movement)
 
   return (
@@ -49,10 +50,10 @@ export function StockDetailPanel({
               onClick={() => onCreateEntry(movement)}
               size="sm"
               variant="outline"
-              title={hasMovement ? 'Corriger les entrees' : 'Enregistrer des entrees'}
+              title={hasEntries ? 'Corriger les entrées' : 'Enregistrer des entrées'}
               className="size-8 p-0"
             >
-              {hasMovement ? <Pencil className="size-4" /> : <ArrowDown className="size-4" />}
+              {hasEntries ? <Pencil className="size-4" /> : <ArrowDown className="size-4" />}
             </Button>
           )}
 
