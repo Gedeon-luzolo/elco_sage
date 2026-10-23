@@ -3,63 +3,10 @@
 | Routes file
 |--------------------------------------------------------------------------
 |
-| The routes file is used for defining the HTTP routes.
+| Le backend ne sert que du JSON : toutes les routes vivent sous /api.
 |
 */
 
-import { middleware } from '#start/kernel'
 import { registerApiRoutes } from '#routes/api_routes'
-import { registerAuthenticatedAuthRoutes, registerGuestAuthRoutes } from '#routes/auth_routes'
-import { registerCustomerRoutes } from '#routes/customer_routes'
-import { registerExchangeRateRoutes } from '#routes/exchange_rate_routes'
-import { registerManagementRoutes } from '#routes/management_routes'
-import { registerProductCategoryRoutes } from '#routes/product_category_routes'
-import { registerProductServiceRoutes } from '#routes/product_service_routes'
-import { registerSalesRoutes } from '#routes/sales_routes'
-import { registerStockMovementRoutes } from '#routes/stock_movement_routes'
-import { registerUserRoutes } from '#routes/user_routes'
-import router from '@adonisjs/core/services/router'
 
-// API JSON de la SPA, authentifiee par token (hors session web).
 registerApiRoutes()
-
-router
-  .on('/')
-  .renderInertia('home/home', {})
-  .as('home')
-  .use(middleware.auth({ redirectTo: '/splash' }))
-  .use(middleware.managementAccess())
-
-router
-  .group(() => {
-    registerGuestAuthRoutes()
-  })
-  .use(middleware.guest())
-
-router
-  .group(() => {
-    registerAuthenticatedAuthRoutes()
-    registerCustomerRoutes()
-
-    // Routes de gestion de stock, accessibles aux utilisateurs authentifies.
-    registerStockMovementRoutes()
-
-    // Routes de vente protegees par l'etat de session de caisse.
-    router
-      .group(() => {
-        registerSalesRoutes()
-      })
-      .use(middleware.cashSession())
-
-    router
-      .group(() => {
-        registerManagementRoutes()
-        registerUserRoutes()
-        registerExchangeRateRoutes()
-        registerProductCategoryRoutes()
-        registerProductServiceRoutes()
-      })
-      .prefix('management')
-      .use(middleware.managementAccess())
-  })
-  .use(middleware.auth())

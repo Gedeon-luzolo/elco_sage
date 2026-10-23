@@ -28,13 +28,6 @@ export default class ApiSalesController {
   }
 
   /**
-   * Detail d'une vente.
-   */
-  async show({ params, serialize }: HttpContext) {
-    return serialize(SaleTransformer.transformSingle(await this.saleService.findById(params.id)))
-  }
-
-  /**
    * Cree une vente. Idempotent si `id` est fourni (rejeu d'une vente faite hors ligne).
    */
   async store(ctx: HttpContext) {

@@ -14,6 +14,14 @@ const ApiCustomersController = () => import('#controllers/api/customers/api_cust
 const ApiProductServicesController = () =>
   import('#controllers/api/products/api_product_services_controller')
 const ApiOperatorsController = () => import('#controllers/api/users/api_operators_controller')
+const ApiUsersController = () => import('#controllers/api/management/api_users_controller')
+const ApiProductCategoriesController = () =>
+  import('#controllers/api/management/api_product_categories_controller')
+const ApiProductServicesAdminController = () =>
+  import('#controllers/api/management/api_product_services_controller')
+const ApiJournalisationsController = () =>
+  import('#controllers/api/management/api_journalisations_controller')
+const ApiDashboardController = () => import('#controllers/api/management/api_dashboard_controller')
 const ApiExchangeRatesController = () =>
   import('#controllers/api/exchange_rates/api_exchange_rates_controller')
 
@@ -42,7 +50,7 @@ export function registerApiRoutes() {
           router.get('customers', [ApiCustomersController, 'index'])
           router.get('customers/active-for-sale', [ApiCustomersController, 'activeForSale'])
           router.post('customers', [ApiCustomersController, 'store'])
-          router.put('customers/:id', [ApiCustomersController, 'update'])
+          router.patch('customers/:id', [ApiCustomersController, 'update'])
 
           // Sessions de caisse (routes fixes declarees avant :id).
           router.get('cash-sessions', [ApiCashSessionsController, 'index'])
@@ -51,14 +59,6 @@ export function registerApiRoutes() {
             ApiCashSessionsController,
             'systemAmounts',
           ])
-          router.get('cash-sessions/current/addition-numbers', [
-            ApiCashSessionsController,
-            'additionNumbers',
-          ])
-          router.post('cash-sessions/current/addition-numbers', [
-            ApiCashSessionsController,
-            'reserveAdditionNumbers',
-          ])
           router.post('cash-sessions/close', [ApiCashSessionsController, 'close'])
           router.post('cash-sessions', [ApiCashSessionsController, 'store'])
           router.get('cash-sessions/:id', [ApiCashSessionsController, 'show'])
@@ -66,7 +66,6 @@ export function registerApiRoutes() {
           // Ventes, dettes et recouvrements.
           router.get('sales', [ApiSalesController, 'index'])
           router.post('sales', [ApiSalesController, 'store'])
-          router.get('sales/:id', [ApiSalesController, 'show'])
           router.patch('sales/:id/cancel', [ApiSalesController, 'cancel'])
           router.post('sales/:saleId/recoveries', [ApiSaleRecoveriesController, 'store'])
           router.get('debts', [ApiDebtsController, 'index'])
@@ -75,9 +74,33 @@ export function registerApiRoutes() {
           // Stock.
           router.get('stock', [ApiStockMovementsController, 'index'])
           router.post('stock/movements', [ApiStockMovementsController, 'store'])
-          router.put('stock/movements/:id', [ApiStockMovementsController, 'update'])
+          router.patch('stock/movements/:id', [ApiStockMovementsController, 'update'])
           router.post('stock/validate-physical', [ApiStockMovementsController, 'validatePhysical'])
-          router.put('stock/validate-physical/:id', [ApiStockMovementsController, 'updatePhysical'])
+          router.patch('stock/validate-physical/:id', [
+            ApiStockMovementsController,
+            'updatePhysical',
+          ])
+
+          // Back-office : reserve a la direction.
+          router
+            .group(() => {
+              router.post('exchange-rates', [ApiExchangeRatesController, 'store'])
+              router.get('dashboard', [ApiDashboardController, 'index'])
+              router.get('journalisations', [ApiJournalisationsController, 'index'])
+              router.get('users', [ApiUsersController, 'index'])
+              router.post('users', [ApiUsersController, 'store'])
+              router.patch('users/:id', [ApiUsersController, 'update'])
+              router.delete('users/:id', [ApiUsersController, 'destroy'])
+              router.get('product-categories', [ApiProductCategoriesController, 'index'])
+              router.post('product-categories', [ApiProductCategoriesController, 'store'])
+              router.patch('product-categories/:id', [ApiProductCategoriesController, 'update'])
+              router.delete('product-categories/:id', [ApiProductCategoriesController, 'destroy'])
+              router.get('product-services', [ApiProductServicesAdminController, 'index'])
+              router.post('product-services', [ApiProductServicesAdminController, 'store'])
+              router.patch('product-services/:id', [ApiProductServicesAdminController, 'update'])
+              router.delete('product-services/:id', [ApiProductServicesAdminController, 'destroy'])
+            })
+            .use(middleware.apiManagement())
         })
         .use(middleware.apiAuth())
     })

@@ -14,6 +14,13 @@ export const controllers = {
     exchangeRates: {
       ApiExchangeRates: () => import('#controllers/api/exchange_rates/api_exchange_rates_controller'),
     },
+    management: {
+      ApiDashboard: () => import('#controllers/api/management/api_dashboard_controller'),
+      ApiJournalisations: () => import('#controllers/api/management/api_journalisations_controller'),
+      ApiProductCategories: () => import('#controllers/api/management/api_product_categories_controller'),
+      ApiProductServices: () => import('#controllers/api/management/api_product_services_controller'),
+      ApiUsers: () => import('#controllers/api/management/api_users_controller'),
+    },
     products: {
       ApiProductServices: () => import('#controllers/api/products/api_product_services_controller'),
     },
@@ -29,40 +36,5 @@ export const controllers = {
     users: {
       ApiOperators: () => import('#controllers/api/users/api_operators_controller'),
     },
-  },
-  auth: {
-    Session: () => import('#controllers/auth/session_controller'),
-  },
-  categories: {
-    ProductCategories: () => import('#controllers/categories/product_categories_controller'),
-  },
-  customers: {
-    Customers: () => import('#controllers/customers/customers_controller'),
-  },
-  exchangeRates: {
-    ExchangeRates: () => import('#controllers/exchange_rates/exchange_rates_controller'),
-  },
-  journalisations: {
-    Journalisations: () => import('#controllers/journalisations/journalisations_controller'),
-  },
-  management: {
-    Dashboard: () => import('#controllers/management/dashboard_controller'),
-  },
-  products: {
-    ProductServices: () => import('#controllers/products/product_services_controller'),
-  },
-  sales: {
-    CashSessions: () => import('#controllers/sales/cash_sessions_controller'),
-    financials: {
-      Debts: () => import('#controllers/sales/financials/debts_controller'),
-      SaleRecoveries: () => import('#controllers/sales/financials/sale_recoveries_controller'),
-    },
-    Sales: () => import('#controllers/sales/sales_controller'),
-  },
-  stock: {
-    StockMovements: () => import('#controllers/stock/stock_movements_controller'),
-  },
-  users: {
-    Users: () => import('#controllers/users/users_controller'),
   },
 }

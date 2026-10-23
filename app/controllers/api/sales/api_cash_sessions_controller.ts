@@ -76,14 +76,14 @@ export default class ApiCashSessionsController {
   /**
    * Montants systeme affiches dans le dialogue de cloture.
    */
-  async systemAmounts({ auth, response }: HttpContext) {
+  async systemAmounts({ auth, response, serialize }: HttpContext) {
     const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
 
     if (!session) {
       return response.notFound({ message: "Aucune session de caisse ouverte n'a ete trouvee." })
     }
 
-    return response.ok(await this.cashSessionService.computeSystemAmounts(session))
+    return serialize(await this.cashSessionService.computeSystemAmounts(session))
   }
 
   /**
@@ -98,33 +98,5 @@ export default class ApiCashSessionsController {
 
       return ctx.serialize(CashSessionTransformer.transformSingle(session))
     })
-  }
-
-  /**
-   * Plages de numeros deja reservees pour la session ouverte (rechargees apres reconnexion).
-   */
-  async additionNumbers({ auth, response, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
-
-    if (!session) {
-      return response.notFound({ message: "Aucune session de caisse ouverte n'a ete trouvee." })
-    }
-
-    return serialize(await this.additionNumberService.listBlocks(session.id))
-  }
-
-  /**
-   * Reserve une nouvelle plage quand la precedente est presque consommee (client en ligne).
-   */
-  async reserveAdditionNumbers({ auth, response, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
-
-    if (!session) {
-      return response.notFound({ message: "Aucune session de caisse ouverte n'a ete trouvee." })
-    }
-
-    return response.created(
-      await serialize(await this.additionNumberService.reserveBlock(session.id))
-    )
   }
 }

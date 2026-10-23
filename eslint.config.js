@@ -1,4 +1,4 @@
 import { configApp } from '@adonisjs/eslint-config'
-import { react } from '@adonisjs/eslint-config/react'
 
-export default configApp(...react)
+// Le frontend (web/) a son propre outillage.
+export default configApp({ ignores: ['web/**'] })

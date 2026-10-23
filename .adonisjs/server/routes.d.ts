@@ -18,14 +18,11 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
-    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
     'api.api_sales.store': { paramsTuple?: []; params?: {} }
-    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
@@ -35,79 +32,37 @@ export type ScannedRoutes = {
     'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'home': { paramsTuple?: []; params?: {} }
-    'splash': { paramsTuple?: []; params?: {} }
-    'session.create': { paramsTuple?: []; params?: {} }
-    'session.store': { paramsTuple?: []; params?: {} }
-    'auth.verify_password': { paramsTuple?: []; params?: {} }
-    'session.destroy': { paramsTuple?: []; params?: {} }
-    'customers.index': { paramsTuple?: []; params?: {} }
-    'customers.store': { paramsTuple?: []; params?: {} }
-    'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'stock_movements.index': { paramsTuple?: []; params?: {} }
-    'stock_movements.store': { paramsTuple?: []; params?: {} }
-    'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
-    'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cash_sessions.index': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
-    'sales.debts.index': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.overview': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
-    'sales.index': { paramsTuple?: []; params?: {} }
-    'sales.create': { paramsTuple?: []; params?: {} }
-    'sales.history': { paramsTuple?: []; params?: {} }
-    'sales.store': { paramsTuple?: []; params?: {} }
-    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'management': { paramsTuple?: []; params?: {} }
-    'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
-    'users.get': { paramsTuple?: []; params?: {} }
-    'users.store': { paramsTuple?: []; params?: {} }
-    'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'exchange_rates.get': { paramsTuple?: []; params?: {} }
-    'exchange_rates.store': { paramsTuple?: []; params?: {} }
-    'product_categories.index': { paramsTuple?: []; params?: {} }
-    'product_categories.store': { paramsTuple?: []; params?: {} }
-    'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_services.index': { paramsTuple?: []; params?: {} }
-    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
-    'product_services.store': { paramsTuple?: []; params?: {} }
-    'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_services.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_exchange_rates.store': { paramsTuple?: []; params?: {} }
+    'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
+    'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
+    'api.api_users.index': { paramsTuple?: []; params?: {} }
+    'api.api_users.store': { paramsTuple?: []; params?: {} }
+    'api.api_users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_categories.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_categories.store': { paramsTuple?: []; params?: {} }
+    'api.api_product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_services_admin.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services_admin.store': { paramsTuple?: []; params?: {} }
+    'api.api_product_services_admin.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_services_admin.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   POST: {
     'api.api_session.login': { paramsTuple?: []; params?: {} }
     'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
     'api.api_customers.store': { paramsTuple?: []; params?: {} }
-    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
     'api.api_sales.store': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'api.api_stock_movements.store': { paramsTuple?: []; params?: {} }
     'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
-    'session.store': { paramsTuple?: []; params?: {} }
-    'auth.verify_password': { paramsTuple?: []; params?: {} }
-    'session.destroy': { paramsTuple?: []; params?: {} }
-    'customers.store': { paramsTuple?: []; params?: {} }
-    'stock_movements.store': { paramsTuple?: []; params?: {} }
-    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
-    'sales.store': { paramsTuple?: []; params?: {} }
-    'users.store': { paramsTuple?: []; params?: {} }
-    'exchange_rates.store': { paramsTuple?: []; params?: {} }
-    'product_categories.store': { paramsTuple?: []; params?: {} }
-    'product_services.store': { paramsTuple?: []; params?: {} }
+    'api.api_exchange_rates.store': { paramsTuple?: []; params?: {} }
+    'api.api_users.store': { paramsTuple?: []; params?: {} }
+    'api.api_product_categories.store': { paramsTuple?: []; params?: {} }
+    'api.api_product_services_admin.store': { paramsTuple?: []; params?: {} }
   }
   GET: {
     'api.api_session.me': { paramsTuple?: []; params?: {} }
@@ -119,35 +74,16 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
-    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
     'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
-    'home': { paramsTuple?: []; params?: {} }
-    'splash': { paramsTuple?: []; params?: {} }
-    'session.create': { paramsTuple?: []; params?: {} }
-    'customers.index': { paramsTuple?: []; params?: {} }
-    'stock_movements.index': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.index': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'sales.debts.index': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.overview': { paramsTuple?: []; params?: {} }
-    'sales.index': { paramsTuple?: []; params?: {} }
-    'sales.create': { paramsTuple?: []; params?: {} }
-    'sales.history': { paramsTuple?: []; params?: {} }
-    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'management': { paramsTuple?: []; params?: {} }
-    'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
-    'users.get': { paramsTuple?: []; params?: {} }
-    'exchange_rates.get': { paramsTuple?: []; params?: {} }
-    'product_categories.index': { paramsTuple?: []; params?: {} }
-    'product_services.index': { paramsTuple?: []; params?: {} }
-    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
+    'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
+    'api.api_users.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_categories.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services_admin.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'api.api_session.me': { paramsTuple?: []; params?: {} }
@@ -159,55 +95,30 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
-    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
     'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
-    'home': { paramsTuple?: []; params?: {} }
-    'splash': { paramsTuple?: []; params?: {} }
-    'session.create': { paramsTuple?: []; params?: {} }
-    'customers.index': { paramsTuple?: []; params?: {} }
-    'stock_movements.index': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.index': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cash_sessions.create': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
-    'sales.debts.index': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.overview': { paramsTuple?: []; params?: {} }
-    'sales.index': { paramsTuple?: []; params?: {} }
-    'sales.create': { paramsTuple?: []; params?: {} }
-    'sales.history': { paramsTuple?: []; params?: {} }
-    'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'management': { paramsTuple?: []; params?: {} }
-    'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
-    'users.get': { paramsTuple?: []; params?: {} }
-    'exchange_rates.get': { paramsTuple?: []; params?: {} }
-    'product_categories.index': { paramsTuple?: []; params?: {} }
-    'product_services.index': { paramsTuple?: []; params?: {} }
-    'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
-  }
-  PUT: {
-    'api.api_customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
+    'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
+    'api.api_users.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_categories.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services_admin.index': { paramsTuple?: []; params?: {} }
   }
   PATCH: {
+    'api.api_customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_services_admin.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
-    'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'product_services.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_product_services_admin.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

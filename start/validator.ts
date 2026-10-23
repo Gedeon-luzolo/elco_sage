@@ -21,3 +21,6 @@ declare module '@vinejs/vine/types' {
 }
 
 VineDate.transform((value) => DateTime.fromJSDate(value))
+
+// Charge l'augmentation de types qui ajoute request.validateUsing() au HttpContext.
+import type {} from '@adonisjs/core/providers/vinejs_provider'
