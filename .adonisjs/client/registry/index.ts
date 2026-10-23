@@ -6,6 +6,30 @@ import type { ApiDefinition } from './tree.d.ts'
 const placeholder: any = {}
 
 const routes = {
+  'api.api_session.login': {
+    methods: ["POST"],
+    pattern: '/api/auth/login',
+    tokens: [[0,"api"],[0,"auth"],[0,"login"]],
+    types: placeholder as Registry['api.api_session.login']['types'],
+  },
+  'api.api_session.me': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/auth/me',
+    tokens: [[0,"api"],[0,"auth"],[0,"me"]],
+    types: placeholder as Registry['api.api_session.me']['types'],
+  },
+  'api.api_session.verify_password': {
+    methods: ["POST"],
+    pattern: '/api/auth/verify-password',
+    tokens: [[0,"api"],[0,"auth"],[0,"verify-password"]],
+    types: placeholder as Registry['api.api_session.verify_password']['types'],
+  },
+  'api.api_session.logout': {
+    methods: ["POST"],
+    pattern: '/api/auth/logout',
+    tokens: [[0,"api"],[0,"auth"],[0,"logout"]],
+    types: placeholder as Registry['api.api_session.logout']['types'],
+  },
   'home': {
     methods: ["GET","HEAD"],
     pattern: '/',

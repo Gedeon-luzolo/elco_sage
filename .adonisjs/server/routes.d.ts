@@ -4,6 +4,10 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
+    'api.api_session.login': { paramsTuple?: []; params?: {} }
+    'api.api_session.me': { paramsTuple?: []; params?: {} }
+    'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
+    'api.api_session.logout': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -51,7 +55,27 @@ export type ScannedRoutes = {
     'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'product_services.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
+  POST: {
+    'api.api_session.login': { paramsTuple?: []; params?: {} }
+    'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
+    'api.api_session.logout': { paramsTuple?: []; params?: {} }
+    'session.store': { paramsTuple?: []; params?: {} }
+    'auth.verify_password': { paramsTuple?: []; params?: {} }
+    'session.destroy': { paramsTuple?: []; params?: {} }
+    'customers.store': { paramsTuple?: []; params?: {} }
+    'stock_movements.store': { paramsTuple?: []; params?: {} }
+    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
+    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
+    'sales.store': { paramsTuple?: []; params?: {} }
+    'users.store': { paramsTuple?: []; params?: {} }
+    'exchange_rates.store': { paramsTuple?: []; params?: {} }
+    'product_categories.store': { paramsTuple?: []; params?: {} }
+    'product_services.store': { paramsTuple?: []; params?: {} }
+  }
   GET: {
+    'api.api_session.me': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -76,6 +100,7 @@ export type ScannedRoutes = {
     'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
+    'api.api_session.me': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -98,22 +123,6 @@ export type ScannedRoutes = {
     'product_categories.index': { paramsTuple?: []; params?: {} }
     'product_services.index': { paramsTuple?: []; params?: {} }
     'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
-  }
-  POST: {
-    'session.store': { paramsTuple?: []; params?: {} }
-    'auth.verify_password': { paramsTuple?: []; params?: {} }
-    'session.destroy': { paramsTuple?: []; params?: {} }
-    'customers.store': { paramsTuple?: []; params?: {} }
-    'stock_movements.store': { paramsTuple?: []; params?: {} }
-    'stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.store': { paramsTuple?: []; params?: {} }
-    'sales.cash_sessions.close': { paramsTuple?: []; params?: {} }
-    'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
-    'sales.store': { paramsTuple?: []; params?: {} }
-    'users.store': { paramsTuple?: []; params?: {} }
-    'exchange_rates.store': { paramsTuple?: []; params?: {} }
-    'product_categories.store': { paramsTuple?: []; params?: {} }
-    'product_services.store': { paramsTuple?: []; params?: {} }
   }
   PUT: {
     'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

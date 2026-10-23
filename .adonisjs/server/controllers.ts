@@ -4,6 +4,11 @@
  */
 
 export const controllers = {
+  api: {
+    auth: {
+      ApiSession: () => import('#controllers/api/auth/api_session_controller'),
+    },
+  },
   auth: {
     Session: () => import('#controllers/auth/session_controller'),
   },

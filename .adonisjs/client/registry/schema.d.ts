@@ -7,6 +7,58 @@ import type { InferInput, SimpleError } from '@vinejs/vine/types'
 export type ParamValue = string | number | bigint | boolean
 
 export interface Registry {
+  'api.api_session.login': {
+    methods: ["POST"]
+    pattern: '/api/auth/login'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/auth/login').loginValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/auth/login').loginValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['login']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['login']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['login']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_session.me': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/auth/me'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['me']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['me']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['me']>>>
+    }
+  }
+  'api.api_session.verify_password': {
+    methods: ["POST"]
+    pattern: '/api/auth/verify-password'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/auth/password').verifyPasswordValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/auth/password').verifyPasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['verifyPassword']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['verifyPassword']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['verifyPassword']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_session.logout': {
+    methods: ["POST"]
+    pattern: '/api/auth/logout'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['logout']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['logout']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['logout']>>>
+    }
+  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/'

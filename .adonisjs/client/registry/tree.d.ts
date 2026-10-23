@@ -2,6 +2,14 @@
 import type { routes } from './index.ts'
 
 export interface ApiDefinition {
+  api: {
+    apiSession: {
+      login: typeof routes['api.api_session.login']
+      me: typeof routes['api.api_session.me']
+      verifyPassword: typeof routes['api.api_session.verify_password']
+      logout: typeof routes['api.api_session.logout']
+    }
+  }
   home: typeof routes['home']
   splash: typeof routes['splash']
   session: {

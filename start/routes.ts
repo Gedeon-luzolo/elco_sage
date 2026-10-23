@@ -8,6 +8,7 @@
 */
 
 import { middleware } from '#start/kernel'
+import { registerApiRoutes } from '#routes/api_routes'
 import { registerAuthenticatedAuthRoutes, registerGuestAuthRoutes } from '#routes/auth_routes'
 import { registerCustomerRoutes } from '#routes/customer_routes'
 import { registerExchangeRateRoutes } from '#routes/exchange_rate_routes'
@@ -18,6 +19,9 @@ import { registerSalesRoutes } from '#routes/sales_routes'
 import { registerStockMovementRoutes } from '#routes/stock_movement_routes'
 import { registerUserRoutes } from '#routes/user_routes'
 import router from '@adonisjs/core/services/router'
+
+// API JSON de la SPA, authentifiee par token (hors session web).
+registerApiRoutes()
 
 router
   .on('/')

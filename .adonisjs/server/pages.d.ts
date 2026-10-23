@@ -28,10 +28,10 @@ declare module '@adonisjs/inertia/types' {
     'sales/debts_page': ExtractProps<(typeof import('../../inertia/pages/sales/debts_page.tsx'))['default']>
     'sales/recoveries_page': ExtractProps<(typeof import('../../inertia/pages/sales/recoveries_page.tsx'))['default']>
     'sales/sale_create_page': ExtractProps<(typeof import('../../inertia/pages/sales/sale_create_page.tsx'))['default']>
+    'sales/sales_history_page': ExtractProps<(typeof import('../../inertia/pages/sales/sales_history_page.tsx'))['default']>
     'sales/sales_page': ExtractProps<(typeof import('../../inertia/pages/sales/sales_page.tsx'))['default']>
     'splash': ExtractProps<(typeof import('../../inertia/pages/splash.tsx'))['default']>
     'stock/stock_movements_page': ExtractProps<(typeof import('../../inertia/pages/stock/stock_movements_page.tsx'))['default']>
     'users/users_page': ExtractProps<(typeof import('../../inertia/pages/users/users_page.tsx'))['default']>
-    'sales/sales_history_page': ExtractProps<(typeof import('../../inertia/pages/sales/sales_history_page.tsx'))['default']>
   }
 }
