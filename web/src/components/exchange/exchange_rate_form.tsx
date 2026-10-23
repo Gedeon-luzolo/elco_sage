@@ -5,12 +5,11 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 
 interface ExchangeRateFormProps {
-  errors: Record<string, string | undefined>
   action: (formData: FormData) => void | Promise<void>
 }
 
 // Affiche le formulaire de mise a jour du taux courant.
-export function ExchangeRateForm({ errors, action }: ExchangeRateFormProps) {
+export function ExchangeRateForm({ action }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">
       <CardHeader>
@@ -38,9 +37,6 @@ export function ExchangeRateForm({ errors, action }: ExchangeRateFormProps) {
                 CDF
               </span>
             </div>
-            {errors.exchangeRate && (
-              <p className="text-xs text-destructive">{errors.exchangeRate}</p>
-            )}
           </div>
 
           <div className="grid gap-2">
@@ -60,7 +56,6 @@ export function ExchangeRateForm({ errors, action }: ExchangeRateFormProps) {
                 CDF
               </span>
             </div>
-            {errors.sellRate && <p className="text-xs text-destructive">{errors.sellRate}</p>}
           </div>
 
           <SubmitButton

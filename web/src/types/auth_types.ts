@@ -9,6 +9,8 @@ export type LoginResponse = { token: string; expiresAt: string | null; user: Use
 export type AuthContextType = {
   user: UserDTO | null
   isLoading: boolean
+  isLoggingIn: boolean
+  loginError: string | null
   login: (credentials: LoginCredentials) => Promise<UserDTO>
   logout: () => Promise<void>
 }

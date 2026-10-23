@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Lock, Mail } from 'lucide-react'
@@ -6,7 +6,6 @@ import { BrandLogo } from '~/components/brand/brand_logo'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useAuth } from '~/hooks/auth/useAuth'
-import { ApiError } from '~/lib/api/fetch'
 import { isManagementRole } from '~/utils/user_role.utils'
 import { Label } from '~/components/ui/label'
 
@@ -16,10 +15,8 @@ const formItemVariants = {
 }
 
 export default function Login() {
-  const { user, login } = useAuth()
+  const { user, login, isLoggingIn, loginError } = useAuth()
   const navigate = useNavigate()
-  const [processing, setProcessing] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
 
   // La direction arrive sur l'accueil, les profils operationnels entrent dans le flux vente.
   useEffect(() => {
@@ -28,29 +25,15 @@ export default function Login() {
     }
   }, [user, navigate])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
 
-    setProcessing(true)
-    setErrors({})
-
-    try {
-      await login({
-        email: String(formData.get('email') ?? ''),
-        password: String(formData.get('password') ?? ''),
-      })
-    } catch (error) {
-      if (error instanceof ApiError && error.fieldErrors.length > 0) {
-        setErrors(Object.fromEntries(error.fieldErrors.map((item) => [item.field, item.message])))
-      } else {
-        setErrors({
-          E_INVALID_CREDENTIALS: error instanceof Error ? error.message : 'Connexion impossible.',
-        })
-      }
-    } finally {
-      setProcessing(false)
-    }
+    // L'erreur est exposee par useAuth (loginError) : rien a faire ici.
+    login({
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
+    }).catch(() => {})
   }
 
   return (
@@ -109,11 +92,9 @@ export default function Login() {
                     id="email"
                     placeholder="Email"
                     autoComplete="email"
-                    data-invalid={errors.email ? 'true' : undefined}
                     required
                   />
                 </div>
-                {errors.email && <p className="mt-2 text-sm text-blue-100">{errors.email}</p>}
               </motion.div>
 
               <motion.div
@@ -133,16 +114,12 @@ export default function Login() {
                     id="password"
                     placeholder="Mot de passe"
                     autoComplete="current-password"
-                    data-invalid={errors.password ? 'true' : undefined}
                     required
                   />
                 </div>
-                {errors.password && <p className="mt-2 text-sm text-blue-100">{errors.password}</p>}
               </motion.div>
 
-              {errors.E_INVALID_CREDENTIALS && (
-                <p className="text-sm text-blue-100">{errors.E_INVALID_CREDENTIALS}</p>
-              )}
+              {loginError && <p className="text-sm text-blue-100">{loginError}</p>}
 
               <motion.div
                 variants={formItemVariants}
@@ -150,13 +127,13 @@ export default function Login() {
               >
                 <Button
                   type="submit"
-                  disabled={processing}
+                  disabled={isLoggingIn}
                   className="mt-7 h-12 w-full rounded-xl bg-primary px-5 text-base text-primary-foreground hover:bg-blue-700"
                 >
-                  {processing && (
+                  {isLoggingIn && (
                     <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   )}
-                  {processing ? 'Connexion...' : 'Se connecter'}
+                  {isLoggingIn ? 'Connexion...' : 'Se connecter'}
                 </Button>
               </motion.div>
             </>

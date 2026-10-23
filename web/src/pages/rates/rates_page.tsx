@@ -6,7 +6,6 @@ import { PageHeader } from '~/components/common/page_header'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { ManagementLayout } from '~/layouts/management_layout'
 import { useCrud } from '~/hooks/common/useCrud'
-import { ApiError } from '~/lib/api/fetch'
 import type { ExchangeRateDTO } from '~/types/dto'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
@@ -21,10 +20,6 @@ export default function RatesPage() {
   const { data } = useListWithParams({ limit: 20 })
   const exchangeRates = data ?? EMPTY_RATES
   const createRate = useCreate<{ exchangeRate: number; sellRate: number }, void>()
-  const errors: Record<string, string | undefined> =
-    createRate.error instanceof ApiError
-      ? Object.fromEntries(createRate.error.fieldErrors.map((item) => [item.field, item.message]))
-      : {}
   const currentRate = exchangeRates[0]
 
   // Enregistre une nouvelle ligne pour conserver l'historique des taux.
@@ -84,7 +79,7 @@ export default function RatesPage() {
         </section>
 
         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <ExchangeRateForm action={saveRate} errors={errors} />
+          <ExchangeRateForm action={saveRate} />
           <ExchangeRateHistoryTable exchangeRates={exchangeRates} />
         </section>
       </section>

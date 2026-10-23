@@ -1,7 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useCallback, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ApiError, api } from '~/lib/api/fetch'
+import { getErrorMessage } from '~/lib/error/get_error_message'
 import { clearToken, getToken, setToken, UNAUTHORIZED_EVENT } from '~/lib/api/token'
 import {
   ME_KEY,
@@ -47,11 +48,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, endSession)
   }, [endSession])
 
-  const login = async (credentials: LoginCredentials) => {
-    const response = await api.post<LoginResponse>('auth/login', credentials)
+  const loginMutation = useMutation({
+    mutationFn: (credentials: LoginCredentials) =>
+      api.post<LoginResponse>('auth/login', credentials),
+    onSuccess: (response) => {
+      setToken(response.token)
+      queryClient.setQueryData(ME_KEY, response.user)
+    },
+  })
 
-    setToken(response.token)
-    queryClient.setQueryData(ME_KEY, response.user)
+  const login = async (credentials: LoginCredentials) => {
+    const response = await loginMutation.mutateAsync(credentials)
 
     return response.user
   }
@@ -67,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user: user ?? null,
         isLoading: Boolean(getToken()) && isPending,
+        isLoggingIn: loginMutation.isPending,
+        loginError: loginMutation.error ? getErrorMessage(loginMutation.error) : null,
         login,
         logout,
       }}

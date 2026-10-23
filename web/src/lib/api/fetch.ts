@@ -10,22 +10,16 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 // URL de base de l'API (se termine par un slash pour que les endpoints relatifs s'y ajoutent).
 const API_URL = import.meta.env.VITE_API_URL as string
 
-// Erreur de validation renvoyee par VineJS : { errors: [{ field, message }] }.
-export interface FieldError {
-  field: string
-  message: string
-}
-
 // Erreur normalisee pour toutes les reponses API non valides.
 export class ApiError extends Error {
   status: number
-  fieldErrors: FieldError[]
+  details: unknown
 
-  constructor(message: string, status: number, fieldErrors: FieldError[] = []) {
+  constructor(message: string, status: number, details?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.status = status
-    this.fieldErrors = fieldErrors
+    this.details = details
   }
 }
 
@@ -74,13 +68,13 @@ async function request<T>(endpoint: string, options: RequestOptions = {}) {
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
     }
 
-    const fieldErrors: FieldError[] = Array.isArray(payload?.errors) ? payload.errors : []
+    // VineJS renvoie { errors: [{ message }] } et nos erreurs metier { message }.
     const message =
       typeof payload?.message === 'string'
         ? payload.message
-        : (fieldErrors[0]?.message ?? 'Une erreur est survenue.')
+        : (payload?.errors?.[0]?.message ?? 'Une erreur est survenue.')
 
-    throw new ApiError(message, response.status, fieldErrors)
+    throw new ApiError(message, response.status, payload)
   }
 
   // Deballe { data } meme quand data vaut null (ex: aucune session ouverte).
