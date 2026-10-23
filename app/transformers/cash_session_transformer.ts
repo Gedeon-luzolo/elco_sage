@@ -1,5 +1,6 @@
 import type CashSession from '#models/cash_session'
 import type { CashSessionSystemAmounts } from '#services/sales/cash_session_service'
+import { dateTimeToDateKey, dateTimeToTimeLabel } from '#utils/date_utils'
 import { MoneyMapDTO, normalizeMoneyMap } from '#utils/money_map'
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
@@ -33,11 +34,11 @@ export default class CashSessionTransformer {
       userId: item.userId,
       status: item.status,
       openedAt: item.openedAt?.toISO() ?? null,
-      openingDate: item.openedAt?.toISODate() ?? null,
-      openingTime: item.openedAt?.toFormat('HH:mm') ?? null,
+      openingDate: item.openedAt ? dateTimeToDateKey(item.openedAt) : null,
+      openingTime: item.openedAt ? dateTimeToTimeLabel(item.openedAt) : null,
       closedAt: item.closedAt?.toISO() ?? null,
-      closingDate: item.closedAt?.toISODate() ?? null,
-      closingTime: item.closedAt?.toFormat('HH:mm') ?? null,
+      closingDate: item.closedAt ? dateTimeToDateKey(item.closedAt) : null,
+      closingTime: item.closedAt ? dateTimeToTimeLabel(item.closedAt) : null,
       systemAmounts: normalizeMoneyMap(systemAmounts?.systemAmounts ?? item.systemAmounts),
       closingAmounts: item.closingAmounts ? normalizeMoneyMap(item.closingAmounts) : null,
       differenceAmounts: item.differenceAmounts ? normalizeMoneyMap(item.differenceAmounts) : null,

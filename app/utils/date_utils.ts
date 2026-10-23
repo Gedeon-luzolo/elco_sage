@@ -22,6 +22,11 @@ export function dateTimeToDateKey(date: DateTime): string {
   return date.setZone(BUSINESS_TIME_ZONE).toISODate()!
 }
 
+// Convertit une DateTime en heure HH:mm dans le fuseau metier (le serveur tourne en UTC).
+export function dateTimeToTimeLabel(date: DateTime): string {
+  return date.setZone(BUSINESS_TIME_ZONE).toFormat('HH:mm')
+}
+
 // Refuse les dates futures en comparant uniquement les jours locaux, sans heure.
 export function ensureDateIsNotFuture(date: string) {
   const movementDate = dateKeyToDay(date)
