@@ -53,35 +53,32 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
   }
 
   return (
-    <header className="flex min-h-16 w-full items-center justify-between border-b border-border bg-background px-4 py-3 text-foreground shadow-sm sm:px-6">
+    <header className="flex min-h-16 w-full items-center justify-between border-b-2 border-primary bg-background px-4 py-3 text-foreground sm:px-6">
       <Link href="/" className="flex min-w-0 items-center gap-3">
-        <span className="flex h-11 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-sm ring-1 ring-blue-100">
-          <BrandLogo className="h-full w-full object-contain" />
-        </span>
+        <BrandLogo className="h-9 w-auto shrink-0 object-contain" />
         <span className="sr-only">Elco Sage</span>
       </Link>
 
       <div className="flex min-w-0 items-center justify-end gap-3 sm:gap-4">
-        <div className="flex min-w-0 items-center gap-3 text-right">
-          {exchangeRate ? (
-            <div className="flex min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:text-xs lg:flex-row lg:items-center lg:gap-4">
+        {exchangeRate ? (
+            <div className="hidden min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:flex sm:text-xs lg:flex-row lg:items-center lg:gap-4">
               <span>
                 Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
               </span>
               <span>
                 Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
               </span>
-            </div>
-          ) : (
-            <div className="text-xs text-muted-foreground">Aucun taux disponible</div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="hidden text-xs text-muted-foreground sm:block">Aucun taux disponible</div>
+        )}
 
         <div ref={profileMenuRef} className="relative shrink-0">
           <Button
             type="button"
+            variant="outline"
             size="icon-lg"
-            className="rounded-full font-semibold"
+            className="rounded-full border-primary bg-transparent font-semibold text-primary hover:bg-primary/10"
             aria-expanded={isProfileMenuOpen}
             aria-haspopup="menu"
             aria-label={`Ouvrir le profil de ${displayName}`}
