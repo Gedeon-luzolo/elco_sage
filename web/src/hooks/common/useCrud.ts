@@ -8,6 +8,8 @@ type Id = string | number
 
 type QueryParams = Record<string, string | number | boolean | undefined>
 
+// Options d'une ressource : son endpoint, les listes à recharger après une mutation
+// (préfixes de clés ou clés exactes) et l'affichage du toast de succès.
 type CrudOptions = {
   endpoint: string
   queryKey?: string
@@ -15,6 +17,16 @@ type CrudOptions = {
   showSuccessToast?: boolean
 }
 
+// Description d'une action sur une sous-route : méthode, chemin, corps et message de succès.
+type ActionOptions<TVars> = {
+  method?: 'post' | 'patch' | 'delete'
+  path: (variables: TVars) => string
+  body?: (variables: TVars) => unknown
+  successMessage?: string
+}
+
+// Hook générique CRUD : lectures, création, modification, suppression et actions,
+// avec toasts et invalidation du cache.
 export function useCrud<T extends Record<string, unknown>>({
   endpoint,
   queryKey,
@@ -24,22 +36,23 @@ export function useCrud<T extends Record<string, unknown>>({
   const queryClient = useQueryClient()
   const resourceKey = queryKey ?? endpoint
 
-  /** Affiche l'erreur d'une mutation en toast (les lectures s'affichent dans la page). */
+  // Affiche l'erreur d'une mutation en toast (les lectures s'affichent dans la page)
   const notifyError = (error: unknown) => {
     toast.error(getErrorMessage(error))
   }
 
-  /** Confirme en toast qu'une mutation a reussi. */
+  // Confirme en toast qu'une mutation a réussi
   const notifySuccess = (title: string) => {
     if (showSuccessToast) {
       toast.success(title)
     }
   }
 
-  /** Recharge les listes liees a la ressource. */
+  // Recharge les listes liées à la ressource
   const invalidateResource = () => {
     queryClient.invalidateQueries({ queryKey: [resourceKey] })
 
+    // Les ressources liées sont rechargées par préfixe (texte) ou par clé exacte
     invalidateQueries.forEach((key) => {
       if (typeof key === 'string') {
         invalidateQueriesByPrefix(key)
@@ -50,7 +63,7 @@ export function useCrud<T extends Record<string, unknown>>({
     })
   }
 
-  /** Recupere la liste simple. */
+  // Récupère la liste simple
   const useList = (enabled = true) =>
     useQuery({
       queryKey: [resourceKey],
@@ -58,7 +71,7 @@ export function useCrud<T extends Record<string, unknown>>({
       enabled,
     })
 
-  /** Recupere la liste avec filtres. */
+  // Récupère la liste avec filtres
   const useListWithParams = (params: QueryParams, enabled = true) =>
     useQuery({
       queryKey: [resourceKey, params],
@@ -66,7 +79,7 @@ export function useCrud<T extends Record<string, unknown>>({
       enabled,
     })
 
-  /** Recupere une reponse qui n'est pas une liste (ex. { debts, stats }), avec filtres. */
+  // Récupère une réponse qui n'est pas une liste (ex : { debts, stats }), avec filtres
   const useGetWithParams = <R = T>(params: QueryParams = {}, enabled = true) =>
     useQuery({
       queryKey: [resourceKey, params],
@@ -74,7 +87,7 @@ export function useCrud<T extends Record<string, unknown>>({
       enabled,
     })
 
-  /** Recupere un element par id. */
+  // Récupère un élément par id
   const useGet = (id: Id, enabled = true) =>
     useQuery({
       queryKey: [resourceKey, id],
@@ -82,7 +95,7 @@ export function useCrud<T extends Record<string, unknown>>({
       enabled,
     })
 
-  /** Cree un element. */
+  // Crée un élément
   const useCreate = <TPayload = Omit<T, 'id'>, TResult = T>() =>
     useMutation({
       mutationFn: (payload: TPayload) => api.post<TResult>(endpoint, payload),
@@ -93,12 +106,13 @@ export function useCrud<T extends Record<string, unknown>>({
       onError: notifyError,
     })
 
-  /** Modifie un element (PATCH /ressource/:id). */
+  // Modifie un élément (PATCH /ressource/:id)
   const usePatch = <TPayload = Partial<T>>() =>
     useMutation({
       mutationFn: ({ id, data }: { id: Id; data: TPayload }) =>
         api.patch<T>(`${endpoint}/${id}`, data),
       onSuccess: (_data, payload) => {
+        // La fiche modifiée et les listes sont rechargées
         queryClient.invalidateQueries({ queryKey: [resourceKey, payload.id] })
         invalidateResource()
         notifySuccess('Modification réussie.')
@@ -106,21 +120,15 @@ export function useCrud<T extends Record<string, unknown>>({
       onError: notifyError,
     })
 
-  /**
-   * Action sur une sous-route (ex: annuler une vente, encaisser une dette).
-   * Invalide les memes ressources qu'une mutation CRUD classique.
-   */
-  const useAction = <TVars = Id, TResult = unknown>(action: {
-    method?: 'post' | 'patch' | 'delete'
-    path: (variables: TVars) => string
-    body?: (variables: TVars) => unknown
-    successMessage?: string
-  }) =>
+  // Action sur une sous-route (ex : annuler une vente, encaisser une dette).
+  // Invalide les mêmes ressources qu'une mutation CRUD classique.
+  const useAction = <TVars = Id, TResult = unknown>(action: ActionOptions<TVars>) =>
     useMutation({
       mutationFn: (variables: TVars) => {
         const path = action.path(variables)
         const method = action.method ?? 'post'
 
+        // La suppression n'envoie pas de corps
         if (method === 'delete') {
           return api.delete<TResult>(path)
         }
@@ -134,7 +142,7 @@ export function useCrud<T extends Record<string, unknown>>({
       onError: notifyError,
     })
 
-  /** Supprime un element. */
+  // Supprime un élément
   const useDelete = () =>
     useMutation({
       mutationFn: (id: Id) => api.delete(`${endpoint}/${id}`),

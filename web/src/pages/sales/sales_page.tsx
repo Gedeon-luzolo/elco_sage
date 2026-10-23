@@ -14,7 +14,7 @@ export default function SalesPage() {
   const { user } = useAuth()
   const { data: currentCashSession } = useCurrentCashSession()
 
-  // Le resume cash/dettes/recouvrements reutilise les totaux du rapport de la session ouverte.
+  // Le résumé cash, dettes et recouvrements réutilise les totaux du rapport de la session ouverte
   const { data: sessionReport } = useCrud<Record<string, unknown>>({
     endpoint: '/cash-sessions',
   }).useGet(currentCashSession?.id ?? '', Boolean(currentCashSession))

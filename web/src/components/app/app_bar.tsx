@@ -1,6 +1,7 @@
 import { AppLink as Link } from '~/components/common/app_link'
 import { DoorClosed, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { SyncStatus } from '~/components/app/sync_status'
 import { BrandLogo } from '~/components/brand/brand_logo'
 import { CashSessionClosingDialog } from '~/components/sales/cash_session_closing_dialog'
 import { Button } from '~/components/ui/button'
@@ -56,6 +57,7 @@ export function AppBar() {
       </Link>
 
       <div className="flex min-w-0 items-center justify-end gap-3 sm:gap-4">
+        <SyncStatus />
         {exchangeRate ? (
           <div className="hidden min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:flex sm:text-xs lg:flex-row lg:items-center lg:gap-4">
             <span>

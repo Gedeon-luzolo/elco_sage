@@ -8,7 +8,7 @@ import RatesPage from '~/pages/rates/rates_page'
 import UsersPage from '~/pages/users/users_page'
 import { isManagementRole } from '~/utils/user_role.utils'
 
-/** Table de routes interne au module Management, telechargee uniquement avec lui. */
+// Table de routes interne au module Management, téléchargée uniquement avec lui.
 const managementRoutes = [
   { index: true, element: <ManagementPage /> },
   { path: 'users', element: <UsersPage /> },
@@ -18,11 +18,12 @@ const managementRoutes = [
   { path: 'rates', element: <RatesPage /> },
 ]
 
-/** Entree du module Management montee depuis /management/*, reservee a la direction. */
+// Entrée du module Management montée depuis /management/*, réservée à la direction.
 export function ManagementRoutesModule() {
+  // Profil connecté, pour limiter l'accès à la direction
   const { user } = useAuth()
   const routes = useRoutes(managementRoutes)
 
-  // L'API refuse deja ces appels (403) ; on evite aussi d'afficher les pages aux autres profils.
+  // L'API refuse déjà ces appels (403) ; on évite aussi d'afficher les pages aux autres profils
   return isManagementRole(user?.role) ? routes : <Navigate to="/sales" replace />
 }

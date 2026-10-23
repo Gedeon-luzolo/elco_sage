@@ -35,7 +35,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
   const [selectedUnit, setSelectedUnit] = useState<StockUnit>('base')
   const [quantity, setQuantity] = useState<string>(movement.entries?.toString() ?? '')
 
-  // Une entree modifie le stock vendable et les rapports de stock.
+  // Une entrée modifie le stock vendable et les rapports de stock
   const { useCreate, usePatch } = useCrud<StockMovementItem>({
     endpoint: '/stock/movements',
     invalidateQueries: ['/stock', '/product-services'],

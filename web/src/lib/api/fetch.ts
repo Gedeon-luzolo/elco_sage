@@ -1,7 +1,11 @@
 import { clearToken, getToken, UNAUTHORIZED_EVENT } from '~/lib/api/token'
+import { REQUEST_TIMEOUT_MS } from '~/lib/offline/config'
+import { reportReachability } from '~/lib/offline/connectivity'
 
+// Paramètres de requête : les valeurs absentes (null ou undefined) sont ignorées.
 type Params = Record<string, string | number | boolean | null | undefined>
 
+// Options d'une requête : le corps est du JSON sérialisé automatiquement.
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown
   params?: Params
@@ -10,7 +14,8 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 // URL de base de l'API (se termine par un slash pour que les endpoints relatifs s'y ajoutent).
 const API_URL = import.meta.env.VITE_API_URL as string
 
-// Erreur normalisee pour toutes les reponses API non valides.
+// Erreur normalisée pour toutes les réponses API non valides.
+// details contient la réponse brute du serveur, utile pour lire les erreurs de validation.
 export class ApiError extends Error {
   status: number
   details: unknown
@@ -23,10 +28,11 @@ export class ApiError extends Error {
   }
 }
 
-// Prepare l'URL finale avec les query params (les valeurs absentes sont ignorees).
+// Prépare l'URL finale avec les paramètres de requête.
 function buildUrl(endpoint: string, params?: Params) {
   const url = new URL(endpoint.replace(/^\//, ''), API_URL)
 
+  // Seuls les paramètres réellement fournis sont ajoutés
   Object.entries(params ?? {}).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
       url.searchParams.set(key, String(value))
@@ -36,12 +42,14 @@ function buildUrl(endpoint: string, params?: Params) {
   return url.toString()
 }
 
-// Execute une requete HTTP et deballe l'enveloppe { data } du backend.
+// Exécute une requête HTTP et déballe l'enveloppe { data } du backend.
 async function request<T>(endpoint: string, options: RequestOptions = {}) {
   const { body, params, headers, ...requestOptions } = options
   const token = getToken()
 
   const response = await fetch(buildUrl(endpoint, params), {
+    // Sans réponse dans le délai, la requête est considérée perdue (comme une coupure réseau)
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...requestOptions,
     headers: {
       Accept: 'application/json',
@@ -51,9 +59,15 @@ async function request<T>(endpoint: string, options: RequestOptions = {}) {
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   }).catch(() => {
+    // Le serveur n'a pas répondu : l'application bascule en mode hors ligne
+    reportReachability(false)
     throw new ApiError('Serveur injoignable.', 0)
   })
 
+  // Une réponse, même une erreur, prouve que le serveur est joignable
+  reportReachability(true)
+
+  // Pas de contenu : rien à lire
   if (response.status === 204) {
     return undefined as T
   }
@@ -62,13 +76,13 @@ async function request<T>(endpoint: string, options: RequestOptions = {}) {
   const payload = isJson ? await response.json() : undefined
 
   if (!response.ok) {
-    // Un token refuse (hors login) force le retour a l'ecran de connexion.
+    // Un token refusé (hors connexion) renvoie à l'écran de connexion
     if (response.status === 401 && token) {
       clearToken()
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
     }
 
-    // VineJS renvoie { errors: [{ message }] } et nos erreurs metier { message }.
+    // VineJS renvoie { errors: [{ message }] } et nos erreurs métier { message }
     const message =
       typeof payload?.message === 'string'
         ? payload.message
@@ -77,11 +91,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}) {
     throw new ApiError(message, response.status, payload)
   }
 
-  // Deballe { data } meme quand data vaut null (ex: aucune session ouverte).
+  // Déballe { data } même quand data vaut null (ex : aucune session ouverte)
   return (payload && typeof payload === 'object' && 'data' in payload ? payload.data : payload) as T
 }
 
-// Methodes HTTP utilisees par les hooks.
+// Méthodes HTTP utilisées par les hooks.
 export const api = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: 'GET' }),

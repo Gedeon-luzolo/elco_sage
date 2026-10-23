@@ -3,7 +3,7 @@ import type { CashSessionItem } from '~/types/cash_session_types'
 
 export const CASH_SESSIONS_ENDPOINT = '/cash-sessions'
 
-/** Session de caisse ouverte de l'utilisateur (null quand aucune n'est ouverte). */
+// Session de caisse ouverte de l'utilisateur (null quand aucune n'est ouverte).
 export function useCurrentCashSession(enabled = true) {
   return useCrud<CashSessionItem>({ endpoint: CASH_SESSIONS_ENDPOINT }).useGet('current', enabled)
 }

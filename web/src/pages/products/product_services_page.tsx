@@ -34,7 +34,7 @@ const EMPTY_CATEGORIES: ProductCategoryDTO[] = []
 const EMPTY_STATS = { total: 0, productCount: 0, serviceCount: 0 } as ProductServiceStats
 
 export default function ProductServicesPage() {
-  // Un article modifie le stock vendable et la vente : on invalide ces ressources.
+  // Un article modifie le stock vendable et la vente : on invalide ces ressources
   const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<ProductServicesPageProps>({
     endpoint: '/product-services',
     invalidateQueries: ['/stock'],

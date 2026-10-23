@@ -11,7 +11,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { useCrud } from '~/hooks/common/useCrud'
+import { useRecoverDebt } from '~/hooks/sales/useRecoverDebt'
 import type { DebtItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { getLocalDateKey } from '~/utils/date'
@@ -26,15 +26,8 @@ interface DebtPaymentDialogProps {
 export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps) {
   const saleCurrency = debt?.sale.currency as CurrencyCode | undefined
 
-  // Un recouvrement modifie la dette, la caisse et les rapports.
-  const recover = useCrud<DebtItem>({
-    endpoint: '/recoveries',
-    invalidateQueries: ['/debts', '/cash-sessions', '/sales'],
-  }).useAction<{ saleId: string; payload: Record<string, unknown> }>({
-    path: ({ saleId }) => `/sales/${saleId}/recoveries`,
-    body: ({ payload }) => payload,
-    successMessage: 'Recouvrement enregistré avec succès.',
-  })
+  // En ligne le recouvrement part au serveur ; sans réseau il va dans la file d'attente
+  const recover = useRecoverDebt()
 
   const closeDialog = () => {
     onOpenChange(false)
@@ -44,14 +37,12 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
     if (!debt) return
 
     // Les champs visibles viennent du FormData, les champs de contexte viennent de la dette.
-    // L'id genere ici rend l'envoi rejouable sans doublon (utile hors ligne).
-    const payload = {
-      ...Object.fromEntries(formData),
-      id: crypto.randomUUID(),
-      currency: debt.sale.currency,
-    }
+    const payload = { ...Object.fromEntries(formData), currency: debt.sale.currency }
 
-    recover.mutate({ saleId: debt.sale.id, payload }, { onSuccess: closeDialog })
+    recover.mutate(
+      { saleId: debt.sale.id, additionNumber: debt.sale.additionNumber, payload },
+      { onSuccess: closeDialog }
+    )
   }
 
   return (

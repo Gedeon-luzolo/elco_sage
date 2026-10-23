@@ -8,7 +8,7 @@ import CashSessionOpeningPage from '~/pages/sales/cash_session_opening_page'
 import SaleCreatePage from '~/pages/sales/sale_create_page'
 import SalesPage from '~/pages/sales/sales_page'
 
-/** Table de routes interne au module Ventes, telechargee uniquement avec lui. */
+// Table de routes interne au module Ventes, téléchargée uniquement avec lui.
 const salesRoutes = [
   { index: true, element: <SalesPage /> },
   { path: 'session/open', element: <CashSessionOpeningPage /> },
@@ -20,7 +20,7 @@ const salesRoutes = [
   { path: 'sessions/:id', element: <CashSessionDetailPage /> },
 ]
 
-/** Entree du module Ventes montee depuis la route de base /sales/*. */
+// Entrée du module Ventes montée depuis la route de base /sales/*.
 export function SalesRoutesModule() {
   return useRoutes(salesRoutes)
 }

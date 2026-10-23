@@ -34,7 +34,7 @@ const EMPTY_CATEGORIES: ProductCategoryItem[] = []
 const EMPTY_STATS: ProductCategoryStats = { total: 0, activeCount: 0, inactiveCount: 0 }
 
 export default function ProductCategoriesPage() {
-  // Les articles affichent le nom de leur categorie : on invalide aussi le catalogue.
+  // Les articles affichent le nom de leur catégorie : on invalide aussi le catalogue
   const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<ProductCategoriesPageProps>({
     endpoint: '/product-categories',
     invalidateQueries: ['/product-services'],

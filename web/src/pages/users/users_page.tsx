@@ -45,7 +45,7 @@ const EMPTY_DISTRIBUTION: UserStatusDistribution[] = []
 export default function UsersPage() {
   const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<UsersPageProps>({
     endpoint: '/users',
-    // Les operateurs de vente dependent des comptes : on invalide aussi leur liste.
+    // Les opérateurs de vente dépendent des comptes : on invalide aussi leur liste
     invalidateQueries: ['/operators'],
     showSuccessToast: false,
   })

@@ -44,7 +44,7 @@ const EMPTY_STATS: DebtStats = {
 
 export default function RecoveriesPage() {
   const selectionDate = useSelectionDate()
-  // Sans filtre au premier chargement ; la periode n'est envoyee qu'au clic sur "Chercher".
+  // Sans filtre au premier chargement ; la période n'est envoyée qu'au clic sur "Chercher"
   const [appliedPeriod, setAppliedPeriod] = useState<{ startDate?: string; endDate?: string }>({})
   const { data, isFetching: isLoading } = useCrud<RecoveryPaymentItem>({
     endpoint: '/recoveries',

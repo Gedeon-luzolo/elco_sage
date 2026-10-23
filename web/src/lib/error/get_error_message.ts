@@ -1,9 +1,9 @@
 import { ApiError } from '~/lib/api/fetch'
 
-// Statuts pour lesquels le message du backend est ecrit par nous, donc affichable tel quel.
+// Statuts pour lesquels le message du backend est écrit par nous, donc affichable tel quel.
 const BACKEND_MESSAGE_STATUSES = [400, 401, 409, 422]
 
-// Messages fixes en francais pour les autres statuts.
+// Messages fixes en français pour les autres statuts.
 const STATUS_MESSAGES: Record<number, string> = {
   403: "Accès non autorisé. Vous n'avez pas les permissions nécessaires.",
   404: "La ressource demandée n'existe pas.",
@@ -13,17 +13,19 @@ const STATUS_MESSAGES: Record<number, string> = {
 
 const FALLBACK_MESSAGE = "Une erreur inattendue s'est produite. Veuillez réessayer."
 
-/** Transforme n'importe quelle erreur en message lisible par l'utilisateur. */
+// Transforme n'importe quelle erreur en message lisible par l'utilisateur.
 export const getErrorMessage = (error: unknown): string => {
+  // Les erreurs qui ne viennent pas de l'API n'ont pas de message présentable
   if (!(error instanceof ApiError)) {
     return FALLBACK_MESSAGE
   }
 
-  // Statut 0 = le serveur n'a pas repondu (reseau coupe, backend arrete).
+  // Statut 0 : le serveur n'a pas répondu (réseau coupé, backend arrêté)
   if (error.status === 0) {
     return 'Impossible de joindre le serveur. Vérifiez votre connexion.'
   }
 
+  // Ces statuts portent un message déjà écrit pour l'utilisateur
   if (BACKEND_MESSAGE_STATUSES.includes(error.status)) {
     return error.message
   }

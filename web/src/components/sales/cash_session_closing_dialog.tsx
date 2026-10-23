@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog'
 import { useCrud } from '~/hooks/common/useCrud'
+import { useOutbox } from '~/hooks/useOutbox'
 import { api } from '~/lib/api/fetch'
 import type { CashSessionItem } from '~/types/cash_session_types'
 import type { MoneyMap } from '~/utils/money_map.utils'
@@ -34,6 +35,8 @@ export function CashSessionClosingDialog({
   onOpenChange,
 }: CashSessionClosingDialogProps) {
   const navigate = useNavigate()
+  // Fermer la caisse avec des ventes non envoyees les exclurait du rapport de cloture.
+  const unsyncedCount = useOutbox().length
   const [closingAmountCdf, setClosingAmountCdf] = useState('')
   const [closingAmountUsd, setClosingAmountUsd] = useState('')
 
@@ -135,6 +138,13 @@ export function CashSessionClosingDialog({
           />
         </div>
 
+        {unsyncedCount > 0 && (
+          <p className="text-sm text-destructive">
+            {unsyncedCount} opération(s) hors ligne ne sont pas encore envoyées. Envoyez-les avant
+            de fermer la caisse.
+          </p>
+        )}
+
         <DialogFooter>
           <Button type="button" variant="outline" onClick={closeDialog} disabled={isSubmitting}>
             Annuler
@@ -142,7 +152,7 @@ export function CashSessionClosingDialog({
           <Button
             type="button"
             onClick={submitClosing}
-            disabled={!canSubmit || isSubmitting || isLoadingSystemAmounts}
+            disabled={!canSubmit || isSubmitting || isLoadingSystemAmounts || unsyncedCount > 0}
           >
             <Save className="size-4" />
             {isSubmitting ? 'Fermeture...' : 'Valider la cloture'}

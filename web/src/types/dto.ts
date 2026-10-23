@@ -1,9 +1,8 @@
-/**
- * Formes JSON renvoyees par l'API (miroir des transformers du backend).
- * Le frontend ne depend volontairement d'aucun fichier du dossier app/.
- */
+// Formes JSON renvoyées par l'API (miroir des transformers du backend).
+// Le frontend ne dépend volontairement d'aucun fichier du dossier app/.
 export type CustomerType = 'MALE' | 'FEMALE' | 'COMPANY'
 
+// Client tel que renvoyé par l'API.
 export type CustomerDTO = {
   id: string
   fullName: string
@@ -15,6 +14,7 @@ export type CustomerDTO = {
   updatedAt: string | null
 }
 
+// Catégorie de produits et services.
 export type ProductCategoryDTO = {
   id: string
   name: string
@@ -23,6 +23,7 @@ export type ProductCategoryDTO = {
   updatedAt: string | null
 }
 
+// Produit ou service, avec son stock vendable calculé par le serveur.
 export type ProductServiceDTO = {
   id: string
   type: string
@@ -47,6 +48,7 @@ export type ProductServiceDTO = {
   updatedAt: string | null
 }
 
+// Utilisateur du système.
 export type UserDTO = {
   id: string
   fullName: string | null
@@ -58,6 +60,7 @@ export type UserDTO = {
   initials: string
 }
 
+// Taux de change (createdAt n'est présent que dans l'historique).
 export type ExchangeRateDTO = {
   id: string
   exchangeRate: number

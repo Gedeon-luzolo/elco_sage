@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
@@ -28,7 +27,12 @@ import {
 } from '~/components/ui/select'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useCrud } from '~/hooks/common/useCrud'
+import { useOutbox } from '~/hooks/useOutbox'
+import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
+import { useCreateSale } from '~/hooks/sales/useCreateSale'
+import { applyPendingSales } from '~/lib/offline/pending_stock'
+import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { UserListItem } from '~/types/user_types'
@@ -58,8 +62,10 @@ export default function SaleCreatePage() {
   const navigate = useNavigate()
   const { data: currentCashSession } = useCurrentCashSession()
 
-  // Donnees de reference de la vente ; le stock est calcule a la date metier de la caisse.
-  const { data: saleServices = [] } = useCrud<ProductServiceDTO>({
+  // Données de référence de la vente ; le stock est calculé à la date métier de la caisse
+  const { user } = useAuth()
+  const outbox = useOutbox()
+  const { data: fetchedServices = [] } = useCrud<ProductServiceDTO>({
     endpoint: '/product-services/active-for-sale',
   }).useGetWithParams<ProductServiceDTO[]>(
     { date: currentCashSession?.openingDate ?? undefined },
@@ -70,12 +76,14 @@ export default function SaleCreatePage() {
     endpoint: '/customers/active-for-sale',
   }).useList()
 
-  // Une vente enregistree modifie la caisse, le stock, les dettes et les rapports.
-  const createSale = useCrud<SaleItemRow>({
-    endpoint: '/sales',
-    showSuccessToast: false,
-    invalidateQueries: ['/cash-sessions', '/product-services', '/stock', '/debts', '/recoveries'],
-  }).useCreate<ReturnType<typeof buildCreateSalePayload>, SaleItemRow>()
+  // Les ventes encore dans la file ne sont pas connues du serveur : on retire leur stock localement
+  const saleServices = useMemo(
+    () => applyPendingSales(fetchedServices, outbox),
+    [fetchedServices, outbox]
+  )
+
+  // En ligne la vente part au serveur ; sans réseau elle va dans la file d'attente
+  const createSale = useCreateSale()
 
   // Derniere vente enregistree : son ticket est imprime automatiquement.
   const [printSale, setPrintSale] = useState<SaleItemRow | null>(null)
@@ -178,20 +186,36 @@ export default function SaleCreatePage() {
   const submitSale = () => {
     if (!canSubmit) return
 
+    if (!currentCashSession || !user) return
+
+    const payload = buildCreateSalePayload({
+      paymentType,
+      customerId,
+      operatorId,
+      currency,
+      payableAmount: effectivePayableAmount,
+      theoreticalAmount,
+      lines,
+    })
+
     createSale.mutate(
-      buildCreateSalePayload({
-        paymentType,
-        customerId,
-        operatorId,
-        currency,
-        payableAmount: effectivePayableAmount,
-        theoreticalAmount,
-        lines,
-      }),
+      {
+        cashSessionId: currentCashSession.id,
+        payload,
+        buildSale: (meta) =>
+          buildLocalSale({
+            ...meta,
+            cashSessionId: currentCashSession.id,
+            payload,
+            services: saleServices,
+            customers,
+            operators,
+            seller: user,
+          }),
+      },
       {
         // Le formulaire est vidé après succès pour enchaîner la vente suivante sur la même page.
-        onSuccess: (sale) => {
-          toast.success('Vente enregistrée avec succès.')
+        onSuccess: ({ sale }) => {
           setPrintSale(sale)
           setAutoPrintSaleId(sale.id)
           resetForm()

@@ -1,17 +1,24 @@
 import { QueryClient } from '@tanstack/react-query'
+import { OFFLINE_CACHE_MAX_AGE_MS } from '~/lib/offline/config'
 
-/** Client global pour les requetes serveur. */
+// Client global pour les requêtes serveur.
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
       staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 60,
+      // Doit couvrir la durée de persistance, sinon le cache restauré serait purgé aussitôt
+      gcTime: OFFLINE_CACHE_MAX_AGE_MS,
+      // Tente le réseau mais ne reste pas bloqué en attente quand il est coupé
+      networkMode: 'offlineFirst',
     },
+    // Les écritures hors ligne passent par la file d'attente : la mutation doit s'exécuter
+    // et échouer (statut 0) plutôt que de rester en pause
+    mutations: { networkMode: 'always' },
   },
 })
 
-/** Invalide les requetes dont la cle (premier element) commence par un prefixe. */
+// Invalide les requêtes dont la clé (premier élément) commence par un préfixe.
 export const invalidateQueriesByPrefix = (prefixes: string | string[]) => {
   const prefixList = Array.isArray(prefixes) ? prefixes : [prefixes]
 
