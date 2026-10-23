@@ -9,10 +9,12 @@ type Id = string | number
 type QueryParams = Record<string, string | number | boolean | undefined>
 
 // Options d'une ressource : son endpoint, les listes à recharger après une mutation
-// (préfixes de clés ou clés exactes) et l'affichage du toast de succès.
+// (préfixes de clés ou clés exactes), l'affichage du toast de succès et la fraîcheur des lectures
+// (staleTime, le défaut du client de requêtes si absent).
 type CrudOptions = {
   endpoint: string
   queryKey?: string
+  staleTime?: number
   invalidateQueries?: (string | readonly unknown[])[]
   showSuccessToast?: boolean
 }
@@ -30,6 +32,7 @@ type ActionOptions<TVars> = {
 export function useCrud<T extends Record<string, unknown>>({
   endpoint,
   queryKey,
+  staleTime,
   invalidateQueries = [],
   showSuccessToast = true,
 }: CrudOptions) {
@@ -69,6 +72,7 @@ export function useCrud<T extends Record<string, unknown>>({
       queryKey: [resourceKey],
       queryFn: () => api.get<T[]>(endpoint),
       enabled,
+      staleTime,
     })
 
   // Récupère la liste avec filtres
@@ -77,6 +81,7 @@ export function useCrud<T extends Record<string, unknown>>({
       queryKey: [resourceKey, params],
       queryFn: () => api.get<T[]>(endpoint, { params }),
       enabled,
+      staleTime,
     })
 
   // Récupère une réponse qui n'est pas une liste (ex : { debts, stats }), avec filtres
@@ -85,6 +90,7 @@ export function useCrud<T extends Record<string, unknown>>({
       queryKey: [resourceKey, params],
       queryFn: () => api.get<R>(endpoint, { params }),
       enabled,
+      staleTime,
     })
 
   // Récupère un élément par id
@@ -93,6 +99,7 @@ export function useCrud<T extends Record<string, unknown>>({
       queryKey: [resourceKey, id],
       queryFn: () => api.get<T>(`${endpoint}/${id}`),
       enabled,
+      staleTime,
     })
 
   // Crée un élément

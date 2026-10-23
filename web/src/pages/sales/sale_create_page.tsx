@@ -31,6 +31,7 @@ import { useOutbox } from '~/hooks/useOutbox'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCreateSale } from '~/hooks/sales/useCreateSale'
+import { STALE_TIME } from '~/lib/react-query/cache_ttl'
 import { applyPendingSales } from '~/lib/offline/pending_stock'
 import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
@@ -67,6 +68,8 @@ export default function SaleCreatePage() {
   const outbox = useOutbox()
   const { data: fetchedServices = [] } = useCrud<ProductServiceDTO>({
     endpoint: '/product-services/active-for-sale',
+    // Le stock vendable change depuis d'autres postes : il est relu à chaque ouverture de la page
+    staleTime: STALE_TIME.ALWAYS_REFETCH,
   }).useGetWithParams<ProductServiceDTO[]>(
     { date: currentCashSession?.openingDate ?? undefined },
     Boolean(currentCashSession)
