@@ -70,6 +70,7 @@
     "@adonisjs/static": "^2.0.1",
     "@adonisjs/vite": "^5.1.1",
     "@base-ui/react": "^1.6.0",
+    "@fontsource/inter": "^5.3.0",
     "@inertiajs/react": "^2.3.24",
     "@tailwindcss/vite": "^4.3.3",
     "@tuyau/core": "^1.2.2",
