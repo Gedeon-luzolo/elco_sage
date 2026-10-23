@@ -5,13 +5,14 @@ import type User from '#models/user'
 import { CacheKeys } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import AdditionNumberService from '#services/sales/addition_number_service'
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
 import type { CreateSaleInput, FindSalesHistoryParams } from '#types/sales'
 import { dateKeyToDay, dateTimeToDateKey } from '#utils/date_utils'
+import { findReplayedRecord } from '#utils/idempotency'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
-import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 
 @inject()
@@ -20,7 +21,8 @@ export default class SaleService {
     private journalisationService: JournalisationService,
     private saleItemService: SaleItemService,
     private saleValidationService: SaleValidationService,
-    private cacheService: CacheService
+    private cacheService: CacheService,
+    private additionNumberService: AdditionNumberService
   ) {}
 
   /**
@@ -71,6 +73,18 @@ export default class SaleService {
    * Cree une vente et ses lignes dans une transaction.
    */
   async create(actor: User, payload: CreateSaleInput) {
+    // Un rejeu (client hors ligne qui resynchronise) ne recrée rien : on renvoie la vente existante.
+    const replayed = await findReplayedRecord({
+      id: payload.id,
+      find: (id) => Sale.find(id),
+      belongsToCaller: (sale) => sale.sellerId === actor.id,
+      conflictMessage: 'Cet identifiant de vente est déjà utilisé.',
+    })
+
+    if (replayed) {
+      return this.findById(replayed.id)
+    }
+
     // Les lignes sont préparées avant la transaction pour valider les services et calculer les prix.
     const prepared = await this.saleItemService.prepareItems(payload.items, payload.currency)
     const discountAmount = Number(payload.discountAmount ?? 0)
@@ -89,12 +103,24 @@ export default class SaleService {
     const stockDateKey = dateTimeToDateKey(cashSession.openedAt)
 
     const createdSale = await db.transaction(async (trx) => {
-      // Le numéro d'addition est verrouillé dans la transaction pour éviter deux numéros identiques.
-      const additionNumber = await this.generateAdditionNumber(trx)
+      // En ligne, le serveur attribue le numéro (verrouillé dans la transaction).
+      // Hors ligne, le client fournit un numéro issu de la plage réservée à sa caisse.
+      let additionNumber: string
+      if (payload.additionNumber) {
+        await this.additionNumberService.assertReservedFor(
+          cashSession.id,
+          payload.additionNumber,
+          trx
+        )
+        additionNumber = this.additionNumberService.format(Number(payload.additionNumber))
+      } else {
+        additionNumber = await this.additionNumberService.generateOnlineNumber(trx)
+      }
 
       // L'entete porte les informations communes a toutes les lignes de vente.
       const sale = await Sale.create(
         {
+          id: payload.id,
           cashSessionId: cashSession.id,
           customerId: payload.customerId ?? null,
           operatorId: payload.operatorId,
@@ -231,19 +257,6 @@ export default class SaleService {
       })
       .preload('recoveries')
       .firstOrFail()
-  }
-
-  // Génère un numéro d'addition séquentiel au format 000000.
-  private async generateAdditionNumber(trx: TransactionClientContract) {
-    await trx.rawQuery(`SELECT pg_advisory_xact_lock(hashtext('sales_addition_number'))`)
-
-    const result = await trx.rawQuery(`
-      SELECT COALESCE(MAX(addition_number::integer), 0) + 1 AS next_number
-      FROM sales
-    `)
-    const nextNumber = Number(result.rows[0]?.next_number ?? 1)
-
-    return String(nextNumber).padStart(5, '0')
   }
 
   // Convertit la date reçue en DateTime, ou utilise l'heure serveur par défaut.

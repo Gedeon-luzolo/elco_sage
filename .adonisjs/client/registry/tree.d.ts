@@ -9,6 +9,51 @@ export interface ApiDefinition {
       verifyPassword: typeof routes['api.api_session.verify_password']
       logout: typeof routes['api.api_session.logout']
     }
+    apiOperators: {
+      index: typeof routes['api.api_operators.index']
+    }
+    apiProductServices: {
+      activeForSale: typeof routes['api.api_product_services.active_for_sale']
+    }
+    apiExchangeRates: {
+      index: typeof routes['api.api_exchange_rates.index']
+    }
+    apiCustomers: {
+      index: typeof routes['api.api_customers.index']
+      activeForSale: typeof routes['api.api_customers.active_for_sale']
+      store: typeof routes['api.api_customers.store']
+      update: typeof routes['api.api_customers.update']
+    }
+    apiCashSessions: {
+      index: typeof routes['api.api_cash_sessions.index']
+      current: typeof routes['api.api_cash_sessions.current']
+      systemAmounts: typeof routes['api.api_cash_sessions.system_amounts']
+      additionNumbers: typeof routes['api.api_cash_sessions.addition_numbers']
+      reserveAdditionNumbers: typeof routes['api.api_cash_sessions.reserve_addition_numbers']
+      close: typeof routes['api.api_cash_sessions.close']
+      store: typeof routes['api.api_cash_sessions.store']
+      show: typeof routes['api.api_cash_sessions.show']
+    }
+    apiSales: {
+      index: typeof routes['api.api_sales.index']
+      store: typeof routes['api.api_sales.store']
+      show: typeof routes['api.api_sales.show']
+      cancel: typeof routes['api.api_sales.cancel']
+    }
+    apiSaleRecoveries: {
+      store: typeof routes['api.api_sale_recoveries.store']
+      index: typeof routes['api.api_sale_recoveries.index']
+    }
+    apiDebts: {
+      index: typeof routes['api.api_debts.index']
+    }
+    apiStockMovements: {
+      index: typeof routes['api.api_stock_movements.index']
+      store: typeof routes['api.api_stock_movements.store']
+      update: typeof routes['api.api_stock_movements.update']
+      validatePhysical: typeof routes['api.api_stock_movements.validate_physical']
+      updatePhysical: typeof routes['api.api_stock_movements.update_physical']
+    }
   }
   home: typeof routes['home']
   splash: typeof routes['splash']

@@ -8,6 +8,27 @@ export const controllers = {
     auth: {
       ApiSession: () => import('#controllers/api/auth/api_session_controller'),
     },
+    customers: {
+      ApiCustomers: () => import('#controllers/api/customers/api_customers_controller'),
+    },
+    exchangeRates: {
+      ApiExchangeRates: () => import('#controllers/api/exchange_rates/api_exchange_rates_controller'),
+    },
+    products: {
+      ApiProductServices: () => import('#controllers/api/products/api_product_services_controller'),
+    },
+    sales: {
+      ApiCashSessions: () => import('#controllers/api/sales/api_cash_sessions_controller'),
+      ApiDebts: () => import('#controllers/api/sales/api_debts_controller'),
+      ApiSaleRecoveries: () => import('#controllers/api/sales/api_sale_recoveries_controller'),
+      ApiSales: () => import('#controllers/api/sales/api_sales_controller'),
+    },
+    stock: {
+      ApiStockMovements: () => import('#controllers/api/stock/api_stock_movements_controller'),
+    },
+    users: {
+      ApiOperators: () => import('#controllers/api/users/api_operators_controller'),
+    },
   },
   auth: {
     Session: () => import('#controllers/auth/session_controller'),

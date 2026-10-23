@@ -7,6 +7,21 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class AdditionNumberBlockSchema extends BaseModel {
+  static $columns = ['cashSessionId', 'createdAt', 'endNumber', 'id', 'startNumber'] as const
+  $columns = AdditionNumberBlockSchema.$columns
+  @column()
+  declare cashSessionId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endNumber: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare startNumber: number
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
@@ -209,14 +224,12 @@ export class SaleRecoverySchema extends BaseModel {
 }
 
 export class SaleSchema extends BaseModel {
-  static $columns = ['additionNumber', 'cashSessionId', 'clientReferenceId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
+  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
   $columns = SaleSchema.$columns
   @column()
   declare additionNumber: string
   @column()
   declare cashSessionId: string
-  @column()
-  declare clientReferenceId: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()

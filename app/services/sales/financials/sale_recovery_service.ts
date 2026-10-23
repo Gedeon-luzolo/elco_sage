@@ -15,6 +15,7 @@ import type {
 } from '#types/debt'
 import type { CreateSaleRecoveryInput } from '#types/sales'
 import { normalizeDateRange } from '#utils/date_utils'
+import { findReplayedRecord } from '#utils/idempotency'
 import { normalizeMoneyMap, sumMoneyByCurrency } from '#utils/money_map'
 import { resolveDebtStatus } from '#utils/sale_debt.utils'
 import { inject } from '@adonisjs/core'
@@ -33,6 +34,19 @@ export default class SaleRecoveryService {
    * Enregistre un recouvrement sur une vente à crédit.
    */
   async create(actor: User, saleId: string, payload: CreateSaleRecoveryInput) {
+    // Un rejeu (client hors ligne qui resynchronise) ne recrée pas le recouvrement.
+    const replayed = await findReplayedRecord({
+      id: payload.id,
+      find: (id) => SaleRecovery.find(id),
+      belongsToCaller: (recovery) =>
+        recovery.receivedById === actor.id && recovery.saleId === saleId,
+      conflictMessage: 'Cet identifiant de recouvrement est déjà utilisé.',
+    })
+
+    if (replayed) {
+      return replayed
+    }
+
     const sale = await Sale.query().where('id', saleId).preload('recoveries').firstOrFail()
 
     // Les recouvrements concernent uniquement les ventes à crédit encore actives.
@@ -47,6 +61,7 @@ export default class SaleRecoveryService {
 
     // Le recouvrement est enregistré dans la base de données avec l'agent et la caisse active.
     const recovery = await SaleRecovery.create({
+      id: payload.id,
       saleId: sale.id,
       cashSessionId: cashSession.id,
       receivedById: actor.id,

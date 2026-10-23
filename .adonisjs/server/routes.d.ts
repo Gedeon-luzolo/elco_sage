@@ -8,6 +8,33 @@ export type ScannedRoutes = {
     'api.api_session.me': { paramsTuple?: []; params?: {} }
     'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
+    'api.api_operators.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_exchange_rates.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_customers.store': { paramsTuple?: []; params?: {} }
+    'api.api_customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_sales.index': { paramsTuple?: []; params?: {} }
+    'api.api_sales.store': { paramsTuple?: []; params?: {} }
+    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
+    'api.api_debts.index': { paramsTuple?: []; params?: {} }
+    'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.store': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -59,6 +86,14 @@ export type ScannedRoutes = {
     'api.api_session.login': { paramsTuple?: []; params?: {} }
     'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
+    'api.api_customers.store': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
+    'api.api_sales.store': { paramsTuple?: []; params?: {} }
+    'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
+    'api.api_stock_movements.store': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
     'auth.verify_password': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
@@ -76,6 +111,21 @@ export type ScannedRoutes = {
   }
   GET: {
     'api.api_session.me': { paramsTuple?: []; params?: {} }
+    'api.api_operators.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_exchange_rates.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_sales.index': { paramsTuple?: []; params?: {} }
+    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_debts.index': { paramsTuple?: []; params?: {} }
+    'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -101,6 +151,21 @@ export type ScannedRoutes = {
   }
   HEAD: {
     'api.api_session.me': { paramsTuple?: []; params?: {} }
+    'api.api_operators.index': { paramsTuple?: []; params?: {} }
+    'api.api_product_services.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_exchange_rates.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.index': { paramsTuple?: []; params?: {} }
+    'api.api_customers.active_for_sale': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_sales.index': { paramsTuple?: []; params?: {} }
+    'api.api_sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_debts.index': { paramsTuple?: []; params?: {} }
+    'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
+    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'splash': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -125,6 +190,9 @@ export type ScannedRoutes = {
     'product_services.active_for_sale': { paramsTuple?: []; params?: {} }
   }
   PUT: {
+    'api.api_customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -133,6 +201,7 @@ export type ScannedRoutes = {
     'product_services.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
+    'api.api_sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {

@@ -24,6 +24,10 @@ export interface PreparedSaleItemsResult {
 }
 
 export interface CreateSaleInput {
+  // Identifiant généré par le client hors ligne : sert à rendre la création idempotente.
+  id?: string
+  // Numéro issu de la plage réservée à la caisse (vente hors ligne).
+  additionNumber?: string
   cashSessionId?: string
   customerId?: string | null
   operatorId: string
@@ -35,6 +39,8 @@ export interface CreateSaleInput {
 }
 
 export interface CreateSaleRecoveryInput {
+  // Identifiant généré par le client hors ligne : sert à rendre la création idempotente.
+  id?: string
   amount: number
   currency: Currency
   recoveredAt?: string | Date | null

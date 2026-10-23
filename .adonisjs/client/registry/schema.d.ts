@@ -59,6 +59,357 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/auth/api_session_controller').default['logout']>>>
     }
   }
+  'api.api_operators.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/operators'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/users/api_operators_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/users/api_operators_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/users/api_operators_controller').default['index']>>>
+    }
+  }
+  'api.api_product_services.active_for_sale': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/product-services/active-for-sale'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/products/api_product_services_controller').default['activeForSale']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/products/api_product_services_controller').default['activeForSale']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/products/api_product_services_controller').default['activeForSale']>>>
+    }
+  }
+  'api.api_exchange_rates.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/exchange-rates'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/exchange_rates/api_exchange_rates_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/exchange_rates/api_exchange_rates_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/exchange_rates/api_exchange_rates_controller').default['index']>>>
+    }
+  }
+  'api.api_customers.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/customers'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['index']>>>
+    }
+  }
+  'api.api_customers.active_for_sale': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/customers/active-for-sale'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['activeForSale']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['activeForSale']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['activeForSale']>>>
+    }
+  }
+  'api.api_customers.store': {
+    methods: ["POST"]
+    pattern: '/api/customers'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/customer').createCustomerValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/customer').createCustomerValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_customers.update': {
+    methods: ["PUT"]
+    pattern: '/api/customers/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/customer').updateCustomerValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/customer').updateCustomerValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/customers/api_customers_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_cash_sessions.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/cash-sessions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['index']>>>
+    }
+  }
+  'api.api_cash_sessions.current': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/cash-sessions/current'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['current']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['current']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['current']>>>
+    }
+  }
+  'api.api_cash_sessions.system_amounts': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/cash-sessions/current/system-amounts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['systemAmounts']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['systemAmounts']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['systemAmounts']>>>
+    }
+  }
+  'api.api_cash_sessions.addition_numbers': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/cash-sessions/current/addition-numbers'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['additionNumbers']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['additionNumbers']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['additionNumbers']>>>
+    }
+  }
+  'api.api_cash_sessions.reserve_addition_numbers': {
+    methods: ["POST"]
+    pattern: '/api/cash-sessions/current/addition-numbers'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['reserveAdditionNumbers']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['reserveAdditionNumbers']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['reserveAdditionNumbers']>>>
+    }
+  }
+  'api.api_cash_sessions.close': {
+    methods: ["POST"]
+    pattern: '/api/cash-sessions/close'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/cash_session').closeCashSessionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/cash_session').closeCashSessionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['close']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['close']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['close']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_cash_sessions.store': {
+    methods: ["POST"]
+    pattern: '/api/cash-sessions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['store']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['store']>>>
+    }
+  }
+  'api.api_cash_sessions.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/cash-sessions/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_cash_sessions_controller').default['show']>>>
+    }
+  }
+  'api.api_sales.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/sales'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['index']>>>
+    }
+  }
+  'api.api_sales.store': {
+    methods: ["POST"]
+    pattern: '/api/sales'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/sale').createSaleValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/sale').createSaleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_sales.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/sales/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['show']>>>
+    }
+  }
+  'api.api_sales.cancel': {
+    methods: ["PATCH"]
+    pattern: '/api/sales/:id/cancel'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['cancel']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['cancel']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sales_controller').default['cancel']>>>
+    }
+  }
+  'api.api_sale_recoveries.store': {
+    methods: ["POST"]
+    pattern: '/api/sales/:saleId/recoveries'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/sale_recovery').createSaleRecoveryValidator)>>
+      paramsTuple: [ParamValue]
+      params: { saleId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/sale_recovery').createSaleRecoveryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_debts.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/debts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_debts_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_debts_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_debts_controller').default['index']>>>
+    }
+  }
+  'api.api_sale_recoveries.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/recoveries'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/sales/api_sale_recoveries_controller').default['index']>>>
+    }
+  }
+  'api.api_stock_movements.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/stock'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['index']>>>
+    }
+  }
+  'api.api_stock_movements.store': {
+    methods: ["POST"]
+    pattern: '/api/stock/movements'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_stock_movements.update': {
+    methods: ["PUT"]
+    pattern: '/api/stock/movements/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').createStockMovementValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_stock_movements.validate_physical': {
+    methods: ["POST"]
+    pattern: '/api/stock/validate-physical'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['validatePhysical']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['validatePhysical']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['validatePhysical']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.api_stock_movements.update_physical': {
+    methods: ["PUT"]
+    pattern: '/api/stock/validate-physical/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock_movement').validatePhysicalStockValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['updatePhysical']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['updatePhysical']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/api/stock/api_stock_movements_controller').default['updatePhysical']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/'

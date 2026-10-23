@@ -16,6 +16,11 @@ const saleItemSchema = vine.object({
  * Valide la creation d'une vente avec ses lignes.
  */
 export const createSaleValidator = vine.create({
+  id: vine.string().uuid().optional(),
+  additionNumber: vine
+    .string()
+    .regex(/^\d{1,6}$/)
+    .optional(),
   cashSessionId: vine.string().uuid().nullable().optional(),
   customerId: vine.string().uuid().nullable(),
   operatorId: vine.string().uuid(),
