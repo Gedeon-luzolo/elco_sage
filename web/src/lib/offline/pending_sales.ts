@@ -1,4 +1,5 @@
 import type { OutboxEntry } from '~/lib/offline/db'
+import { getPendingEntries } from '~/lib/offline/pending_entries'
 import type { SaleItemRow } from '~/types/sale_types'
 import { businessDateKey } from '~/utils/date'
 
@@ -21,10 +22,8 @@ export function getPendingSales(
 
   const search = filters.additionNumber?.toLowerCase()
 
-  return entries
-    .filter(
-      (entry) => entry.type === 'sale' && entry.status === 'pending' && entry.userId === userId
-    )
+  return getPendingEntries(entries, 'sale')
+    .filter((entry) => entry.userId === userId)
     .flatMap((entry) => (entry.sale ? [entry.sale] : []))
     .filter((sale) => {
       // Recherche partielle sur le numéro d'addition, sans tenir compte de la casse

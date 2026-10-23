@@ -9,7 +9,7 @@ import {
   Search,
   Wallet,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { DataLoader } from '~/components/common/data_loader'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
@@ -28,6 +28,8 @@ import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import { useSimplePrint } from '~/hooks/use_simple_print'
 import { useCrud } from '~/hooks/common/useCrud'
+import { useOutbox } from '~/hooks/useOutbox'
+import { applyPendingRecoveries } from '~/lib/offline/pending_debts'
 import type { DebtItem, DebtStats, DebtsPageProps } from '~/types/debt_types'
 import { formatDateLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
@@ -50,8 +52,13 @@ export default function DebtsPage() {
   const { data, isFetching: isLoading } = useCrud<DebtItem>({
     endpoint: '/debts',
   }).useGetWithParams<Pick<DebtsPageProps, 'debts' | 'stats'>>(appliedPeriod)
-  const debts = data?.debts ?? EMPTY_DEBTS
-  const stats = data?.stats ?? EMPTY_STATS
+
+  // Les recouvrements faits hors ligne sont déduits des dettes du serveur en attendant leur envoi
+  const outbox = useOutbox()
+  const { debts, stats } = useMemo(
+    () => applyPendingRecoveries(data?.debts ?? EMPTY_DEBTS, data?.stats ?? EMPTY_STATS, outbox),
+    [data, outbox]
+  )
   const [selectedDebt, setSelectedDebt] = useState<DebtItem | null>(null)
   const { PrintContainer, handlePrint } = useSimplePrint({
     orientation: 'portrait',

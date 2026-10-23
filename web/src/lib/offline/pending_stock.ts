@@ -1,4 +1,5 @@
 import type { OutboxEntry } from '~/lib/offline/db'
+import { getPendingEntries } from '~/lib/offline/pending_entries'
 import type { ProductServiceDTO } from '~/types/dto'
 
 // Retire des stocks affichés les quantités des ventes encore dans la file.
@@ -11,10 +12,7 @@ export function applyPendingSales<T extends ProductServiceDTO>(
   const consumedByProduct = new Map<string, number>()
   const stockProductByService = new Map(services.map((item) => [item.id, item.stockProductId]))
 
-  for (const entry of entries) {
-    // Un conflit a été refusé par le serveur : il ne consomme plus de stock
-    if (entry.type !== 'sale' || entry.status !== 'pending') continue
-
+  for (const entry of getPendingEntries(entries, 'sale')) {
     for (const item of entry.sale?.items ?? []) {
       const stockProductId = stockProductByService.get(item.productServiceId)
       if (!stockProductId) continue

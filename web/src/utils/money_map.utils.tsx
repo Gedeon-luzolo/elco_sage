@@ -4,6 +4,11 @@ import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 // Forme frontend des montants multi-devise reçus depuis les DTO Inertia.
 export type MoneyMap = Record<string, number>
 
+// Ajoute un montant à une map par devise, sans modifier la map d'origine.
+export function addAmount(map: MoneyMap, currency: string, amount: number): MoneyMap {
+  return { ...map, [currency]: (map[currency] ?? 0) + amount }
+}
+
 // Rend une map monétaire sous la forme: 240 $ + 110,000 FC.
 export function renderMoneyMap(values: MoneyMap | null | undefined) {
   if (!values || typeof values !== 'object') {

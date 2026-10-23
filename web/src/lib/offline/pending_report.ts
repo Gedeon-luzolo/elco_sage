@@ -1,7 +1,8 @@
 import type { OutboxEntry } from '~/lib/offline/db'
+import { getPendingEntries } from '~/lib/offline/pending_entries'
 import type { SaleReportTotals } from '~/types/cash_session_types'
 import type { SaleItemRow } from '~/types/sale_types'
-import type { MoneyMap } from '~/utils/money_map.utils'
+import { addAmount } from '~/utils/money_map.utils'
 
 // Session de caisse concernée par le rapport : seuls ces champs servent à retrouver ses opérations.
 type ReportSession = { id: string; userId: string; status: string }
@@ -23,11 +24,6 @@ export const EMPTY_REPORT_TOTALS: SaleReportTotals = {
   collectionAmounts: {},
 }
 
-// Ajoute un montant à une map par devise, sans modifier la map d'origine.
-function addAmount(map: MoneyMap, currency: string, amount: number): MoneyMap {
-  return { ...map, [currency]: (map[currency] ?? 0) + amount }
-}
-
 // Retrouve les opérations en attente qui appartiennent à la session affichée.
 export function getPendingActivity(
   entries: OutboxEntry[],
@@ -37,10 +33,7 @@ export function getPendingActivity(
 
   if (!session) return activity
 
-  for (const entry of entries) {
-    // Une opération refusée par le serveur n'est pas comptée : elle n'existera jamais
-    if (entry.status !== 'pending') continue
-
+  for (const entry of getPendingEntries(entries)) {
     // Une vente est rattachée à la session qui a servi à la créer
     if (entry.type === 'sale' && entry.sale?.cashSessionId === session.id) {
       activity.sales.push(entry.sale)
