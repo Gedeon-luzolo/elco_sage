@@ -7,8 +7,3 @@ export const IDLE_ACTIVITY_EVENTS = [
   'touchstart',
   'scroll',
 ] as const
-
-export const IDLE_STORAGE_KEYS = {
-  lastActivityAt: 'elco_idle_last_activity_at',
-  locked: 'elco_idle_locked',
-} as const

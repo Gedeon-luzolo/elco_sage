@@ -4,7 +4,6 @@ import AuthAttemptService from '#services/auth/auth_attempt_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import UserTransformer from '#transformers/user_transformer'
 import { loginValidator } from '#validators/auth/login'
-import { verifyPasswordValidator } from '#validators/auth/password'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -53,19 +52,6 @@ export default class ApiSessionController {
    */
   async me({ auth, serialize }: HttpContext) {
     return serialize({ user: UserTransformer.transform(auth.getUserOrFail()) })
-  }
-
-  /**
-   * Vérifie le mot de passe de l'utilisateur connecté (déverrouillage de l'écran d'inactivité).
-   */
-  async verifyPassword({ request, auth, serialize }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const payload = await request.validateUsing(verifyPasswordValidator)
-
-    // La vérification ne compte pas comme une tentative de connexion
-    const valid = await this.authAttemptService.verifyCurrentPassword(user, payload.password)
-
-    return serialize({ valid })
   }
 
   /**

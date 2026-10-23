@@ -1,35 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { IDLE_ACTIVITY_EVENTS, IDLE_STORAGE_KEYS, IDLE_TIMEOUT_MS } from '~/constants/idle'
+import { IDLE_ACTIVITY_EVENTS, IDLE_TIMEOUT_MS } from '~/constants/idle'
 import { formatLongDate, formatShortTime } from '~/utils/date'
-import { api } from '~/lib/api/fetch'
 import type { UserDTO } from '~/types/dto'
-
-// Sauvegarde le dernier instant d'activite utilisateur.
-const saveLastActivity = () => {
-  window.localStorage.setItem(IDLE_STORAGE_KEYS.lastActivityAt, String(Date.now()))
-}
-
-// Verifie si la session est deja verrouillee dans le navigateur.
-const isStoredLocked = () => {
-  return window.localStorage.getItem(IDLE_STORAGE_KEYS.locked) === 'true'
-}
-
-// Sauvegarde l'etat verrouille ou deverrouille.
-const saveLockedState = (value: boolean) => {
-  window.localStorage.setItem(IDLE_STORAGE_KEYS.locked, String(value))
-}
 
 /**
  * Gere le verrouillage automatique apres inactivite.
- * Expose l'etat idle et la verification du mot de passe.
+ * Expose l'etat idle et la reprise de la session sans verification.
  * Reste volontairement limite a la session utilisateur courante.
  */
 export function useIdle(user?: UserDTO) {
   const [isIdle, setIsIdle] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isVerifying, setIsVerifying] = useState(false)
   const idleTimerRef = useRef<number | null>(null)
 
   const formattedDate = formatLongDate(currentTime)
@@ -50,8 +31,7 @@ export function useIdle(user?: UserDTO) {
     clearIdleTimer()
 
     idleTimerRef.current = window.setTimeout(() => {
-      // Une fois idle, on bloque l'interface jusqu'au mot de passe valide.
-      saveLockedState(true)
+      // Une fois idle, l'ecran de veille reste affiche jusqu'a la reprise.
       setIsIdle(true)
     }, IDLE_TIMEOUT_MS)
   }
@@ -62,55 +42,12 @@ export function useIdle(user?: UserDTO) {
       return
     }
 
-    saveLastActivity()
     startIdleTimer()
   }
 
-  // Deverrouille apres validation du mot de passe.
-  const unlock = () => {
-    saveLastActivity()
-    saveLockedState(false)
+  // Reprend la session des que l'utilisateur clique ou appuie sur une touche.
+  const resume = () => {
     setIsIdle(false)
-    setPassword('')
-    setError(null)
-    startIdleTimer()
-  }
-
-  /**
-   * Vérifie le mot de passe courant auprès du backend.
-   * L'endpoint ne modifie pas les tentatives de login du compte.
-   * Deverrouille seulement si le backend confirme valid=true.
-   */
-  const verifyPassword = async () => {
-    if (!password.trim()) {
-      setError('Veuillez saisir votre mot de passe')
-      return
-    }
-
-    setIsVerifying(true)
-    setError(null)
-
-    try {
-      const { valid } = await api.post<{ valid: boolean }>('auth/verify-password', { password })
-
-      if (!valid) {
-        setError('Mot de passe incorrect')
-        return
-      }
-
-      unlock()
-    } catch {
-      // Une erreur reseau ne doit jamais deverrouiller l'ecran.
-      setError('Impossible de verifier le mot de passe')
-    } finally {
-      setIsVerifying(false)
-    }
-  }
-
-  // Efface la saisie de mot de passe sans deverrouiller.
-  const clearPasswordPrompt = () => {
-    setPassword('')
-    setError(null)
   }
 
   useEffect(() => {
@@ -120,13 +57,11 @@ export function useIdle(user?: UserDTO) {
       return
     }
 
-    if (isStoredLocked()) {
-      // Un refresh ne doit pas sortir l'utilisateur du verrouillage.
-      setIsIdle(true)
-      return clearIdleTimer
+    // Pendant la veille, plus de timer ni d'écoute : la reprise relance l'effet.
+    if (isIdle) {
+      return
     }
 
-    saveLastActivity()
     startIdleTimer()
     IDLE_ACTIVITY_EVENTS.forEach((eventName) =>
       window.addEventListener(eventName, registerActivity)
@@ -150,14 +85,9 @@ export function useIdle(user?: UserDTO) {
 
   return {
     currentTime,
-    error,
     formattedDate,
     formattedTime,
     isIdle,
-    isVerifying,
-    password,
-    clearPasswordPrompt,
-    setPassword,
-    verifyPassword,
+    resume,
   }
 }

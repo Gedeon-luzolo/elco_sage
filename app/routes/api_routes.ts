@@ -39,7 +39,6 @@ export function registerApiRoutes() {
         // Tout le reste exige un token valide
         .group(() => {
           router.get('auth/me', [ApiSessionController, 'me'])
-          router.post('auth/verify-password', [ApiSessionController, 'verifyPassword'])
           router.post('auth/logout', [ApiSessionController, 'logout'])
 
           // Données de référence (mises en cache hors ligne par la SPA)
