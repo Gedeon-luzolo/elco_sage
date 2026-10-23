@@ -1,3 +1,4 @@
+import { CashSessionStatus } from '#models/cash_session'
 import { JournalisationModule } from '#models/journalisation'
 import Sale, { SaleStatus } from '#models/sale'
 import type User from '#models/user'
@@ -30,6 +31,7 @@ export default class SaleService {
     return Sale.query()
       .where('cashSessionId', cashSessionId)
       .where('status', SaleStatus.ACTIVE)
+      .preload('cashSession')
       .preload('customer')
       .preload('operator')
       .preload('seller')
@@ -52,6 +54,7 @@ export default class SaleService {
     return Sale.query()
       .where('status', SaleStatus.ACTIVE)
       .whereBetween('saleDate', [startDate, endDate])
+      .preload('cashSession')
       .preload('customer')
       .preload('operator')
       .preload('seller')
@@ -151,6 +154,11 @@ export default class SaleService {
       // Si la vente est deja annulee, on ne fait rien et on retourne l'objet.
       if (item.status === SaleStatus.CANCELLED) {
         return item
+      }
+
+      // Une fois la caisse fermee, l'addition est figee dans le rapport de cloture.
+      if (item.cashSession.status === CashSessionStatus.CLOSED) {
+        throw new Error('Impossible d\'annuler une vente dont la session de caisse est fermee.')
       }
 
       // L'annulation retire les sorties de stock associees aux services vendus.

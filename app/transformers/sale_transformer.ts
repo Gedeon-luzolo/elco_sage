@@ -20,6 +20,7 @@ export interface SaleDTO {
   discountAmount: number
   totalAmount: number
   status: string
+  cashSessionStatus: string | null
   customer: CustomerDTO | null
   operatorName: string | null
   sellerName: string | null
@@ -46,6 +47,7 @@ export default class SaleTransformer {
       discountAmount: sale.discountAmount,
       totalAmount: sale.totalAmount,
       status: sale.status,
+      cashSessionStatus: sale.cashSession?.status ?? null,
       customer: sale.customer ? CustomerTransformer.transformSingle(sale.customer) : null,
       operatorName: sale.operator?.fullName ?? sale.operator?.email ?? null,
       sellerName: sale.seller?.fullName ?? sale.seller?.email ?? null,

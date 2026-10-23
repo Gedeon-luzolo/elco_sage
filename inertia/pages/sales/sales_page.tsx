@@ -235,7 +235,7 @@ export default function SalesPage({
               {selectedSale && (
                 <SaleDetailPanel
                   sale={selectedSale}
-                  canCancelSale={isManagementUser}
+                  canCancelSale={isManagementUser && selectedSale.cashSessionStatus !== 'CLOSED'}
                   onPrintSale={printInvoice}
                   onCancelSale={setSaleToCancel}
                 />

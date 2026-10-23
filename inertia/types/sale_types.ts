@@ -39,6 +39,7 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   discountAmount: number
   totalAmount: number
   status: string
+  cashSessionStatus: string | null
   customer: (Record<string, JSONDataTypes> & CustomerDTO) | null
   operatorName: string | null
   sellerName: string | null
