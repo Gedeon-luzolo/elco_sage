@@ -24,50 +24,8 @@ export default class SaleService {
   ) {}
 
   /**
-   * Recupere les ventes d'une session de caisse.
-   */
-  async findByCashSession(cashSessionId: string) {
-    // Les relations permettent de lire client, vendeur, operateur et services sans snapshot.
-    return Sale.query()
-      .where('cashSessionId', cashSessionId)
-      .where('status', SaleStatus.ACTIVE)
-      .preload('cashSession')
-      .preload('customer')
-      .preload('operator')
-      .preload('seller')
-      .preload('items', (itemsQuery) => {
-        itemsQuery.preload('productService')
-      })
-      .preload('recoveries')
-      .orderBy('saleDate', 'desc')
-  }
-
-  /**
-   * Recupere les ventes d'une journee metier.
-   */
-  async findByBusinessDate(date: string) {
-    // La clé YYYY-MM-DD est convertie en bornes de journée dans le fuseau métier.
-    const startDate = dateKeyToDay(date).toJSDate()
-    const endDate = dateKeyToDay(date).endOf('day').toJSDate()
-
-    // Les managers lisent les ventes du jour, toutes caisses confondues.
-    return Sale.query()
-      .where('status', SaleStatus.ACTIVE)
-      .whereBetween('saleDate', [startDate, endDate])
-      .preload('cashSession')
-      .preload('customer')
-      .preload('operator')
-      .preload('seller')
-      .preload('items', (itemsQuery) => {
-        itemsQuery.preload('productService')
-      })
-      .preload('recoveries')
-      .orderBy('saleDate', 'desc')
-  }
-
-  /**
-   * Recupere l'historique des ventes par batch, toutes caisses et tous statuts confondus.
-   * Permet de retrouver une addition passee pour la reimprimer.
+   * Récupère l'historique des ventes par lot, toutes caisses et tous statuts confondus.
+   * Permet de retrouver une addition passée pour la réimprimer.
    */
   async findAllBatch({
     offset = 0,
@@ -88,7 +46,7 @@ export default class SaleService {
       .orderBy('saleDate', 'desc')
       .offset(offset)
 
-    // Applique le filtre de date de facturation si precise.
+    // Applique le filtre de date de facturation si précisé.
     if (facturationDate) {
       const dayStart = dateKeyToDay(facturationDate).toJSDate()
       const dayEnd = dateKeyToDay(facturationDate).endOf('day').toJSDate()
@@ -96,12 +54,12 @@ export default class SaleService {
       query.whereBetween('saleDate', [dayStart, dayEnd])
     }
 
-    // Recherche partielle et insensible a la casse sur le numero d'addition.
+    // Recherche partielle et insensible à la casse sur le numéro d'addition.
     if (additionNumber) {
       query.whereILike('additionNumber', `%${additionNumber}%`)
     }
 
-    // Filtre par statut (active/annulee) si precise.
+    // Filtre par statut (active/annulée) si précisé.
     if (status) {
       query.where('status', status)
     }
@@ -113,7 +71,7 @@ export default class SaleService {
    * Cree une vente et ses lignes dans une transaction.
    */
   async create(actor: User, payload: CreateSaleInput) {
-    // Les lignes sont preparees avant la transaction pour valider les services et calculer les prix.
+    // Les lignes sont préparées avant la transaction pour valider les services et calculer les prix.
     const prepared = await this.saleItemService.prepareItems(payload.items, payload.currency)
     const discountAmount = Number(payload.discountAmount ?? 0)
     const theoreticalAmount = prepared.theoreticalAmount
@@ -153,11 +111,11 @@ export default class SaleService {
         { client: trx }
       )
 
-      // Les sorties de stock sont imputees dans la meme transaction que la vente.
+      // Les sorties de stock sont imputées dans la même transaction que la vente.
       // Si le stock échoue, l'entête de vente et les lignes sont rollback ensemble.
       await this.saleItemService.consumeStockForSale(prepared.items, stockDateKey, trx)
 
-      // Les lignes gardent seulement l'id du service et les montants calcules.
+      // Les lignes gardent seulement l'id du service et les montants calculés.
       await this.saleItemService.createManyForSale(sale.id, prepared.items, trx)
 
       await this.journalisationService.create({
@@ -195,23 +153,23 @@ export default class SaleService {
         .preload('cashSession')
         .firstOrFail()
 
-      // Si la vente est deja annulee, on ne fait rien et on retourne l'objet.
+      // Si la vente est déjà annulée, on ne fait rien et on retourne l'objet.
       if (item.status === SaleStatus.CANCELLED) {
         return item
       }
 
-      // Une fois la caisse fermee, l'addition est figee dans le rapport de cloture.
+      // Une fois la caisse fermée, l'addition est figée dans le rapport de clôture.
       if (item.cashSession.status === CashSessionStatus.CLOSED) {
-        throw new Error('Impossible d\'annuler une vente dont la session de caisse est fermee.')
+        throw new Error("Impossible d'annuler une vente dont la session de caisse est fermée.")
       }
 
-      // L'annulation retire les sorties de stock associees aux services vendus.
+      // L'annulation retire les sorties de stock associées aux services vendus.
       await this.saleItemService.restoreStockForCancelledSale(
         item.items.map((saleItem) => {
           // Les anciennes ventes doivent rester annulables seulement si leur service est encore correctement lié.
           if (!saleItem.productService?.stockProduct) {
             throw new Error(
-              `Le service de la ligne "${saleItem.orderNumber}" n'est pas lie a un produit de stock.`
+              `Le service de la ligne "${saleItem.orderNumber}" n'est pas lié à un produit de stock.`
             )
           }
 
@@ -225,7 +183,7 @@ export default class SaleService {
             totalPrice: saleItem.totalPrice,
           }
         }),
-        // La restitution utilise la meme date metier de caisse que la creation de vente.
+        // La restitution utilise la même date métier de caisse que la création de vente.
         dateTimeToDateKey(item.cashSession.openedAt),
         trx
       )
@@ -239,7 +197,7 @@ export default class SaleService {
 
     await this.journalisationService.create({
       module: JournalisationModule.SALES,
-      message: `Addition ${sale.additionNumber} annulee par ${actor.fullName ?? actor.email}.`,
+      message: `Addition ${sale.additionNumber} annulée par ${actor.fullName ?? actor.email}.`,
       user: actor,
     })
 
@@ -275,7 +233,7 @@ export default class SaleService {
       .firstOrFail()
   }
 
-  // Genere un numero d'addition sequentiel au format 000000.
+  // Génère un numéro d'addition séquentiel au format 000000.
   private async generateAdditionNumber(trx: TransactionClientContract) {
     await trx.rawQuery(`SELECT pg_advisory_xact_lock(hashtext('sales_addition_number'))`)
 
@@ -288,7 +246,7 @@ export default class SaleService {
     return String(nextNumber).padStart(5, '0')
   }
 
-  // Convertit la date recue en DateTime, ou utilise l'heure serveur par defaut.
+  // Convertit la date reçue en DateTime, ou utilise l'heure serveur par défaut.
   private resolveSaleDate(saleDate?: string | Date | null) {
     if (!saleDate) {
       return DateTime.now()

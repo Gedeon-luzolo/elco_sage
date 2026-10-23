@@ -1,6 +1,5 @@
 import type { ProductServiceDTO } from '#transformers/product_service_transformer'
 import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
-import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { Currency } from '~/utils/currency'
 
@@ -48,13 +47,6 @@ export const EMPTY_SALE_LINE: SaleLineState = {
   productServiceId: '',
   quantity: 1,
 }
-
-// Champs utilises par la recherche locale de la page des ventes.
-export const saleSearchFields = [
-  (sale: SaleItemRow) => sale.additionNumber,
-  (sale: SaleItemRow) => sale.customer?.fullName,
-  (sale: SaleItemRow) => sale.items.map((item) => item.orderNumber).join(' '),
-]
 
 // Retourne le prix du service selon la devise de vente selectionnee.
 export function getSaleServiceUnitPrice(

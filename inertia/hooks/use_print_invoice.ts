@@ -25,13 +25,13 @@ export function usePrintInvoice({ selectedSale, onSelectSale }: UsePrintInvoiceO
       return
     }
 
-    // Apres impression auto, on retire printSaleId pour eviter une reimpression au refresh.
-    router.visit('/sales', {
+    // Après impression auto, on retire printSaleId pour éviter une réimpression au rafraîchissement.
+    router.visit(url.split('?')[0], {
       replace: true,
       preserveScroll: true,
       preserveState: true,
     })
-  }, [printSaleId])
+  }, [printSaleId, url])
 
   const handlePrint = useReactToPrint({
     contentRef: receiptRef,
@@ -40,20 +40,20 @@ export function usePrintInvoice({ selectedSale, onSelectSale }: UsePrintInvoiceO
 
   const printInvoice = useCallback(
     (sale: SaleItemRow) => {
-      // flushSync force selectedSale a changer avant que react-to-print clone le contenu.
+      // flushSync force selectedSale à changer avant que react-to-print clone le contenu.
       flushSync(() => onSelectSale(sale.id))
       handlePrint()
     },
     [handlePrint, onSelectSale]
   )
 
-  // Si printSaleId est present dans l'URL et correspond a la vente selectionnee, on lance l'impression auto.
+  // Si printSaleId est présent dans l'URL et correspond à la vente sélectionnée, on lance l'impression auto.
   useEffect(() => {
     if (!printSaleId || !selectedSale || selectedSale.id !== printSaleId) {
       return
     }
 
-    // Cas vente reussie: la vente est deja selectionnee via printSaleId, on ouvre l'impression.
+    // Cas vente réussie : la vente est déjà sélectionnée via printSaleId, on ouvre l'impression.
     handlePrint()
   }, [handlePrint, printSaleId, selectedSale])
 

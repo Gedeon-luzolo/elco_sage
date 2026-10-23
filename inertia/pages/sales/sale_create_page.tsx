@@ -12,6 +12,7 @@ import {
 import { useMemo, useState } from 'react'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
+import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import type { InertiaProps } from '~/types'
 import type { SaleCreatePageProps } from '~/types/cash_session_types'
 import { CURRENCY_OPTIONS, Currency, type CurrencyCode } from '~/utils/currency'
@@ -45,11 +47,15 @@ import {
   type SalePaymentType,
 } from '~/utils/sales/sale.utils'
 
+// Le ticket est toujours celui de la vente chargée par le serveur : aucune sélection manuelle ici.
+const ignoreSaleSelection = () => {}
+
 export default function SaleCreatePage({
   currentCashSession,
   saleServices,
   operators,
   customers,
+  printSale,
 }: InertiaProps<SaleCreatePageProps>) {
   const [paymentType, setPaymentType] = useState<SalePaymentType>('CASH')
   const [currency, setCurrency] = useState<CurrencyCode>(Currency.CDF)
@@ -60,30 +66,36 @@ export default function SaleCreatePage({
   const [lines, setLines] = useState<SaleLineState[]>([EMPTY_SALE_LINE])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Imprime automatiquement le ticket de la vente venant d'être enregistrée (?printSaleId=...).
+  const { receiptRef } = usePrintInvoice({
+    selectedSale: printSale,
+    onSelectSale: ignoreSaleSelection,
+  })
+
   const serviceById = useMemo(
     () => new Map(saleServices.map((service) => [service.id, service])),
     [saleServices]
   )
 
-  // Calcule les totaux a partir des prix exposes par les services.
+  // Calcule les totaux à partir des prix exposés par les services.
   const theoreticalAmount = useMemo(
     () => getSaleTheoreticalAmount(lines, serviceById, currency),
     [currency, lines, serviceById]
   )
 
-  // Calcule le montant a payer effectif, en tenant compte d'un montant personnalise si l'utilisateur l'a saisi.
+  // Calcule le montant à payer effectif, en tenant compte d'un montant personnalisé si l'utilisateur l'a saisi.
   const effectivePayableAmount = hasCustomPayableAmount
     ? normalizeSalePayableAmount(payableAmount, theoreticalAmount)
     : theoreticalAmount
 
-  // Calcule la remise a partir du montant a payer et du montant theorique.
+  // Calcule la remise à partir du montant à payer et du montant théorique.
   const discountAmount = getSaleDiscountAmountFromPayableAmount(
     theoreticalAmount,
     effectivePayableAmount
   )
   const totalAmount = effectivePayableAmount
   const hasStockIssue = hasSaleStockIssue(lines, serviceById)
-  // Verifie si le formulaire peut etre soumis, en tenant compte des champs requis et des problemes de stock.
+  // Vérifie si le formulaire peut être soumis, en tenant compte des champs requis et des problèmes de stock.
   const canSubmit =
     canSubmitSaleForm({
       currentCashSessionId: currentCashSession?.id,
@@ -102,7 +114,7 @@ export default function SaleCreatePage({
   }
 
   /**
-   * Met a jour une ligne de service.
+   * Met à jour une ligne de service.
    */
   const updateLine = (index: number, patch: Partial<SaleLineState>) => {
     setLines((current) =>
@@ -121,6 +133,17 @@ export default function SaleCreatePage({
 
       return current.filter((_, lineIndex) => lineIndex !== index)
     })
+  }
+
+  /**
+   * Remet le formulaire à zéro après une vente enregistrée.
+   */
+  const resetForm = () => {
+    setPaymentType('CASH')
+    setCustomerId('')
+    setPayableAmount(0)
+    setHasCustomPayableAmount(false)
+    setLines([EMPTY_SALE_LINE])
   }
 
   /**
@@ -143,6 +166,8 @@ export default function SaleCreatePage({
         lines,
       }),
       {
+        // Le formulaire est vidé après succès pour enchaîner la vente suivante sur la même page.
+        onSuccess: resetForm,
         onFinish: () => setIsSubmitting(false),
       }
     )
@@ -150,6 +175,13 @@ export default function SaleCreatePage({
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
+      <div className="fixed left-[10000px] top-0" aria-hidden="true">
+        {/* Le ticket reste monté hors écran pour que react-to-print puisse le lire via ref. */}
+        <div ref={receiptRef} className="bg-white">
+          {printSale && <ThermalSaleReceipt sale={printSale} />}
+        </div>
+      </div>
+
       <section className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Nouvelle vente"
@@ -221,7 +253,7 @@ export default function SaleCreatePage({
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="sale-operator">Operateur</Label>
+                    <Label htmlFor="sale-operator">Opérateur</Label>
                     <Select
                       id="sale-operator"
                       items={operators.map((operator) => ({
@@ -232,7 +264,7 @@ export default function SaleCreatePage({
                       onValueChange={(value) => setOperatorId(value ?? '')}
                     >
                       <SelectTrigger className="h-10 w-full">
-                        <SelectValue placeholder="Selectionner..." />
+                        <SelectValue placeholder="Sélectionner..." />
                       </SelectTrigger>
                       <SelectContent>
                         {operators.map((operator) => (
@@ -256,7 +288,7 @@ export default function SaleCreatePage({
                       onValueChange={(value) => setCustomerId(value ?? '')}
                     >
                       <SelectTrigger className="h-10 w-full">
-                        <SelectValue placeholder="Selectionner..." />
+                        <SelectValue placeholder="Sélectionner..." />
                       </SelectTrigger>
                       <SelectContent>
                         {customers.map((customer) => (
@@ -310,7 +342,7 @@ export default function SaleCreatePage({
                             }
                           >
                             <SelectTrigger className="h-10 w-full">
-                              <SelectValue placeholder="Selectionner un service..." />
+                              <SelectValue placeholder="Sélectionner un service..." />
                             </SelectTrigger>
                             <SelectContent>
                               {saleServices.map((item) => (
@@ -335,7 +367,7 @@ export default function SaleCreatePage({
                         </div>
 
                         <div className="grid gap-2">
-                          <Label>Quantite</Label>
+                          <Label>Quantité</Label>
                           <div className="flex items-center gap-1">
                             <Button
                               type="button"
@@ -415,18 +447,18 @@ export default function SaleCreatePage({
               <div className="border-b border-border p-4">
                 <div className="flex items-center gap-2">
                   <ReceiptText className="size-5" />
-                  <h2 className="font-semibold">Resume</h2>
+                  <h2 className="font-semibold">Résumé</h2>
                 </div>
               </div>
 
               <div className="space-y-4 p-4">
                 <SaleSummaryLine
-                  label="Montant theorique"
+                  label="Montant théorique"
                   value={formatMoneyWithCurrency(theoreticalAmount, currency)}
                 />
 
                 <div className="grid gap-2">
-                  <Label htmlFor="sale-payable-amount">Montant a payer</Label>
+                  <Label htmlFor="sale-payable-amount">Montant à payer</Label>
                   <Input
                     id="sale-payable-amount"
                     type="number"
@@ -443,12 +475,12 @@ export default function SaleCreatePage({
                 </div>
 
                 <SaleSummaryLine
-                  label="Remise calculee"
+                  label="Remise calculée"
                   value={formatMoneyWithCurrency(discountAmount, currency)}
                 />
 
                 <SaleSummaryLine
-                  label="Total a payer"
+                  label="Total à payer"
                   value={formatMoneyWithCurrency(totalAmount, currency)}
                   strong
                 />

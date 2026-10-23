@@ -6,8 +6,9 @@ import type { NextFn } from '@adonisjs/core/types/http'
 
 const READ_METHODS = ['GET', 'HEAD']
 const OPENING_PATHS = ['/sales/session/open']
-// Lecture seule, utile pour retrouver et reimprimer une facture meme sans caisse ouverte.
-const UNRESTRICTED_READ_PATHS = ['/sales/history']
+// Lecture seule: /sales n'est qu'un hub de navigation et /sales/history permet de
+// retrouver et réimprimer une facture, les deux doivent rester accessibles sans caisse ouverte.
+const UNRESTRICTED_READ_PATHS = ['/sales', '/sales/history']
 const SALE_CANCEL_PATH_PATTERN = /^\/sales\/[^/]+\/cancel$/
 
 @inject()
@@ -15,8 +16,8 @@ export default class CashSessionMiddleware {
   constructor(private cashSessionService: CashSessionService) {}
 
   /**
-   * Controle l'acces au module vente selon la session de caisse active.
-   * Les profils direction peuvent consulter sans session, mais pas ecrire.
+   * Contrôle l'accès au module vente selon la session de caisse active.
+   * Les profils direction peuvent consulter sans session, mais pas écrire.
    */
   async handle(ctx: HttpContext, next: NextFn) {
     const user = ctx.auth.user
@@ -49,7 +50,7 @@ export default class CashSessionMiddleware {
     const isSaleCancelRequest =
       ctx.request.method() === 'PATCH' && SALE_CANCEL_PATH_PATTERN.test(requestPath)
 
-    // Admin et directeur gardent l'acces lecture aux ventes meme sans caisse ouverte.
+    // Admin et directeur gardent l'accès lecture aux ventes même sans caisse ouverte.
     if (isManagementUser && isReadRequest) {
       return next()
     }
@@ -59,7 +60,7 @@ export default class CashSessionMiddleware {
       return next()
     }
 
-    // Les ecritures restent bloquées cote serveur quand aucune caisse n'est ouverte.
+    // Les écritures restent bloquées côté serveur quand aucune caisse n'est ouverte.
     if (isManagementUser) {
       ctx.session.flash('error', 'Ouvrez une session de caisse avant de modifier les ventes.')
       return ctx.response.redirect().back()

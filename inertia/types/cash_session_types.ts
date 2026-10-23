@@ -6,7 +6,7 @@ import type { UserListItem } from '~/types/user_types'
 
 export type MoneyMap = Record<string, number>
 
-// Forme exposee au frontend pour la session de caisse courante.
+// Forme exposée au frontend pour la session de caisse courante.
 export type CashSessionItem = Record<string, JSONDataTypes> & {
   id: string
   userId: string
@@ -37,7 +37,7 @@ export interface CashSessionsPageProps extends Record<string, JSONDataTypes> {
   }
 }
 
-// Type pour les totaux d'un rapport de ventes, regroupes par devise.
+// Type pour les totaux d'un rapport de ventes, regroupés par devise.
 export type SaleReportTotals = Record<string, JSONDataTypes> & {
   theoreticalAmounts: MoneyMap
   discountAmounts: MoneyMap
@@ -48,26 +48,24 @@ export type SaleReportTotals = Record<string, JSONDataTypes> & {
   collectionAmounts: MoneyMap
 }
 
-// Props de la page de detail d'une session de caisse.
+// Props de la page de détail d'une session de caisse.
 export interface CashSessionDetailPageProps extends Record<string, JSONDataTypes> {
   session: CashSessionItem
   sales: SaleItemRow[]
   totals: SaleReportTotals
 }
 
-// Props de la premiere page du module vente.
+// Props de la page de navigation du module vente.
 export interface SalesPageProps extends Record<string, JSONDataTypes> {
   currentCashSession: CashSessionItem | null
-  saleServices: Array<Record<string, JSONDataTypes> & ProductServiceDTO>
-  operators: Array<Record<string, JSONDataTypes> & UserListItem>
-  customers: Array<Record<string, JSONDataTypes> & CustomerDTO>
-  sales: SaleItemRow[]
+  sessionTotals: SaleReportTotals | null
 }
 
-// Props du formulaire de creation de vente.
+// Props du formulaire de création de vente.
 export interface SaleCreatePageProps extends Record<string, JSONDataTypes> {
   currentCashSession: CashSessionItem | null
   saleServices: Array<Record<string, JSONDataTypes> & ProductServiceDTO>
   operators: Array<Record<string, JSONDataTypes> & UserListItem>
   customers: Array<Record<string, JSONDataTypes> & CustomerDTO>
+  printSale: SaleItemRow | null
 }

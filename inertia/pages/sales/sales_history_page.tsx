@@ -1,6 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
-import { todayDateKey } from '#utils/date_utils'
 import { ArrowLeft, History, Search } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { DataLoader } from '~/components/common/data_loader'
@@ -11,6 +10,7 @@ import { SalesTable } from '~/components/sales/sales_table'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { PaginationControls } from '~/components/ui/pagination_controls'
@@ -24,7 +24,10 @@ import {
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePaginated } from '~/hooks/use_paginated'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
-import type { SalesHistoryPageProps } from '~/types/sale_types'
+import type { InertiaProps } from '~/types'
+import type { SaleItemRow, SalesHistoryPageProps } from '~/types/sale_types'
+import { getLocalDateKey } from '~/utils/date'
+import { isManagementRole } from '~/utils/user_role.utils'
 
 const SALES_HISTORY_PAGE_SIZE = 20
 
@@ -35,15 +38,21 @@ const SALE_STATUS_OPTIONS = [
   { value: 'CANCELLED', label: 'Annulées' },
 ] as const
 
-export default function SalesHistoryPage({ sales, filters }: SalesHistoryPageProps) {
+export default function SalesHistoryPage({
+  sales,
+  filters,
+  user,
+}: InertiaProps<SalesHistoryPageProps>) {
+  const isManagementUser = isManagementRole(user?.role)
   const [additionNumber, setAdditionNumber] = useState(filters.additionNumber ?? '')
   const [status, setStatus] = useState(filters.status ?? 'ALL')
   const [facturationDate, setFacturationDate] = useState(filters.facturationDate ?? '')
   const [isLoading, setIsLoading] = useState(false)
+  const [saleToCancel, setSaleToCancel] = useState<SaleItemRow | null>(null)
 
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(sales[0]?.id ?? null)
 
-  // Pagine en memoire le batch deja charge depuis le serveur.
+  // Pagine en mémoire le lot déjà chargé depuis le serveur.
   const paginatedSales = usePaginated({
     initialItems: sales,
     pageSize: SALES_HISTORY_PAGE_SIZE,
@@ -66,7 +75,21 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
     onSelectSale: selectSaleForPrint,
   })
 
-  // Recharge un nouveau batch depuis le serveur avec les filtres courants.
+  // Confirme l'annulation d'une vente par un profil de gestion.
+  const confirmCancelSale = () => {
+    if (!saleToCancel) return
+
+    router.patch(
+      `/sales/${saleToCancel.id}/cancel`,
+      {},
+      {
+        preserveScroll: true,
+        onSuccess: () => setSaleToCancel(null),
+      }
+    )
+  }
+
+  // Recharge un nouveau lot depuis le serveur avec les filtres courants.
   const searchSalesHistory = () => {
     setIsLoading(true)
 
@@ -88,7 +111,7 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <div className="fixed left-[10000px] top-0" aria-hidden="true">
-        {/* Le ticket reste monte hors ecran pour que react-to-print puisse le lire via ref. */}
+        {/* Le ticket reste monté hors écran pour que react-to-print puisse le lire via ref. */}
         <div ref={receiptRef} className="bg-white">
           {selectedSale && <ThermalSaleReceipt sale={selectedSale} />}
         </div>
@@ -97,7 +120,7 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Historique des ventes"
-          description="Retrouvez une addition passee, toutes caisses et journees confondues, pour la reimprimer."
+          description="Retrouvez une addition passée, toutes caisses et journées confondues, pour la réimprimer."
           icon={History}
           accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
@@ -112,13 +135,13 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
             <div>
               <CardTitle>Filtres</CardTitle>
               <CardDescription>
-                Chercher par numero d'addition, statut et/ou periode de facturation.
+                Chercher par numéro d&apos;addition, statut et/ou date de facturation.
               </CardDescription>
             </div>
 
             <div className="flex w-full flex-col gap-4 xl:w-auto xl:flex-row xl:items-end xl:justify-end">
               <div className="grid gap-2 xl:w-56">
-                <Label htmlFor="addition-number">Numero d'addition</Label>
+                <Label htmlFor="addition-number">Numéro d&apos;addition</Label>
                 <Input
                   id="addition-number"
                   className="h-10"
@@ -151,7 +174,7 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
                   type="date"
                   className="h-10"
                   value={facturationDate}
-                  max={todayDateKey()}
+                  max={getLocalDateKey()}
                   onChange={(event) => setFacturationDate(event.target.value)}
                 />
               </div>
@@ -175,8 +198,8 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
         ) : sales.length === 0 ? (
           <EmptyState
             icon={Search}
-            title="Aucune vente trouvee"
-            description="Modifiez la periode ou le numero d'addition recherche."
+            title="Aucune vente trouvée"
+            description="Modifiez la date, le statut ou le numéro d'addition recherché."
           />
         ) : (
           <div className="flex flex-col gap-4">
@@ -196,11 +219,31 @@ export default function SalesHistoryPage({ sales, filters }: SalesHistoryPagePro
                 selectedSaleId={effectiveSelectedSaleId}
                 onSelectSale={setSelectedSaleId}
               />
-              {selectedSale && <SaleDetailPanel sale={selectedSale} onPrintSale={printInvoice} />}
+              {selectedSale && (
+                <SaleDetailPanel
+                  sale={selectedSale}
+                  canCancelSale={isManagementUser && selectedSale.cashSessionStatus !== 'CLOSED'}
+                  onPrintSale={printInvoice}
+                  onCancelSale={setSaleToCancel}
+                />
+              )}
             </div>
           </div>
         )}
       </section>
+
+      <ConfirmationDialog
+        open={Boolean(saleToCancel)}
+        title="Annuler cette vente ?"
+        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée et les sorties de stock associées seront restaurées.`}
+        confirmLabel="Annuler la vente"
+        variant="destructive"
+        onOpenChange={(open) => {
+          if (!open) setSaleToCancel(null)
+        }}
+        onCancel={() => setSaleToCancel(null)}
+        onConfirm={confirmCancelSale}
+      />
     </main>
   )
 }

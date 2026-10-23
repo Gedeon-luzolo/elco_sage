@@ -1,271 +1,142 @@
 import { Link } from '@adonisjs/inertia/react'
-import { router } from '@inertiajs/react'
-import {
-  ArrowLeft,
-  Banknote,
-  CalendarDays,
-  CreditCard,
-  Eye,
-  HandCoins,
-  History,
-  Plus,
-  ShoppingCart,
-} from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
-import { EmptyState } from '~/components/common/empty_state'
-import { PageHeader } from '~/components/common/page_header'
-import { SearchInput } from '~/components/common/search_input'
-import { SaleDetailPanel } from '~/components/sales/sale_detail_panel'
-import { SalesTable } from '~/components/sales/sales_table'
-import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
+import { ArrowLeft, ArrowRight, Banknote, Plus } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
-import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
-import { PaginationControls } from '~/components/ui/pagination_controls'
-import { usePaginated } from '~/hooks/use_paginated'
-import { usePrintInvoice } from '~/hooks/use_print_invoice'
-import { useSearch } from '~/hooks/use_search'
+import { SALES_NAV_LINKS } from '~/constants/sales'
 import type { InertiaProps } from '~/types'
 import type { SalesPageProps } from '~/types/cash_session_types'
-import type { SaleItemRow } from '~/types/sale_types'
 import { formatDateLabel } from '~/utils/date'
-import { saleSearchFields } from '~/utils/sales/sale.utils'
+import { renderMoneyMap } from '~/utils/money_map.utils'
 import { isManagementRole } from '~/utils/user_role.utils'
-
-const SALES_PAGE_SIZE = 2
 
 export default function SalesPage({
   currentCashSession,
-  sales,
+  sessionTotals,
   user,
 }: InertiaProps<SalesPageProps>) {
-  const printSaleId = new URLSearchParams(window.location.search).get('printSaleId')
   const isManagementUser = isManagementRole(user?.role)
+
+  // Résumé de la session ouverte : argent entré en caisse, dettes et recouvrements.
+  const sessionSummary = [
+    { label: 'Cash', amounts: sessionTotals?.cashAmounts },
+    { label: 'Dettes', amounts: sessionTotals?.debtAmounts },
+    { label: 'Recouvrements', amounts: sessionTotals?.recoveryAmounts },
+  ]
   const canCreateSale = Boolean(currentCashSession && currentCashSession.userId === user?.id)
-  // La vente selectionnee est identifiee par son ID. On initialise la selection a printSaleId si present, sinon a la premiere vente chargee.²
-  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(
-    printSaleId ?? sales[0]?.id ?? null
-  )
-  const [saleToCancel, setSaleToCancel] = useState<SaleItemRow | null>(null)
 
-  // Filtre les ventes de la session courante par addition, client ou bon de commande.
-  const {
-    search,
-    setSearch,
-    filteredItems: filteredSales,
-  } = useSearch({
-    items: sales,
-    fields: saleSearchFields,
-  })
-
-  // Pagine localement les ventes deja chargees apres application de la recherche.
-  const paginatedSales = usePaginated({
-    initialItems: filteredSales,
-    pageSize: SALES_PAGE_SIZE,
-  })
-
-  const cashierSessionDescription = currentCashSession?.openingDate
-    ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} a ${
+  const sessionDescription = currentCashSession?.openingDate
+    ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} à ${
         currentCashSession.openingTime ?? '--:--'
       }.`
-    : ''
-  const managerDailyDescription = "Lecture des ventes enregistrées aujourd'hui."
-  const shouldShowManagerDailyDescription = isManagementUser && !currentCashSession
-  // La description distingue la lecture manager par jour et la lecture caissier par session.
-  const pageDescription = shouldShowManagerDailyDescription
-    ? managerDailyDescription
-    : cashierSessionDescription
+    : 'Aucune session de caisse ouverte.'
 
-  const effectiveSelectedSaleId = paginatedSales.visibleItems.some(
-    (sale) => sale.id === selectedSaleId
-  )
-    ? selectedSaleId
-    : (paginatedSales.visibleItems[0]?.id ?? null)
-
-  // La ligne selectionnee alimente le panneau de details.
-  const selectedSale = useMemo(
-    () => sales.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
-    [sales, effectiveSelectedSaleId]
-  )
-  // Le callback pour selectionner une vente a ete memorise pour eviter de recrer la fonction a chaque rendu.
-  const selectSaleForPrint = useCallback((saleId: string) => setSelectedSaleId(saleId), [])
-
-  // Utiliser le hook usePrintInvoice pour preparer l'impression du ticket thermique.
-  const { printInvoice, receiptRef } = usePrintInvoice({
-    selectedSale,
-    onSelectSale: selectSaleForPrint,
-  })
-
-  // Confirme l'annulation d'une vente par un profil de gestion.
-  const confirmCancelSale = () => {
-    if (!saleToCancel) return
-
-    router.patch(
-      `/sales/${saleToCancel.id}/cancel`,
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => setSaleToCancel(null),
-      }
-    )
-  }
-
+  // 66px retire la hauteur de l'AppBar (min-h-16 + bordure 2px) pour éviter un scroll résiduel.
   return (
-    <main className="min-h-screen bg-muted/40 text-foreground">
-      <div className="fixed left-[10000px] top-0" aria-hidden="true">
-        {/* Le ticket reste monte hors ecran pour que react-to-print puisse le lire via ref. */}
-        <div ref={receiptRef} className="bg-white">
-          {selectedSale && <ThermalSaleReceipt sale={selectedSale} />}
+    <main className="relative flex min-h-[calc(100vh-66px)] w-full justify-center overflow-hidden px-6 py-16 text-foreground">
+      {/* Fond illustré : deux taches de couleur douces sur un gris neutre. */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-muted/40"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 20% 20%, oklch(0.9 0.05 263), transparent 60%), radial-gradient(circle at 80% 80%, oklch(0.92 0.05 20), transparent 60%)',
+        }}
+      />
+
+      {isManagementUser && (
+        <Button
+          render={<Link href="/" />}
+          variant="outline"
+          size="sm"
+          className="absolute top-6 right-6 bg-background/70 backdrop-blur-sm"
+        >
+          <ArrowLeft className="size-4" />
+          Retour accueil
+        </Button>
+      )}
+
+      <div className="relative flex w-full max-w-6xl flex-col items-center gap-10">
+        <div className="flex w-full flex-wrap items-end justify-between gap-6">
+          <div className="text-left">
+            <p className="text-3xl font-semibold">Gestion des ventes</p>
+            <p className="mt-2.5 text-base text-muted-foreground">{sessionDescription}</p>
+          </div>
+
+          {sessionTotals && (
+            <div className="space-y-1 text-sm">
+              {sessionSummary.map((item) => (
+                <p key={item.label} className="text-muted-foreground">
+                  {item.label} :{' '}
+                  <span className="font-semibold text-foreground">
+                    {renderMoneyMap(item.amounts)}
+                  </span>
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-4 sm:grid-rows-2">
+          {canCreateSale ? (
+            <Link
+              href="/sales/create"
+              className="group relative col-span-2 flex flex-col justify-end gap-6 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 p-10 text-left text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.015] hover:shadow-primary/60 sm:row-span-2"
+            >
+              <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
+
+              <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                <Plus className="size-7" />
+              </div>
+
+              <div className="relative flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-3xl font-semibold">Nouvelle vente</p>
+                  <p className="mt-2 text-base text-primary-foreground/80">
+                    Enregistrer une addition sur la session ouverte
+                  </p>
+                </div>
+                <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
+              </div>
+            </Link>
+          ) : !currentCashSession ? (
+            <Link
+              href="/sales/session/open"
+              className="group relative col-span-2 flex flex-col justify-end gap-6 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 p-10 text-left text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.015] hover:shadow-primary/60 sm:row-span-2"
+            >
+              <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
+
+              <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                <Banknote className="size-7" />
+              </div>
+
+              <div className="relative flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-3xl font-semibold">Ouvrir une caisse</p>
+                  <p className="mt-2 text-base text-primary-foreground/80">
+                    Démarrer une nouvelle session pour encaisser
+                  </p>
+                </div>
+                <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
+              </div>
+            </Link>
+          ) : null}
+
+          {SALES_NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="group flex flex-col items-start justify-center gap-4 rounded-2xl border border-border bg-background/70 p-8 text-foreground no-underline shadow-sm backdrop-blur-sm transition duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-background hover:shadow-lg"
+            >
+              <link.icon className="size-8 text-muted-foreground transition-colors duration-300 group-hover:text-primary" />
+              <div className="flex w-full items-end justify-between gap-2">
+                <div>
+                  <p className="text-lg font-medium">{link.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{link.description}</p>
+                </div>
+                <ArrowRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
-
-      <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
-        <PageHeader
-          title="Gestion des ventes"
-          description={pageDescription}
-          icon={ShoppingCart}
-          accentClassName={MODULE_HEADER_ACCENTS.sales}
-        >
-          <>
-            {isManagementUser && (
-              <Button
-                render={<Link href="/" />}
-                variant="outline"
-                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
-              >
-                <ArrowLeft className="size-4" />
-                <span className="sm:hidden">Accueil</span>
-                <span className="hidden sm:inline">Retour accueil</span>
-              </Button>
-            )}
-            <Button
-              render={<Link href="/sales/sessions" />}
-              variant="outline"
-              className="min-w-0 basis-[30%] bg-sky-600 px-2 text-xs text-white hover:bg-sky-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
-            >
-              <CalendarDays className="size-4" />
-              <span className="sm:hidden">Sessions</span>
-              <span className="hidden sm:inline">Rapport des Sessions</span>
-            </Button>
-            <Button
-              className="min-w-0 basis-[30%] bg-red-800 px-2 text-xs text-white hover:bg-red-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
-              render={<Link href="/sales/debts" />}
-              variant="outline"
-            >
-              <CreditCard className="size-4" />
-              Credits
-            </Button>
-            <Button
-              className="min-w-0 basis-[30%] bg-emerald-600 px-2 text-xs text-white hover:bg-emerald-500/80 hover:text-white sm:basis-auto sm:px-3 sm:text-sm"
-              render={<Link href="/sales/recoveries" />}
-              variant="outline"
-            >
-              <HandCoins className="size-4" />
-              <span className="sm:hidden">Recouv.</span>
-              <span className="hidden sm:inline">Recouvrements</span>
-            </Button>
-            <Button
-              render={<Link href="/sales/history" />}
-              variant="outline"
-              className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
-            >
-              <History className="size-4" />
-              Historique
-            </Button>
-
-            {canCreateSale ? (
-              <Button
-                render={<Link href="/sales/create" />}
-                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
-              >
-                <Plus className="size-4" />
-                <span className="sm:hidden">Vente</span>
-                <span className="hidden sm:inline">Nouvelle vente</span>
-              </Button>
-            ) : !currentCashSession ? (
-              <Button
-                render={<Link href="/sales/session/open" />}
-                variant="outline"
-                className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
-              >
-                <Banknote className="size-4" />
-                <span className="sm:hidden">Caisse</span>
-                <span className="hidden sm:inline">Ouvrir une caisse</span>
-              </Button>
-            ) : null}
-          </>
-        </PageHeader>
-
-        {!currentCashSession && !isManagementUser ? (
-          <EmptyState
-            icon={Banknote}
-            title="Aucune caisse ouverte"
-            description="Ouvrez une session de caisse pour consulter les ventes de votre session."
-          />
-        ) : sales.length === 0 ? (
-          <EmptyState
-            icon={Eye}
-            title={
-              isManagementUser ? "Aucune vente aujourd'hui" : 'Aucune vente dans cette session'
-            }
-            description={
-              isManagementUser
-                ? "Les ventes enregistrées aujourd'hui apparaitront ici."
-                : 'Les ventes enregistrees pendant cette session apparaitront ici.'
-            }
-          />
-        ) : (
-          <div className="flex flex-col gap-4">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Rechercher addition, client ou bon..."
-                className="w-full lg:w-80"
-              />
-
-              {paginatedSales.totalLoadedPages > 1 && (
-                <PaginationControls
-                  canGoPrevious={paginatedSales.canGoPrevious}
-                  canGoNext={paginatedSales.canGoNext}
-                  pageSize={SALES_PAGE_SIZE}
-                  onPrevious={paginatedSales.goToPreviousPage}
-                  onNext={paginatedSales.goToNextPage}
-                />
-              )}
-            </div>
-
-            <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
-              <SalesTable
-                sales={paginatedSales.visibleItems}
-                selectedSaleId={effectiveSelectedSaleId}
-                onSelectSale={setSelectedSaleId}
-              />
-              {selectedSale && (
-                <SaleDetailPanel
-                  sale={selectedSale}
-                  canCancelSale={isManagementUser && selectedSale.cashSessionStatus !== 'CLOSED'}
-                  onPrintSale={printInvoice}
-                  onCancelSale={setSaleToCancel}
-                />
-              )}
-            </div>
-          </div>
-        )}
-      </section>
-
-      <ConfirmationDialog
-        open={Boolean(saleToCancel)}
-        title="Annuler cette vente ?"
-        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée et les sorties de stock associées seront restaurées.`}
-        confirmLabel="Annuler la vente"
-        variant="destructive"
-        onOpenChange={(open) => {
-          if (!open) setSaleToCancel(null)
-        }}
-        onCancel={() => setSaleToCancel(null)}
-        onConfirm={confirmCancelSale}
-      />
     </main>
   )
 }
