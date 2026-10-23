@@ -6,6 +6,8 @@ import type { NextFn } from '@adonisjs/core/types/http'
 
 const READ_METHODS = ['GET', 'HEAD']
 const OPENING_PATHS = ['/sales/session/open']
+// Lecture seule, utile pour retrouver et reimprimer une facture meme sans caisse ouverte.
+const UNRESTRICTED_READ_PATHS = ['/sales/history']
 const SALE_CANCEL_PATH_PATTERN = /^\/sales\/[^/]+\/cancel$/
 
 @inject()
@@ -27,6 +29,13 @@ export default class CashSessionMiddleware {
     const requestPath = ctx.request.url().split('?')[0]
 
     if (OPENING_PATHS.includes(requestPath)) {
+      return next()
+    }
+
+    if (
+      UNRESTRICTED_READ_PATHS.includes(requestPath) &&
+      READ_METHODS.includes(ctx.request.method())
+    ) {
       return next()
     }
 

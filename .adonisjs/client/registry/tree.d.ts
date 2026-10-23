@@ -42,6 +42,7 @@ export interface ApiDefinition {
     }
     index: typeof routes['sales.index']
     create: typeof routes['sales.create']
+    history: typeof routes['sales.history']
     store: typeof routes['sales.store']
     show: typeof routes['sales.show']
     cancel: typeof routes['sales.cancel']

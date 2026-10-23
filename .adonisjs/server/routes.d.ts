@@ -29,6 +29,7 @@ export type ScannedRoutes = {
     'sales.recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.history': { paramsTuple?: []; params?: {} }
     'sales.store': { paramsTuple?: []; params?: {} }
     'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -64,6 +65,7 @@ export type ScannedRoutes = {
     'sales.recoveries.overview': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.history': { paramsTuple?: []; params?: {} }
     'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }
@@ -87,6 +89,7 @@ export type ScannedRoutes = {
     'sales.recoveries.overview': { paramsTuple?: []; params?: {} }
     'sales.index': { paramsTuple?: []; params?: {} }
     'sales.create': { paramsTuple?: []; params?: {} }
+    'sales.history': { paramsTuple?: []; params?: {} }
     'sales.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'management': { paramsTuple?: []; params?: {} }
     'journalisations.get_journalisations': { paramsTuple?: []; params?: {} }

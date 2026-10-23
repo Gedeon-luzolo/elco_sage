@@ -7,6 +7,7 @@ import CashSessionTransformer from '#transformers/cash_session_transformer'
 import CustomerTransformer from '#transformers/customer_transformer'
 import ProductServiceTransformer from '#transformers/product_service_transformer'
 import SaleTransformer from '#transformers/sale_transformer'
+import { SaleStatus } from '#models/sale'
 import type { CreateSaleInput } from '#types/sales'
 import { runAction } from '#utils/error_handler'
 import { createSaleValidator } from '#validators/sale'
@@ -98,6 +99,39 @@ export default class SalesController {
       customers: CustomerTransformer.transform(customers),
       sales: SaleTransformer.transform(visibleSales),
     })
+  }
+
+  /**
+   * Affiche l'historique des ventes, toutes caisses et journees confondues.
+   */
+  async history({ inertia, request }: HttpContext) {
+    const facturationDate = request.input('facturationDate')
+    const additionNumber = request.input('additionNumber')
+    const status = this.normalizeSaleStatus(request.input('status'))
+
+    const sales = await this.saleService.findAllBatch({
+      facturationDate: facturationDate || undefined,
+      additionNumber: additionNumber || undefined,
+      status,
+    })
+
+    return (inertia.render as any)('sales/sales_history_page', {
+      sales: SaleTransformer.transform(sales),
+      filters: {
+        facturationDate: facturationDate ?? null,
+        additionNumber: additionNumber ?? null,
+        status: status ?? 'ALL',
+      },
+    })
+  }
+
+  // Ignore un statut inconnu pour eviter une erreur sur une URL modifiee a la main.
+  private normalizeSaleStatus(status?: string) {
+    if (!status || status === 'ALL') {
+      return undefined
+    }
+
+    return Object.values(SaleStatus).includes(status as SaleStatus) ? status : undefined
   }
 
   /**

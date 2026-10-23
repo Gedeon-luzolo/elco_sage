@@ -7,6 +7,7 @@ import {
   CreditCard,
   Eye,
   HandCoins,
+  History,
   Plus,
   ShoppingCart,
 } from 'lucide-react'
@@ -162,6 +163,14 @@ export default function SalesPage({
               <HandCoins className="size-4" />
               <span className="sm:hidden">Recouv.</span>
               <span className="hidden sm:inline">Recouvrements</span>
+            </Button>
+            <Button
+              render={<Link href="/sales/history" />}
+              variant="outline"
+              className="min-w-0 basis-[30%] px-2 text-xs sm:basis-auto sm:px-3 sm:text-sm"
+            >
+              <History className="size-4" />
+              Historique
             </Button>
 
             {canCreateSale ? (

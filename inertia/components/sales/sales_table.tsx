@@ -47,6 +47,7 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
               <TableHead className="text-right font-semibold">Remise</TableHead>
               <TableHead className="text-right font-semibold">Total</TableHead>
               <TableHead className="font-semibold">Paiement</TableHead>
+              <TableHead className="font-semibold">Statut</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -76,6 +77,9 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
                     {formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}
                   </TableCell>
                   <TableCell>{sale.paymentType}</TableCell>
+                  <TableCell>
+                    {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
+                  </TableCell>
                 </TableRow>
               )
             })}
@@ -112,9 +116,10 @@ function SaleMobileCard({
           <p className="truncate text-sm font-semibold">Addition {sale.additionNumber}</p>
           <p className="text-xs text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
-        <Badge variant="outline" className="shrink-0">
-          {sale.paymentType}
-        </Badge>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <Badge variant="outline">{sale.paymentType}</Badge>
+          {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
+        </div>
       </div>
 
       <div className="grid gap-1.5 text-xs">

@@ -46,3 +46,16 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   items: SaleItem[]
   recoveries: SaleRecovery[]
 }
+
+// Filtres appliqués par le controller Inertia sur l'historique des ventes.
+export type SalesHistoryFilters = Record<string, JSONDataTypes> & {
+  facturationDate: string | null
+  additionNumber: string | null
+  status: string
+}
+
+// Props de la page historique des ventes.
+export interface SalesHistoryPageProps extends Record<string, JSONDataTypes> {
+  sales: SaleItemRow[]
+  filters: SalesHistoryFilters
+}

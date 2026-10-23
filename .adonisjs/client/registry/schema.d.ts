@@ -332,6 +332,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['create']>>>
     }
   }
+  'sales.history': {
+    methods: ["GET","HEAD"]
+    pattern: '/sales/history'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['history']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['history']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/sales/sales_controller').default['history']>>>
+    }
+  }
   'sales.store': {
     methods: ["POST"]
     pattern: '/sales'

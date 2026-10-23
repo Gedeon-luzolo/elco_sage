@@ -39,3 +39,11 @@ export interface CreateSaleRecoveryInput {
   currency: Currency
   recoveredAt?: string | Date | null
 }
+
+export interface FindSalesHistoryParams {
+  offset?: number
+  limit?: number
+  facturationDate?: string
+  additionNumber?: string
+  status?: string
+}

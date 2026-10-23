@@ -32,5 +32,6 @@ declare module '@adonisjs/inertia/types' {
     'splash': ExtractProps<(typeof import('../../inertia/pages/splash.tsx'))['default']>
     'stock/stock_movements_page': ExtractProps<(typeof import('../../inertia/pages/stock/stock_movements_page.tsx'))['default']>
     'users/users_page': ExtractProps<(typeof import('../../inertia/pages/users/users_page.tsx'))['default']>
+    'sales/sales_history_page': ExtractProps<(typeof import('../../inertia/pages/sales/sales_history_page.tsx'))['default']>
   }
 }

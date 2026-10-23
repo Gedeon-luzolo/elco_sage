@@ -7,7 +7,7 @@ import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
-import type { CreateSaleInput } from '#types/sales'
+import type { CreateSaleInput, FindSalesHistoryParams } from '#types/sales'
 import { dateKeyToDay, dateTimeToDateKey } from '#utils/date_utils'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
@@ -63,6 +63,50 @@ export default class SaleService {
       })
       .preload('recoveries')
       .orderBy('saleDate', 'desc')
+  }
+
+  /**
+   * Recupere l'historique des ventes par batch, toutes caisses et tous statuts confondus.
+   * Permet de retrouver une addition passee pour la reimprimer.
+   */
+  async findAllBatch({
+    offset = 0,
+    limit = 20,
+    facturationDate,
+    additionNumber,
+    status,
+  }: FindSalesHistoryParams = {}) {
+    const query = Sale.query()
+      .preload('cashSession')
+      .preload('customer')
+      .preload('operator')
+      .preload('seller')
+      .preload('items', (itemsQuery) => {
+        itemsQuery.preload('productService')
+      })
+      .preload('recoveries')
+      .orderBy('saleDate', 'desc')
+      .offset(offset)
+
+    // Applique le filtre de date de facturation si precise.
+    if (facturationDate) {
+      const dayStart = dateKeyToDay(facturationDate).toJSDate()
+      const dayEnd = dateKeyToDay(facturationDate).endOf('day').toJSDate()
+
+      query.whereBetween('saleDate', [dayStart, dayEnd])
+    }
+
+    // Recherche partielle et insensible a la casse sur le numero d'addition.
+    if (additionNumber) {
+      query.whereILike('additionNumber', `%${additionNumber}%`)
+    }
+
+    // Filtre par statut (active/annulee) si precise.
+    if (status) {
+      query.where('status', status)
+    }
+
+    return query.limit(limit)
   }
 
   /**

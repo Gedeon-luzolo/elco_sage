@@ -156,6 +156,12 @@ const routes = {
     tokens: [[0,"sales"],[0,"create"]],
     types: placeholder as Registry['sales.create']['types'],
   },
+  'sales.history': {
+    methods: ["GET","HEAD"],
+    pattern: '/sales/history',
+    tokens: [[0,"sales"],[0,"history"]],
+    types: placeholder as Registry['sales.history']['types'],
+  },
   'sales.store': {
     methods: ["POST"],
     pattern: '/sales',
