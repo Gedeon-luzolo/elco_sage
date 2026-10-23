@@ -5,7 +5,7 @@ export const USER_ROLE_OPTIONS: Array<UserSelectOption<UserRole>> = [
   { value: 'ADMIN', label: 'Admin' },
   { value: 'DIRECTOR', label: 'Directeur' },
   { value: 'CASHIER', label: 'Caissier' },
-  { value: 'OPERATOR', label: 'Operateur' },
+  { value: 'OPERATOR', label: 'Opérateur' },
 ]
 
 // Options disponibles pour le champ statut utilisateur.
@@ -28,7 +28,7 @@ export const USER_ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: 'Admin',
   DIRECTOR: 'Directeur',
   CASHIER: 'Caissier',
-  OPERATOR: 'Operateur',
+  OPERATOR: 'Opérateur',
 }
 
 // Libelles des statuts utilisateur.

@@ -31,7 +31,7 @@ export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
       <div className="mt-[2mm]">
         <ReceiptLine label="Date" value={formatDateTimeLabel(sale.saleDate)} />
         {sale.customer && <ReceiptLine label="Client" value={sale.customer.fullName} />}
-        <ReceiptLine label="Operateur" value={sale.operatorName ?? '-'} />
+        <ReceiptLine label="Opérateur" value={sale.operatorName ?? '-'} />
         <ReceiptLine label="Paiement" value={sale.paymentType} />
       </div>
 

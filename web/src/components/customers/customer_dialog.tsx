@@ -125,7 +125,7 @@ export function CustomerDialog({
             </div>
 
             <div className="grid flex-1 gap-2">
-              <Label htmlFor="customer-phone-number">Numero de telephone</Label>
+              <Label htmlFor="customer-phone-number">Numéro de téléphone</Label>
               <Input
                 id="customer-phone-number"
                 name="phoneNumber"

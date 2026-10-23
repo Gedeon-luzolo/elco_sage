@@ -170,12 +170,12 @@ export default function CustomersPage() {
         title={editingCustomer ? 'Modifier le client' : 'Nouveau client'}
         description={
           editingCustomer
-            ? 'Mettez a jour les informations principales du client.'
+            ? 'Mettez à jour les informations principales du client.'
             : 'Enregistrez les informations principales du client.'
         }
         open={isModalOpen}
         customer={editingCustomer}
-        submitLabel={editingCustomer ? 'Enregistrer' : 'Creer'}
+        submitLabel={editingCustomer ? 'Enregistrer' : 'Créer'}
         onOpenChange={(open) => {
           if (!open) closeDialog()
           else setIsModalOpen(true)

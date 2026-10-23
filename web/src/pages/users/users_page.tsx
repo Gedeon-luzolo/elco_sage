@@ -139,7 +139,7 @@ export default function UsersPage() {
         >
           <Button type="button" onClick={openCreateDialog}>
             <Plus className="size-4" />
-            Creer
+            Créer
           </Button>
         </PageHeader>
 
@@ -172,7 +172,7 @@ export default function UsersPage() {
       </section>
 
       <CreateUpdateUserDialog
-        title={editingUser ? 'Modifier un utilisateur' : 'Creer un utilisateur'}
+        title={editingUser ? 'Modifier un utilisateur' : 'Créer un utilisateur'}
         description={
           editingUser
             ? "Ces changements affectent le profil et l'acces du compte."
@@ -180,7 +180,7 @@ export default function UsersPage() {
         }
         open={isCreateOpen || Boolean(editingUser)}
         defaultValues={editingUser ?? EMPTY_USER_FORM}
-        submitLabel={editingUser ? 'Enregistrer' : 'Creer'}
+        submitLabel={editingUser ? 'Enregistrer' : 'Créer'}
         roleOptions={USER_ROLE_OPTIONS}
         statusOptions={USER_STATUS_OPTIONS}
         onOpenChange={(open) => {

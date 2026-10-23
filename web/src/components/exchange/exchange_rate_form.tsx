@@ -8,7 +8,7 @@ interface ExchangeRateFormProps {
   action: (formData: FormData) => void | Promise<void>
 }
 
-// Affiche le formulaire de mise a jour du taux courant.
+// Affiche le formulaire de mise à jour du taux courant.
 export function ExchangeRateForm({ action }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">

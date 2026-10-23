@@ -70,7 +70,7 @@ export function SaleDetailPanel({
         )}
         <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
-          <DetailLine label="Operateur" value={sale.operatorName ?? '-'} />
+          <DetailLine label="Opérateur" value={sale.operatorName ?? '-'} />
           <DetailLine label="Vendeur" value={sale.sellerName ?? '-'} />
           <DetailLine label="Paiement" value={sale.paymentType} />
           <DetailLine label="Statut" value={sale.status} />
@@ -103,7 +103,7 @@ export function SaleDetailPanel({
                   <div className="min-w-0">
                     <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
                     <p className="text-xs text-muted-foreground">
-                      Bon : {item.orderNumber} - Quantite : {item.quantity}{' '}
+                      Bon : {item.orderNumber} - Quantité : {item.quantity}{' '}
                       {item.productService?.stockProductBaseUnit ?? ''}
                     </p>
                   </div>

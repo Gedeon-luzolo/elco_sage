@@ -99,7 +99,7 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
         </DialogHeader>
 
         <form className="grid gap-5" action={handleSubmit}>
-          {/* Resume du mouvement pour eviter de valider le mauvais produit. */}
+          {/* Résumé du mouvement pour éviter de valider le mauvais produit. */}
           <div className="rounded-lg border border-border bg-muted/40 p-3">
             <div className="flex items-center gap-2 text-sm">
               <ClipboardCheck className="size-4 text-muted-foreground" />

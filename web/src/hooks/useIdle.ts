@@ -77,7 +77,7 @@ export function useIdle(user?: UserDTO) {
   }
 
   /**
-   * Verifie le mot de passe courant aupres du backend.
+   * Vérifie le mot de passe courant auprès du backend.
    * L'endpoint ne modifie pas les tentatives de login du compte.
    * Deverrouille seulement si le backend confirme valid=true.
    */

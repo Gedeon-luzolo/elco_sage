@@ -44,7 +44,7 @@ export function CustomerCard({ customer, onEdit }: CustomerCardProps) {
           </span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground">Telephone</span>
+          <span className="text-muted-foreground">Téléphone</span>
           <span className="font-medium text-foreground">
             {customer.phoneNumber || 'Non renseigne'}
           </span>

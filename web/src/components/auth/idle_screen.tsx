@@ -39,7 +39,7 @@ function LockedContent({ idle, user }: LockedContentProps) {
       // On ouvre le prompt si l'utilisateur appuie sur une touche de caractere (lettre, chiffre, symbole).
       setIsPasswordPromptVisible(true)
 
-      // On met a jour le mot de passe avec la touche appuyee, pour que l'utilisateur puisse commencer a taper directement.
+      // On met à jour le mot de passe avec la touche appuyée, pour que l'utilisateur puisse commencer à taper directement.
       if (event.key.length === 1) {
         idle.setPassword(event.key)
       }

@@ -86,7 +86,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
         </DialogHeader>
 
         <form className="grid gap-5" action={handleSubmit}>
-          {/* Resume du produit pour eviter d'enregistrer une entree sur le mauvais article. */}
+          {/* Résumé du produit pour éviter d'enregistrer une entrée sur le mauvais article. */}
           <div className="rounded-lg border border-border bg-muted/40 p-3">
             <div className="flex items-center gap-2 text-sm">
               <Package className="size-4 text-muted-foreground" />
@@ -113,7 +113,7 @@ export function StockEntryDialog({ open, movement, onClose }: StockEntryDialogPr
             )}
           </div>
 
-          {/* Quantite entree et unite de saisie sur la meme ligne. */}
+          {/* Quantité entrée et unité de saisie sur la meme ligne. */}
           <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
             <div className="grid gap-2">
               <Label htmlFor="entries">Quantité entrée *</Label>

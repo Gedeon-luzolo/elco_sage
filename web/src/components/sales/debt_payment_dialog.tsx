@@ -65,7 +65,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
                   label="Date de vente"
                   value={formatDebtSaleDate(debt.sale.saleDate)}
                 />
-                <DebtPaymentLine label="Operateur" value={debt.sale.operatorName ?? '-'} />
+                <DebtPaymentLine label="Opérateur" value={debt.sale.operatorName ?? '-'} />
                 <DebtPaymentLine
                   label="Dette totale"
                   value={formatMoneyWithCurrency(debt.debtTotalAmount, saleCurrency!)}
