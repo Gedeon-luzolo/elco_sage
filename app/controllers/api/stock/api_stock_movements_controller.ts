@@ -13,9 +13,10 @@ export default class ApiStockMovementsController {
   constructor(private stockMovementService: StockMovementService) {}
 
   /**
-   * Stock journalier (par defaut celui du jour).
+   * Stock journalier (par défaut celui du jour).
    */
   async index(ctx: HttpContext) {
+    // Sans date, le stock affiché est celui du jour
     const date = ctx.request.input('date', todayDateKey())
 
     return apiAction(ctx, async () =>
@@ -24,13 +25,14 @@ export default class ApiStockMovementsController {
   }
 
   /**
-   * Cree ou complete un mouvement (entrees).
+   * Crée ou complète un mouvement (entrées).
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createStockMovementValidator)
 
     return apiAction(ctx, async () => {
+      // Le service journalise l'entrée et recalcule le stock
       await this.stockMovementService.createOrUpdate(actor, payload)
 
       return ctx.response.noContent()
@@ -38,7 +40,7 @@ export default class ApiStockMovementsController {
   }
 
   /**
-   * Corrige les entrees d'un mouvement.
+   * Corrige les entrées d'un mouvement.
    */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()

@@ -10,20 +10,25 @@ export default class ApiExchangeRatesController {
   constructor(private exchangeRateService: ExchangeRateService) {}
 
   /**
-   * Historique des taux (le plus recent en premier = taux courant).
+   * Historique des taux (le plus récent en premier = taux courant).
    */
   async index({ request, serialize }: HttpContext) {
+    // Nombre de lignes demandé, 20 par défaut
     const limit = Number(request.input('limit', 20))
     const rates = await this.exchangeRateService.getHistory(limit)
 
     return serialize(ExchangeRateTransformer.transform(rates).useVariant('toHistory'))
   }
 
+  /**
+   * Ajoute un taux : l'historique est conservé et le dernier devient le taux courant.
+   */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createExchangeRateValidator)
 
     return apiAction(ctx, async () => {
+      // Le service journalise le changement et vide les caches dépendants
       await this.exchangeRateService.create(actor, payload)
 
       return ctx.response.noContent()

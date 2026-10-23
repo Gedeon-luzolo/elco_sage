@@ -11,9 +11,10 @@ export default class ApiSaleRecoveriesController {
   constructor(private saleRecoveryService: SaleRecoveryService) {}
 
   /**
-   * Historique des paiements de dettes sur la periode.
+   * Historique des paiements de dettes sur la période.
    */
   async index({ request, serialize }: HttpContext) {
+    // Les paiements et leurs statistiques sont renvoyés ensemble
     const overview = await this.saleRecoveryService.getOverview({
       startDate: request.input('startDate'),
       endDate: request.input('endDate'),
@@ -33,6 +34,7 @@ export default class ApiSaleRecoveriesController {
     const payload = await ctx.request.validateUsing(createSaleRecoveryValidator)
 
     return apiAction(ctx, async () => {
+      // Le service vérifie la vente, la devise et le reste dû
       const recovery = await this.saleRecoveryService.create(
         actor,
         ctx.params.saleId,

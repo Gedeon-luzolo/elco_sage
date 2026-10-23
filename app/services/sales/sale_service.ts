@@ -103,8 +103,8 @@ export default class SaleService {
     const stockDateKey = dateTimeToDateKey(cashSession.openedAt)
 
     const createdSale = await db.transaction(async (trx) => {
-      // En ligne, le serveur attribue le numéro (verrouillé dans la transaction).
-      // Hors ligne, le client fournit un numéro issu de la plage réservée à sa caisse.
+      // Le client fournit un numéro issu de la plage réservée à sa caisse ;
+      // sans numéro, le serveur en attribue un (verrouillé dans la transaction)
       let additionNumber: string
       if (payload.additionNumber) {
         await this.additionNumberService.assertReservedFor(

@@ -26,21 +26,23 @@ const ApiExchangeRatesController = () =>
   import('#controllers/api/exchange_rates/api_exchange_rates_controller')
 
 /**
- * Routes JSON consommees par la SPA (dossier web/).
- * Elles cohabitent avec les routes Inertia le temps de la migration.
+ * Routes JSON consommées par la SPA (dossier web/).
+ * Toutes vivent sous /api et, hors connexion, exigent un token Bearer.
  */
 export function registerApiRoutes() {
   router
     .group(() => {
+      // Connexion : seule route publique
       router.post('auth/login', [ApiSessionController, 'login'])
 
       router
+        // Tout le reste exige un token valide
         .group(() => {
           router.get('auth/me', [ApiSessionController, 'me'])
           router.post('auth/verify-password', [ApiSessionController, 'verifyPassword'])
           router.post('auth/logout', [ApiSessionController, 'logout'])
 
-          // Donnees de reference (mises en cache hors ligne par la SPA).
+          // Données de référence (mises en cache hors ligne par la SPA)
           router.get('operators', [ApiOperatorsController, 'index'])
           router.get('product-services/active-for-sale', [
             ApiProductServicesController,
@@ -52,18 +54,26 @@ export function registerApiRoutes() {
           router.post('customers', [ApiCustomersController, 'store'])
           router.patch('customers/:id', [ApiCustomersController, 'update'])
 
-          // Sessions de caisse (routes fixes declarees avant :id).
+          // Sessions de caisse (les routes fixes sont déclarées avant :id)
           router.get('cash-sessions', [ApiCashSessionsController, 'index'])
           router.get('cash-sessions/current', [ApiCashSessionsController, 'current'])
           router.get('cash-sessions/current/system-amounts', [
             ApiCashSessionsController,
             'systemAmounts',
           ])
+          router.get('cash-sessions/current/addition-numbers', [
+            ApiCashSessionsController,
+            'additionNumbers',
+          ])
+          router.post('cash-sessions/current/addition-numbers', [
+            ApiCashSessionsController,
+            'reserveAdditionNumbers',
+          ])
           router.post('cash-sessions/close', [ApiCashSessionsController, 'close'])
           router.post('cash-sessions', [ApiCashSessionsController, 'store'])
           router.get('cash-sessions/:id', [ApiCashSessionsController, 'show'])
 
-          // Ventes, dettes et recouvrements.
+          // Ventes, dettes et recouvrements
           router.get('sales', [ApiSalesController, 'index'])
           router.post('sales', [ApiSalesController, 'store'])
           router.patch('sales/:id/cancel', [ApiSalesController, 'cancel'])
@@ -71,7 +81,7 @@ export function registerApiRoutes() {
           router.get('debts', [ApiDebtsController, 'index'])
           router.get('recoveries', [ApiSaleRecoveriesController, 'index'])
 
-          // Stock.
+          // Stock
           router.get('stock', [ApiStockMovementsController, 'index'])
           router.post('stock/movements', [ApiStockMovementsController, 'store'])
           router.patch('stock/movements/:id', [ApiStockMovementsController, 'update'])
@@ -81,7 +91,7 @@ export function registerApiRoutes() {
             'updatePhysical',
           ])
 
-          // Back-office : reserve a la direction.
+          // Back-office : réservé à la direction
           router
             .group(() => {
               router.post('exchange-rates', [ApiExchangeRatesController, 'store'])

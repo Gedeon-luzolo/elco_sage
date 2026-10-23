@@ -39,15 +39,15 @@ class ApiSerializer extends BaseSerializer<{
 const serializer = new ApiSerializer()
 const serialize = Object.assign(
   async function (this: HttpContext, ...[data, resolver]: Parameters<ApiSerializer['serialize']>) {
-    // null n'est pas serialisable par les transformers : "pas de donnee" reste un { data: null }.
+    // null n'est pas sérialisable par les transformers : "pas de donnée" reste un { data: null }
     if (data === null || data === undefined) {
       return { data: null }
     }
 
     const output = await serializer.serialize(data, resolver ?? this.containerResolver)
 
-    // Les transformers enveloppent deja leur resultat ; les tableaux et objets simples non.
-    // On garantit ainsi un contrat unique { data } pour toute l'API.
+    // Les transformers enveloppent déjà leur résultat ; les tableaux et objets simples non.
+    // On garantit ainsi un contrat unique { data } pour toute l'API
     const isWrapped =
       typeof output === 'object' && output !== null && 'data' in output && !Array.isArray(output)
 

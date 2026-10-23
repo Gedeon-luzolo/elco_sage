@@ -8,9 +8,10 @@ export default class ApiOperatorsController {
   constructor(private userService: UserService) {}
 
   /**
-   * Operateurs selectionnables sur une vente.
+   * Opérateurs sélectionnables sur une vente.
    */
   async index({ serialize }: HttpContext) {
+    // Tous les utilisateurs actifs sauf l'administrateur
     return serialize(UserTransformer.transform(await this.userService.getActiveOperatorsForSale()))
   }
 }

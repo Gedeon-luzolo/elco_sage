@@ -10,9 +10,10 @@ export default class ApiUsersController {
   constructor(private userService: UserService) {}
 
   /**
-   * Liste des utilisateurs avec statistiques et repartition par statut.
+   * Liste des utilisateurs avec statistiques et répartition par statut.
    */
   async index({ serialize }: HttpContext) {
+    // Les 30 derniers utilisateurs, avec les statistiques calculées par le service
     const overview = await this.userService.getUsersOverview(30)
 
     return serialize({
@@ -23,13 +24,14 @@ export default class ApiUsersController {
   }
 
   /**
-   * Cree un utilisateur et renvoie le mot de passe temporaire a communiquer.
+   * Crée un utilisateur et renvoie le mot de passe temporaire à communiquer.
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createUserValidator)
 
     return apiAction(ctx, async () => {
+      // Le service applique la règle de rôle et attribue le mot de passe initial
       const result = await this.userService.create(actor, payload)
 
       return ctx.response.created(
@@ -39,10 +41,11 @@ export default class ApiUsersController {
   }
 
   /**
-   * Modifie un utilisateur (le validateur recoit l'id pour l'unicite de l'email).
+   * Modifie un utilisateur (le validateur reçoit l'id pour l'unicité de l'email).
    */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
+    // L'id de l'URL sert à ignorer l'utilisateur lui-même dans le contrôle d'unicité de l'email
     const payload = await ctx.request.validateUsing(updateUserValidator, {
       meta: { id: ctx.params.id },
     })
@@ -54,6 +57,9 @@ export default class ApiUsersController {
     })
   }
 
+  /**
+   * Supprime un utilisateur (jamais soi-même, règle appliquée par le service).
+   */
   async destroy(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 

@@ -18,9 +18,10 @@ export default class ApiProductServicesAdminController {
   ) {}
 
   /**
-   * Catalogue complet : produits, services, statistiques et categories actives.
+   * Catalogue complet : produits, services, statistiques et catégories actives.
    */
   async index({ serialize }: HttpContext) {
+    // Catalogue et catégories sont chargés ensemble pour l'écran d'administration
     const overview = await this.productServiceService.getOverview()
     const categories = await this.productCategoryService.getActiveCategories()
 
@@ -32,6 +33,9 @@ export default class ApiProductServicesAdminController {
     })
   }
 
+  /**
+   * Crée un produit ou un service.
+   */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createProductServiceValidator)
@@ -43,6 +47,9 @@ export default class ApiProductServicesAdminController {
     })
   }
 
+  /**
+   * Modifie un produit ou un service.
+   */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(updateProductServiceValidator)
@@ -54,6 +61,9 @@ export default class ApiProductServicesAdminController {
     })
   }
 
+  /**
+   * Supprime un produit ou un service.
+   */
   async destroy(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 

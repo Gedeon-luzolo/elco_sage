@@ -9,10 +9,12 @@ export default class ApiJournalisationsController {
   constructor(private journalisationService: JournalisationService) {}
 
   /**
-   * Journal des actions, filtrable par module et par periode.
+   * Journal des actions, filtrable par module et par période.
    */
   async index({ request, serialize }: HttpContext) {
     const module = request.input('module')
+
+    // Les filtres sont optionnels : un module inconnu est ignoré
 
     const journalisations = await this.journalisationService.findAllBatch({
       // Un module inconnu est ignore plutot que de provoquer une erreur.

@@ -9,10 +9,11 @@ export default class ApiProductServicesController {
   constructor(private productServiceService: ProductServiceService) {}
 
   /**
-   * Services actifs vendables avec leur disponibilite de stock a la date metier demandee.
-   * Donnee de reference mise en cache hors ligne : la SPA y controle le stock localement.
+   * Services actifs vendables avec leur disponibilité de stock à la date métier demandée.
+   * Donnée de référence mise en cache hors ligne : la SPA y contrôle le stock localement.
    */
   async activeForSale({ request, serialize }: HttpContext) {
+    // Sans date, le stock est celui du jour métier
     const services = await this.productServiceService.getActiveServicesForSale(
       request.input('date', todayDateKey())
     )

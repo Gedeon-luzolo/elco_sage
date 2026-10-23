@@ -8,9 +8,10 @@ export default class ApiDebtsController {
   constructor(private debtService: DebtService) {}
 
   /**
-   * Ventes a credit avec leur reste a payer. Les dettes soldees sont exclues sauf `includePaid=true`.
+   * Ventes à crédit avec leur reste à payer. Les dettes soldées sont exclues sauf `includePaid=true`.
    */
   async index({ request, serialize }: HttpContext) {
+    // La période est optionnelle : sans dates, toutes les dettes sont listées
     const overview = await this.debtService.getOverview({
       startDate: request.input('startDate'),
       endDate: request.input('endDate'),

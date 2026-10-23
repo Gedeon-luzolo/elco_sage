@@ -15,6 +15,7 @@ export default class ApiCustomersController {
   async index({ serialize }: HttpContext) {
     const overview = await this.customerService.getOverview()
 
+    // La liste et ses statistiques sont renvoyées ensemble
     return serialize({
       customers: CustomerTransformer.transform(overview.customers),
       stats: overview.stats,
@@ -22,7 +23,7 @@ export default class ApiCustomersController {
   }
 
   /**
-   * Clients actifs, utilises comme donnees de reference hors ligne par la vente.
+   * Clients actifs, utilisés comme données de référence hors ligne par la vente.
    */
   async activeForSale({ serialize }: HttpContext) {
     return serialize(
@@ -30,11 +31,15 @@ export default class ApiCustomersController {
     )
   }
 
+  /**
+   * Crée un client.
+   */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createCustomerValidator)
 
     return apiAction(ctx, async () => {
+      // Le service applique les règles métier et journalise l'action
       const customer = await this.customerService.create(actor, payload)
 
       return ctx.response.created(
@@ -43,6 +48,9 @@ export default class ApiCustomersController {
     })
   }
 
+  /**
+   * Modifie un client.
+   */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(updateCustomerValidator)

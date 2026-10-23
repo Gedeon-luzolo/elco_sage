@@ -3,11 +3,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 
 /**
- * Reserve une route de l'API aux profils de gestion (admin, directeur).
- * Doit etre chainee apres apiAuth : un role insuffisant recoit un 403 JSON.
+ * Réserve une route de l'API aux profils de gestion (admin, directeur).
+ * Doit être chaînée après apiAuth : un rôle insuffisant reçoit un 403 JSON.
  */
 export default class ApiManagementMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
+    // L'utilisateur est déjà authentifié par apiAuth, il ne reste qu'à contrôler son rôle
     if (!isManagementRole(ctx.auth.getUserOrFail().role)) {
       return ctx.response.forbidden({ message: 'Accès réservé à la direction.' })
     }

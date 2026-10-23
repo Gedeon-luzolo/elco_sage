@@ -18,6 +18,8 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -53,6 +55,7 @@ export type ScannedRoutes = {
     'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
     'api.api_customers.store': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.close': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
     'api.api_sales.store': { paramsTuple?: []; params?: {} }
@@ -74,6 +77,7 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
@@ -95,6 +99,7 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.index': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.current': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.system_amounts': { paramsTuple?: []; params?: {} }
+    'api.api_cash_sessions.addition_numbers': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }

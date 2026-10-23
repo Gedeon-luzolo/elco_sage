@@ -34,7 +34,7 @@ export default class SaleRecoveryService {
    * Enregistre un recouvrement sur une vente à crédit.
    */
   async create(actor: User, saleId: string, payload: CreateSaleRecoveryInput) {
-    // Un rejeu (client hors ligne qui resynchronise) ne recrée pas le recouvrement.
+    // Un rejeu (client hors ligne qui resynchronise) ne recrée pas le recouvrement
     const replayed = await findReplayedRecord({
       id: payload.id,
       find: (id) => SaleRecovery.find(id),

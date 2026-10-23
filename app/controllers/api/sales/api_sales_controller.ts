@@ -13,11 +13,12 @@ export default class ApiSalesController {
   constructor(private saleService: SaleService) {}
 
   /**
-   * Historique des ventes (toutes caisses), filtrable par date, numero et statut.
+   * Historique des ventes (toutes caisses), filtrable par date, numéro et statut.
    */
   async index({ request, serialize }: HttpContext) {
     const status = request.input('status')
 
+    // Un statut inconnu est ignoré plutôt que de provoquer une erreur
     const sales = await this.saleService.findAllBatch({
       facturationDate: request.input('facturationDate') || undefined,
       additionNumber: request.input('additionNumber') || undefined,
@@ -28,13 +29,14 @@ export default class ApiSalesController {
   }
 
   /**
-   * Cree une vente. Idempotent si `id` est fourni (rejeu d'une vente faite hors ligne).
+   * Crée une vente. Idempotent si `id` est fourni (rejeu d'une vente faite hors ligne).
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createSaleValidator)
 
     return apiAction(ctx, async () => {
+      // Le service gère la validation métier, le stock et l'idempotence
       const sale = await this.saleService.create(actor, payload as CreateSaleInput)
 
       return ctx.response.created(await ctx.serialize(SaleTransformer.transformSingle(sale)))
@@ -47,6 +49,7 @@ export default class ApiSalesController {
   async cancel(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 
+    // Seule la direction peut annuler une vente
     if (!isManagementRole(actor.role)) {
       return ctx.response.forbidden({
         message: 'Seuls les profils de gestion peuvent annuler une vente.',

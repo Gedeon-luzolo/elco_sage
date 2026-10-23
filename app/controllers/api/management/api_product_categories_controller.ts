@@ -12,6 +12,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class ApiProductCategoriesController {
   constructor(private categoryService: ProductCategoryService) {}
 
+  /**
+   * Liste des catégories avec leurs statistiques.
+   */
   async index({ serialize }: HttpContext) {
     const overview = await this.categoryService.getCategoriesOverview()
 
@@ -21,11 +24,15 @@ export default class ApiProductCategoriesController {
     })
   }
 
+  /**
+   * Crée une catégorie.
+   */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(createProductCategoryValidator)
 
     return apiAction(ctx, async () => {
+      // Le service journalise la création
       const category = await this.categoryService.create(actor, payload)
 
       return ctx.response.created(
@@ -34,6 +41,9 @@ export default class ApiProductCategoriesController {
     })
   }
 
+  /**
+   * Modifie une catégorie (nom et statut).
+   */
   async update(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(updateProductCategoryValidator)
@@ -45,6 +55,9 @@ export default class ApiProductCategoriesController {
     })
   }
 
+  /**
+   * Supprime une catégorie.
+   */
   async destroy(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
 

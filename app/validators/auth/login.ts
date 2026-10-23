@@ -2,7 +2,7 @@ import vine from '@vinejs/vine'
 import type { InferInput } from '@vinejs/vine/types'
 
 /**
- * Valide les identifiants envoyes par la SPA pour obtenir un token.
+ * Valide les identifiants envoyés par la SPA pour obtenir un token.
  */
 export const loginValidator = vine.create({
   email: vine.string().trim().email(),

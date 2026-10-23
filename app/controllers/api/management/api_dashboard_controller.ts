@@ -7,9 +7,10 @@ export default class ApiDashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   /**
-   * Vue d'ensemble du management sur la periode demandee.
+   * Vue d'ensemble du management sur la période demandée.
    */
   async index({ request, serialize }: HttpContext) {
+    // Sans dates, le service prend le mois en cours
     return serialize(
       await this.dashboardService.getOverview({
         startDate: request.input('startDate'),
