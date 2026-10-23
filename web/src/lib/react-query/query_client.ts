@@ -1,14 +1,12 @@
 import { QueryClient } from '@tanstack/react-query'
 import { OFFLINE_CACHE_MAX_AGE_MS } from '~/lib/offline/config'
-import { STALE_TIME } from '~/lib/react-query/cache_ttl'
 
 // Client global pour les requêtes serveur.
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
-      // Défaut des lectures ; les données qui changent depuis un autre poste (stock) le surchargent
-      staleTime: STALE_TIME.MINUTES_5,
+      staleTime: 1000 * 60 * 5,
       // Doit couvrir la durée de persistance, sinon le cache restauré serait purgé aussitôt
       gcTime: OFFLINE_CACHE_MAX_AGE_MS,
       // Tente le réseau mais ne reste pas bloqué en attente quand il est coupé

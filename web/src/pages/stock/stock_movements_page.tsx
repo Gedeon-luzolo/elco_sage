@@ -21,7 +21,6 @@ import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { useCrud } from '~/hooks/common/useCrud'
-import { STALE_TIME } from '~/lib/react-query/cache_ttl'
 import { useOnlineStatus } from '~/hooks/useOnlineStatus'
 import { formatQuantity } from '~/utils/stock'
 import { formatShortTime, todayDateKey } from '~/utils/date'
@@ -38,8 +37,6 @@ export default function StockMovementsPage() {
   const isOnline = useOnlineStatus()
   const { data, isError, isFetching, refetch, dataUpdatedAt } = useCrud<StockMovementItem>({
     endpoint: '/stock',
-    // Le stock change depuis d'autres postes : il est relu à chaque ouverture de la page
-    staleTime: STALE_TIME.ALWAYS_REFETCH,
   }).useListWithParams({ date: selectedDate })
   const stockItems = data ?? EMPTY_STOCK
   const [selectedMovementId, setSelectedMovementId] = useState<string | null>(null)
