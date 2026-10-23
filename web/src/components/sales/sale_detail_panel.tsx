@@ -5,8 +5,10 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
+// Propriétés du panneau ; isPending marque une vente faite hors ligne et pas encore envoyée.
 interface SaleDetailPanelProps {
   sale: SaleItemRow
+  isPending?: boolean
   canCancelSale?: boolean
   onPrintSale?: (sale: SaleItemRow) => void
   onCancelSale?: (sale: SaleItemRow) => void
@@ -17,6 +19,7 @@ interface SaleDetailPanelProps {
  */
 export function SaleDetailPanel({
   sale,
+  isPending = false,
   canCancelSale = false,
   onPrintSale,
   onCancelSale,
@@ -59,6 +62,12 @@ export function SaleDetailPanel({
       </div>
 
       <div className="space-y-4 p-4">
+        {/* Cette vente n'existe que sur l'appareil : elle ne peut pas encore être annulée */}
+        {isPending && (
+          <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
+            Vente faite hors ligne
+          </p>
+        )}
         <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
           <DetailLine label="Operateur" value={sale.operatorName ?? '-'} />

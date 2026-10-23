@@ -12,8 +12,6 @@ type QueuedFields = Pick<
 export type SubmitResult<T> = { queued: false; data: T } | { queued: true; entry: OutboxEntry }
 
 // Envoie une écriture au serveur ; si le réseau est coupé, la met dans la file pour plus tard.
-// Un refus du serveur (stock insuffisant, validation...) n'est jamais mis en file : l'erreur
-// remonte tout de suite pour que la personne corrige.
 export async function submitOrQueue<T>(operation: QueuedFields): Promise<SubmitResult<T>> {
   try {
     // Inutile d'attendre un délai d'expiration quand le navigateur sait déjà qu'il est hors ligne

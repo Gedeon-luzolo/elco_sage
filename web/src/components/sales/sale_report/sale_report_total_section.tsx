@@ -2,16 +2,25 @@ import type { SaleReportTotals } from '~/types/cash_session_types'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 import { TotalItem } from './total_item_text'
 
+// Totaux affichés ; pendingCount est le nombre d'opérations hors ligne incluses dans ces totaux.
 interface SaleReportTotalSectionProps {
   totals: SaleReportTotals
+  pendingCount?: number
 }
 
-export function SaleReportTotalSection({ totals }: SaleReportTotalSectionProps) {
+export function SaleReportTotalSection({ totals, pendingCount = 0 }: SaleReportTotalSectionProps) {
   return (
     <div className="mt-8 border-t-2 border-gray-300 pt-6 print:mt-4 print:pt-3">
       <h3 className="mb-4 text-lg font-semibold text-gray-900 print:mb-2 print:text-sm">
         Totaux généraux
       </h3>
+
+      {/* Les montants incluent des opérations que le serveur ne connaît pas encore */}
+      {pendingCount > 0 && (
+        <p className="mb-4 text-xs text-amber-700 print:text-[9px]">
+          Dont {pendingCount} opération(s) faite(s) hors ligne, pas encore envoyée(s) au serveur.
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] print:grid-cols-[minmax(0,1fr)_auto] print:gap-4">
         <div className="space-y-3 print:space-y-2">

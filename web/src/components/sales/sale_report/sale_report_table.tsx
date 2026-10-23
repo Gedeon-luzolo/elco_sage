@@ -13,15 +13,17 @@ import type { SaleReportTotals } from '~/types/cash_session_types'
 import type { SaleItemRow } from '~/types/sale_types'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 
+// Données du tableau ; pendingSaleIds liste les ventes faites hors ligne et pas encore envoyées.
 interface SaleReportTableProps {
   sales: SaleItemRow[]
   totals: SaleReportTotals
+  pendingSaleIds?: Set<string>
 }
 
 /**
  * Tableau partagé entre l'écran et l'impression du rapport journalier.
  */
-export function SaleReportTable({ sales, totals }: SaleReportTableProps) {
+export function SaleReportTable({ sales, totals, pendingSaleIds }: SaleReportTableProps) {
   return (
     <Table className="text-sm print:text-[9px]">
       <TableHeader className="bg-black/50 text-white print:bg-black print:text-white [&_th]:text-white [&_tr]:border-black">
@@ -52,9 +54,17 @@ export function SaleReportTable({ sales, totals }: SaleReportTableProps) {
                   item={item}
                   saleIndex={saleIndex}
                   isFirstLine={itemIndex === 0}
+                  isPending={pendingSaleIds?.has(sale.id)}
                 />
               ))
-            : [<SaleReportEmptySaleRow key={sale.id} sale={sale} saleIndex={saleIndex} />]
+            : [
+                <SaleReportEmptySaleRow
+                  key={sale.id}
+                  sale={sale}
+                  saleIndex={saleIndex}
+                  isPending={pendingSaleIds?.has(sale.id)}
+                />,
+              ]
         )}
       </TableBody>
       <TableFooter className="border-black bg-black/50 text-white print:bg-black print:text-white [&_td]:text-white">

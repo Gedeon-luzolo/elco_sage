@@ -5,6 +5,12 @@ import { SALES_NAV_LINKS } from '~/constants/sales'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
+import { usePendingActivity } from '~/hooks/sales/usePendingActivity'
+import {
+  countPendingActivity,
+  EMPTY_REPORT_TOTALS,
+  mergePendingTotals,
+} from '~/lib/offline/pending_report'
 import type { SaleReportTotals } from '~/types/cash_session_types'
 import { formatDateLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
@@ -18,7 +24,15 @@ export default function SalesPage() {
   const { data: sessionReport } = useCrud<Record<string, unknown>>({
     endpoint: '/cash-sessions',
   }).useGet(currentCashSession?.id ?? '', Boolean(currentCashSession))
-  const sessionTotals = (sessionReport?.totals as SaleReportTotals | undefined) ?? null
+  const serverTotals = (sessionReport?.totals as SaleReportTotals | undefined) ?? null
+
+  // Les ventes et recouvrements faits hors ligne s'ajoutent aux totaux du serveur
+  const pending = usePendingActivity(currentCashSession)
+  const pendingCount = countPendingActivity(pending)
+  const sessionTotals =
+    serverTotals || pendingCount > 0
+      ? mergePendingTotals(serverTotals ?? EMPTY_REPORT_TOTALS, pending)
+      : null
 
   const isManagementUser = isManagementRole(user?.role)
 
@@ -77,6 +91,12 @@ export default function SalesPage() {
                   </span>
                 </p>
               ))}
+              {/* Les montants incluent des opérations que le serveur ne connaît pas encore */}
+              {pendingCount > 0 && (
+                <p className="text-xs text-amber-700">
+                  Dont {pendingCount} opération(s) hors ligne, pas encore envoyée(s).
+                </p>
+              )}
             </div>
           )}
         </div>

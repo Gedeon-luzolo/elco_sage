@@ -9,8 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { useSimplePrint } from '~/hooks/use_simple_print'
 import { useParams } from 'react-router-dom'
 import { DataLoader } from '~/components/common/data_loader'
+import { useMemo } from 'react'
 import { useCrud } from '~/hooks/common/useCrud'
-import type { CashSessionDetailPageProps } from '~/types/cash_session_types'
+import { usePendingActivity } from '~/hooks/sales/usePendingActivity'
+import { countPendingActivity, mergePendingTotals } from '~/lib/offline/pending_report'
+import type {
+  CashSessionDetailPageProps,
+  CashSessionItem,
+  SaleReportTotals,
+} from '~/types/cash_session_types'
+import type { SaleItemRow } from '~/types/sale_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 
@@ -20,14 +28,50 @@ export default function CashSessionDetailPage() {
     endpoint: '/cash-sessions',
   }).useGet(id)
 
-  if (!report) {
+  // Les ventes et recouvrements faits hors ligne sur cette session s'ajoutent au rapport du serveur
+  const pending = usePendingActivity(report?.session)
+  const merged = useMemo(() => {
+    if (!report) return null
+
+    return {
+      sales: [...report.sales, ...pending.sales].sort((a, b) =>
+        String(a.saleDate).localeCompare(String(b.saleDate))
+      ),
+      totals: mergePendingTotals(report.totals, pending),
+    }
+  }, [report, pending])
+
+  if (!report || !merged) {
     return <DataLoader title="Chargement de la session..." />
   }
 
-  return <CashSessionDetail {...report} />
+  return (
+    <CashSessionDetail
+      session={report.session}
+      sales={merged.sales}
+      totals={merged.totals}
+      pendingSaleIds={new Set(pending.sales.map((sale) => sale.id))}
+      pendingCount={countPendingActivity(pending)}
+    />
+  )
 }
 
-function CashSessionDetail({ session, sales, totals }: CashSessionDetailPageProps) {
+// Propriétés du rapport de session : le contenu fusionné et ce qui reste à envoyer au serveur.
+type CashSessionDetailProps = {
+  session: CashSessionItem
+  sales: SaleItemRow[]
+  totals: SaleReportTotals
+  pendingSaleIds: Set<string>
+  pendingCount: number
+}
+
+function CashSessionDetail({
+  session,
+  sales,
+  totals,
+  pendingSaleIds,
+  pendingCount,
+}: CashSessionDetailProps) {
   const { PrintContainer, handlePrint } = useSimplePrint()
   const renderSessionHeaderDetails = () => (
     <>
@@ -47,8 +91,8 @@ function CashSessionDetail({ session, sales, totals }: CashSessionDetailPageProp
           title="Rapport journalier des ventes"
           details={renderSessionHeaderDetails()}
         />
-        <SaleReportTable sales={sales} totals={totals} />
-        <SaleReportTotalSection totals={totals} />
+        <SaleReportTable sales={sales} totals={totals} pendingSaleIds={pendingSaleIds} />
+        <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
       </PrintContainer>
 
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
@@ -82,11 +126,11 @@ function CashSessionDetail({ session, sales, totals }: CashSessionDetailPageProp
             </Button>
           </CardHeader>
           <CardContent>
-            <SaleReportTable sales={sales} totals={totals} />
+            <SaleReportTable sales={sales} totals={totals} pendingSaleIds={pendingSaleIds} />
           </CardContent>
         </Card>
 
-        <SaleReportTotalSection totals={totals} />
+        <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
       </section>
     </main>
   )

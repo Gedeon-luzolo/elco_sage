@@ -23,6 +23,8 @@ import {
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePaginated } from '~/hooks/use_paginated'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
+import { useOutbox } from '~/hooks/useOutbox'
+import { getPendingSales } from '~/lib/offline/pending_sales'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCrud } from '~/hooks/common/useCrud'
 import type { SaleItemRow } from '~/types/sale_types'
@@ -59,7 +61,16 @@ export default function SalesHistoryPage() {
     invalidateQueries: ['/cash-sessions', '/product-services', '/stock', '/debts', '/recoveries'],
   })
   const { data, isFetching: isLoading } = useListWithParams(appliedFilters)
-  const sales = data ?? EMPTY_SALES
+  const serverSales = data ?? EMPTY_SALES
+
+  // Les ventes faites hors ligne s'affichent avec celles du serveur, selon les mêmes filtres
+  const outbox = useOutbox()
+  const pendingSales = useMemo(
+    () => getPendingSales(outbox, user?.id ?? '', appliedFilters),
+    [outbox, user?.id, appliedFilters]
+  )
+  const pendingSaleIds = useMemo(() => new Set(pendingSales.map((sale) => sale.id)), [pendingSales])
+  const sales = useMemo(() => [...pendingSales, ...serverSales], [pendingSales, serverSales])
   const cancelSale = useAction<string>({
     method: 'patch',
     path: (saleId) => `/sales/${saleId}/cancel`,
@@ -218,11 +229,17 @@ export default function SalesHistoryPage() {
                 sales={paginatedSales.visibleItems}
                 selectedSaleId={effectiveSelectedSaleId}
                 onSelectSale={setSelectedSaleId}
+                pendingSaleIds={pendingSaleIds}
               />
               {selectedSale && (
                 <SaleDetailPanel
                   sale={selectedSale}
-                  canCancelSale={isManagementUser && selectedSale.cashSessionStatus !== 'CLOSED'}
+                  isPending={pendingSaleIds.has(selectedSale.id)}
+                  canCancelSale={
+                    isManagementUser &&
+                    selectedSale.cashSessionStatus !== 'CLOSED' &&
+                    !pendingSaleIds.has(selectedSale.id)
+                  }
                   onPrintSale={printInvoice}
                   onCancelSale={setSaleToCancel}
                 />

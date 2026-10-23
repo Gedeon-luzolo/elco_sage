@@ -4,14 +4,22 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
+// Ligne d'un service dans le rapport ; isPending marque une vente pas encore envoyée au serveur.
 interface SaleReportItemRowProps {
   sale: SaleItemRow
   item: SaleItem
   saleIndex: number
   isFirstLine: boolean
+  isPending?: boolean
 }
 
-export function SaleReportItemRow({ sale, item, saleIndex, isFirstLine }: SaleReportItemRowProps) {
+export function SaleReportItemRow({
+  sale,
+  item,
+  saleIndex,
+  isFirstLine,
+  isPending = false,
+}: SaleReportItemRowProps) {
   const itemCurrency = item.currency as CurrencyCode
   const saleCurrency = sale.currency as CurrencyCode
 
@@ -19,7 +27,13 @@ export function SaleReportItemRow({ sale, item, saleIndex, isFirstLine }: SaleRe
     <TableRow className="align-top">
       <TableCell>{isFirstLine ? saleIndex + 1 : ''}</TableCell>
       <TableCell>{isFirstLine && sale.saleDate ? formatDateLabel(sale.saleDate) : ''}</TableCell>
-      <TableCell className="font-medium">{isFirstLine ? sale.additionNumber : ''}</TableCell>
+      <TableCell className="font-medium">
+        {isFirstLine ? sale.additionNumber : ''}
+        {/* Vente faite hors ligne : le serveur ne la connaît pas encore */}
+        {isFirstLine && isPending && (
+          <span className="ml-1 text-[10px] font-normal text-amber-600">Non envoyée</span>
+        )}
+      </TableCell>
       <TableCell>{item.orderNumber}</TableCell>
       <TableCell>{isFirstLine ? (sale.customer?.fullName ?? '-') : ''}</TableCell>
       <TableCell className="min-w-56 whitespace-normal">

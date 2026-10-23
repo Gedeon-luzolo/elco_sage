@@ -1,4 +1,4 @@
-import { ArrowLeft, Package, Warehouse } from 'lucide-react'
+import { ArrowLeft, CloudOff, Package, RefreshCw, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '~/components/ui/button'
@@ -21,8 +21,9 @@ import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { useCrud } from '~/hooks/common/useCrud'
+import { useOnlineStatus } from '~/hooks/useOnlineStatus'
 import { formatQuantity } from '~/utils/stock'
-import { getLocalDateKey, todayDateKey } from '~/utils/date'
+import { formatShortTime, getLocalDateKey, todayDateKey } from '~/utils/date'
 
 /**
  * Page principale de gestion des mouvements de stock journaliers.
@@ -33,7 +34,8 @@ const EMPTY_STOCK: StockMovementItem[] = []
 export default function StockMovementsPage() {
   const navigate = useNavigate()
   const [selectedDate, setSelectedDate] = useState(todayDateKey)
-  const { data } = useCrud<StockMovementItem>({
+  const isOnline = useOnlineStatus()
+  const { data, isError, isFetching, refetch, dataUpdatedAt } = useCrud<StockMovementItem>({
     endpoint: '/stock',
   }).useListWithParams({ date: selectedDate })
   const stockItems = data ?? EMPTY_STOCK
@@ -87,6 +89,16 @@ export default function StockMovementsPage() {
           </Button>
         </PageHeader>
 
+        {/* Hors ligne, le stock est celui du dernier chargement et ne peut pas être modifié */}
+        {!isOnline && (
+          <p className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            <CloudOff className="size-4 shrink-0" />
+            Hors ligne : stock du dernier chargement
+            {dataUpdatedAt > 0 && ` (${formatShortTime(new Date(dataUpdatedAt))})`}.
+            Reconnectez-vous pour l'actualiser ou le modifier.
+          </p>
+        )}
+
         {/* Barre de contrôle */}
         <section className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
           <div className="flex min-w-0 items-center gap-2">
@@ -106,15 +118,35 @@ export default function StockMovementsPage() {
             className="w-full max-w-none sm:max-w-xs"
             inputClassName="h-8"
           />
+
+          {/* Recharge le stock depuis le serveur */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!isOnline || isFetching}
+            onClick={() => void refetch()}
+          >
+            <RefreshCw className={isFetching ? 'size-4 animate-spin' : 'size-4'} />
+            Actualiser
+          </Button>
         </section>
 
         {/* Vue en split : Tableau + Panneau de détails */}
         {filteredItems.length === 0 ? (
-          <EmptyState
-            icon={Package}
-            title="Aucun produit trouvé"
-            description="Aucun produit ne correspond à votre recherche."
-          />
+          isError && stockItems.length === 0 ? (
+            <EmptyState
+              icon={CloudOff}
+              title="Stock indisponible"
+              description="Ce stock n'a pas été chargé sur cet appareil. Reconnectez-vous pour le consulter."
+            />
+          ) : (
+            <EmptyState
+              icon={Package}
+              title="Aucun produit trouvé"
+              description="Aucun produit ne correspond à votre recherche."
+            />
+          )
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_450px]">
             {/* Tableau maître */}
@@ -229,8 +261,9 @@ export default function StockMovementsPage() {
               <StockDetailPanel
                 movement={selectedMovement}
                 onClose={() => setSelectedMovementId(null)}
-                onCreateEntry={openEntryDialog}
-                onValidatePhysical={openPhysicalDialog}
+                // Sans réseau, les actions de modification disparaissent
+                onCreateEntry={isOnline ? openEntryDialog : undefined}
+                onValidatePhysical={isOnline ? openPhysicalDialog : undefined}
               />
             )}
           </div>

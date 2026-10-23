@@ -84,6 +84,9 @@ export const dateKey = getLocalDateKey()
 // Fuseau de référence du métier (caisse, stock) : il doit rester identique à celui du backend.
 export const BUSINESS_TIME_ZONE = 'Africa/Kinshasa'
 
-// Date métier du jour au format YYYY-MM-DD, quel que soit le fuseau de l'appareil.
-export const todayDateKey = () =>
-  new Date().toLocaleDateString('sv-SE', { timeZone: BUSINESS_TIME_ZONE })
+// Jour métier d'une date au format YYYY-MM-DD, quel que soit le fuseau de l'appareil.
+export const businessDateKey = (date: Date | string) =>
+  new Date(date).toLocaleDateString('sv-SE', { timeZone: BUSINESS_TIME_ZONE })
+
+// Date métier du jour au format YYYY-MM-DD.
+export const todayDateKey = () => businessDateKey(new Date())

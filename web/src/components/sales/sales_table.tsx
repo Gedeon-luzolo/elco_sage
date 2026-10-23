@@ -12,16 +12,23 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
+// Données du tableau ; pendingSaleIds liste les ventes faites hors ligne et pas encore envoyées.
 interface SalesTableProps {
   sales: SaleItemRow[]
   selectedSaleId: string | null
   onSelectSale: (saleId: string) => void
+  pendingSaleIds?: Set<string>
 }
 
 /**
  * Tableau de lecture des ventes de la session courante.
  */
-export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTableProps) {
+export function SalesTable({
+  sales,
+  selectedSaleId,
+  onSelectSale,
+  pendingSaleIds,
+}: SalesTableProps) {
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       {/* Vue mobile : les ventes deviennent des fiches tactiles au lieu d'un tableau large. */}
@@ -31,6 +38,7 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
             key={sale.id}
             sale={sale}
             isSelected={sale.id === selectedSaleId}
+            isPending={pendingSaleIds?.has(sale.id)}
             onSelectSale={onSelectSale}
           />
         ))}
@@ -79,6 +87,8 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
                   <TableCell>{sale.paymentType}</TableCell>
                   <TableCell>
                     {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
+                    {/* Vente faite hors ligne : le serveur ne la connaît pas encore */}
+                    {pendingSaleIds?.has(sale.id) && <Badge variant="secondary">Non envoyée</Badge>}
                   </TableCell>
                 </TableRow>
               )
@@ -90,13 +100,16 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
   )
 }
 
+// Fiche mobile d'une vente ; isPending marque une vente pas encore envoyée au serveur.
 function SaleMobileCard({
   sale,
   isSelected,
+  isPending = false,
   onSelectSale,
 }: {
   sale: SaleItemRow
   isSelected: boolean
+  isPending?: boolean
   onSelectSale: (saleId: string) => void
 }) {
   const orderNumbers = [...new Set(sale.items.map((item) => item.orderNumber))].join(', ')
@@ -119,6 +132,7 @@ function SaleMobileCard({
         <div className="flex shrink-0 flex-col items-end gap-1">
           <Badge variant="outline">{sale.paymentType}</Badge>
           {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
+          {isPending && <Badge variant="secondary">Non envoyée</Badge>}
         </div>
       </div>
 
