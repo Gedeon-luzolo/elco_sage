@@ -38,7 +38,7 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
 
   const displayName = user.fullName!
 
-  // Ouvre le formulaire de cloture depuis le menu profil.
+  // Ouvre le formulaire de clôture depuis le menu profil.
   const openCashSessionClosingDialog = () => {
     setIsProfileMenuOpen(false)
     setIsClosingDialogOpen(true)
@@ -61,13 +61,13 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
 
       <div className="flex min-w-0 items-center justify-end gap-3 sm:gap-4">
         {exchangeRate ? (
-            <div className="hidden min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:flex sm:text-xs lg:flex-row lg:items-center lg:gap-4">
-              <span>
-                Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
-              </span>
-              <span>
-                Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
-              </span>
+          <div className="hidden min-w-0 flex-col gap-0.5 text-[11px] leading-tight text-muted-foreground sm:flex sm:text-xs lg:flex-row lg:items-center lg:gap-4">
+            <span>
+              Taux de change : 1 USD = {formatMoneyWithCurrency(exchangeRate.exchangeRate, 'CDF')}
+            </span>
+            <span>
+              Taux de vente : 1 USD = {formatMoneyWithCurrency(exchangeRate.sellRate, 'CDF')}
+            </span>
           </div>
         ) : (
           <div className="hidden text-xs text-muted-foreground sm:block">Aucun taux disponible</div>
@@ -141,7 +141,7 @@ export function AppBar({ user, exchangeRate, currentCashSession }: AppBarProps) 
                 onClick={logout}
               >
                 <LogOut className="size-4" />
-                {isLoggingOut ? 'Deconnexion...' : 'Se deconnecter'}
+                {isLoggingOut ? 'Déconnexion...' : 'Se déconnecter'}
               </Button>
             </div>
           )}

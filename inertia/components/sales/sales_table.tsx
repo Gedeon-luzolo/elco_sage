@@ -43,7 +43,7 @@ export function SalesTable({ sales, selectedSaleId, onSelectSale }: SalesTablePr
               <TableHead className="font-semibold">Addition</TableHead>
               <TableHead className="font-semibold">Bon</TableHead>
               <TableHead className="font-semibold">Client</TableHead>
-              <TableHead className="text-right font-semibold">Theorique</TableHead>
+              <TableHead className="text-right font-semibold">Théorique</TableHead>
               <TableHead className="text-right font-semibold">Remise</TableHead>
               <TableHead className="text-right font-semibold">Total</TableHead>
               <TableHead className="font-semibold">Paiement</TableHead>
