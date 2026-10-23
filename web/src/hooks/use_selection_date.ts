@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getLocalDateKey, getStartOfMonth } from '~/utils/date'
+import { getLocalDateKey, getStartOfMonth, todayDateKey } from '~/utils/date'
 
 type SelectionDateType = 'start' | 'end'
 
@@ -21,7 +21,7 @@ export function useSelectionDate({
   )
 
   // Gère la date de fin avec la date du jour par défaut.
-  const [endDate, setEndDate] = useState(initialEndDate ?? getLocalDateKey(now))
+  const [endDate, setEndDate] = useState(initialEndDate ?? todayDateKey())
 
   const handleDateChange = (type: SelectionDateType, value: string) => {
     if (type === 'start') {

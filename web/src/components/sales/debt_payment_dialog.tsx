@@ -14,7 +14,7 @@ import { Label } from '~/components/ui/label'
 import { useRecoverDebt } from '~/hooks/sales/useRecoverDebt'
 import type { DebtItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
-import { getLocalDateKey } from '~/utils/date'
+import { todayDateKey } from '~/utils/date'
 import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
@@ -101,7 +101,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
                   id="debt-payment-date"
                   name="recoveredAt"
                   type="date"
-                  defaultValue={getLocalDateKey(new Date())}
+                  defaultValue={todayDateKey()}
                   readOnly
                 />
               </div>

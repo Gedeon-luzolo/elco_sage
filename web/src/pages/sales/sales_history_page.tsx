@@ -28,7 +28,7 @@ import { getPendingSales } from '~/lib/offline/pending_sales'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCrud } from '~/hooks/common/useCrud'
 import type { SaleItemRow } from '~/types/sale_types'
-import { getLocalDateKey } from '~/utils/date'
+import { todayDateKey } from '~/utils/date'
 import { isManagementRole } from '~/utils/user_role.utils'
 
 const SALES_HISTORY_PAGE_SIZE = 20
@@ -185,7 +185,7 @@ export default function SalesHistoryPage() {
                   type="date"
                   className="h-10"
                   value={facturationDate}
-                  max={getLocalDateKey()}
+                  max={todayDateKey()}
                   onChange={(event) => setFacturationDate(event.target.value)}
                 />
               </div>
