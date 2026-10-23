@@ -6,7 +6,6 @@ export type ScannedRoutes = {
   ALL: {
     'api.api_session.login': { paramsTuple?: []; params?: {} }
     'api.api_session.me': { paramsTuple?: []; params?: {} }
-    'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
     'api.api_operators.index': { paramsTuple?: []; params?: {} }
     'api.api_product_services.active_for_sale': { paramsTuple?: []; params?: {} }
@@ -52,7 +51,6 @@ export type ScannedRoutes = {
   }
   POST: {
     'api.api_session.login': { paramsTuple?: []; params?: {} }
-    'api.api_session.verify_password': { paramsTuple?: []; params?: {} }
     'api.api_session.logout': { paramsTuple?: []; params?: {} }
     'api.api_customers.store': { paramsTuple?: []; params?: {} }
     'api.api_cash_sessions.reserve_addition_numbers': { paramsTuple?: []; params?: {} }
