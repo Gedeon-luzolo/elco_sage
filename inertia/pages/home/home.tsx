@@ -1,83 +1,55 @@
-import { Link } from '@adonisjs/inertia/react'
 import { Home as HomeIcon } from 'lucide-react'
-import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
-import { MODULES } from '~/constants/modules'
 import { PageHeader } from '~/components/common/page_header'
-import { cn } from '~/lib/utils'
+import { ModuleListRow } from '~/components/navigation/module_list_row'
+import { MODULES } from '~/constants/modules'
 import { type InertiaProps } from '~/types'
 
 export default function Home(props: InertiaProps) {
+  // Répartit les modules sur les deux colonnes de l'aperçu liste.
+  const half = Math.ceil(MODULES.length / 2)
+  const leftModules = MODULES.slice(0, half)
+  const rightModules = MODULES.slice(half)
+
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10">
         <PageHeader
-          title="Accueil"
-          description={`Bienvenue ${props.user?.fullName}`}
+          title={`Bonjour, ${props.user?.fullName ?? ''}`}
+          description="Choisissez une application pour commencer."
           icon={HomeIcon}
         >
-          <p className="text-sm text-muted-foreground">{props.user?.role}</p>
+          <span className="text-sm text-muted-foreground">{props.user?.role}</span>
         </PageHeader>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
-          {MODULES.map((module) => {
-            const Icon = module.icon
-
-            return (
-              <Card
+        <div className="grid gap-x-10 sm:grid-cols-2 sm:divide-x sm:divide-border">
+          <div className="sm:pr-6">
+            {leftModules.map((module) => (
+              <ModuleListRow
                 key={module.title}
-                className="rounded-2xl bg-background shadow-sm transition-colors hover:bg-card/80"
-              >
-                <CardHeader>
-                  <div
-                    className={cn(
-                      'mb-4 flex size-11 items-center justify-center rounded-xl shadow-lg',
-                      module.color.icon
-                    )}
-                  >
-                    <Icon className="size-5" aria-hidden="true" />
-                  </div>
-                  <CardTitle className={module.color.title}>{module.title}</CardTitle>
-                  <CardDescription>{module.description}</CardDescription>
-                  <CardAction>
-                    {module.isManagement && (
-                      <Badge variant="outline" className={module.color.badge}>
-                        Direction
-                      </Badge>
-                    )}
-                  </CardAction>
-                </CardHeader>
-                <CardContent>
-                  {module.href ? (
-                    <Button
-                      render={<Link href={module.href} />}
-                      variant="outline"
-                      className={cn('w-full justify-center', module.color.button)}
-                    >
-                      Ouvrir
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className={cn('w-full justify-center', module.color.button)}
-                      type="button"
-                    >
-                      Ouvrir
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </section>
+                title={module.title}
+                description={module.description}
+                href={module.href}
+                icon={module.icon}
+                color={module.color}
+                isManagement={module.isManagement}
+              />
+            ))}
+          </div>
+
+          <div className="sm:pl-6">
+            {rightModules.map((module) => (
+              <ModuleListRow
+                key={module.title}
+                title={module.title}
+                description={module.description}
+                href={module.href}
+                icon={module.icon}
+                color={module.color}
+                isManagement={module.isManagement}
+              />
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   )
