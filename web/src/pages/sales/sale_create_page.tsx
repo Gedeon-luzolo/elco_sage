@@ -11,6 +11,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '~/components/common/page_header'
+import { SearchableSelect } from '~/components/common/searchable_select'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
@@ -329,26 +330,15 @@ export default function SaleCreatePage() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="sale-customer">Client</Label>
-                    <Select
+                    <SearchableSelect
                       id="sale-customer"
-                      items={customers.map((customer) => ({
-                        label: customer.fullName,
-                        value: customer.id,
-                      }))}
+                      items={customers}
                       value={customerId}
-                      onValueChange={(value) => setCustomerId(value ?? '')}
-                    >
-                      <SelectTrigger className="h-10 w-full">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.fullName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onValueChange={setCustomerId}
+                      getValue={(customer) => customer.id}
+                      getLabel={(customer) => customer.fullName}
+                      emptyMessage="Aucun client trouvé."
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -379,30 +369,20 @@ export default function SaleCreatePage() {
 
                         <div className="grid gap-2">
                           <Label>Service</Label>
-                          <Select
-                            items={saleServices.map((item) => ({
-                              label:
-                                item.saleAvailableStock === null
-                                  ? item.name
-                                  : `${item.name} - ${item.saleAvailableStock} ${item.stockProductBaseUnit ?? ''}`,
-                              value: item.id,
-                            }))}
+                          <SearchableSelect
+                            items={saleServices}
                             value={line.productServiceId}
-                            onValueChange={(value) =>
-                              updateLine(index, { productServiceId: value ?? '' })
+                            onValueChange={(value) => updateLine(index, { productServiceId: value })}
+                            getValue={(item) => item.id}
+                            getLabel={(item) =>
+                              item.saleAvailableStock === null
+                                ? item.name
+                                : `${item.name} - ${item.saleAvailableStock} ${item.stockProductBaseUnit ?? ''}`
                             }
-                          >
-                            <SelectTrigger className="h-10 w-full">
-                              <SelectValue placeholder="Sélectionner un service..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {saleServices.map((item) => (
-                                <SelectItem key={item.id} value={item.id} disabled={!item.canSell}>
-                                  {item.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            getDisabled={(item) => !item.canSell}
+                            placeholder="Sélectionner un service..."
+                            emptyMessage="Aucun service trouvé."
+                          />
 
                           {stockMessage && (
                             <p
