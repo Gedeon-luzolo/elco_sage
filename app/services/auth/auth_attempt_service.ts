@@ -72,6 +72,9 @@ export default class AuthAttemptService {
       await user.save()
       await this.invalidateUserCache()
 
+      // Un compte bloqué perd toutes ses connexions déjà ouvertes.
+      await User.accessTokens.deleteAll(user)
+
       // Journalise le blocage automatique après les échecs de connexion.
       await this.journalisationService.create({
         module: JournalisationModule.AUTHENTIFICATION,

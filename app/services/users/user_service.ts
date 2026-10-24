@@ -141,6 +141,11 @@ export default class UserService {
 
     await user.save()
 
+    // Un compte qui n'est plus actif perd immédiatement toutes ses connexions.
+    if (user.status !== UserStatus.ACTIVE) {
+      await User.accessTokens.deleteAll(user)
+    }
+
     // Journalise la mise à jour du compte utilisateur.
     await this.journalisationService.create({
       module: JournalisationModule.USERS,
@@ -173,6 +178,8 @@ export default class UserService {
       message: `Le compte ${user.fullName ?? user.email} a ete supprime par ${actor.fullName ?? actor.email}`,
       user,
     })
+    // Les tokens vivent dans Redis : ils ne disparaissent pas avec la ligne de la base.
+    await User.accessTokens.deleteAll(user)
     await user.delete()
     await this.invalidateUserCache()
   }

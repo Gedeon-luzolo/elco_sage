@@ -4,7 +4,7 @@ import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import { beforeCreate, column } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import RedisAccessTokensProvider from '#services/auth/redis_access_tokens_provider'
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -24,10 +24,9 @@ export default class User extends compose(UserSchema, withAuthFinder(hash)) {
    * Tokens d'acces de l'API consommee par la SPA.
    * Longue duree de vie : la caisse doit rester utilisable hors ligne.
    */
-  static accessTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: '30 days',
+  static accessTokens = new RedisAccessTokensProvider<typeof User>({
+    expiresIn: '10 days',
     prefix: 'elco_',
-    table: 'auth_access_tokens',
     type: 'auth_token',
     tokenSecretLength: 40,
   })
