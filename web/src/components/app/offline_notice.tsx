@@ -3,8 +3,7 @@ import { CloudOff, Wifi, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useOnlineStatus } from '~/hooks/useOnlineStatus'
 
-// Durée d'affichage de l'information hors ligne (1 minute), puis de la confirmation de retour (5 secondes).
-const OFFLINE_NOTICE_DURATION_MS = 60 * 1000
+// Durée d'affichage de la confirmation de retour du réseau.
 const RECONNECTED_NOTICE_DURATION_MS = 5 * 1000
 
 type Notice = 'offline' | 'reconnected' | null
@@ -17,13 +16,11 @@ export function OfflineNotice() {
   const wasOffline = useRef(false)
 
   useEffect(() => {
-    // Coupure : la bande s'affiche, puis disparaît d'elle-même après un temps
+    // Coupure : la bande reste affichée jusqu'à ce que l'utilisateur la ferme ou que le réseau revienne
     if (!isOnline) {
       wasOffline.current = true
       setNotice('offline')
-      const timerId = window.setTimeout(() => setNotice(null), OFFLINE_NOTICE_DURATION_MS)
-
-      return () => window.clearTimeout(timerId)
+      return
     }
 
     // Démarrage en ligne : rien à confirmer
