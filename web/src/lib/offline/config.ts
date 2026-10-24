@@ -9,7 +9,6 @@ export const OFFLINE_QUERY_PREFIXES = [
   '/sales',
   '/debts',
   '/recoveries',
-  '/stock',
 ]
 
 // Durée de conservation du cache de lecture (7 jours).

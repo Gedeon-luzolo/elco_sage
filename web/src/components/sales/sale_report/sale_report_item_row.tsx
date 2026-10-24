@@ -40,7 +40,7 @@ export function SaleReportItemRow({
         <span className="font-medium">{item.productService?.name ?? 'Service inconnu'}</span>
       </TableCell>
       <TableCell className="text-center">
-        {item.quantity} {item.productService?.stockProductBaseUnit ?? ''}
+        {item.quantity}
       </TableCell>
       <TableCell className="text-right">
         {formatMoneyWithCurrency(item.unitPrice, itemCurrency)}

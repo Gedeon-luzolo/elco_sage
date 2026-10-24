@@ -83,7 +83,7 @@ export function useCreateSale() {
       }
 
       toast.success('Vente enregistrée avec succès.')
-      // Une vente modifie la caisse, le stock, les dettes et les rapports
+      // Une vente modifie la caisse, les dettes et les rapports
       invalidateQueriesByPrefix(OFFLINE_QUERY_PREFIXES)
     },
     onError: (error) => toast.error(getErrorMessage(error)),

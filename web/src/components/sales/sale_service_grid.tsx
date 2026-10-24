@@ -88,22 +88,15 @@ export function SaleServiceGrid({
               <button
                 key={service.id}
                 type="button"
-                disabled={!service.canSell}
-                title={service.stockBlockingReason ?? undefined}
                 onClick={() => onPick(service.id)}
-                className="relative flex h-20 flex-col justify-between rounded-xl border border-border bg-card p-2.5 text-left shadow-sm transition hover:border-primary/50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                className="relative flex h-20 flex-col justify-between rounded-xl border border-border bg-card p-2.5 text-left shadow-sm transition hover:border-primary/50 hover:shadow-md"
               >
-                <span className="line-clamp-2 text-[13px] leading-tight font-semibold">{service.name}</span>
+                <span className="line-clamp-2 text-[13px] leading-tight font-semibold">
+                  {service.name}
+                </span>
 
-                <span className="flex items-baseline justify-between gap-2">
-                  <span className="text-[13px] font-bold text-foreground">
-                    {formatMoneyWithCurrency(getSaleServiceUnitPrice(service, currency), currency)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {service.canSell
-                      ? `Stock ${service.saleAvailableStock ?? '-'}`
-                      : 'Indisponible'}
-                  </span>
+                <span className="text-[13px] font-bold text-foreground">
+                  {formatMoneyWithCurrency(getSaleServiceUnitPrice(service, currency), currency)}
                 </span>
 
                 {quantity > 0 && (

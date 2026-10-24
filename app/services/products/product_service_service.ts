@@ -5,27 +5,18 @@ import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
-import StockMovementService, {
-  type SaleStockSnapshot,
-} from '#services/stock/stock_movement_service'
 import { Currency } from '#types/currency'
-import { todayDateKey } from '#utils/date_utils'
 import type {
   CreateProductServiceInput,
   UpdateProductServiceInput,
 } from '#validators/product_service'
 import { inject } from '@adonisjs/core'
 
-export type ProductServiceWithSaleStock = ProductService & {
-  saleStockSnapshot?: SaleStockSnapshot | null
-}
-
 @inject()
 export default class ProductServiceService {
   constructor(
     private journalisationService: JournalisationService,
     private exchangeRateService: ExchangeRateService,
-    private stockMovementService: StockMovementService,
     private cacheService: CacheService
   ) {}
 
@@ -40,10 +31,7 @@ export default class ProductServiceService {
 
   private async buildOverview() {
     // Recuperer d'abord les produits et les services avec leurs relations d'affichage.
-    const items = await ProductService.query()
-      .preload('category')
-      .preload('stockProduct')
-      .orderBy('name', 'asc')
+    const items = await ProductService.query().preload('category').orderBy('name', 'asc')
 
     // Separer les produits et les services
     const products = items.filter((i) => i.type === 'PRODUCT')
@@ -69,39 +57,20 @@ export default class ProductServiceService {
   }
 
   /**
-   * Recupere uniquement les services actifs disponibles a la vente.
+   * Le module vente ne vend pas les produits physiques, uniquement les prestations.
+   * La liste change seulement quand un article, une catégorie ou le taux change, et ces écritures la vident.
    */
-  async getActiveServicesForSale(stockDate = todayDateKey()) {
+  async getActiveServicesForSale() {
     return this.cacheService.remember(
-      CacheKeys.productServices.activeForSale(stockDate),
-      CacheTtl.MEDIUM,
-      () => this.buildActiveServicesForSale(stockDate)
+      CacheKeys.productServices.activeForSale,
+      CacheTtl.ONE_MONTH,
+      () =>
+        ProductService.query()
+          .where('type', ProductServiceType.SERVICE)
+          .where('isActive', true)
+          .preload('category')
+          .orderBy('name', 'asc')
     )
-  }
-
-  private async buildActiveServicesForSale(stockDate: string) {
-    // Le module vente ne vend pas les produits physiques, uniquement les prestations.
-    const services = await ProductService.query()
-      .where('type', ProductServiceType.SERVICE)
-      .where('isActive', true)
-      .preload('category')
-      .preload('stockProduct')
-      .orderBy('name', 'asc')
-
-    // Le formulaire de vente doit afficher le stock du produit consomme par chaque service.
-    for (const service of services as ProductServiceWithSaleStock[]) {
-      // Un service bien configuré pointe vers le produit physique qui sera décrémenté à la vente.
-      service.saleStockSnapshot = service.stockProduct
-        ? await this.stockMovementService.getSaleStockSnapshot(service.stockProduct, stockDate)
-        : {
-            productId: service.id,
-            availableStock: 0,
-            canSell: false,
-            blockingReason: `Le service "${service.name}" n'est pas lie a un produit de stock.`,
-          }
-    }
-
-    return services
   }
 
   /**
@@ -174,8 +143,6 @@ export default class ProductServiceService {
         ? Number(payload.packagingCapacity)
         : null
     )
-    // Pour un service, on valide ici le produit consommé avant de créer l'article.
-    const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
     const baseUnit = this.resolveBaseUnit(payload.type, payload.baseUnit)
 
     // Creer le produit ou service
@@ -183,7 +150,6 @@ export default class ProductServiceService {
       type: payload.type as any,
       name: payload.name,
       categoryId: payload.categoryId ?? null,
-      stockProductId,
       isActive: true,
       baseUnit,
       packagingUnit: payload.packagingUnit ?? null,
@@ -240,15 +206,12 @@ export default class ProductServiceService {
         ? Number(payload.packagingCapacity)
         : null
     )
-    // Si l'article devient un produit, le lien stock est nettoyé; si c'est un service, il est obligatoire.
-    const stockProductId = await this.resolveStockProductId(payload.type, payload.stockProductId)
     const baseUnit = this.resolveBaseUnit(payload.type, payload.baseUnit)
 
     const previousName = item.name
     item.type = payload.type as any
     item.name = payload.name
     item.categoryId = payload.categoryId ?? null
-    item.stockProductId = stockProductId
     item.baseUnit = baseUnit
     item.packagingUnit = payload.packagingUnit ?? null
     item.packagingCapacity =
@@ -279,34 +242,6 @@ export default class ProductServiceService {
   private invalidateProductServiceCache() {
     this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
     this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
-  }
-
-  /**
-   * Determine le produit physique consomme par un service.
-   */
-  private async resolveStockProductId(type: string, stockProductId?: string | null) {
-    // Les produits physiques alimentent le stock, ils ne doivent pas pointer vers eux-memes.
-    if (type === ProductServiceType.PRODUCT) {
-      return null
-    }
-
-    // Un service vendable doit savoir quel produit physique il consomme.
-    if (!stockProductId) {
-      throw new Error('Selectionnez le produit de stock consomme par ce service.')
-    }
-
-    // Un service doit toujours consommer un article physique actif.
-    const product = await ProductService.query()
-      .where('id', stockProductId)
-      .where('type', ProductServiceType.PRODUCT)
-      .where('isActive', true)
-      .first()
-
-    if (!product) {
-      throw new Error('Le produit de stock selectionne est invalide ou inactif.')
-    }
-
-    return product.id
   }
 
   /**

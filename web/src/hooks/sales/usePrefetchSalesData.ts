@@ -18,7 +18,6 @@ export function usePrefetchSalesData() {
   const isOnline = useOnlineStatus()
   const { data: session } = useCurrentCashSession()
   const sessionId = session?.id
-  const openingDate = session?.openingDate
 
   useEffect(() => {
     // Sans utilisateur ou sans réseau, il n'y a rien à charger
@@ -37,6 +36,7 @@ export function usePrefetchSalesData() {
     // Données de l'écran de vente
     void prefetch('/operators')
     void prefetch('/customers/active-for-sale')
+    void prefetch('/product-services/active-for-sale')
     void prefetch('/exchange-rates', { limit: 1 })
 
     // Premier lot de l'historique, puis dettes et recouvrements avec leurs filtres par défaut
@@ -49,8 +49,6 @@ export function usePrefetchSalesData() {
       // Plages de numéros d'addition gardées en réserve pour pouvoir vendre si le réseau se coupe
       void refreshNumbering(sessionId, user.id).catch(() => undefined)
 
-      void prefetch('/product-services/active-for-sale', { date: openingDate ?? undefined })
-
       // Rapport de la session (résumé de la page Ventes), lu par id
       void queryClient
         .query({
@@ -59,5 +57,5 @@ export function usePrefetchSalesData() {
         })
         .catch(() => undefined)
     }
-  }, [queryClient, user, isOnline, sessionId, openingDate])
+  }, [queryClient, user, isOnline, sessionId])
 }

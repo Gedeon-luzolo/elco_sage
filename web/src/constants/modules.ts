@@ -1,5 +1,4 @@
 import {
-  Boxes,
   CircleDollarSign,
   LayoutDashboard,
   Package,
@@ -70,21 +69,6 @@ export const MODULES: NavigationModule[] = [
     },
   },
   {
-    title: 'Gestion de stock',
-    description: 'Contrôler les entrées, sorties et niveaux disponibles.',
-    icon: Boxes,
-    href: '/stock',
-    color: {
-      header: 'from-emerald-600 to-lime-600 shadow-emerald-600/20',
-      icon: 'bg-emerald-600 text-white shadow-emerald-600/20',
-      title: 'text-emerald-700 dark:text-emerald-300',
-      badge:
-        'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300',
-      button:
-        'border-emerald-300 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-600 dark:hover:text-white',
-    },
-  },
-  {
     title: 'Management',
     description: 'Administrer les accès et suivre les actions sensibles.',
     icon: ShieldCheck,
@@ -106,8 +90,7 @@ export const MODULES: NavigationModule[] = [
 export const MODULE_HEADER_ACCENTS = {
   sales: MODULES[0].color.header,
   customers: MODULES[1].color.header,
-  stock: MODULES[2].color.header,
-  management: MODULES[3].color.header,
+  management: MODULES[2].color.header,
 } as const
 
 export const MANAGEMENT_MODULES: NavigationModuleItem[] = [

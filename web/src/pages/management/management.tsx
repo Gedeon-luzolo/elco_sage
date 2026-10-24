@@ -7,7 +7,6 @@ import {
   CreditCard,
   Gift,
   HandCoins,
-  Package,
   ReceiptText,
   TrendingUp,
   Wallet,
@@ -18,7 +17,6 @@ import { StatCard } from '~/components/common/stat_card'
 import { DashboardChartsTab } from '~/components/management/dashboard/dashboard_charts_tab'
 import { DashboardPeriodicReportTab } from '~/components/management/dashboard/dashboard_periodic_report_tab'
 import { DashboardStaffProductivityTab } from '~/components/management/dashboard/dashboard_staff_productivity_tab'
-import { DashboardStockReportTab } from '~/components/management/dashboard/dashboard_stock_report_tab'
 import { PeriodSelector } from '~/components/ui/period_selector'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { useSelectionDate } from '~/hooks/use_selection_date'
@@ -63,7 +61,7 @@ type ManagementDashboardProps = {
 }
 
 function ManagementDashboard({
-  data: { period, stats, periodicReports, topServices, staffProductivity, stockReport },
+  data: { period, stats, periodicReports, topServices, staffProductivity },
   selectionDate,
   isLoading,
   onSearch: searchDashboard,
@@ -161,14 +159,10 @@ function ManagementDashboard({
         </section>
 
         <Tabs defaultValue="sales-report" className="gap-6 gap-y-14 md:gap-y-4">
-          <TabsList className="grid h-auto w-full grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+          <TabsList className="grid h-auto w-full grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
             <TabsTrigger value="sales-report">
               <ClipboardList className="size-4" />
               Rapport des ventes
-            </TabsTrigger>
-            <TabsTrigger value="stock-report">
-              <Package className="size-4" />
-              Rapport de stock
             </TabsTrigger>
             <TabsTrigger value="staff-productivity">
               <TrendingUp className="size-4" />
@@ -185,7 +179,6 @@ function ManagementDashboard({
             stats={stats}
             periodicReports={periodicReports}
           />
-          <DashboardStockReportTab period={period} stockReport={stockReport} />
           <DashboardStaffProductivityTab staffProductivity={staffProductivity} />
           <DashboardChartsTab stats={stats} topServices={topServices} />
         </Tabs>

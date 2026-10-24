@@ -24,9 +24,8 @@ export const CacheKeys = {
   },
   productServices: {
     overview: 'product_services:overview',
-    activeForSale: (stockDate: string) => `product_services:active_for_sale:${stockDate}`,
+    activeForSale: 'product_services:active_for_sale',
     prefix: 'product_services:',
-    activeForSalePrefix: 'product_services:active_for_sale:',
   },
   customers: {
     overview: 'customers:overview',

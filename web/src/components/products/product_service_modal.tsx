@@ -26,7 +26,6 @@ interface ProductServiceModalProps {
   item: ProductServiceItem | null
   submitLabel: string
   categories: ProductCategoryDTO[]
-  products: ProductServiceItem[]
   defaultType?: 'PRODUCT' | 'SERVICE'
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
@@ -44,7 +43,6 @@ export function ProductServiceModal({
   item,
   submitLabel,
   categories,
-  products,
   defaultType = 'PRODUCT',
   onOpenChange,
   action,
@@ -63,9 +61,8 @@ export function ProductServiceModal({
     item ? getItemPriceForCurrency(item, Currency.CDF) : ''
   )
 
-  // Choix de la catégorie et du produit lié, envoyés avec le formulaire par des champs cachés
+  // Choix de la catégorie, envoyé avec le formulaire
   const [categoryId, setCategoryId] = useState(item?.categoryId ?? '')
-  const [stockProductId, setStockProductId] = useState(item?.stockProductId ?? '')
 
   const isService = selectedType === 'SERVICE'
   /**
@@ -131,25 +128,6 @@ export function ProductServiceModal({
                 emptyMessage="Aucune catégorie trouvée."
               />
             </div>
-
-            {/* Produit physique consommé par le service pour les sorties de stock */}
-            {isService && (
-              <div className="grid gap-2">
-                <Label htmlFor="ps-stock-product">Produit lié *</Label>
-                <SearchableSelect
-                  id="ps-stock-product"
-                  name="stockProductId"
-                  items={products}
-                  value={stockProductId}
-                  onValueChange={setStockProductId}
-                  getValue={(product) => product.id}
-                  getLabel={(product) => product.name}
-                  placeholder="Sélectionner un produit..."
-                  emptyMessage="Aucun produit trouvé."
-                  required
-                />
-              </div>
-            )}
 
             {/* Unité de base (Vente / Consommation) */}
             {isService ? (

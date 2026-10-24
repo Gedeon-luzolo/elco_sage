@@ -78,7 +78,7 @@ export const formatShortDate = (dateStr: string) => {
   }
 }
 
-// Fuseau de référence du métier (caisse, stock) : il doit rester identique à celui du backend.
+// Fuseau de référence du métier (caisse) : il doit rester identique à celui du backend.
 const BUSINESS_TIME_ZONE = 'Africa/Kinshasa'
 
 // Jour métier d'une date au format YYYY-MM-DD, quel que soit le fuseau de l'appareil.

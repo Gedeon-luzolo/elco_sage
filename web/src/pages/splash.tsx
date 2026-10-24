@@ -59,7 +59,7 @@ export default function Splash() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.36, duration: 0.32, ease: 'easeOut' }}
         >
-          Gestion des ventes, du stock et des inventaires
+          Gestion des ventes et de la caisse
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}

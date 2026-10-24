@@ -104,8 +104,7 @@ export function SaleDetailPanel({
                   <div className="min-w-0">
                     <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
                     <p className="text-xs text-muted-foreground">
-                      Quantité : {item.quantity}{' '}
-                      {item.productService?.stockProductBaseUnit ?? ''}
+                      Quantité : {item.quantity}
                     </p>
                   </div>
                   <p className="shrink-0 font-semibold">

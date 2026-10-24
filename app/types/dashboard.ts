@@ -67,32 +67,6 @@ export interface DashboardStaffProductivity {
   totals: DashboardStaffProductivityRow
 }
 
-// Type pour une ligne du rapport de stock par produit sur une période.
-export interface DashboardStockReportRow {
-  productId: string
-  productName: string
-  categoryName: string | null
-  baseUnit: string | null
-  periodInitialStock: number
-  totalEntries: number
-  periodStock: number
-  periodStockValueCdf: number
-  totalOutputs: number
-  outputsValueCdf: number
-  totalLosses: number
-  lossesValueCdf: number
-  finalTheoreticalStock: number
-  lastPhysicalStock: number | null
-  physicalStockValueCdf: number | null
-  finalVariance: number | null
-}
-
-// Type pour les données de stock avec la ligne total.
-export interface DashboardStockReport {
-  rows: DashboardStockReportRow[]
-  totals: DashboardStockReportRow
-}
-
 // Type pour une ligne du rapport périodique des ventes.
 export interface DashboardPeriodicReport {
   date: string
@@ -118,5 +92,4 @@ export interface DashboardOverview {
   paymentDistribution: DashboardPaymentDistribution[]
   topServices: DashboardTopService[]
   staffProductivity: DashboardStaffProductivity
-  stockReport: DashboardStockReport
 }

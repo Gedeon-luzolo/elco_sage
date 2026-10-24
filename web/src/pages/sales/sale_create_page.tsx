@@ -12,11 +12,9 @@ import { Card, CardContent } from '~/components/ui/card'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useCrud } from '~/hooks/common/useCrud'
-import { useOutbox } from '~/hooks/useOutbox'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCreateSale } from '~/hooks/sales/useCreateSale'
-import { applyPendingSales } from '~/lib/offline/pending_stock'
 import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
@@ -28,14 +26,13 @@ import {
   EMPTY_SALE_LINE,
   getSaleDiscountAmountFromPayableAmount,
   getSaleLineService,
-  getSaleLineStockMessage,
   getSaleTheoreticalAmount,
-  hasSaleLineStockIssue,
-  hasSaleStockIssue,
   normalizeSalePayableAmount,
   type SaleLineState,
   type SalePaymentType,
 } from '~/utils/sales/sale.utils'
+
+const EMPTY_SERVICES: ProductServiceDTO[] = []
 
 // Le ticket est toujours celui de la vente chargée par le serveur : aucune sélection manuelle ici.
 const ignoreSaleSelection = () => {}
@@ -44,25 +41,15 @@ export default function SaleCreatePage() {
   const navigate = useNavigate()
   const { data: currentCashSession } = useCurrentCashSession()
 
-  // Données de référence de la vente ; le stock est calculé à la date métier de la caisse
+  // Données de référence de la vente
   const { user } = useAuth()
-  const outbox = useOutbox()
-  const { data: fetchedServices = [] } = useCrud<ProductServiceDTO>({
+  const { data: saleServices = EMPTY_SERVICES } = useCrud<ProductServiceDTO>({
     endpoint: '/product-services/active-for-sale',
-  }).useGetWithParams<ProductServiceDTO[]>(
-    { date: currentCashSession?.openingDate ?? undefined },
-    Boolean(currentCashSession)
-  )
+  }).useList()
   const { data: operators = [] } = useCrud<UserListItem>({ endpoint: '/operators' }).useList()
   const { data: customers = [] } = useCrud<CustomerDTO>({
     endpoint: '/customers/active-for-sale',
   }).useList()
-
-  // Les ventes encore dans la file ne sont pas connues du serveur : on retire leur stock localement
-  const saleServices = useMemo(
-    () => applyPendingSales(fetchedServices, outbox),
-    [fetchedServices, outbox]
-  )
 
   // En ligne la vente part au serveur ; sans réseau elle va dans la file d'attente
   const createSale = useCreateSale()
@@ -111,18 +98,16 @@ export default function SaleCreatePage() {
     effectivePayableAmount
   )
   const totalAmount = effectivePayableAmount
-  const hasStockIssue = hasSaleStockIssue(lines, serviceById)
-  // Vérifie si le formulaire peut être soumis, en tenant compte des champs requis et des problèmes de stock.
-  const canSubmit =
-    canSubmitSaleForm({
-      currentCashSessionId: currentCashSession?.id,
-      paymentType,
-      orderNumber,
-      operatorId,
-      customerId,
-      discountAmount,
-      lines,
-    }) && !hasStockIssue
+  // Vérifie si le formulaire peut être soumis, en tenant compte des champs requis.
+  const canSubmit = canSubmitSaleForm({
+    currentCashSessionId: currentCashSession?.id,
+    paymentType,
+    orderNumber,
+    operatorId,
+    customerId,
+    discountAmount,
+    lines,
+  })
 
   // Quantité déjà au ticket pour chaque service, affichée en badge sur la grille
   const quantityByServiceId = useMemo(() => {
@@ -307,8 +292,6 @@ export default function SaleCreatePage() {
                       line={line}
                       service={getSaleLineService(line, serviceById)}
                       currency={currency}
-                      stockMessage={getSaleLineStockMessage(line, serviceById)}
-                      hasStockIssue={hasSaleLineStockIssue(line, serviceById)}
                       onChange={(patch) => updateLine(index, patch)}
                       onRemove={() => removeLine(index)}
                     />

@@ -19,7 +19,6 @@ const ManagementModule = lazy(() =>
   }))
 )
 const CustomersPage = lazy(() => import('~/pages/customers/customers_page'))
-const StockMovementsPage = lazy(() => import('~/pages/stock/stock_movements_page'))
 
 // Écran affiché le temps de charger un module
 const moduleFallback = <div className="min-h-screen" />
@@ -65,14 +64,6 @@ export const baseRoutes: RouteObject[] = [
             element: (
               <Suspense fallback={moduleFallback}>
                 <CustomersPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: '/stock',
-            element: (
-              <Suspense fallback={moduleFallback}>
-                <StockMovementsPage />
               </Suspense>
             ),
           },

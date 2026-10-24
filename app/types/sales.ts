@@ -1,6 +1,5 @@
 import type { Currency } from '#types/currency'
 import type { SalePaymentType } from '#models/sale'
-import type ProductService from '#models/product_service'
 
 export interface CreateSaleItemInput {
   productServiceId: string
@@ -9,7 +8,6 @@ export interface CreateSaleItemInput {
 
 export interface PreparedSaleItemInput {
   productServiceId: string
-  stockProduct: ProductService
   quantity: number
   currency: Currency
   unitPrice: number

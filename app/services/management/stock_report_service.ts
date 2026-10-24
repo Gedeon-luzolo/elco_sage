@@ -1,7 +1,30 @@
 import StockMovement from '#models/stock_movement'
-import type { DashboardStockReport, DashboardStockReportRow } from '#types/dashboard'
 import { dateTimeToDateKey } from '#utils/date_utils'
 import { DateTime } from 'luxon'
+
+export interface DashboardStockReportRow {
+  productId: string
+  productName: string
+  categoryName: string | null
+  baseUnit: string | null
+  periodInitialStock: number
+  totalEntries: number
+  periodStock: number
+  periodStockValueCdf: number
+  totalOutputs: number
+  outputsValueCdf: number
+  totalLosses: number
+  lossesValueCdf: number
+  finalTheoreticalStock: number
+  lastPhysicalStock: number | null
+  physicalStockValueCdf: number | null
+  finalVariance: number | null
+}
+
+export interface DashboardStockReport {
+  rows: DashboardStockReportRow[]
+  totals: DashboardStockReportRow
+}
 
 interface StockReportSource {
   startDate: Date

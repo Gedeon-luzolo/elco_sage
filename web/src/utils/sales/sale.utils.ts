@@ -80,51 +80,6 @@ export function getSaleLineService(
   return servicesById.get(line.productServiceId)
 }
 
-// Verifie si la ligne respecte le stock disponible du produit consomme.
-export function hasSaleLineStockIssue(
-  line: SaleLineState,
-  servicesById: Map<string, SaleServiceOption>
-) {
-  const service = getSaleLineService(line, servicesById)
-
-  if (!service) {
-    return false
-  }
-
-  // canSell couvre les blocages metier serveur: stock de la veille non valide, service mal configure, stock epuise.
-  // saleAvailableStock couvre ensuite le cas ou la quantite saisie depasse le stock courant.
-  return (
-    !service.canSell ||
-    service.saleAvailableStock === null ||
-    Number(line.quantity || 0) > service.saleAvailableStock
-  )
-}
-
-// Construit le message de stock affiche sous le service choisi.
-export function getSaleLineStockMessage(
-  line: SaleLineState,
-  servicesById: Map<string, SaleServiceOption>
-) {
-  const service = getSaleLineService(line, servicesById)
-
-  if (!service) {
-    return null
-  }
-
-  // Le backend fournit deja une raison lisible quand le service n'est pas vendable.
-  if (service.stockBlockingReason) {
-    return service.stockBlockingReason
-  }
-
-  // Sans quantite ou unite, on prefere afficher un blocage clair plutot qu'un stock ambigu.
-  if (service.saleAvailableStock === null || !service.stockProductBaseUnit) {
-    return 'Stock indisponible pour ce service.'
-  }
-
-  // Une unite de service consomme une unite de base du produit lie.
-  return `Stock disponible: ${service.saleAvailableStock} ${service.stockProductBaseUnit}`
-}
-
 // Calcule le montant avant remise sur toutes les lignes.
 export function getSaleTheoreticalAmount(
   lines: SaleLineState[],
@@ -132,15 +87,6 @@ export function getSaleTheoreticalAmount(
   currency: CurrencyCode
 ) {
   return lines.reduce((sum, line) => sum + getSaleLineTotal(line, servicesById, currency), 0)
-}
-
-// Verifie si au moins une ligne selectionnee depasse ou bloque le stock disponible.
-export function hasSaleStockIssue(
-  lines: SaleLineState[],
-  servicesById: Map<string, SaleServiceOption>
-) {
-  // Un seul probleme de stock suffit a bloquer le bouton d'enregistrement.
-  return lines.some((line) => hasSaleLineStockIssue(line, servicesById))
 }
 
 // Garde le montant a payer dans les bornes autorisees par le total theorique.
@@ -160,7 +106,7 @@ export function getSaleDiscountAmountFromPayableAmount(
 export function canSubmitSaleForm(form: SaleFormState) {
   const requiresCustomer = form.paymentType !== 'CASH' || Number(form.discountAmount || 0) > 0
 
-  // La validation frontend reste volontairement minimale; le backend recalculera prix et stock.
+  // La validation frontend reste volontairement minimale; le backend recalculera les prix.
   return (
     Boolean(form.currentCashSessionId) &&
     Boolean(form.operatorId) &&

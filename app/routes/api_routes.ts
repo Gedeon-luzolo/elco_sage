@@ -8,8 +8,9 @@ const ApiSalesController = () => import('#controllers/api/sales/api_sales_contro
 const ApiDebtsController = () => import('#controllers/api/sales/api_debts_controller')
 const ApiSaleRecoveriesController = () =>
   import('#controllers/api/sales/api_sale_recoveries_controller')
-const ApiStockMovementsController = () =>
-  import('#controllers/api/stock/api_stock_movements_controller')
+// Stock débranché : décommenter l'import et les routes du bloc « Stock » pour le réactiver.
+// const ApiStockMovementsController = () =>
+//   import('#controllers/api/stock/api_stock_movements_controller')
 const ApiCustomersController = () => import('#controllers/api/customers/api_customers_controller')
 const ApiProductServicesController = () =>
   import('#controllers/api/products/api_product_services_controller')
@@ -80,15 +81,15 @@ export function registerApiRoutes() {
           router.get('debts', [ApiDebtsController, 'index'])
           router.get('recoveries', [ApiSaleRecoveriesController, 'index'])
 
-          // Stock
-          router.get('stock', [ApiStockMovementsController, 'index'])
-          router.post('stock/movements', [ApiStockMovementsController, 'store'])
-          router.patch('stock/movements/:id', [ApiStockMovementsController, 'update'])
-          router.post('stock/validate-physical', [ApiStockMovementsController, 'validatePhysical'])
-          router.patch('stock/validate-physical/:id', [
-            ApiStockMovementsController,
-            'updatePhysical',
-          ])
+          // Stock (débranché)
+          // router.get('stock', [ApiStockMovementsController, 'index'])
+          // router.post('stock/movements', [ApiStockMovementsController, 'store'])
+          // router.patch('stock/movements/:id', [ApiStockMovementsController, 'update'])
+          // router.post('stock/validate-physical', [ApiStockMovementsController, 'validatePhysical'])
+          // router.patch('stock/validate-physical/:id', [
+          //   ApiStockMovementsController,
+          //   'updatePhysical',
+          // ])
 
           // Back-office : réservé à la direction
           router

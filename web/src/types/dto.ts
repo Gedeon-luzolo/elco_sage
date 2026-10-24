@@ -23,19 +23,13 @@ export type ProductCategoryDTO = {
   updatedAt: string | null
 }
 
-// Produit ou service, avec son stock vendable calculé par le serveur.
+// Produit ou service du catalogue.
 export type ProductServiceDTO = {
   id: string
   type: string
   name: string
   categoryId: string | null
   categoryName: string | null
-  stockProductId: string | null
-  stockProductName: string | null
-  stockProductBaseUnit: string | null
-  saleAvailableStock: number | null
-  canSell: boolean
-  stockBlockingReason: string | null
   isActive: boolean
   baseUnit: string | null
   packagingUnit: string | null

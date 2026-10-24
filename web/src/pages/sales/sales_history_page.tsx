@@ -49,7 +49,7 @@ export default function SalesHistoryPage() {
   const { useAction } = useCrud<SaleItemRow>({
     endpoint: '/sales',
     showSuccessToast: false,
-    invalidateQueries: ['/cash-sessions', '/product-services', '/stock', '/debts', '/recoveries'],
+    invalidateQueries: ['/cash-sessions', '/debts', '/recoveries'],
   })
 
   // Le serveur renvoie l'historique par lots ; chaque lot alimente plusieurs pages
@@ -248,7 +248,7 @@ export default function SalesHistoryPage() {
       <ConfirmationDialog
         open={Boolean(saleToCancel)}
         title="Annuler cette vente ?"
-        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée et les sorties de stock associées seront restaurées.`}
+        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée.`}
         confirmLabel="Annuler la vente"
         variant="destructive"
         onOpenChange={(open) => {

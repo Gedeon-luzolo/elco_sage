@@ -58,7 +58,7 @@ export function OfflineNotice() {
           <p className="flex-1 truncate">
             {isReconnected
               ? 'Connexion rétablie : les opérations en attente vont être envoyées.'
-              : 'Mode hors ligne : ventes et recouvrements possibles, envoyés au retour du réseau. Stock, clôture de caisse et gestion limités.'}
+              : 'Mode hors ligne : ventes et recouvrements possibles, envoyés au retour du réseau. Clôture de caisse et gestion limitées.'}
           </p>
 
           {!isReconnected && (

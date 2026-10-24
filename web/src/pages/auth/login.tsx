@@ -69,7 +69,7 @@ export default function Login() {
           variants={formItemVariants}
           transition={{ duration: 0.32, ease: 'easeOut' }}
         >
-          Gestion des ventes, du stock et des inventaires
+          Gestion des ventes et de la caisse
         </motion.p>
 
         <form onSubmit={handleSubmit} className="mt-10 flex w-full flex-col gap-4">

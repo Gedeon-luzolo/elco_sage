@@ -33,10 +33,10 @@ const EMPTY_CATEGORIES: ProductCategoryDTO[] = []
 const EMPTY_STATS = { total: 0, productCount: 0, serviceCount: 0 } as ProductServiceStats
 
 export default function ProductServicesPage() {
-  // Un article modifie le stock vendable et la vente : on invalide ces ressources
   const { useGetWithParams, useCreate, usePatch } = useCrud<ProductServicesPageProps>({
     endpoint: '/product-services',
-    invalidateQueries: ['/stock'],
+    // La liste des services vendables de la vente a sa propre clé : elle est rechargée aussi
+    invalidateQueries: ['/product-services'],
   })
   const { data } = useGetWithParams()
   const products = data?.products ?? EMPTY_ITEMS
@@ -102,7 +102,6 @@ export default function ProductServicesPage() {
 
     // Les Select sans valeur renvoient une chaine vide; le backend attend null pour les champs optionnels.
     payload.categoryId = payload.categoryId || null
-    payload.stockProductId = payload.stockProductId || null
     payload.baseUnit = payload.baseUnit || null
     payload.packagingUnit = payload.packagingUnit || null
     payload.packagingCapacity = payload.packagingCapacity || null
@@ -259,7 +258,6 @@ export default function ProductServicesPage() {
         item={selectedItem}
         submitLabel={selectedItem ? 'Enregistrer' : 'Créer'}
         categories={categories}
-        products={products}
         defaultType={defaultModalType}
         onOpenChange={(open) => {
           if (!open) closeModal()

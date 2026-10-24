@@ -67,9 +67,6 @@ export function ProductCard({ item, onEdit }: ProductCardProps) {
             1 {item.packagingUnit} = {item.packagingCapacity} {item.baseUnit}s
           </InfoPill>
         )}
-        {!isProduct && item.stockProductName && (
-          <InfoPill>Produit lié : {item.stockProductName}</InfoPill>
-        )}
       </div>
 
       {/* Prix : francs en avant, dollars en dessous */}

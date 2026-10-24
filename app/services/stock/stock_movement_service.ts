@@ -533,7 +533,6 @@ export default class StockMovementService {
   // les snapshots de vente et les produits vendables des dates suivantes.
   private invalidateStockDomains() {
     this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.productServices.activeForSalePrefix)
   }
 
   private ensurePayloadMatchesMovement(movement: StockMovement, productId: string, date: string) {

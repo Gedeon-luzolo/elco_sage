@@ -9,8 +9,6 @@ interface SaleTicketLineProps {
   line: SaleLineState
   service: ProductServiceDTO | undefined
   currency: CurrencyCode
-  stockMessage: string | null
-  hasStockIssue: boolean
   onChange: (patch: Partial<SaleLineState>) => void
   onRemove: () => void
 }
@@ -20,8 +18,6 @@ export function SaleTicketLine({
   line,
   service,
   currency,
-  stockMessage,
-  hasStockIssue,
   onChange,
   onRemove,
 }: SaleTicketLineProps) {
@@ -32,7 +28,9 @@ export function SaleTicketLine({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-semibold">{service?.name ?? 'Service inconnu'}</p>
-          <p className="text-xs text-muted-foreground">{formatMoneyWithCurrency(unitPrice, currency)}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatMoneyWithCurrency(unitPrice, currency)}
+          </p>
         </div>
         <p className="shrink-0 font-semibold">
           {formatMoneyWithCurrency(unitPrice * line.quantity, currency)}
@@ -75,8 +73,6 @@ export function SaleTicketLine({
           <Trash2 className="size-4" />
         </Button>
       </div>
-
-      {hasStockIssue && stockMessage && <p className="text-xs text-destructive">{stockMessage}</p>}
     </div>
   )
 }
