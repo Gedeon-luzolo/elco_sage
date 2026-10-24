@@ -78,15 +78,24 @@ export function DashboardPeriodicReportTab({
       <Card className="bg-background">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Rapport des ventes</CardTitle>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrint}
-            disabled={paginatedReports.items.length === 0}
-          >
-            <Printer className="size-4" />
-            Imprimer
-          </Button>
+          {/* Pagination à côté du bouton d'impression */}
+          <div className="flex flex-wrap items-center gap-3">
+            <PaginationControls
+              currentPage={paginatedReports.currentPage}
+              totalPages={paginatedReports.totalLoadedPages}
+              onPageChange={paginatedReports.goToPage}
+              className=""
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrint}
+              disabled={paginatedReports.items.length === 0}
+            >
+              <Printer className="size-4" />
+              Imprimer
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {paginatedReports.items.length === 0 ? (
@@ -98,14 +107,6 @@ export function DashboardPeriodicReportTab({
             />
           ) : (
             <>
-              {paginatedReports.totalLoadedPages > 1 && (
-                <PaginationControls
-                  currentPage={paginatedReports.currentPage}
-                  totalPages={paginatedReports.totalLoadedPages}
-                  onPageChange={paginatedReports.goToPage}
-                />
-              )}
-
               <DashboardPeriodicReportTable reports={paginatedReports.visibleItems} />
             </>
           )}

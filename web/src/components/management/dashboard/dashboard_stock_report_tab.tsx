@@ -81,15 +81,24 @@ export function DashboardStockReportTab({ period, stockReport }: DashboardStockR
               Entrées, sorties, pertes et écarts par produit sur la période.
             </CardDescription>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrint}
-            disabled={paginatedReport.items.length === 0}
-          >
-            <Printer className="size-4" />
-            Imprimer
-          </Button>
+          {/* Pagination à côté du bouton d'impression */}
+          <div className="flex flex-wrap items-center gap-3">
+            <PaginationControls
+              currentPage={paginatedReport.currentPage}
+              totalPages={paginatedReport.totalLoadedPages}
+              onPageChange={paginatedReport.goToPage}
+              className=""
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrint}
+              disabled={paginatedReport.items.length === 0}
+            >
+              <Printer className="size-4" />
+              Imprimer
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {paginatedReport.items.length === 0 ? (
@@ -101,14 +110,6 @@ export function DashboardStockReportTab({ period, stockReport }: DashboardStockR
             />
           ) : (
             <>
-              {paginatedReport.totalLoadedPages > 1 && (
-                <PaginationControls
-                  currentPage={paginatedReport.currentPage}
-                  totalPages={paginatedReport.totalLoadedPages}
-                  onPageChange={paginatedReport.goToPage}
-                />
-              )}
-
               <DashboardStockReportTable
                 rows={paginatedReport.visibleItems}
                 totals={stockReport.totals}
