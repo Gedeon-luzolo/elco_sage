@@ -2,6 +2,7 @@ import { ArrowLeft, CloudOff, Package, RefreshCw, Warehouse } from 'lucide-react
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '~/components/ui/button'
+import { PaginationControls } from '~/components/ui/pagination_controls'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
@@ -16,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
+import { usePaginated } from '~/hooks/use_paginated'
 import { useSearch } from '~/hooks/use_search'
 import { StockEntryDialog } from '~/components/stock/stock_entry_dialog'
 import { StockPhysicalDialog } from '~/components/stock/stock_physical_dialog'
@@ -30,6 +32,10 @@ import { formatShortTime, todayDateKey } from '~/utils/date'
  * Permet de visualiser, enregistrer les entrées et valider les stocks physiques.
  */
 const EMPTY_STOCK: StockMovementItem[] = []
+
+// Champs de recherche et taille de page, hors du composant pour rester stables d'un rendu à l'autre.
+const STOCK_SEARCH_FIELDS: (keyof StockMovementItem)[] = ['productName']
+const STOCK_PAGE_SIZE = 10
 
 export default function StockMovementsPage() {
   const navigate = useNavigate()
@@ -49,7 +55,13 @@ export default function StockMovementsPage() {
     filteredItems,
   } = useSearch({
     items: stockItems,
-    fields: ['productName'],
+    fields: STOCK_SEARCH_FIELDS,
+  })
+
+  // Pagination locale appliquée après la recherche
+  const { visibleItems, currentPage, totalLoadedPages, goToPage } = usePaginated({
+    initialItems: filteredItems,
+    pageSize: STOCK_PAGE_SIZE,
   })
 
   // Trouver le mouvement sélectionné
@@ -130,6 +142,13 @@ export default function StockMovementsPage() {
             <RefreshCw className={isFetching ? 'size-4 animate-spin' : 'size-4'} />
             Actualiser
           </Button>
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalLoadedPages}
+            onPageChange={goToPage}
+            className="sm:ml-auto"
+          />
         </section>
 
         {/* Vue en split : Tableau + Panneau de détails */}
@@ -148,125 +167,129 @@ export default function StockMovementsPage() {
             />
           )
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_450px]">
-            {/* Tableau maître */}
-            {/* Liste mobile : évite le tableau horizontal sur petit écran. */}
-            <div className="grid gap-3 md:hidden">
-              {filteredItems.map((item) => {
-                const hasMovement = item.id !== -1
-                const isSelected = selectedMovementId === item.productId
+          <>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_450px]">
+              {/* Tableau maître */}
+              {/* Liste mobile : évite le tableau horizontal sur petit écran. */}
+              <div className="grid gap-3 md:hidden">
+                {visibleItems.map((item) => {
+                  const hasMovement = item.id !== -1
+                  const isSelected = selectedMovementId === item.productId
 
-                return (
-                  <StockMobileCard
-                    key={item.productId}
-                    item={item}
-                    hasMovement={hasMovement}
-                    isSelected={isSelected}
-                    onSelect={() => setSelectedMovementId(item.productId)}
-                  />
-                )
-              })}
-            </div>
-
-            <div className="hidden h-[70vh] overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block">
-              <div className="h-full overflow-y-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="font-semibold">Produit</TableHead>
-                      <TableHead className="font-semibold">Catégorie</TableHead>
-                      <TableHead className="text-right font-semibold">Stock Initial</TableHead>
-                      <TableHead className="text-right font-semibold">Entrées</TableHead>
-                      <TableHead className="text-right font-semibold">Disponible</TableHead>
-                      <TableHead className="text-right font-semibold">Sorties</TableHead>
-                      <TableHead className="text-right font-semibold">Pertes</TableHead>
-                      <TableHead className="text-right font-semibold">Théorique</TableHead>
-                      <TableHead className="text-right font-semibold">Physique</TableHead>
-                      <TableHead className="text-right font-semibold">Écart</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredItems.map((item) => {
-                      const hasMovement = item.id !== -1
-                      const isSelected = selectedMovementId === item.productId
-
-                      return (
-                        <TableRow
-                          key={item.productId}
-                          onClick={() => setSelectedMovementId(item.productId)}
-                          className={`cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
-                            !hasMovement ? 'opacity-60' : ''
-                          } ${isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
-                        >
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <span>{item.productName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">
-                              {item.categoryName || '—'}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatQuantity(item.initialStock)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-semibold text-blue-600">
-                              {formatQuantity(item.entries)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatQuantity(item.availableStock)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-semibold text-red-600">
-                              {formatQuantity(item.outputs)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-semibold text-orange-600">
-                              {formatQuantity(item.losses)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatQuantity(item.theoreticalStock)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="font-bold">{formatQuantity(item.physicalStock)}</span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {item.variance !== null && (
-                              <span
-                                className={`font-bold ${
-                                  Math.abs(item.variance) > 0
-                                    ? 'text-amber-600'
-                                    : 'text-emerald-600'
-                                }`}
-                              >
-                                {formatQuantity(item.variance)}
-                              </span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
+                  return (
+                    <StockMobileCard
+                      key={item.productId}
+                      item={item}
+                      hasMovement={hasMovement}
+                      isSelected={isSelected}
+                      onSelect={() => setSelectedMovementId(item.productId)}
+                    />
+                  )
+                })}
               </div>
-            </div>
 
-            {/* Panneau de détails */}
-            {selectedMovement && (
-              <StockDetailPanel
-                movement={selectedMovement}
-                onClose={() => setSelectedMovementId(null)}
-                // Sans réseau, les actions de modification disparaissent
-                onCreateEntry={isOnline ? openEntryDialog : undefined}
-                onValidatePhysical={isOnline ? openPhysicalDialog : undefined}
-              />
-            )}
-          </div>
+              <div className="hidden h-[70vh] overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block">
+                <div className="h-full overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-semibold">Produit</TableHead>
+                        <TableHead className="font-semibold">Catégorie</TableHead>
+                        <TableHead className="text-right font-semibold">Stock Initial</TableHead>
+                        <TableHead className="text-right font-semibold">Entrées</TableHead>
+                        <TableHead className="text-right font-semibold">Disponible</TableHead>
+                        <TableHead className="text-right font-semibold">Sorties</TableHead>
+                        <TableHead className="text-right font-semibold">Pertes</TableHead>
+                        <TableHead className="text-right font-semibold">Théorique</TableHead>
+                        <TableHead className="text-right font-semibold">Physique</TableHead>
+                        <TableHead className="text-right font-semibold">Écart</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visibleItems.map((item) => {
+                        const hasMovement = item.id !== -1
+                        const isSelected = selectedMovementId === item.productId
+
+                        return (
+                          <TableRow
+                            key={item.productId}
+                            onClick={() => setSelectedMovementId(item.productId)}
+                            className={`cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                              !hasMovement ? 'opacity-60' : ''
+                            } ${isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''}`}
+                          >
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                <span>{item.productName}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-muted-foreground">
+                                {item.categoryName || '—'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatQuantity(item.initialStock)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="font-semibold text-blue-600">
+                                {formatQuantity(item.entries)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatQuantity(item.availableStock)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="font-semibold text-red-600">
+                                {formatQuantity(item.outputs)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="font-semibold text-orange-600">
+                                {formatQuantity(item.losses)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatQuantity(item.theoreticalStock)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="font-bold">
+                                {formatQuantity(item.physicalStock)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {item.variance !== null && (
+                                <span
+                                  className={`font-bold ${
+                                    Math.abs(item.variance) > 0
+                                      ? 'text-amber-600'
+                                      : 'text-emerald-600'
+                                  }`}
+                                >
+                                  {formatQuantity(item.variance)}
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Panneau de détails */}
+              {selectedMovement && (
+                <StockDetailPanel
+                  movement={selectedMovement}
+                  onClose={() => setSelectedMovementId(null)}
+                  // Sans réseau, les actions de modification disparaissent
+                  onCreateEntry={isOnline ? openEntryDialog : undefined}
+                  onValidatePhysical={isOnline ? openPhysicalDialog : undefined}
+                />
+              )}
+            </div>
+          </>
         )}
 
         {/* Dialog pour enregistrer les entrées */}
