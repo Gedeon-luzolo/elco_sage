@@ -21,7 +21,11 @@ export default defineConfig({
   ],
 
   // Modules importés avant le démarrage
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/vine'),
+  ],
 
   hooks: {
     init: [
