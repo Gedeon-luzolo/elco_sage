@@ -10,6 +10,7 @@ import {
 
 type SearchableSelectProps<T> = {
   id?: string
+  name?: string
   items: T[]
   value: string
   onValueChange: (value: string) => void
@@ -18,6 +19,7 @@ type SearchableSelectProps<T> = {
   getDisabled?: (item: T) => boolean
   placeholder?: string
   emptyMessage?: string
+  required?: boolean
   disabled?: boolean
   className?: string
 }
@@ -25,6 +27,7 @@ type SearchableSelectProps<T> = {
 // Liste déroulante avec recherche intégrée, pour les longues listes (produits, clients).
 export function SearchableSelect<T>({
   id,
+  name,
   items,
   value,
   onValueChange,
@@ -33,6 +36,7 @@ export function SearchableSelect<T>({
   getDisabled,
   placeholder = 'Sélectionner...',
   emptyMessage = 'Aucun résultat.',
+  required = false,
   disabled = false,
   className,
 }: SearchableSelectProps<T>) {
@@ -45,6 +49,8 @@ export function SearchableSelect<T>({
       onValueChange={(item) => onValueChange(item ? getValue(item) : '')}
       itemToStringLabel={getLabel}
       itemToStringValue={getValue}
+      name={name}
+      required={required}
       disabled={disabled}
     >
       <ComboboxTrigger id={id} className={className ?? 'h-10'}>
