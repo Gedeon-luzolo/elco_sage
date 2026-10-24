@@ -103,11 +103,9 @@ export function DashboardStockReportTab({ period, stockReport }: DashboardStockR
             <>
               {paginatedReport.totalLoadedPages > 1 && (
                 <PaginationControls
-                  canGoPrevious={paginatedReport.canGoPrevious}
-                  canGoNext={paginatedReport.canGoNext}
-                  pageSize={STOCK_REPORT_PAGE_SIZE}
-                  onPrevious={paginatedReport.goToPreviousPage}
-                  onNext={paginatedReport.goToNextPage}
+                  currentPage={paginatedReport.currentPage}
+                  totalPages={paginatedReport.totalLoadedPages}
+                  onPageChange={paginatedReport.goToPage}
                 />
               )}
 

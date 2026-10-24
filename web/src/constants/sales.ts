@@ -34,3 +34,7 @@ export const SALES_NAV_LINKS: SalesNavLink[] = [
     icon: CalendarDays,
   },
 ]
+
+// Historique des ventes : un lot du serveur alimente deux pages affichées.
+export const SALES_HISTORY_PAGE_SIZE = 20
+export const SALES_HISTORY_BATCH_SIZE = 40

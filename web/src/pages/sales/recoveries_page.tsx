@@ -198,11 +198,9 @@ export default function RecoveriesPage() {
 
                   {paginatedRecoveries.totalLoadedPages > 1 && (
                     <PaginationControls
-                      canGoPrevious={paginatedRecoveries.canGoPrevious}
-                      canGoNext={paginatedRecoveries.canGoNext}
-                      pageSize={RECOVERIES_PAGE_SIZE}
-                      onPrevious={paginatedRecoveries.goToPreviousPage}
-                      onNext={paginatedRecoveries.goToNextPage}
+                      currentPage={paginatedRecoveries.currentPage}
+                      totalPages={paginatedRecoveries.totalLoadedPages}
+                      onPageChange={paginatedRecoveries.goToPage}
                     />
                   )}
                 </div>

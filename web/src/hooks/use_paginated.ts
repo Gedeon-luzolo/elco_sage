@@ -35,16 +35,9 @@ export function usePaginated<T>({ initialItems, pageSize = 10 }: UsePaginatedPar
     setCurrentPage(1)
   }
 
-  // Revient à la page précédente sans descendre sous la première page.
-  const goToPreviousPage = () => {
-    setCurrentPage((page) => Math.max(1, page - 1))
-  }
-
-  // Avance vers la page suivante déjà disponible en mémoire.
-  const goToNextPage = () => {
-    if (currentPage < totalLoadedPages) {
-      setCurrentPage((page) => page + 1)
-    }
+  // Va directement à une page déjà disponible en mémoire.
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.min(totalLoadedPages, Math.max(1, page)))
   }
 
   return {
@@ -53,10 +46,7 @@ export function usePaginated<T>({ initialItems, pageSize = 10 }: UsePaginatedPar
     currentPage,
     totalLoadedPages,
     loadedItemsCount: items.length,
-    canGoPrevious: currentPage > 1,
-    canGoNext: currentPage < totalLoadedPages,
     reset,
-    goToPreviousPage,
-    goToNextPage,
+    goToPage,
   }
 }

@@ -206,11 +206,9 @@ export default function ProductServicesPage() {
               <>
                 {paginatedProducts.totalLoadedPages > 1 && (
                   <PaginationControls
-                    canGoPrevious={paginatedProducts.canGoPrevious}
-                    canGoNext={paginatedProducts.canGoNext}
-                    pageSize={PRODUCT_SERVICES_PAGE_SIZE}
-                    onPrevious={paginatedProducts.goToPreviousPage}
-                    onNext={paginatedProducts.goToNextPage}
+                    currentPage={paginatedProducts.currentPage}
+                    totalPages={paginatedProducts.totalLoadedPages}
+                    onPageChange={paginatedProducts.goToPage}
                   />
                 )}
 
@@ -240,11 +238,9 @@ export default function ProductServicesPage() {
               <>
                 {paginatedServices.totalLoadedPages > 1 && (
                   <PaginationControls
-                    canGoPrevious={paginatedServices.canGoPrevious}
-                    canGoNext={paginatedServices.canGoNext}
-                    pageSize={PRODUCT_SERVICES_PAGE_SIZE}
-                    onPrevious={paginatedServices.goToPreviousPage}
-                    onNext={paginatedServices.goToNextPage}
+                    currentPage={paginatedServices.currentPage}
+                    totalPages={paginatedServices.totalLoadedPages}
+                    onPageChange={paginatedServices.goToPage}
                   />
                 )}
 

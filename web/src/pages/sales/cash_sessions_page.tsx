@@ -76,11 +76,9 @@ export default function CashSessionsPage() {
           <>
             {paginatedSessions.totalLoadedPages > 1 && (
               <PaginationControls
-                canGoPrevious={paginatedSessions.canGoPrevious}
-                canGoNext={paginatedSessions.canGoNext}
-                pageSize={CASH_SESSIONS_PAGE_SIZE}
-                onPrevious={paginatedSessions.goToPreviousPage}
-                onNext={paginatedSessions.goToNextPage}
+                currentPage={paginatedSessions.currentPage}
+                totalPages={paginatedSessions.totalLoadedPages}
+                onPageChange={paginatedSessions.goToPage}
               />
             )}
 

@@ -100,11 +100,9 @@ export function DashboardPeriodicReportTab({
             <>
               {paginatedReports.totalLoadedPages > 1 && (
                 <PaginationControls
-                  canGoPrevious={paginatedReports.canGoPrevious}
-                  canGoNext={paginatedReports.canGoNext}
-                  pageSize={PERIODIC_REPORT_PAGE_SIZE}
-                  onPrevious={paginatedReports.goToPreviousPage}
-                  onNext={paginatedReports.goToNextPage}
+                  currentPage={paginatedReports.currentPage}
+                  totalPages={paginatedReports.totalLoadedPages}
+                  onPageChange={paginatedReports.goToPage}
                 />
               )}
 

@@ -27,8 +27,7 @@ import {
   JOURNALISATION_MODULE_OPTIONS,
 } from '~/constants/journalisations'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
-import { useCrud } from '~/hooks/common/useCrud'
-import { usePaginated } from '~/hooks/use_paginated'
+import { useServerBatchPagination } from '~/hooks/use_server_batch_pagination'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import { ManagementLayout } from '~/layouts/management_layout'
 import type {
@@ -37,9 +36,9 @@ import type {
 } from '~/types/journalisation_types'
 import { formatLongDate, formatShortTime } from '~/utils/date'
 
+// Un lot du serveur alimente cinq pages affichées.
 const JOURNALISATIONS_PAGE_SIZE = 10
-
-const EMPTY_JOURNALISATIONS: JournalisationListItem[] = []
+const JOURNALISATIONS_BATCH_SIZE = 50
 
 export default function JournalisationsPage() {
   // Hooks d'état local pour les filtres.
@@ -51,18 +50,17 @@ export default function JournalisationsPage() {
     startDate?: string
     endDate?: string
   }>({ module: 'ALL' })
-  const { data, isFetching: isLoading } = useCrud<JournalisationListItem>({
+
+  // Le serveur renvoie le journal par lots ; chaque lot alimente plusieurs pages
+  const journalisations = useServerBatchPagination<JournalisationListItem>({
     endpoint: '/journalisations',
-  }).useListWithParams(appliedFilters)
-  const journalisations = data ?? EMPTY_JOURNALISATIONS
-
-  // Hook de pagination pour gérer les entrées visibles et la navigation.
-  const paginatedJournalisations = usePaginated<JournalisationListItem>({
-    initialItems: journalisations,
-    pageSize: JOURNALISATIONS_PAGE_SIZE,
+    params: appliedFilters,
+    itemsPerPage: JOURNALISATIONS_PAGE_SIZE,
+    batchSize: JOURNALISATIONS_BATCH_SIZE,
   })
+  const { isLoading, isFetching } = journalisations
 
-  // Applique les filtres cote serveur ; la pagination reste ensuite locale.
+  // Applique les filtres côté serveur et repart du premier lot.
   const searchJournalisations = () => {
     setAppliedFilters({
       module,
@@ -76,7 +74,7 @@ export default function JournalisationsPage() {
       <section className="flex flex-col gap-6">
         <PageHeader
           title="Journalisation"
-          description={`Les actions chargées sont affichées par page de ${JOURNALISATIONS_PAGE_SIZE}.`}
+          description={`Les actions sont affichées par page de ${JOURNALISATIONS_PAGE_SIZE}.`}
           icon={History}
           accentClassName={MODULE_HEADER_ACCENTS.management}
         />
@@ -116,7 +114,7 @@ export default function JournalisationsPage() {
                 endDate={selectionDate.endDate}
                 onDateChange={selectionDate.handleDateChange}
                 onSearch={searchJournalisations}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 className="xl:w-auto"
                 hideCardWrapper
               />
@@ -127,7 +125,7 @@ export default function JournalisationsPage() {
         {isLoading ? (
           <DataLoader title="Chargement des journalisations..." />
         ) : (
-          <Card className="bg-background">
+          <Card className={`bg-background transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
             <CardHeader>
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-md bg-muted">
@@ -136,19 +134,17 @@ export default function JournalisationsPage() {
                 <div>
                   <CardTitle>Actions enregistrées</CardTitle>
                   <CardDescription>
-                    Page {paginatedJournalisations.currentPage} -{' '}
-                    {paginatedJournalisations.loadedItemsCount} entrée(s) chargée(s)
+                    Page {journalisations.currentPage} sur {journalisations.totalPages} -{' '}
+                    {journalisations.totalItems} entrée(s)
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <PaginationControls
-                canGoPrevious={paginatedJournalisations.canGoPrevious}
-                canGoNext={paginatedJournalisations.canGoNext}
-                pageSize={JOURNALISATIONS_PAGE_SIZE}
-                onPrevious={paginatedJournalisations.goToPreviousPage}
-                onNext={paginatedJournalisations.goToNextPage}
+                currentPage={journalisations.currentPage}
+                totalPages={journalisations.totalPages}
+                onPageChange={journalisations.goToPage}
               />
               <Table>
                 <TableHeader>
@@ -160,7 +156,7 @@ export default function JournalisationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedJournalisations.visibleItems.map((journalisation) => {
+                  {journalisations.currentItems.map((journalisation) => {
                     const createdAt = new Date(journalisation.createdAt)
 
                     return (
@@ -192,7 +188,7 @@ export default function JournalisationsPage() {
                     )
                   })}
 
-                  {paginatedJournalisations.items.length === 0 && (
+                  {journalisations.currentItems.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="h-64">
                         <EmptyState

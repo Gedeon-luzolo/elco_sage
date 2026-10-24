@@ -21,7 +21,8 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
-import { usePaginated } from '~/hooks/use_paginated'
+import { SALES_HISTORY_BATCH_SIZE, SALES_HISTORY_PAGE_SIZE } from '~/constants/sales'
+import { useServerBatchPagination } from '~/hooks/use_server_batch_pagination'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useOutbox } from '~/hooks/useOutbox'
 import { getPendingSales } from '~/lib/offline/pending_sales'
@@ -31,16 +32,12 @@ import type { SaleItemRow } from '~/types/sale_types'
 import { todayDateKey } from '~/utils/date'
 import { isManagementRole } from '~/utils/user_role.utils'
 
-const SALES_HISTORY_PAGE_SIZE = 20
-
 // Options du filtre de statut, alignees sur l'enum backend SaleStatus.
 const SALE_STATUS_OPTIONS = [
   { value: 'ALL', label: 'Toutes' },
   { value: 'ACTIVE', label: 'Actives' },
   { value: 'CANCELLED', label: 'Annulées' },
 ] as const
-
-const EMPTY_SALES: SaleItemRow[] = []
 
 export default function SalesHistoryPage() {
   const { user } = useAuth()
@@ -55,13 +52,26 @@ export default function SalesHistoryPage() {
     status: string
   }>({ status: 'ALL' })
 
-  const { useListWithParams, useAction } = useCrud<SaleItemRow>({
+  const { useAction } = useCrud<SaleItemRow>({
     endpoint: '/sales',
     showSuccessToast: false,
     invalidateQueries: ['/cash-sessions', '/product-services', '/stock', '/debts', '/recoveries'],
   })
-  const { data, isFetching: isLoading } = useListWithParams(appliedFilters)
-  const serverSales = data ?? EMPTY_SALES
+
+  // Le serveur renvoie l'historique par lots ; chaque lot alimente plusieurs pages
+  const {
+    currentItems: serverSales,
+    currentPage,
+    totalPages,
+    isLoading,
+    isFetching,
+    goToPage,
+  } = useServerBatchPagination<SaleItemRow>({
+    endpoint: '/sales',
+    params: appliedFilters,
+    itemsPerPage: SALES_HISTORY_PAGE_SIZE,
+    batchSize: SALES_HISTORY_BATCH_SIZE,
+  })
 
   // Les ventes faites hors ligne s'affichent avec celles du serveur, selon les mêmes filtres
   const outbox = useOutbox()
@@ -70,7 +80,12 @@ export default function SalesHistoryPage() {
     [outbox, user?.id, appliedFilters]
   )
   const pendingSaleIds = useMemo(() => new Set(pendingSales.map((sale) => sale.id)), [pendingSales])
-  const sales = useMemo(() => [...pendingSales, ...serverSales], [pendingSales, serverSales])
+
+  // Les ventes en attente s'affichent en tête de la première page
+  const visibleSales = useMemo(
+    () => (currentPage === 1 ? [...pendingSales, ...serverSales] : serverSales),
+    [currentPage, pendingSales, serverSales]
+  )
   const cancelSale = useAction<string>({
     method: 'patch',
     path: (saleId) => `/sales/${saleId}/cancel`,
@@ -78,23 +93,15 @@ export default function SalesHistoryPage() {
   })
   const [saleToCancel, setSaleToCancel] = useState<SaleItemRow | null>(null)
 
-  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(sales[0]?.id ?? null)
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
 
-  // Pagine en mémoire le lot déjà chargé depuis le serveur.
-  const paginatedSales = usePaginated({
-    initialItems: sales,
-    pageSize: SALES_HISTORY_PAGE_SIZE,
-  })
-
-  const effectiveSelectedSaleId = paginatedSales.visibleItems.some(
-    (sale) => sale.id === selectedSaleId
-  )
+  const effectiveSelectedSaleId = visibleSales.some((sale) => sale.id === selectedSaleId)
     ? selectedSaleId
-    : (paginatedSales.visibleItems[0]?.id ?? null)
+    : (visibleSales[0]?.id ?? null)
 
   const selectedSale = useMemo(
-    () => sales.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
-    [sales, effectiveSelectedSaleId]
+    () => visibleSales.find((sale) => sale.id === effectiveSelectedSaleId) ?? null,
+    [visibleSales, effectiveSelectedSaleId]
   )
   const selectSaleForPrint = useCallback((saleId: string) => setSelectedSaleId(saleId), [])
 
@@ -194,11 +201,11 @@ export default function SalesHistoryPage() {
                 variant="outline"
                 type="button"
                 size="lg"
-                disabled={isLoading}
+                disabled={isFetching}
                 onClick={searchSalesHistory}
               >
                 <Search className="size-4" />
-                {isLoading ? 'Chargement...' : 'Chercher'}
+                {isFetching ? 'Chargement...' : 'Chercher'}
               </Button>
             </div>
           </CardHeader>
@@ -206,27 +213,28 @@ export default function SalesHistoryPage() {
 
         {isLoading ? (
           <DataLoader title="Chargement de l'historique..." />
-        ) : sales.length === 0 ? (
+        ) : visibleSales.length === 0 ? (
           <EmptyState
             icon={Search}
             title="Aucune vente trouvée"
             description="Modifiez la date, le statut ou le numéro d'addition recherché."
           />
         ) : (
-          <div className="flex flex-col gap-4">
-            {paginatedSales.totalLoadedPages > 1 && (
+          <div
+            className={`flex flex-col gap-4 transition-opacity ${isFetching ? 'opacity-60' : ''}`}
+          >
+            {totalPages > 1 && (
               <PaginationControls
-                canGoPrevious={paginatedSales.canGoPrevious}
-                canGoNext={paginatedSales.canGoNext}
-                pageSize={SALES_HISTORY_PAGE_SIZE}
-                onPrevious={paginatedSales.goToPreviousPage}
-                onNext={paginatedSales.goToNextPage}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                className="justify-end"
               />
             )}
 
             <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
               <SalesTable
-                sales={paginatedSales.visibleItems}
+                sales={visibleSales}
                 selectedSaleId={effectiveSelectedSaleId}
                 onSelectSale={setSelectedSaleId}
                 pendingSaleIds={pendingSaleIds}

@@ -2,46 +2,96 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
 interface PaginationControlsProps {
-  canGoPrevious: boolean
-  canGoNext: boolean
-  pageSize: number
-  onPrevious: () => void
-  onNext: () => void
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  className?: string
 }
 
-// Actions de pagination en mémoire.
+// Numéros de page à afficher : toutes les pages si elles sont peu nombreuses, sinon les pages
+// proches de la page courante avec la première et la dernière, séparées par des points de suspension.
+function getPageNumbers(currentPage: number, totalPages: number) {
+  const maxVisiblePages = 4
+
+  if (totalPages <= maxVisiblePages) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+
+  // Début de la liste : les premières pages, puis la dernière
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, '...', totalPages]
+  }
+
+  // Fin de la liste : la première page, puis les dernières
+  if (currentPage >= totalPages - 2) {
+    return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+  }
+
+  // Milieu : la page courante et ses voisines
+  return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages]
+}
+
+// Pagination par numéros de page.
 export function PaginationControls({
-  canGoPrevious,
-  canGoNext,
-  pageSize,
-  onPrevious,
-  onNext,
+  currentPage,
+  totalPages,
+  onPageChange,
+  className = 'justify-center',
 }: PaginationControlsProps) {
+  // Une seule page : rien à paginer
+  if (totalPages <= 1) {
+    return null
+  }
+
   return (
-    <div className="mb-4 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-muted-foreground">{pageSize} lignes par page.</p>
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full sm:w-auto"
-          disabled={!canGoPrevious}
-          onClick={onPrevious}
-        >
-          <ChevronLeft className="size-4" />
-          Précédent
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full sm:w-auto"
-          disabled={!canGoNext}
-          onClick={onNext}
-        >
-          Suivant
-          <ChevronRight className="size-4" />
-        </Button>
-      </div>
-    </div>
+    <nav
+      aria-label="Pagination"
+      className={`mb-4 flex items-center gap-1 border-b pb-4 ${className}`}
+    >
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="size-8 p-0"
+        aria-label="Page précédente"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        <ChevronLeft className="size-4" />
+      </Button>
+
+      {getPageNumbers(currentPage, totalPages).map((page, index) =>
+        page === '...' ? (
+          <span key={`ellipsis-${index}`} className="px-2 text-sm text-muted-foreground">
+            ...
+          </span>
+        ) : (
+          <Button
+            key={page}
+            type="button"
+            variant={page === currentPage ? 'default' : 'outline'}
+            size="sm"
+            className="size-8 p-0"
+            aria-label={`Page ${page}`}
+            aria-current={page === currentPage ? 'page' : undefined}
+            onClick={() => onPageChange(page as number)}
+          >
+            {page}
+          </Button>
+        )
+      )}
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="size-8 p-0"
+        aria-label="Page suivante"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        <ChevronRight className="size-4" />
+      </Button>
+    </nav>
   )
 }

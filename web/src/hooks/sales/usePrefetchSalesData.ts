@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useOnlineStatus } from '~/hooks/useOnlineStatus'
+import { SALES_HISTORY_BATCH_SIZE } from '~/constants/sales'
 import { api } from '~/lib/api/fetch'
 import { refreshNumbering } from '~/lib/offline/numbering'
 
@@ -38,8 +39,8 @@ export function usePrefetchSalesData() {
     void prefetch('/customers/active-for-sale')
     void prefetch('/exchange-rates', { limit: 1 })
 
-    // Historique, dettes et recouvrements avec leurs filtres par défaut
-    void prefetch('/sales', { status: 'ALL' })
+    // Premier lot de l'historique, puis dettes et recouvrements avec leurs filtres par défaut
+    void prefetch('/sales', { status: 'ALL', offset: 0, limit: SALES_HISTORY_BATCH_SIZE })
     void prefetch('/debts', {})
     void prefetch('/recoveries', {})
 

@@ -199,11 +199,9 @@ export default function DebtsPage() {
 
                   {paginatedDebts.totalLoadedPages > 1 && (
                     <PaginationControls
-                      canGoPrevious={paginatedDebts.canGoPrevious}
-                      canGoNext={paginatedDebts.canGoNext}
-                      pageSize={DEBTS_PAGE_SIZE}
-                      onPrevious={paginatedDebts.goToPreviousPage}
-                      onNext={paginatedDebts.goToNextPage}
+                      currentPage={paginatedDebts.currentPage}
+                      totalPages={paginatedDebts.totalLoadedPages}
+                      onPageChange={paginatedDebts.goToPage}
                     />
                   )}
                 </div>
