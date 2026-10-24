@@ -26,7 +26,14 @@ const persistOptions = {
 // Racine de l'application : cache persistant, routeur, session et notifications.
 export function App() {
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={persistOptions}
+      // Un rechargement redemande les données au serveur
+      onSuccess={() => {
+        queryClient.invalidateQueries()
+      }}
+    >
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
