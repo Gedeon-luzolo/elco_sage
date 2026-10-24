@@ -9,17 +9,11 @@ import { SalesTable } from '~/components/sales/sales_table'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { OptionSelect } from '~/components/common/option_select'
 import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { PaginationControls } from '~/components/ui/pagination_controls'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { SALES_HISTORY_BATCH_SIZE, SALES_HISTORY_PAGE_SIZE } from '~/constants/sales'
 import { useServerBatchPagination } from '~/hooks/use_server_batch_pagination'
@@ -171,18 +165,12 @@ export default function SalesHistoryPage() {
 
               <div className="grid gap-2 xl:w-44">
                 <Label htmlFor="sale-status">Statut</Label>
-                <Select value={status} onValueChange={(value) => setStatus(value ?? 'ALL')}>
-                  <SelectTrigger id="sale-status" className="h-10 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SALE_STATUS_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <OptionSelect
+                  id="sale-status"
+                  options={SALE_STATUS_OPTIONS}
+                  value={status}
+                  onValueChange={setStatus}
+                />
               </div>
 
               <div className="grid gap-2 xl:w-44">

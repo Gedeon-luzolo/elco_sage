@@ -19,13 +19,7 @@ import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useOutbox } from '~/hooks/useOutbox'
@@ -264,68 +258,36 @@ export default function SaleCreatePage() {
                 <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <div className="grid gap-2">
                     <Label htmlFor="sale-payment-type">Paiement</Label>
-                    <Select
+                    <OptionSelect
                       id="sale-payment-type"
-                      items={SALE_PAYMENT_OPTIONS}
+                      options={SALE_PAYMENT_OPTIONS}
                       value={paymentType}
                       onValueChange={(value) => setPaymentType(value as SalePaymentType)}
-                    >
-                      <SelectTrigger className="h-10 w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SALE_PAYMENT_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="sale-currency">Devise</Label>
-                    <Select
+                    <OptionSelect
                       id="sale-currency"
-                      items={CURRENCY_OPTIONS}
+                      options={CURRENCY_OPTIONS}
                       value={currency}
                       onValueChange={(value) => setCurrency(value as CurrencyCode)}
-                    >
-                      <SelectTrigger className="h-10 w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CURRENCY_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="sale-operator">Opérateur</Label>
-                    <Select
+                    <OptionSelect
                       id="sale-operator"
-                      items={operators.map((operator) => ({
+                      options={operators.map((operator) => ({
                         label: operator.fullName ?? operator.email,
                         value: operator.id,
                       }))}
                       value={operatorId}
-                      onValueChange={(value) => setOperatorId(value ?? '')}
-                    >
-                      <SelectTrigger className="h-10 w-full">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {operators.map((operator) => (
-                          <SelectItem key={operator.id} value={operator.id}>
-                            {operator.fullName ?? operator.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onValueChange={setOperatorId}
+                      placeholder="Sélectionner..."
+                    />
                   </div>
 
                   <div className="grid gap-2">

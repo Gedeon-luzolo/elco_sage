@@ -10,13 +10,7 @@ import { Button } from '~/components/ui/button'
 import { SubmitButton } from '~/components/common/submit_button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import type { UserListItem, UserRole, UserSelectOption, UserStatus } from '~/types/user_types'
 
 type UserDialogDefaultValues = Pick<UserListItem, 'fullName' | 'email' | 'role' | 'status'>
@@ -81,44 +75,22 @@ export function CreateUpdateUserDialog({
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="grid flex-1 gap-2">
               <Label htmlFor={`${title}-role`}>Role</Label>
-              <Select
+              <OptionSelect
                 id={`${title}-role`}
                 name="role"
-                items={roleOptions}
+                options={roleOptions}
                 defaultValue={defaultValues.role}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {roleOptions.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="grid flex-1 gap-2">
               <Label htmlFor={`${title}-status`}>Statut</Label>
-              <Select
+              <OptionSelect
                 id={`${title}-status`}
                 name="status"
-                items={statusOptions}
+                options={statusOptions}
                 defaultValue={defaultValues.status}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           </div>
 

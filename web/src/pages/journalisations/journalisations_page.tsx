@@ -7,13 +7,7 @@ import { Badge } from '~/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { PaginationControls } from '~/components/ui/pagination_controls'
 import { PeriodSelector } from '~/components/ui/period_selector'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import {
   Table,
   TableBody,
@@ -91,22 +85,12 @@ export default function JournalisationsPage() {
                 <label className="text-sm font-medium" htmlFor="journalisation-module">
                   Module
                 </label>
-                <Select
-                  items={JOURNALISATION_MODULE_OPTIONS}
+                <OptionSelect
+                  id="journalisation-module"
+                  options={JOURNALISATION_MODULE_OPTIONS}
                   value={module}
                   onValueChange={(value) => setModule(value as JournalisationModuleFilter)}
-                >
-                  <SelectTrigger id="journalisation-module" className="h-10 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOURNALISATION_MODULE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
 
               <PeriodSelector

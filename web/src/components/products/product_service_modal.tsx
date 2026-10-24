@@ -11,13 +11,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import type { ProductCategoryDTO } from '~/types/dto'
 import type { ProductServiceItem } from '~/types/product_service_types'
 import { CURRENCY_OPTIONS, Currency } from '~/utils/currency'
@@ -90,8 +84,7 @@ export function ProductServiceModal({
    * Lors du changement de devise, si un élément existe en édition,
    * la valeur du prix est mise à jour instantanément vers le montant correspondant (USD ou CDF).
    */
-  const handleCurrencyChange = (value: Currency | null) => {
-    if (!value) return
+  const handleCurrencyChange = (value: Currency) => {
     setSelectedCurrency(value)
 
     if (item) {
@@ -133,24 +126,13 @@ export function ProductServiceModal({
             {/* Type : Produit ou Service (Pleine largeur) */}
             <div className="grid gap-2 sm:col-span-2">
               <Label htmlFor="ps-type">Type d&apos;article *</Label>
-              <Select
+              <OptionSelect
                 id="ps-type"
                 name="type"
-                items={PRODUCT_TYPE_OPTIONS}
+                options={PRODUCT_TYPE_OPTIONS}
                 defaultValue={selectedType}
                 onValueChange={handleTypeChange}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             {/* Nom de l'article */}
@@ -173,46 +155,26 @@ export function ProductServiceModal({
             {/* Catégorie associée (en face du Nom) */}
             <div className="grid gap-2">
               <Label htmlFor="ps-category">Catégorie</Label>
-              <Select
+              <OptionSelect
                 id="ps-category"
                 name="categoryId"
-                items={categoryOptions}
+                options={categoryOptions}
                 defaultValue={item?.categoryId ?? ''}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue placeholder="Sélectionner une catégorie..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Sélectionner une catégorie..."
+              />
             </div>
 
             {/* Produit physique consommé par le service pour les sorties de stock */}
             {isService && (
               <div className="grid gap-2">
                 <Label htmlFor="ps-stock-product">Produit lié *</Label>
-                <Select
+                <OptionSelect
                   id="ps-stock-product"
                   name="stockProductId"
-                  items={productOptions}
+                  options={productOptions}
                   defaultValue={item?.stockProductId ?? ''}
-                >
-                  <SelectTrigger className="h-10 w-full">
-                    <SelectValue placeholder="Sélectionner un produit..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {productOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Sélectionner un produit..."
+                />
               </div>
             )}
 
@@ -237,23 +199,12 @@ export function ProductServiceModal({
             {isEditing && (
               <div className="grid gap-2">
                 <Label htmlFor="ps-status">Statut d&apos;activation</Label>
-                <Select
+                <OptionSelect
                   id="ps-status"
                   name="isActive"
-                  items={ACTIVE_STATUS_OPTIONS}
+                  options={ACTIVE_STATUS_OPTIONS}
                   defaultValue={String(item.isActive)}
-                >
-                  <SelectTrigger className="h-10 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ACTIVE_STATUS_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
             )}
 
@@ -290,24 +241,13 @@ export function ProductServiceModal({
             {/* Devise (placée AVANT le prix) */}
             <div className="grid gap-2">
               <Label htmlFor="ps-currency">Devise *</Label>
-              <Select
+              <OptionSelect
                 id="ps-currency"
                 name="currency"
-                items={CURRENCY_OPTIONS}
+                options={CURRENCY_OPTIONS}
                 value={selectedCurrency}
-                onValueChange={handleCurrencyChange}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onValueChange={(value) => handleCurrencyChange(value as Currency)}
+              />
             </div>
 
             {/* Prix utile selon le type: vente pour service, achat pour produit */}

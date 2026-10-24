@@ -10,13 +10,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import type { ProductCategoryItem } from '~/types/product_category_types'
 import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
 
@@ -68,23 +62,12 @@ export function ProductCategoryModal({
           {isEditing && (
             <div className="grid gap-2">
               <Label htmlFor="category-status">Statut d'activation</Label>
-              <Select
+              <OptionSelect
                 id="category-status"
                 name="isActive"
-                items={ACTIVE_STATUS_OPTIONS}
+                options={ACTIVE_STATUS_OPTIONS}
                 defaultValue={category ? String(category.isActive) : 'true'}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIVE_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           )}
 

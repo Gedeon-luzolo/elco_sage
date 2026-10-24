@@ -11,13 +11,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import { CUSTOMER_TYPE_OPTIONS } from '~/constants/customers'
 import type { CustomerItem } from '~/types/customer_types'
 import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
@@ -104,24 +98,13 @@ export function CustomerDialog({
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="grid flex-1 gap-2">
               <Label htmlFor="customer-type">Type de client *</Label>
-              <Select
+              <OptionSelect
                 id="customer-type"
                 name="customerType"
-                items={CUSTOMER_TYPE_OPTIONS}
+                options={CUSTOMER_TYPE_OPTIONS}
                 defaultValue={customer?.customerType ?? 'MALE'}
                 required
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CUSTOMER_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="grid flex-1 gap-2">
@@ -152,23 +135,12 @@ export function CustomerDialog({
           {isEditing && (
             <div className="grid gap-2">
               <Label htmlFor="customer-status">Statut</Label>
-              <Select
+              <OptionSelect
                 id="customer-status"
                 name="isActive"
-                items={ACTIVE_STATUS_OPTIONS}
+                options={ACTIVE_STATUS_OPTIONS}
                 defaultValue={customer ? String(customer.isActive) : 'true'}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIVE_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           )}
 

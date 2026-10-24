@@ -13,13 +13,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
+import { OptionSelect } from '~/components/common/option_select'
 import type { StockMovementItem, StockUnit } from '~/types/stock_types'
 import { formatDateLabel } from '~/utils/date'
 import { getProductUnitOptions, hasProductPackaging } from '~/utils/products/product.utils'
@@ -147,22 +141,11 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
 
             <div className="grid gap-2">
               <Label>Unite</Label>
-              <Select
-                items={unitOptions}
+              <OptionSelect
+                options={unitOptions}
                 value={physicalStockUnit}
                 onValueChange={(value) => setPhysicalStockUnit(value as StockUnit)}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {unitOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             {physicalPreview && (
@@ -190,22 +173,11 @@ export function StockPhysicalDialog({ open, movement, onClose }: StockPhysicalDi
 
             <div className="grid gap-2">
               <Label>Unite</Label>
-              <Select
-                items={unitOptions}
+              <OptionSelect
+                options={unitOptions}
                 value={lossesUnit}
                 onValueChange={(value) => setLossesUnit(value as StockUnit)}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {unitOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             {lossesPreview && (
