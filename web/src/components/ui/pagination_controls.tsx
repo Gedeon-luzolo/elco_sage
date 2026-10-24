@@ -36,7 +36,7 @@ export function PaginationControls({
   currentPage,
   totalPages,
   onPageChange,
-  className = 'justify-center',
+  className = 'mb-3 justify-center',
 }: PaginationControlsProps) {
   // Une seule page : rien à paginer
   if (totalPages <= 1) {
@@ -44,10 +44,7 @@ export function PaginationControls({
   }
 
   return (
-    <nav
-      aria-label="Pagination"
-      className={`mb-4 flex items-center gap-1 border-b pb-4 ${className}`}
-    >
+    <nav aria-label="Pagination" className={`flex items-center gap-1 ${className}`}>
       <Button
         type="button"
         variant="outline"
