@@ -42,7 +42,8 @@ export default function SalesPage() {
     { label: 'Dettes', amounts: sessionTotals?.debtAmounts },
     { label: 'Recouvrements', amounts: sessionTotals?.recoveryAmounts },
   ]
-  const canCreateSale = Boolean(currentCashSession && currentCashSession.userId === user?.id)
+  // La caisse est partagée : tout utilisateur peut vendre tant qu'une session est ouverte
+  const canCreateSale = Boolean(currentCashSession)
 
   const sessionDescription = currentCashSession?.openingDate
     ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} à ${

@@ -47,7 +47,7 @@ export function usePrefetchSalesData() {
     // Ces données dépendent de la session de caisse ouverte
     if (sessionId) {
       // Plages de numéros d'addition gardées en réserve pour pouvoir vendre si le réseau se coupe
-      void refreshNumbering(sessionId).catch(() => undefined)
+      void refreshNumbering(sessionId, user.id).catch(() => undefined)
 
       void prefetch('/product-services/active-for-sale', { date: openingDate ?? undefined })
 

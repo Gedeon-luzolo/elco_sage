@@ -74,6 +74,14 @@ export default function CashSessionOpeningPage() {
           <div className="w-full">
             {currentCashSession ? (
               <div className="flex flex-col gap-5">
+                {/* Une seule session peut être ouverte à la fois : on dit qui l'a ouverte */}
+                <p className="text-sm text-muted-foreground">
+                  Une session est déjà ouverte par{' '}
+                  <span className="font-medium text-foreground">
+                    {currentCashSession.openedByName ?? 'un utilisateur'}
+                  </span>
+                  . Continuez dessus ou fermez-la avant d&apos;en ouvrir une nouvelle.
+                </p>
                 <Button render={<Link href="/sales" />} className="h-12 w-full rounded-xl">
                   <ArrowRight className="size-4" />
                   Continuer

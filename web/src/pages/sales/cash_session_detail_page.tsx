@@ -75,8 +75,9 @@ function CashSessionDetail({
   const { PrintContainer, handlePrint } = useSimplePrint()
   const renderSessionHeaderDetails = () => (
     <>
-      <HeaderDetail label="Caissier" value={session.userName ?? 'Utilisateur'} />
+      <HeaderDetail label="Ouverte par" value={session.openedByName ?? 'Utilisateur'} />
       <HeaderDetail label="Ouverture" value={formatDateTimeLabel(session.openedAt)} />
+      <HeaderDetail label="Fermée par" value={session.closedByName ?? '-'} />
       <HeaderDetail label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
       <HeaderDetail label="Système" value={renderMoneyMap(session.systemAmounts)} strong />
       <HeaderDetail label="Physique" value={renderMoneyMap(session.closingAmounts)} strong />

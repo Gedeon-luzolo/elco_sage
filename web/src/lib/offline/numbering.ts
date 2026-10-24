@@ -4,7 +4,7 @@ import { getDb, type NumberingState } from '~/lib/offline/db'
 // En dessous de ce nombre de numéros restants, une nouvelle plage est réservée (si le serveur répond).
 export const LOW_NUMBERS_THRESHOLD = 20
 
-// Réponse du serveur : les plages réservées et le dernier numéro utilisé par la session.
+// Réponse du serveur : les plages réservées à l'utilisateur et son dernier numéro utilisé.
 interface ServerNumberingState {
   blocks: NumberingState['blocks']
   lastUsedNumber: number | null
@@ -41,9 +41,14 @@ export function remainingNumbers(state: NumberingState) {
   }, 0)
 }
 
-// Lit l'état de la numérotation locale d'une session.
-export async function getNumberingState(cashSessionId: string) {
-  return (await (await getDb()).get('numbering', cashSessionId)) ?? null
+// Clé de la numérotation locale : un état par utilisateur et par session.
+function numberingKey(cashSessionId: string, userId: string) {
+  return `${userId}:${cashSessionId}`
+}
+
+// Lit l'état de la numérotation locale d'un utilisateur dans une session.
+export async function getNumberingState(cashSessionId: string, userId: string) {
+  return (await (await getDb()).get('numbering', numberingKey(cashSessionId, userId))) ?? null
 }
 
 // Fusionne l'état du serveur avec l'état local : le curseur ne recule jamais,
@@ -51,19 +56,31 @@ export async function getNumberingState(cashSessionId: string) {
 export function mergeServerState(
   local: NumberingState | null,
   cashSessionId: string,
+  userId: string,
   server: ServerNumberingState
 ): NumberingState {
   return {
+    id: numberingKey(cashSessionId, userId),
     cashSessionId,
+    userId,
     blocks: server.blocks,
     cursor: Math.max(local?.cursor ?? 0, server.lastUsedNumber ?? 0),
   }
 }
 
 // Enregistre l'état fusionné en base locale.
-async function saveServerState(cashSessionId: string, server: ServerNumberingState) {
+async function saveServerState(
+  cashSessionId: string,
+  userId: string,
+  server: ServerNumberingState
+) {
   const db = await getDb()
-  const merged = mergeServerState(await getNumberingState(cashSessionId), cashSessionId, server)
+  const merged = mergeServerState(
+    await getNumberingState(cashSessionId, userId),
+    cashSessionId,
+    userId,
+    server
+  )
   await db.put('numbering', merged)
 
   return merged
@@ -71,10 +88,11 @@ async function saveServerState(cashSessionId: string, server: ServerNumberingSta
 
 // Synchronise la numérotation avec le serveur et réserve une plage si elle s'épuise.
 // À appeler quand le serveur répond et qu'une session de caisse est ouverte.
-export async function refreshNumbering(cashSessionId: string) {
-  // Récupération des plages déjà réservées et du dernier numéro utilisé
+export async function refreshNumbering(cashSessionId: string, userId: string) {
+  // Récupération des plages déjà réservées à l'utilisateur et de son dernier numéro utilisé
   let state = await saveServerState(
     cashSessionId,
+    userId,
     await api.get<ServerNumberingState>('/cash-sessions/current/addition-numbers')
   )
 
@@ -82,6 +100,7 @@ export async function refreshNumbering(cashSessionId: string) {
   if (remainingNumbers(state) < LOW_NUMBERS_THRESHOLD) {
     state = await saveServerState(
       cashSessionId,
+      userId,
       await api.post<ServerNumberingState>('/cash-sessions/current/addition-numbers')
     )
   }
@@ -90,17 +109,17 @@ export async function refreshNumbering(cashSessionId: string) {
 }
 
 // Numéro que la prochaine vente utilisera (sans le consommer), ou null s'il n'y en a plus.
-export async function peekNextNumber(cashSessionId: string) {
-  const state = await getNumberingState(cashSessionId)
+export async function peekNextNumber(cashSessionId: string, userId: string) {
+  const state = await getNumberingState(cashSessionId, userId)
   const value = state ? nextNumber(state) : null
 
   return value === null ? null : formatAdditionNumber(value)
 }
 
 // Marque un numéro comme consommé, une fois la vente envoyée ou mise en file.
-export async function commitNumber(cashSessionId: string, additionNumber: string) {
+export async function commitNumber(cashSessionId: string, userId: string, additionNumber: string) {
   const db = await getDb()
-  const state = await getNumberingState(cashSessionId)
+  const state = await getNumberingState(cashSessionId, userId)
 
   // Sans état local, il n'y a rien à faire avancer
   if (!state) return

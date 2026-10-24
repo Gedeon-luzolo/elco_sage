@@ -24,7 +24,7 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {session.userName ?? 'Utilisateur'}
+              {session.openedByName ?? 'Utilisateur'}
             </CardTitle>
             <CardDescription className="truncate text-xs">
               {formatDateTimeLabel(session.openedAt)}
@@ -47,6 +47,11 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
           <SessionMetric label="Clôture" value={renderMoneyMap(session.closingAmounts)} />
           <SessionMetric label="Écart" value={renderMoneyMap(session.differenceAmounts)} />
           <SessionMetric label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
+          <SessionMetric
+            className="col-span-2"
+            label="Fermée par"
+            value={session.closedByName ?? '-'}
+          />
         </div>
         <Button type="button" size="sm" variant="outline" className="w-full" onClick={onSelect}>
           Voir les détails
@@ -56,9 +61,17 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
   )
 }
 
-function SessionMetric({ label, value }: { label: string; value: ReactNode }) {
+function SessionMetric({
+  label,
+  value,
+  className,
+}: {
+  label: string
+  value: ReactNode
+  className?: string
+}) {
   return (
-    <div className="min-w-0 rounded-md bg-muted/40 px-2 py-1.5">
+    <div className={cn('min-w-0 rounded-md bg-muted/40 px-2 py-1.5', className)}>
       <p className="truncate text-[11px] text-muted-foreground">{label}</p>
       <div className="truncate text-xs font-semibold">{value}</div>
     </div>

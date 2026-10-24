@@ -9,7 +9,8 @@ export type MoneyMap = Record<string, number>
 // Forme exposée au frontend pour la session de caisse courante.
 export type CashSessionItem = Record<string, JSONDataTypes> & {
   id: string
-  userId: string
+  openedById: string
+  closedById: string | null
   status: string
   openedAt: string | null
   openingDate: string | null
@@ -20,8 +21,8 @@ export type CashSessionItem = Record<string, JSONDataTypes> & {
   systemAmounts: MoneyMap
   closingAmounts: MoneyMap | null
   differenceAmounts: MoneyMap | null
-  userName: string | null
-  userRole: string | null
+  openedByName: string | null
+  closedByName: string | null
 }
 
 // Props de la page d'ouverture de caisse.

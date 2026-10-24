@@ -41,12 +41,12 @@ export function useCreateSale() {
       buildSale,
     }: CreateSaleVariables): Promise<CreateSaleResult> => {
       // Prochain numéro de la plage réservée à cette caisse
-      let additionNumber = await peekNextNumber(cashSessionId)
+      let additionNumber = await peekNextNumber(cashSessionId, user!.id)
 
       // Plages épuisées ou jamais chargées : une tentative de réservation si le serveur répond
       if (!additionNumber) {
-        await refreshNumbering(cashSessionId).catch(() => undefined)
-        additionNumber = await peekNextNumber(cashSessionId)
+        await refreshNumbering(cashSessionId, user!.id).catch(() => undefined)
+        additionNumber = await peekNextNumber(cashSessionId, user!.id)
       }
 
       // Sans numéro, impossible d'imprimer un ticket valable
@@ -71,7 +71,7 @@ export function useCreateSale() {
       })
 
       // Le numéro n'est consommé qu'une fois la vente envoyée ou mise en file
-      await commitNumber(cashSessionId, additionNumber)
+      await commitNumber(cashSessionId, user!.id, additionNumber)
 
       return result.queued ? { sale, queued: true } : { sale: result.data, queued: false }
     },

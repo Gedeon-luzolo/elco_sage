@@ -5,7 +5,7 @@ import type { SaleItemRow } from '~/types/sale_types'
 import { addAmount } from '~/utils/money_map.utils'
 
 // Session de caisse concernée par le rapport : seuls ces champs servent à retrouver ses opérations.
-type ReportSession = { id: string; userId: string; status: string }
+type ReportSession = { id: string; status: string }
 
 // Opérations de la session encore dans la file : les ventes locales et les montants encaissés.
 export interface PendingActivity {
@@ -39,8 +39,8 @@ export function getPendingActivity(
       activity.sales.push(entry.sale)
     }
 
-    // Un recouvrement est rattaché par le serveur à la session ouverte de son auteur
-    if (entry.type === 'recovery' && session.status === 'OPEN' && entry.userId === session.userId) {
+    // Un recouvrement est rattaché par le serveur à la session ouverte, quel que soit son auteur
+    if (entry.type === 'recovery' && session.status === 'OPEN') {
       activity.recoveries.push({
         amount: Number(entry.body.amount),
         currency: String(entry.body.currency),
