@@ -6,6 +6,7 @@ import { BrandLogo } from '~/components/brand/brand_logo'
 import { CashSessionClosingDialog } from '~/components/sales/cash_session_closing_dialog'
 import { Button } from '~/components/ui/button'
 import { useAuth } from '~/hooks/auth/useAuth'
+import { useOnlineStatus } from '~/hooks/useOnlineStatus'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCurrentExchangeRate } from '~/hooks/sales/useExchangeRate'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
@@ -14,6 +15,7 @@ export function AppBar() {
   const { user: authUser, logout: endSession } = useAuth()
   const { data: exchangeRate } = useCurrentExchangeRate()
   const { data: currentCashSession } = useCurrentCashSession()
+  const isOnline = useOnlineStatus()
   const user = authUser!
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -113,7 +115,8 @@ export function AppBar() {
 
               <div className="my-1 h-px bg-border" />
 
-              {currentCashSession && (
+              {/* La clôture se fait en ligne uniquement */}
+              {currentCashSession && isOnline && (
                 <>
                   <Button
                     type="button"
