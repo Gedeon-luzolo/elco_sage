@@ -45,12 +45,6 @@ export default function SalesPage() {
   // La caisse est partagée : tout utilisateur peut vendre tant qu'une session est ouverte
   const canCreateSale = Boolean(currentCashSession)
 
-  const sessionDescription = currentCashSession?.openingDate
-    ? `Session ouverte le ${formatDateLabel(currentCashSession.openingDate)} à ${
-        currentCashSession.openingTime ?? '--:--'
-      }.`
-    : 'Aucune session de caisse ouverte.'
-
   // 66px retire la hauteur de l'AppBar (min-h-16 + bordure 2px) pour éviter un scroll résiduel.
   return (
     <main className="relative flex min-h-[calc(100vh-66px)] w-full justify-center overflow-hidden px-6 py-16 text-foreground">
@@ -79,7 +73,26 @@ export default function SalesPage() {
         <div className="flex w-full flex-wrap items-end justify-between gap-6">
           <div className="text-left">
             <p className="text-3xl font-semibold">Gestion des ventes</p>
-            <p className="mt-2.5 text-base text-muted-foreground">{sessionDescription}</p>
+            {currentCashSession?.openingDate ? (
+              <>
+                <p className="mt-2.5 text-base text-muted-foreground">
+                  Session ouverte le {formatDateLabel(currentCashSession.openingDate)} à{' '}
+                  {currentCashSession.openingTime ?? '--:--'}.
+                </p>
+                {currentCashSession.openedByName && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ouverte par{' '}
+                    <span className="font-semibold text-foreground">
+                      {currentCashSession.openedByName}
+                    </span>
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="mt-2.5 text-base text-muted-foreground">
+                Aucune session de caisse ouverte.
+              </p>
+            )}
           </div>
 
           {sessionTotals && (
