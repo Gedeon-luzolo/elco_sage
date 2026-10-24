@@ -70,7 +70,7 @@ export default class AuthAttemptService {
     if (user.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
       user.status = UserStatus.BLOCKED
       await user.save()
-      this.invalidateUserCache()
+      await this.invalidateUserCache()
 
       // Journalise le blocage automatique après les échecs de connexion.
       await this.journalisationService.create({
@@ -83,7 +83,7 @@ export default class AuthAttemptService {
     }
 
     await user.save()
-    this.invalidateUserCache()
+    await this.invalidateUserCache()
     return this.failed('Email ou mot de passe incorrect')
   }
 
@@ -100,12 +100,12 @@ export default class AuthAttemptService {
     // Le compteur ne doit pas survivre a une authentification reussie.
     user.failedLoginAttempts = 0
     await user.save()
-    this.invalidateUserCache()
+    await this.invalidateUserCache()
   }
 
   // Invalide le cache des utilisateurs pour forcer la lecture depuis la base de donnees.
-  private invalidateUserCache() {
-    this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
+  private async invalidateUserCache() {
+    await this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
   }
 
   /**

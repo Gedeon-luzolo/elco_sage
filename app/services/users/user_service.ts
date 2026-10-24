@@ -5,6 +5,7 @@ import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import type {
   CreatedUserResult,
+  UserListItem,
   UserOverview,
   UserStats,
   UserStatusDistribution,
@@ -57,7 +58,7 @@ export default class UserService {
     const stats = this.extractStats(users)
 
     return {
-      users,
+      users: users.map((user) => this.toListItem(user)),
       stats,
       statusDistribution: this.buildStatusDistribution(stats),
     }
@@ -71,11 +72,14 @@ export default class UserService {
     return this.cacheService.remember(
       CacheKeys.users.activeOperatorsForSale,
       CacheTtl.ONE_MONTH,
-      () =>
-        User.query()
+      async () => {
+        const operators = await User.query()
           .whereNot('role', UserRole.ADMIN)
           .where('status', UserStatus.ACTIVE)
           .orderBy('fullName', 'asc')
+
+        return operators.map((operator) => this.toListItem(operator))
+      }
     )
   }
 
@@ -104,7 +108,7 @@ export default class UserService {
       user,
     })
 
-    this.invalidateUserCache()
+    await this.invalidateUserCache()
 
     return {
       user,
@@ -144,7 +148,7 @@ export default class UserService {
       user,
     })
 
-    this.invalidateUserCache()
+    await this.invalidateUserCache()
 
     return user
   }
@@ -170,12 +174,26 @@ export default class UserService {
       user,
     })
     await user.delete()
-    this.invalidateUserCache()
+    await this.invalidateUserCache()
   }
 
   // Invalide le cache des utilisateurs pour forcer la lecture depuis la base de données.
-  private invalidateUserCache() {
-    this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
+  private async invalidateUserCache() {
+    await this.cacheService.forgetByPrefix(CacheKeys.users.prefix)
+  }
+
+  // Aplatit un utilisateur pour le cache : les modèles Lucid ne survivent pas au JSON de Redis.
+  private toListItem(user: User): UserListItem {
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt.toISO() ?? user.createdAt.toString(),
+      updatedAt: user.updatedAt ? (user.updatedAt.toISO() ?? user.updatedAt.toString()) : null,
+      initials: user.initials,
+    }
   }
 
   // Verifie que l'acteur peut creer des utilisateurs.

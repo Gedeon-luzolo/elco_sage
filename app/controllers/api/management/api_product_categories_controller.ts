@@ -19,7 +19,7 @@ export default class ApiProductCategoriesController {
     const overview = await this.categoryService.getCategoriesOverview()
 
     return serialize({
-      categories: ProductCategoryTransformer.transform(overview.categories),
+      categories: overview.categories,
       stats: overview.stats,
     })
   }

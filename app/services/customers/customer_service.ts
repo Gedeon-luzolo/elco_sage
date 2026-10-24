@@ -4,6 +4,7 @@ import type User from '#models/user'
 import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import CustomerTransformer from '#transformers/customer_transformer'
 import type { CreateCustomerInput, UpdateCustomerInput } from '#validators/customer'
 import { inject } from '@adonisjs/core'
 
@@ -31,8 +32,9 @@ export default class CustomerService {
     const total = customers.length
     const activeCount = customers.filter((customer) => customer.isActive).length
 
+    // Les DTO sont mis en cache : ils survivent à la sérialisation JSON de Redis, pas les modèles.
     return {
-      customers,
+      customers: CustomerTransformer.transform(customers),
       stats: {
         total,
         activeCount,
@@ -45,8 +47,13 @@ export default class CustomerService {
    * Recupere les clients actifs selectionnables dans une vente.
    */
   async getActiveCustomersForSale() {
-    return this.cacheService.remember(CacheKeys.customers.activeForSale, CacheTtl.ONE_MONTH, () =>
-      Customer.query().where('isActive', true).orderBy('fullName', 'asc')
+    return this.cacheService.remember(
+      CacheKeys.customers.activeForSale,
+      CacheTtl.ONE_MONTH,
+      async () =>
+        CustomerTransformer.transform(
+          await Customer.query().where('isActive', true).orderBy('fullName', 'asc')
+        )
     )
   }
 
@@ -86,7 +93,7 @@ export default class CustomerService {
       user: actor,
     })
 
-    this.invalidateCustomerCache()
+    await this.invalidateCustomerCache()
 
     return customer
   }
@@ -134,13 +141,13 @@ export default class CustomerService {
       user: actor,
     })
 
-    this.invalidateCustomerCache()
+    await this.invalidateCustomerCache()
 
     return customer
   }
 
-  private invalidateCustomerCache() {
-    this.cacheService.forgetByPrefix(CacheKeys.customers.prefix)
+  private async invalidateCustomerCache() {
+    await this.cacheService.forgetByPrefix(CacheKeys.customers.prefix)
   }
 
   // Verifie que l'email n'est pas deja porte par un autre customer.

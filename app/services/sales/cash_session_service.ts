@@ -107,7 +107,7 @@ export default class CashSessionService {
     })
 
     // Invalider le cache pour forcer la lecture depuis la base de données
-    this.invalidateCashSessionDomains()
+    await this.invalidateCashSessionDomains()
 
     await cashSession.load('openedBy')
 
@@ -164,15 +164,15 @@ export default class CashSessionService {
       user: actor,
     })
 
-    this.invalidateCashSessionDomains()
+    await this.invalidateCashSessionDomains()
 
     return cashSession
   }
 
   // Invalide le cache des domaines dependants de la session de caisse pour forcer la lecture depuis la base de données.
-  private invalidateCashSessionDomains() {
-    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
+  private async invalidateCashSessionDomains() {
+    await this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
   }
 
   /**

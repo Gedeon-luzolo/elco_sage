@@ -17,7 +17,7 @@ export default class ApiCustomersController {
 
     // La liste et ses statistiques sont renvoyées ensemble
     return serialize({
-      customers: CustomerTransformer.transform(overview.customers),
+      customers: overview.customers,
       stats: overview.stats,
     })
   }
@@ -26,9 +26,7 @@ export default class ApiCustomersController {
    * Clients actifs, utilisés comme données de référence hors ligne par la vente.
    */
   async activeForSale({ serialize }: HttpContext) {
-    return serialize(
-      CustomerTransformer.transform(await this.customerService.getActiveCustomersForSale())
-    )
+    return serialize(await this.customerService.getActiveCustomersForSale())
   }
 
   /**

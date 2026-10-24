@@ -166,7 +166,7 @@ export default class SaleService {
       return sale
     })
 
-    this.invalidateSaleDomains()
+    await this.invalidateSaleDomains()
 
     return createdSale
   }
@@ -205,17 +205,17 @@ export default class SaleService {
       user: actor,
     })
 
-    this.invalidateSaleDomains()
+    await this.invalidateSaleDomains()
 
     return sale
   }
 
   // Invalide les domaines impactés par une vente: finances, caisse et services vendables.
-  private invalidateSaleDomains() {
-    this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
+  private async invalidateSaleDomains() {
+    await this.cacheService.forgetByPrefix(CacheKeys.sales.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
   }
 
   /**

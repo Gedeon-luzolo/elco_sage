@@ -8,7 +8,6 @@ import type { InferData, InferVariants } from '@adonisjs/core/types/transformers
 import type CashSessionTransformer from '#transformers/cash_session_transformer'
 import type CustomerTransformer from '#transformers/customer_transformer'
 import type DebtTransformer from '#transformers/debt_transformer'
-import type ExchangeRateTransformer from '#transformers/exchange_rate_transformer'
 import type JournalisationTransformer from '#transformers/journalisation_transformer'
 import type ProductCategoryTransformer from '#transformers/product_category_transformer'
 import type ProductServiceTransformer from '#transformers/product_service_transformer'
@@ -30,10 +29,6 @@ export namespace Data {
   export type Debt = InferData<DebtTransformer>
   export namespace Debt {
     export type Variants = InferVariants<DebtTransformer>
-  }
-  export type ExchangeRate = InferData<ExchangeRateTransformer>
-  export namespace ExchangeRate {
-    export type Variants = InferVariants<ExchangeRateTransformer>
   }
   export type Journalisation = InferData<JournalisationTransformer>
   export namespace Journalisation {

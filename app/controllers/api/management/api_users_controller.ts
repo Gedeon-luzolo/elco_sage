@@ -1,5 +1,4 @@
 import UserService from '#services/users/user_service'
-import UserTransformer from '#transformers/user_transformer'
 import { apiAction } from '#utils/api_action'
 import { createUserValidator, updateUserValidator } from '#validators/user'
 import { inject } from '@adonisjs/core'
@@ -17,7 +16,7 @@ export default class ApiUsersController {
     const overview = await this.userService.getUsersOverview(30)
 
     return serialize({
-      users: UserTransformer.transform(overview.users),
+      users: overview.users,
       stats: overview.stats,
       statusDistribution: overview.statusDistribution,
     })

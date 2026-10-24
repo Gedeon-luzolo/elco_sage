@@ -1,7 +1,5 @@
 import ProductCategoryService from '#services/categories/product_category_service'
 import ProductServiceService from '#services/products/product_service_service'
-import ProductCategoryTransformer from '#transformers/product_category_transformer'
-import ProductServiceTransformer from '#transformers/product_service_transformer'
 import { apiAction } from '#utils/api_action'
 import {
   createProductServiceValidator,
@@ -26,10 +24,10 @@ export default class ApiProductServicesAdminController {
     const categories = await this.productCategoryService.getActiveCategories()
 
     return serialize({
-      products: ProductServiceTransformer.transform(overview.products),
-      services: ProductServiceTransformer.transform(overview.services),
+      products: overview.products,
+      services: overview.services,
       stats: overview.stats,
-      categories: ProductCategoryTransformer.transform(categories),
+      categories,
     })
   }
 

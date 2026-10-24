@@ -5,6 +5,7 @@ import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import ExchangeRateService from '#services/exchange_rates/exchange_rate_service'
+import ProductServiceTransformer from '#transformers/product_service_transformer'
 import { Currency } from '#types/currency'
 import type {
   CreateProductServiceInput,
@@ -43,9 +44,10 @@ export default class ProductServiceService {
     const total = items.length
     const activeCount = items.filter((i) => i.isActive).length
 
+    // Les DTO sont mis en cache : ils survivent à la sérialisation JSON de Redis, pas les modèles.
     return {
-      products,
-      services,
+      products: ProductServiceTransformer.transform(products),
+      services: ProductServiceTransformer.transform(services),
       stats: {
         total,
         activeCount,
@@ -64,12 +66,14 @@ export default class ProductServiceService {
     return this.cacheService.remember(
       CacheKeys.productServices.activeForSale,
       CacheTtl.ONE_MONTH,
-      () =>
-        ProductService.query()
-          .where('type', ProductServiceType.SERVICE)
-          .where('isActive', true)
-          .preload('category')
-          .orderBy('name', 'asc')
+      async () =>
+        ProductServiceTransformer.transform(
+          await ProductService.query()
+            .where('type', ProductServiceType.SERVICE)
+            .where('isActive', true)
+            .preload('category')
+            .orderBy('name', 'asc')
+        )
     )
   }
 
@@ -168,7 +172,7 @@ export default class ProductServiceService {
     })
 
     // Invalider le cache pour forcer la lecture depuis la base de données
-    this.invalidateProductServiceCache()
+    await this.invalidateProductServiceCache()
 
     return item
   }
@@ -233,15 +237,15 @@ export default class ProductServiceService {
       user: actor,
     })
 
-    this.invalidateProductServiceCache()
+    await this.invalidateProductServiceCache()
 
     return item
   }
 
   // Invalide le cache des produits et services pour forcer la lecture depuis la base de données.
-  private invalidateProductServiceCache() {
-    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
+  private async invalidateProductServiceCache() {
+    await this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
   }
 
   /**

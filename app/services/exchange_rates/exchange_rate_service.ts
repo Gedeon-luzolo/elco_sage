@@ -4,6 +4,7 @@ import type User from '#models/user'
 import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import type { ExchangeRateItem } from '#types/exchange_rates'
 import type { CreateExchangeRateInput } from '#validators/exchange_rate'
 import { inject } from '@adonisjs/core'
 
@@ -16,8 +17,14 @@ export default class ExchangeRateService {
 
   // Recupere le dernier taux encode.
   async getCurrentRate() {
-    return this.cacheService.remember(CacheKeys.exchangeRates.current, CacheTtl.ONE_MONTH, () =>
-      ExchangeRate.query().orderBy('createdAt', 'desc').first()
+    return this.cacheService.remember(
+      CacheKeys.exchangeRates.current,
+      CacheTtl.ONE_MONTH,
+      async () => {
+        const rate = await ExchangeRate.query().orderBy('createdAt', 'desc').first()
+
+        return rate ? this.toRateItem(rate) : null
+      }
     )
   }
 
@@ -26,7 +33,11 @@ export default class ExchangeRateService {
     return this.cacheService.remember(
       CacheKeys.exchangeRates.history(limit),
       CacheTtl.ONE_MONTH,
-      () => ExchangeRate.query().orderBy('createdAt', 'desc').limit(limit)
+      async () => {
+        const rates = await ExchangeRate.query().orderBy('createdAt', 'desc').limit(limit)
+
+        return rates.map((rate) => this.toRateItem(rate))
+      }
     )
   }
 
@@ -49,8 +60,8 @@ export default class ExchangeRateService {
     })
 
     // Invalider le cache pour forcer la lecture depuis la base de données
-    this.cacheService.forgetByPrefix(CacheKeys.exchangeRates.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.exchangeRates.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
 
     return exchangeRate
   }
@@ -75,6 +86,16 @@ export default class ExchangeRateService {
     return amount / this.getRateValue(rate, type)
   }
 
+  // Aplatit un taux pour le cache : les modèles Lucid ne survivent pas au JSON de Redis.
+  private toRateItem(rate: ExchangeRate): ExchangeRateItem {
+    return {
+      id: rate.id,
+      exchangeRate: Number(rate.exchangeRate),
+      sellRate: Number(rate.sellRate),
+      createdAt: rate.createdAt.toJSDate().toISOString(),
+    }
+  }
+
   // Renvoie le taux courant ou bloque la conversion.
   private async getRequiredCurrentRate() {
     const rate = await this.getCurrentRate()
@@ -87,7 +108,7 @@ export default class ExchangeRateService {
   }
 
   // Selectionne la valeur de change ou vente.
-  private getRateValue(rate: ExchangeRate, type: ExchangeRateType) {
+  private getRateValue(rate: ExchangeRateItem, type: ExchangeRateType) {
     if (type === 'buy') {
       return Number(rate.exchangeRate)
     }
@@ -96,7 +117,11 @@ export default class ExchangeRateService {
   }
 
   // Prepare un message lisible pour le journal.
-  private buildJournalMessage(actor: User, rate: ExchangeRate, previousRate: ExchangeRate | null) {
+  private buildJournalMessage(
+    actor: User,
+    rate: ExchangeRate,
+    previousRate: ExchangeRateItem | null
+  ) {
     const actorName = actor.fullName ?? actor.email
 
     if (!previousRate) {

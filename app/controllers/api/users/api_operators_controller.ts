@@ -1,5 +1,4 @@
 import UserService from '#services/users/user_service'
-import UserTransformer from '#transformers/user_transformer'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -12,6 +11,6 @@ export default class ApiOperatorsController {
    */
   async index({ serialize }: HttpContext) {
     // Tous les utilisateurs actifs sauf l'administrateur
-    return serialize(UserTransformer.transform(await this.userService.getActiveOperatorsForSale()))
+    return serialize(await this.userService.getActiveOperatorsForSale())
   }
 }

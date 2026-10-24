@@ -78,16 +78,16 @@ export default class SaleRecoveryService {
       user: actor,
     })
 
-    this.invalidateRecoveryDomains()
+    await this.invalidateRecoveryDomains()
 
     return recovery
   }
 
   // Invalide le cache des recouvrements, dettes et sessions de caisse pour forcer la lecture depuis la base de données.
-  private invalidateRecoveryDomains() {
-    this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
+  private async invalidateRecoveryDomains() {
+    await this.cacheService.forgetByPrefix(CacheKeys.debts.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.recoveries.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.cashSessions.prefix)
   }
 
   /**

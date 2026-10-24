@@ -28,11 +28,6 @@ export type ScannedRoutes = {
     'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.store': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_exchange_rates.store': { paramsTuple?: []; params?: {} }
     'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
     'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
@@ -57,8 +52,6 @@ export type ScannedRoutes = {
     'api.api_cash_sessions.store': { paramsTuple?: []; params?: {} }
     'api.api_sales.store': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.store': { paramsTuple: [ParamValue]; params: {'saleId': ParamValue} }
-    'api.api_stock_movements.store': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.validate_physical': { paramsTuple?: []; params?: {} }
     'api.api_exchange_rates.store': { paramsTuple?: []; params?: {} }
     'api.api_users.store': { paramsTuple?: []; params?: {} }
     'api.api_product_categories.store': { paramsTuple?: []; params?: {} }
@@ -79,7 +72,6 @@ export type ScannedRoutes = {
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
     'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
     'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
     'api.api_users.index': { paramsTuple?: []; params?: {} }
@@ -101,7 +93,6 @@ export type ScannedRoutes = {
     'api.api_sales.index': { paramsTuple?: []; params?: {} }
     'api.api_debts.index': { paramsTuple?: []; params?: {} }
     'api.api_sale_recoveries.index': { paramsTuple?: []; params?: {} }
-    'api.api_stock_movements.index': { paramsTuple?: []; params?: {} }
     'api.api_dashboard.index': { paramsTuple?: []; params?: {} }
     'api.api_journalisations.index': { paramsTuple?: []; params?: {} }
     'api.api_users.index': { paramsTuple?: []; params?: {} }
@@ -111,8 +102,6 @@ export type ScannedRoutes = {
   PATCH: {
     'api.api_customers.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_sales.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_stock_movements.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_stock_movements.update_physical': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_product_categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_product_services_admin.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

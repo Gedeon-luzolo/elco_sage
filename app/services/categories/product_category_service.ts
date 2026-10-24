@@ -4,6 +4,7 @@ import type User from '#models/user'
 import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
+import ProductCategoryTransformer from '#transformers/product_category_transformer'
 import type {
   CreateProductCategoryInput,
   UpdateProductCategoryInput,
@@ -33,7 +34,7 @@ export default class ProductCategoryService {
         const inactiveCount = total - activeCount
 
         return {
-          categories,
+          categories: ProductCategoryTransformer.transform(categories),
           stats: {
             total,
             activeCount,
@@ -46,8 +47,13 @@ export default class ProductCategoryService {
 
   // Récupère la liste des catégories actives pour les produits/services vendables.
   async getActiveCategories() {
-    return this.cacheService.remember(CacheKeys.productCategories.active, CacheTtl.ONE_MONTH, () =>
-      ProductCategory.query().where('is_active', true).orderBy('name', 'asc')
+    return this.cacheService.remember(
+      CacheKeys.productCategories.active,
+      CacheTtl.ONE_MONTH,
+      async () =>
+        ProductCategoryTransformer.transform(
+          await ProductCategory.query().where('is_active', true).orderBy('name', 'asc')
+        )
     )
   }
 
@@ -67,7 +73,7 @@ export default class ProductCategoryService {
       user: actor,
     })
 
-    this.invalidateCategoryCache()
+    await this.invalidateCategoryCache()
 
     return category
   }
@@ -104,7 +110,7 @@ export default class ProductCategoryService {
       user: actor,
     })
 
-    this.invalidateCategoryCache()
+    await this.invalidateCategoryCache()
 
     return category
   }
@@ -126,14 +132,14 @@ export default class ProductCategoryService {
       user: actor,
     })
 
-    this.invalidateCategoryCache()
+    await this.invalidateCategoryCache()
 
     return true
   }
 
   // Invalide le cache des catégories et services pour forcer la lecture depuis la base de données.
-  private invalidateCategoryCache() {
-    this.cacheService.forgetByPrefix(CacheKeys.productCategories.prefix)
-    this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
+  private async invalidateCategoryCache() {
+    await this.cacheService.forgetByPrefix(CacheKeys.productCategories.prefix)
+    await this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)
   }
 }

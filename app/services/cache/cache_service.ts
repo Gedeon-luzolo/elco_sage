@@ -1,61 +1,67 @@
-type CacheEntry<T> = {
-  value: T
-  expiresAt: number
-}
+import logger from '@adonisjs/core/services/logger'
+import redis from '@adonisjs/redis/services/main'
 
-const store = new Map<string, CacheEntry<unknown>>()
+// Préfixe commun qui isole le cache applicatif des autres usages de Redis (sessions, compteurs).
+const CACHE_PREFIX = 'cache:'
 
 export default class CacheService {
-  // Retourne la valeur du cache ou execute le loader si la cle est absente/expiree.
+  // Retourne la valeur du cache ou exécute le loader si la clé est absente/expirée.
   async remember<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
-    // Evite de relancer une requete couteuse tant que la valeur est valide.
-    const cached = this.get<T>(key)
+    // Évite de relancer une requête coûteuse tant que la valeur est valide.
+    const cached = await this.get<T>(key)
 
-    // Si la valeur est absente ou expiree, on execute le loader pour la recalculer et la stocker dans le cache.
     if (cached !== undefined) {
       return cached
     }
 
+    // Si la valeur est absente ou expirée, on exécute le loader pour la recalculer et la stocker.
     const value = await loader()
-    // On stocke la valeur dans le cache avec la duree de vie specifiee.
-    this.set(key, value, ttlMs)
+    await this.set(key, value, ttlMs)
 
     return value
   }
 
-  //Lit une valeur depuis le cache en tenant compte de son expiration.
-  get<T>(key: string): T | undefined {
-    const entry = store.get(key)
+  // Lit une valeur depuis Redis. Une panne Redis ne doit jamais casser une lecture : on retombe sur la base.
+  async get<T>(key: string): Promise<T | undefined> {
+    try {
+      const raw = await redis.get(CACHE_PREFIX + key)
 
-    // Si la valeur est absente ou expiree, on la supprime du cache et on retourne undefined.
-    if (!entry) {
-      return undefined
-    }
-
-    // Si la valeur est expiree, on la supprime du cache et on retourne undefined.
-    if (entry.expiresAt <= Date.now()) {
-      store.delete(key)
-      return undefined
-    }
-
-    return entry.value as T
-  }
-
-  // Enregistre une valeur dans le cache pour une duree donnee.
-  set<T>(key: string, value: T, ttlMs: number) {
-    store.set(key, {
-      value,
-      expiresAt: Date.now() + ttlMs,
-    })
-  }
-
-  //Supprime toutes les cles d'un domaine fonctionnel.
-  forgetByPrefix(prefix: string) {
-    // Les prefixes servent a invalider un domaine sans connaitre toutes ses cles.
-    for (const key of store.keys()) {
-      if (key.startsWith(prefix)) {
-        store.delete(key)
+      if (raw === null) {
+        return undefined
       }
+
+      return JSON.parse(raw) as T
+    } catch (error) {
+      logger.warn({ err: error, key }, 'Lecture du cache impossible')
+      return undefined
+    }
+  }
+
+  // Enregistre une valeur dans Redis pour une durée donnée (PX = millisecondes).
+  async set<T>(key: string, value: T, ttlMs: number) {
+    try {
+      await redis.set(CACHE_PREFIX + key, JSON.stringify(value), 'PX', ttlMs)
+    } catch (error) {
+      logger.warn({ err: error, key }, 'Écriture du cache impossible')
+    }
+  }
+
+  // Supprime toutes les clés d'un domaine fonctionnel.
+  async forgetByPrefix(prefix: string) {
+    try {
+      // SCAN évite de bloquer Redis, contrairement à KEYS.
+      const stream = redis.connection().scanStream({
+        match: `${CACHE_PREFIX}${prefix}*`,
+        count: 100,
+      })
+
+      for await (const keys of stream) {
+        if (keys.length > 0) {
+          await redis.unlink(...keys)
+        }
+      }
+    } catch (error) {
+      logger.warn({ err: error, prefix }, 'Invalidation du cache impossible')
     }
   }
 }

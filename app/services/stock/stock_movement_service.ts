@@ -290,7 +290,7 @@ export default class StockMovementService {
     // outputs représente la somme des sorties vendues pour ce produit à cette date.
     movement.outputs = nextOutputs
     await movement.useTransaction(trx).save()
-    this.invalidateStockDomains()
+    await this.invalidateStockDomains()
 
     return movement
   }
@@ -321,7 +321,7 @@ export default class StockMovementService {
     // On évite une valeur négative si la vente a déjà été restaurée manuellement.
     movement.outputs = Math.max(0, Number(movement.outputs || 0) - quantity)
     await movement.useTransaction(trx).save()
-    this.invalidateStockDomains()
+    await this.invalidateStockDomains()
 
     return movement
   }
@@ -391,7 +391,7 @@ export default class StockMovementService {
     })
 
     await movement.load('product')
-    this.invalidateStockDomains()
+    await this.invalidateStockDomains()
     return movement
   }
 
@@ -431,7 +431,7 @@ export default class StockMovementService {
     })
 
     await movement.load('product')
-    this.invalidateStockDomains()
+    await this.invalidateStockDomains()
     return movement
   }
 
@@ -525,14 +525,14 @@ export default class StockMovementService {
 
     // Recalculer les autres champs après la mise à jour
     await movement.load('product')
-    this.invalidateStockDomains()
+    await this.invalidateStockDomains()
     return movement
   }
 
   // Invalide tout le domaine stock: une imputation peut changer les stocks initiaux,
   // les snapshots de vente et les produits vendables des dates suivantes.
-  private invalidateStockDomains() {
-    this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
+  private async invalidateStockDomains() {
+    await this.cacheService.forgetByPrefix(CacheKeys.stock.prefix)
   }
 
   private ensurePayloadMatchesMovement(movement: StockMovement, productId: string, date: string) {
