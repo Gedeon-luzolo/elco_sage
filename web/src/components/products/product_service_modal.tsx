@@ -12,16 +12,12 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { OptionSelect } from '~/components/common/option_select'
+import { SearchableSelect } from '~/components/common/searchable_select'
 import type { ProductCategoryDTO } from '~/types/dto'
 import type { ProductServiceItem } from '~/types/product_service_types'
 import { CURRENCY_OPTIONS, Currency } from '~/utils/currency'
 import { getItemPriceForCurrency } from '~/utils/products/product.utils'
 import { ACTIVE_STATUS_OPTIONS } from '~/utils/status.utils'
-
-const PRODUCT_TYPE_OPTIONS = [
-  { label: 'Produit (Article physique)', value: 'PRODUCT' },
-  { label: 'Service (Prestation)', value: 'SERVICE' },
-]
 
 interface ProductServiceModalProps {
   title: string
@@ -56,10 +52,8 @@ export function ProductServiceModal({
   // Détermine si le modal est en mode édition ou création.
   const isEditing = item !== null
 
-  // État local pour suivre le type sélectionné (PRODUIT ou SERVICE).
-  const [selectedType, setSelectedType] = useState<'PRODUCT' | 'SERVICE'>(
-    (item?.type as 'PRODUCT' | 'SERVICE') ?? defaultType
-  )
+  // Le type n'est plus choisi dans le formulaire : il vient de l'onglet actif (création) ou de l'article (édition).
+  const selectedType = (item?.type as 'PRODUCT' | 'SERVICE' | undefined) ?? defaultType
 
   // État local pour la devise sélectionnée (CDF par défaut).
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(Currency.CDF)
@@ -69,17 +63,11 @@ export function ProductServiceModal({
     item ? getItemPriceForCurrency(item, Currency.CDF) : ''
   )
 
-  const isService = selectedType === 'SERVICE'
-  const categoryOptions = categories.map((category) => ({
-    label: category.name,
-    value: category.id,
-  }))
-  // Options pour le champ "Produit associé"
-  const productOptions = products.map((product) => ({
-    label: product.name,
-    value: product.id,
-  }))
+  // Choix de la catégorie et du produit lié, envoyés avec le formulaire par des champs cachés
+  const [categoryId, setCategoryId] = useState(item?.categoryId ?? '')
+  const [stockProductId, setStockProductId] = useState(item?.stockProductId ?? '')
 
+  const isService = selectedType === 'SERVICE'
   /**
    * Lors du changement de devise, si un élément existe en édition,
    * la valeur du prix est mise à jour instantanément vers le montant correspondant (USD ou CDF).
@@ -89,21 +77,6 @@ export function ProductServiceModal({
 
     if (item) {
       setPriceValue(getItemPriceForCurrency(item, value))
-    }
-  }
-
-  /**
-   * Synchronise le prix affiché quand le type change en édition.
-   */
-  const handleTypeChange = (value: string | null) => {
-    if (!value) return
-
-    const nextType = value as 'PRODUCT' | 'SERVICE'
-
-    setSelectedType(nextType)
-
-    if (item) {
-      setPriceValue(getItemPriceForCurrency(item, selectedCurrency))
     }
   }
 
@@ -123,21 +96,12 @@ export function ProductServiceModal({
         >
           {/* Disposition en grille 2 colonnes */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Type : Produit ou Service (Pleine largeur) */}
-            <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="ps-type">Type d&apos;article *</Label>
-              <OptionSelect
-                id="ps-type"
-                name="type"
-                options={PRODUCT_TYPE_OPTIONS}
-                defaultValue={selectedType}
-                onValueChange={handleTypeChange}
-              />
-            </div>
+            {/* Le type part avec le formulaire sans être affiché */}
+            <input type="hidden" name="type" value={selectedType} />
 
             {/* Nom de l'article */}
             <div className="grid gap-2">
-              <Label htmlFor="ps-name">Nom de l&apos;article *</Label>
+              <Label htmlFor="ps-name">{isService ? 'Nom du service *' : 'Nom du produit *'}</Label>
               <Input
                 id="ps-name"
                 name="name"
@@ -155,12 +119,16 @@ export function ProductServiceModal({
             {/* Catégorie associée (en face du Nom) */}
             <div className="grid gap-2">
               <Label htmlFor="ps-category">Catégorie</Label>
-              <OptionSelect
+              <SearchableSelect
                 id="ps-category"
                 name="categoryId"
-                options={categoryOptions}
-                defaultValue={item?.categoryId ?? ''}
+                items={categories}
+                value={categoryId}
+                onValueChange={setCategoryId}
+                getValue={(category) => category.id}
+                getLabel={(category) => category.name}
                 placeholder="Sélectionner une catégorie..."
+                emptyMessage="Aucune catégorie trouvée."
               />
             </div>
 
@@ -168,12 +136,17 @@ export function ProductServiceModal({
             {isService && (
               <div className="grid gap-2">
                 <Label htmlFor="ps-stock-product">Produit lié *</Label>
-                <OptionSelect
+                <SearchableSelect
                   id="ps-stock-product"
                   name="stockProductId"
-                  options={productOptions}
-                  defaultValue={item?.stockProductId ?? ''}
+                  items={products}
+                  value={stockProductId}
+                  onValueChange={setStockProductId}
+                  getValue={(product) => product.id}
+                  getLabel={(product) => product.name}
                   placeholder="Sélectionner un produit..."
+                  emptyMessage="Aucun produit trouvé."
+                  required
                 />
               </div>
             )}

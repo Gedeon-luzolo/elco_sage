@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { ProductCard } from '~/components/products/product_card'
 import { ProductServiceModal } from '~/components/products/product_service_modal'
 import { Button } from '~/components/ui/button'
-import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { EmptyState } from '~/components/common/empty_state'
 import { PageHeader } from '~/components/common/page_header'
 import { SearchInput } from '~/components/common/search_input'
@@ -26,7 +25,7 @@ const PRODUCT_SERVICES_PAGE_SIZE = 20
 
 /**
  * Page principale de gestion des Produits et Services.
- * Permet de visualiser, créer, modifier et supprimer des articles (produits physiques et services)
+ * Permet de visualiser, créer et modifier des articles (produits physiques et services)
  * organisés par onglets sous forme de cartes d'affichage.
  */
 const EMPTY_ITEMS: ProductServiceItem[] = []
@@ -35,7 +34,7 @@ const EMPTY_STATS = { total: 0, productCount: 0, serviceCount: 0 } as ProductSer
 
 export default function ProductServicesPage() {
   // Un article modifie le stock vendable et la vente : on invalide ces ressources
-  const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<ProductServicesPageProps>({
+  const { useGetWithParams, useCreate, usePatch } = useCrud<ProductServicesPageProps>({
     endpoint: '/product-services',
     invalidateQueries: ['/stock'],
   })
@@ -46,13 +45,14 @@ export default function ProductServicesPage() {
   const categories = data?.categories ?? EMPTY_CATEGORIES
   const saveItemMutation = useCreate<Record<string, unknown>>()
   const updateItemMutation = usePatch<Record<string, unknown>>()
-  const deleteItemMutation = useDelete()
   // Terme de recherche textuelle pour filtrer dynamiquement les produits/services
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<ProductServiceItem | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [defaultModalType, setDefaultModalType] = useState<'PRODUCT' | 'SERVICE'>('PRODUCT')
+  // Onglet affiché : il décide du type de l'article créé par le bouton de l'en-tête
+  const [activeTab, setActiveTab] = useState('products')
+  const isServicesTab = activeTab === 'services'
   const { filteredItems: filteredProducts } = useSearch({
     items: products,
     fields: ['name'],
@@ -89,16 +89,9 @@ export default function ProductServicesPage() {
     setIsModalOpen(true)
   }
 
-  //Ouvre la boîte de dialogue de confirmation de suppression pour l'article sélectionné.
-  const openDeleteModal = (item: ProductServiceItem) => {
-    setSelectedItem(item)
-    setIsDeleteDialogOpen(true)
-  }
-
   // Ferme toutes les boîtes de dialogue et réinitialise l'élément sélectionné.
   const closeModal = () => {
     setIsModalOpen(false)
-    setIsDeleteDialogOpen(false)
     setSelectedItem(null)
   }
 
@@ -119,12 +112,6 @@ export default function ProductServicesPage() {
     } else {
       saveItemMutation.mutate(payload, options)
     }
-  }
-
-  // Effectue la suppression définitive de l'article sélectionné après confirmation.
-  const confirmDelete = () => {
-    if (!selectedItem) return
-    deleteItemMutation.mutate(selectedItem.id, { onSuccess: closeModal })
   }
 
   // Configuration des cartes de statistiques dérivées des props
@@ -158,9 +145,12 @@ export default function ProductServicesPage() {
           icon={Settings}
           accentClassName={MODULE_HEADER_ACCENTS.management}
         >
-          <Button type="button" onClick={() => openCreateModal()}>
+          <Button
+            type="button"
+            onClick={() => openCreateModal(isServicesTab ? 'SERVICE' : 'PRODUCT')}
+          >
             <Plus className="mr-2 size-4" />
-            Nouvel article
+            {isServicesTab ? 'Nouveau service' : 'Nouveau produit'}
           </Button>
         </PageHeader>
 
@@ -182,7 +172,7 @@ export default function ProductServicesPage() {
         />
 
         {/* Système d'onglets séparant les Produits et les Services */}
-        <Tabs defaultValue="products">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(String(value))}>
           <TabsList className="w-full">
             <TabsTrigger value="products" className="flex-1 gap-2">
               <Package className="size-4" />
@@ -212,14 +202,9 @@ export default function ProductServicesPage() {
                   />
                 )}
 
-                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {paginatedProducts.visibleItems.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      item={item}
-                      onEdit={openEditModal}
-                      onDelete={openDeleteModal}
-                    />
+                    <ProductCard key={item.id} item={item} onEdit={openEditModal} />
                   ))}
                 </div>
               </>
@@ -244,14 +229,9 @@ export default function ProductServicesPage() {
                   />
                 )}
 
-                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {paginatedServices.visibleItems.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      item={item}
-                      onEdit={openEditModal}
-                      onDelete={openDeleteModal}
-                    />
+                    <ProductCard key={item.id} item={item} onEdit={openEditModal} />
                   ))}
                 </div>
               </>
@@ -263,7 +243,13 @@ export default function ProductServicesPage() {
       {/* Boîte de dialogue de Création / Modification */}
       <ProductServiceModal
         key={`${selectedItem?.id ?? 'new'}-${defaultModalType}`}
-        title={selectedItem ? "Modifier l'article" : 'Nouvel article'}
+        title={
+          selectedItem
+            ? "Modifier l'article"
+            : defaultModalType === 'SERVICE'
+              ? 'Nouveau service'
+              : 'Nouveau produit'
+        }
         description={
           selectedItem
             ? 'Modifiez les informations et tarifs de cet article.'
@@ -279,18 +265,6 @@ export default function ProductServicesPage() {
           if (!open) closeModal()
         }}
         action={saveItem}
-      />
-
-      {/* Boîte de dialogue de confirmation de suppression */}
-      <ConfirmationDialog
-        open={isDeleteDialogOpen}
-        title="Supprimer cet article ?"
-        description={`Cette action est irréversible. L'article « ${selectedItem?.name} » sera définitivement supprimé.`}
-        onOpenChange={(open) => {
-          if (!open) closeModal()
-        }}
-        onCancel={closeModal}
-        onConfirm={confirmDelete}
       />
     </ManagementLayout>
   )

@@ -1,4 +1,4 @@
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2 } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
@@ -7,13 +7,12 @@ import type { ProductServiceItem } from '~/types/product_service_types'
 interface ProductCardProps {
   item: ProductServiceItem
   onEdit: (item: ProductServiceItem) => void
-  onDelete: (item: ProductServiceItem) => void
 }
 
 // Pastille d'information (unité, conditionnement, produit lié).
 function InfoPill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+    <span className="rounded-md bg-muted px-2.5 py-1 text-sm text-muted-foreground">
       {children}
     </span>
   )
@@ -22,19 +21,19 @@ function InfoPill({ children }: { children: React.ReactNode }) {
 /**
  * Carte compacte d'un produit ou d'un service : le prix en avant, les détails en pastilles.
  */
-export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
+export function ProductCard({ item, onEdit }: ProductCardProps) {
   const isProduct = item.type === 'PRODUCT'
   const hasPackaging = isProduct && item.packagingUnit && item.packagingCapacity
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:border-primary/40">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-xs transition-colors hover:border-primary/40">
       {/* En-tête : nom, statut et actions */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="truncate text-base leading-snug font-semibold text-foreground">
+          <h3 className="truncate text-lg leading-snug font-semibold text-foreground">
             {item.name}
           </h3>
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <span
               className={cn(
                 'size-1.5 rounded-full',
@@ -50,23 +49,12 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
           <Button
             type="button"
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             aria-label="Modifier cet article"
             title="Modifier cet article"
             onClick={() => onEdit(item)}
           >
-            <Edit2 className="size-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Supprimer cet article"
-            title="Supprimer cet article"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(item)}
-          >
-            <Trash2 className="size-3.5" />
+            <Edit2 className="size-4" />
           </Button>
         </div>
       </div>
@@ -85,18 +73,18 @@ export function ProductCard({ item, onEdit, onDelete }: ProductCardProps) {
       </div>
 
       {/* Prix : francs en avant, dollars en dessous */}
-      <div className="mt-auto border-t border-border pt-3">
-        <p className="text-xs text-muted-foreground">
+      <div className="mt-auto border-t border-border pt-4">
+        <p className="text-sm text-muted-foreground">
           {isProduct ? "Prix d'achat" : 'Prix de vente'}
         </p>
-        <p className="text-lg leading-tight font-bold text-foreground">
+        <p className="text-2xl leading-tight font-bold text-foreground">
           {formatMoneyWithCurrency(item.priceCdf, 'CDF')}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {formatMoneyWithCurrency(item.priceUsd, 'USD')}
         </p>
         {isProduct && (
-          <p className="mt-1.5 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             Coût matière : {formatMoneyWithCurrency(item.materialCostCdf, 'CDF')} / {item.baseUnit}
           </p>
         )}
