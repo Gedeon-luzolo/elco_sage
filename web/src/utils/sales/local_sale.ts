@@ -10,7 +10,8 @@ interface SalePayload {
   operatorId: string
   currency: string
   discountAmount: number
-  items: Array<{ orderNumber: string; productServiceId: string; quantity: number }>
+  orderNumber: string
+  items: Array<{ productServiceId: string; quantity: number }>
 }
 
 // Données nécessaires pour reconstruire la vente : le corps, les listes de référence et le vendeur.
@@ -41,7 +42,6 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     return {
       id: `${input.id}-${index}`,
       saleId: input.id,
-      orderNumber: item.orderNumber,
       productServiceId: item.productServiceId,
       quantity: Number(item.quantity),
       currency: payload.currency,
@@ -64,6 +64,7 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     sellerId: input.seller.id,
     paymentType: payload.paymentType,
     additionNumber: input.additionNumber,
+    orderNumber: payload.orderNumber,
     saleDate: input.saleDate,
     currency: payload.currency,
     theoreticalAmount,

@@ -73,6 +73,7 @@ export default function SaleCreatePage() {
 
   const [paymentType, setPaymentType] = useState<SalePaymentType>('CASH')
   const [currency, setCurrency] = useState<CurrencyCode>(Currency.CDF)
+  const [orderNumber, setOrderNumber] = useState('')
   const [operatorId, setOperatorId] = useState('')
   const [customerId, setCustomerId] = useState('')
   const [payableAmount, setPayableAmount] = useState(0)
@@ -116,6 +117,7 @@ export default function SaleCreatePage() {
     canSubmitSaleForm({
       currentCashSessionId: currentCashSession?.id,
       paymentType,
+      orderNumber,
       operatorId,
       customerId,
       discountAmount,
@@ -182,6 +184,7 @@ export default function SaleCreatePage() {
    */
   const resetForm = () => {
     setPaymentType('CASH')
+    setOrderNumber('')
     setCustomerId('')
     setPayableAmount(0)
     setHasCustomPayableAmount(false)
@@ -198,6 +201,7 @@ export default function SaleCreatePage() {
 
     const payload = buildCreateSalePayload({
       paymentType,
+      orderNumber,
       customerId,
       operatorId,
       currency,
@@ -277,6 +281,8 @@ export default function SaleCreatePage() {
               </div>
 
               <SaleTicketFields
+                orderNumber={orderNumber}
+                onOrderNumberChange={setOrderNumber}
                 paymentType={paymentType}
                 onPaymentTypeChange={setPaymentType}
                 currency={currency}

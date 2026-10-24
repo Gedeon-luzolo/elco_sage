@@ -1,6 +1,5 @@
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import type { ProductServiceDTO } from '~/types/dto'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
@@ -16,7 +15,7 @@ interface SaleTicketLineProps {
   onRemove: () => void
 }
 
-// Une ligne du ticket : service, numéro de bon, quantité et total.
+// Une ligne du ticket : service, quantité et total.
 export function SaleTicketLine({
   line,
   service,
@@ -41,14 +40,6 @@ export function SaleTicketLine({
       </div>
 
       <div className="flex items-center gap-2">
-        <Input
-          aria-label="Numéro de bon"
-          value={line.orderNumber}
-          onChange={(event) => onChange({ orderNumber: event.target.value })}
-          placeholder="Bon BC-001"
-          className="h-9 w-28"
-        />
-
         <div className="ml-auto flex items-center gap-1">
           <Button
             type="button"

@@ -34,7 +34,7 @@ export function SaleReportItemRow({
           <span className="ml-1 text-[10px] font-normal text-amber-600">Non envoyée</span>
         )}
       </TableCell>
-      <TableCell>{item.orderNumber}</TableCell>
+      <TableCell>{isFirstLine ? sale.orderNumber : ''}</TableCell>
       <TableCell>{isFirstLine ? (sale.customer?.fullName ?? '-') : ''}</TableCell>
       <TableCell className="min-w-56 whitespace-normal">
         <span className="font-medium">{item.productService?.name ?? 'Service inconnu'}</span>

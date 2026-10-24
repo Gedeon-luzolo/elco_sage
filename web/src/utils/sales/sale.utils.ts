@@ -7,7 +7,6 @@ export type SalePaymentType = 'CASH' | 'CREDIT' | 'OFFERED'
 
 // Etat minimal d'une ligne dans le formulaire de vente.
 export interface SaleLineState {
-  orderNumber: string
   productServiceId: string
   quantity: number
 }
@@ -16,6 +15,7 @@ export interface SaleLineState {
 interface SaleFormState {
   currentCashSessionId?: string | null
   paymentType: SalePaymentType
+  orderNumber: string
   operatorId: string
   customerId: string
   discountAmount: number
@@ -25,6 +25,7 @@ interface SaleFormState {
 // Donnees utilisees pour construire le payload backend sans exposer les calculs dans la page.
 interface BuildSalePayloadInput {
   paymentType: SalePaymentType
+  orderNumber: string
   customerId: string
   operatorId: string
   currency: CurrencyCode
@@ -43,7 +44,6 @@ export const SALE_PAYMENT_OPTIONS: Array<{ label: string; value: SalePaymentType
 ]
 
 export const EMPTY_SALE_LINE: SaleLineState = {
-  orderNumber: '',
   productServiceId: '',
   quantity: 1,
 }
@@ -164,9 +164,8 @@ export function canSubmitSaleForm(form: SaleFormState) {
   return (
     Boolean(form.currentCashSessionId) &&
     Boolean(form.operatorId) &&
-    form.lines.some(
-      (line) => line.orderNumber.trim().length > 0 && line.productServiceId && line.quantity > 0
-    ) &&
+    form.orderNumber.trim().length > 0 &&
+    form.lines.some((line) => line.productServiceId && line.quantity > 0) &&
     (!requiresCustomer || Boolean(form.customerId))
   )
 }
@@ -174,13 +173,9 @@ export function canSubmitSaleForm(form: SaleFormState) {
 // Prepare uniquement les lignes valides attendues par le backend.
 function buildSaleItemsPayload(lines: SaleLineState[]) {
   // Les lignes incompletes ne sont pas envoyees au serveur.
-  const validLines = lines.filter(
-    (line) => line.orderNumber.trim().length > 0 && line.productServiceId && line.quantity > 0
-  )
+  const validLines = lines.filter((line) => line.productServiceId && line.quantity > 0)
 
   return validLines.map((line) => ({
-    // Le numero de bon est nettoye avant envoi pour eviter les espaces parasites.
-    orderNumber: line.orderNumber.trim(),
     productServiceId: line.productServiceId,
     quantity: Number(line.quantity),
   }))
@@ -189,7 +184,8 @@ function buildSaleItemsPayload(lines: SaleLineState[]) {
 // Construit le payload attendu par POST /sales.
 export function buildCreateSalePayload(input: BuildSalePayloadInput) {
   return {
-    // Une vente cash sans client garde une valeur null cote backend.
+    // Le bon est unique pour toute l'addition ; il est nettoye pour eviter les espaces parasites.
+    orderNumber: input.orderNumber.trim(),
     customerId: input.customerId || null,
     operatorId: input.operatorId,
     paymentType: input.paymentType,

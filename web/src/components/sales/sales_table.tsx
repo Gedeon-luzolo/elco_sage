@@ -72,7 +72,7 @@ export function SalesTable({
                 >
                   <TableCell className="font-medium">{sale.additionNumber}</TableCell>
                   <TableCell className="font-medium">
-                    {[...new Set(sale.items.map((item) => item.orderNumber))].join(', ')}
+                    {sale.orderNumber}
                   </TableCell>
                   <TableCell>{sale.customer?.fullName ?? '-'}</TableCell>
                   <TableCell className="text-right">
@@ -112,8 +112,6 @@ function SaleMobileCard({
   isPending?: boolean
   onSelectSale: (saleId: string) => void
 }) {
-  const orderNumbers = [...new Set(sale.items.map((item) => item.orderNumber))].join(', ')
-
   return (
     <button
       type="button"
@@ -138,7 +136,7 @@ function SaleMobileCard({
 
       <div className="grid gap-1.5 text-xs">
         <MobileSaleMetric label="Client" value={sale.customer?.fullName ?? '-'} />
-        <MobileSaleMetric label="Bon" value={orderNumbers || '-'} />
+        <MobileSaleMetric label="Bon" value={sale.orderNumber || '-'} />
         <MobileSaleMetric
           label="Total"
           value={formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}

@@ -5,7 +5,6 @@ import type { JSONDataTypes } from '~/types/json'
 export type SaleItem = Record<string, JSONDataTypes> & {
   id: string
   saleId: string
-  orderNumber: string
   productServiceId: string
   quantity: number
   currency: string
@@ -33,6 +32,7 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   sellerId: string
   paymentType: string
   additionNumber: string
+  orderNumber: string
   saleDate: string | null
   currency: string
   theoreticalAmount: number

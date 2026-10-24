@@ -30,6 +30,7 @@ export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
 
       <div className="mt-[2mm]">
         <ReceiptLine label="Date" value={formatDateTimeLabel(sale.saleDate)} />
+        <ReceiptLine label="Bon" value={sale.orderNumber} />
         {sale.customer && <ReceiptLine label="Client" value={sale.customer.fullName} />}
         <ReceiptLine label="Opérateur" value={sale.operatorName ?? '-'} />
         <ReceiptLine label="Paiement" value={sale.paymentType} />
@@ -47,7 +48,6 @@ export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
               </strong>
             </div>
             <div className="mt-[0.5mm] flex justify-between gap-[3mm] text-[8px]">
-              <span className="min-w-0">Bon {item.orderNumber}</span>
               <span>
                 {item.quantity} x{' '}
                 {formatMoneyWithCurrency(item.unitPrice, item.currency as CurrencyCode)}
