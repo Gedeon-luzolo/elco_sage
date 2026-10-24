@@ -3,6 +3,7 @@ import { Button } from '~/components/ui/button'
 import type { StockMovementItem } from '~/types/stock_types'
 import { formatQuantityWithUnit, hasSignificantVariance } from '~/utils/stock'
 import { cn } from '~/lib/utils'
+import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 
 interface StockDetailPanelProps {
   movement: StockMovementItem
@@ -24,6 +25,14 @@ export function StockDetailPanel({
   const hasMovement = movement.id !== -1
   const hasEntries = Number(movement.entries || 0) > 0
   const hasVariance = hasSignificantVariance(movement)
+  // Valorisation en francs : quantité en unité de base multipliée par le coût matière unitaire
+  const unitCost = Number(movement.unitCostCdf || 0)
+  const valuationLines = [
+    { label: 'Entrées', quantity: movement.entries },
+    { label: 'Sorties', quantity: movement.outputs },
+    { label: 'Stock disponible', quantity: movement.availableStock },
+    { label: 'Stock physique', quantity: movement.physicalStock },
+  ]
 
   return (
     <div className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
@@ -178,6 +187,32 @@ export function StockDetailPanel({
                 )}
               </>
             )}
+          </div>
+        </div>
+
+        {/* Valorisation du stock au coût matière unitaire */}
+        <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
+          <h4 className="text-sm font-semibold text-foreground">Valorisation</h4>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Prix unitaire :</span>
+              <span className="font-medium">
+                {formatMoneyWithCurrency(unitCost, 'CDF')} / {movement.productBaseUnit}
+              </span>
+            </div>
+
+            {hasMovement &&
+              valuationLines.map((line) => (
+                <div key={line.label} className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{line.label} :</span>
+                  <span className="font-semibold">
+                    {line.quantity === null
+                      ? '-'
+                      : formatMoneyWithCurrency(line.quantity * unitCost, 'CDF')}
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
       </div>
