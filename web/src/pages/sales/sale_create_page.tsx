@@ -1,25 +1,15 @@
-import {
-  ArrowLeft,
-  Banknote,
-  Minus,
-  Plus,
-  ReceiptText,
-  Save,
-  ShoppingCart,
-  Trash2,
-} from 'lucide-react'
+import { ArrowLeft, Banknote, ReceiptText, ShoppingCart } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '~/components/common/page_header'
-import { SearchableSelect } from '~/components/common/searchable_select'
-import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
+import { SaleServiceGrid } from '~/components/sales/sale_service_grid'
+import { SaleTicketFields } from '~/components/sales/sale_ticket_fields'
+import { SaleTicketLine } from '~/components/sales/sale_ticket_line'
+import { SaleTicketSummary } from '~/components/sales/sale_ticket_summary'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent } from '~/components/ui/card'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import { OptionSelect } from '~/components/common/option_select'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useOutbox } from '~/hooks/useOutbox'
@@ -31,8 +21,7 @@ import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { UserListItem } from '~/types/user_types'
-import { CURRENCY_OPTIONS, Currency, type CurrencyCode } from '~/utils/currency'
-import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { Currency, type CurrencyCode } from '~/utils/currency'
 import {
   buildCreateSalePayload,
   canSubmitSaleForm,
@@ -40,12 +29,10 @@ import {
   getSaleDiscountAmountFromPayableAmount,
   getSaleLineService,
   getSaleLineStockMessage,
-  getSaleLineTotal,
   getSaleTheoreticalAmount,
   hasSaleLineStockIssue,
   hasSaleStockIssue,
   normalizeSalePayableAmount,
-  SALE_PAYMENT_OPTIONS,
   type SaleLineState,
   type SalePaymentType,
 } from '~/utils/sales/sale.utils'
@@ -90,7 +77,7 @@ export default function SaleCreatePage() {
   const [customerId, setCustomerId] = useState('')
   const [payableAmount, setPayableAmount] = useState(0)
   const [hasCustomPayableAmount, setHasCustomPayableAmount] = useState(false)
-  const [lines, setLines] = useState<SaleLineState[]>([EMPTY_SALE_LINE])
+  const [lines, setLines] = useState<SaleLineState[]>([])
   const isSubmitting = createSale.isPending
 
   // Imprime automatiquement le ticket de la vente venant d'être enregistrée.
@@ -135,11 +122,35 @@ export default function SaleCreatePage() {
       lines,
     }) && !hasStockIssue
 
+  // Quantité déjà au ticket pour chaque service, affichée en badge sur la grille
+  const quantityByServiceId = useMemo(() => {
+    const quantities = new Map<string, number>()
+
+    lines.forEach((line) => {
+      quantities.set(
+        line.productServiceId,
+        (quantities.get(line.productServiceId) ?? 0) + line.quantity
+      )
+    })
+
+    return quantities
+  }, [lines])
+
   /**
-   * Ajoute une ligne de service au formulaire.
+   * Ajoute un service au ticket : une ligne existante du même service gagne une unité.
    */
-  const addLine = () => {
-    setLines((current) => [...current, EMPTY_SALE_LINE])
+  const pickService = (serviceId: string) => {
+    setLines((current) => {
+      const existingIndex = current.findIndex((line) => line.productServiceId === serviceId)
+
+      if (existingIndex === -1) {
+        return [...current, { ...EMPTY_SALE_LINE, productServiceId: serviceId }]
+      }
+
+      return current.map((line, index) =>
+        index === existingIndex ? { ...line, quantity: line.quantity + 1 } : line
+      )
+    })
   }
 
   /**
@@ -152,16 +163,18 @@ export default function SaleCreatePage() {
   }
 
   /**
-   * Retire une ligne de service du formulaire.
+   * Retire une ligne de service du ticket.
    */
   const removeLine = (index: number) => {
-    setLines((current) => {
-      if (current.length === 1) {
-        return [EMPTY_SALE_LINE]
-      }
+    setLines((current) => current.filter((_, lineIndex) => lineIndex !== index))
+  }
 
-      return current.filter((_, lineIndex) => lineIndex !== index)
-    })
+  /**
+   * Met à jour le montant à payer saisi, borné au montant théorique.
+   */
+  const changePayableAmount = (value: number) => {
+    setHasCustomPayableAmount(true)
+    setPayableAmount(normalizeSalePayableAmount(value, theoreticalAmount))
   }
 
   /**
@@ -172,7 +185,7 @@ export default function SaleCreatePage() {
     setCustomerId('')
     setPayableAmount(0)
     setHasCustomPayableAmount(false)
-    setLines([EMPTY_SALE_LINE])
+    setLines([])
   }
 
   /**
@@ -249,245 +262,65 @@ export default function SaleCreatePage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <section className="space-y-6">
-              <Card className="rounded-2xl">
-                <CardHeader>
-                  <CardTitle>Informations de vente</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="sale-payment-type">Paiement</Label>
-                    <OptionSelect
-                      id="sale-payment-type"
-                      options={SALE_PAYMENT_OPTIONS}
-                      value={paymentType}
-                      onValueChange={(value) => setPaymentType(value as SalePaymentType)}
-                    />
-                  </div>
+          <div className="grid items-start gap-6 lg:grid-cols-[1fr_540px]">
+            <SaleServiceGrid
+              services={saleServices}
+              currency={currency}
+              quantityByServiceId={quantityByServiceId}
+              onPick={pickService}
+            />
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="sale-currency">Devise</Label>
-                    <OptionSelect
-                      id="sale-currency"
-                      options={CURRENCY_OPTIONS}
-                      value={currency}
-                      onValueChange={(value) => setCurrency(value as CurrencyCode)}
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="sale-operator">Opérateur</Label>
-                    <OptionSelect
-                      id="sale-operator"
-                      options={operators.map((operator) => ({
-                        label: operator.fullName ?? operator.email,
-                        value: operator.id,
-                      }))}
-                      value={operatorId}
-                      onValueChange={setOperatorId}
-                      placeholder="Sélectionner..."
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="sale-customer">Client</Label>
-                    <SearchableSelect
-                      id="sale-customer"
-                      items={customers}
-                      value={customerId}
-                      onValueChange={setCustomerId}
-                      getValue={(customer) => customer.id}
-                      getLabel={(customer) => customer.fullName}
-                      emptyMessage="Aucun client trouvé."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl">
-                <CardContent className="space-y-3">
-                  {lines.map((line, index) => {
-                    const selectedService = getSaleLineService(line, serviceById)
-                    const lineTotal = getSaleLineTotal(line, serviceById, currency)
-                    const stockMessage = getSaleLineStockMessage(line, serviceById)
-                    const hasLineStockIssue = hasSaleLineStockIssue(line, serviceById)
-
-                    return (
-                      <div
-                        key={index}
-                        className="grid gap-3 rounded-xl border border-border bg-muted/30 p-3 lg:grid-cols-[160px_1fr_160px_140px_44px_44px]"
-                      >
-                        <div className="grid gap-2">
-                          <Label>Bon</Label>
-                          <Input
-                            value={line.orderNumber}
-                            onChange={(event) =>
-                              updateLine(index, { orderNumber: event.target.value })
-                            }
-                            placeholder="BC-001"
-                          />
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label>Service</Label>
-                          <SearchableSelect
-                            items={saleServices}
-                            value={line.productServiceId}
-                            onValueChange={(value) => updateLine(index, { productServiceId: value })}
-                            getValue={(item) => item.id}
-                            getLabel={(item) =>
-                              item.saleAvailableStock === null
-                                ? item.name
-                                : `${item.name} - ${item.saleAvailableStock} ${item.stockProductBaseUnit ?? ''}`
-                            }
-                            getDisabled={(item) => !item.canSell}
-                            placeholder="Sélectionner un service..."
-                            emptyMessage="Aucun service trouvé."
-                          />
-
-                          {stockMessage && (
-                            <p
-                              className={`text-xs ${
-                                hasLineStockIssue
-                                  ? 'text-destructive'
-                                  : 'text-emerald-700 dark:text-emerald-300'
-                              }`}
-                            >
-                              {stockMessage}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label>Quantité</Label>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              onClick={() =>
-                                updateLine(index, { quantity: Math.max(line.quantity - 1, 1) })
-                              }
-                            >
-                              <Minus className="size-4" />
-                            </Button>
-                            <Input
-                              type="number"
-                              min="1"
-                              max={selectedService?.saleAvailableStock ?? undefined}
-                              step="1"
-                              value={line.quantity}
-                              onChange={(event) =>
-                                updateLine(index, { quantity: Number(event.target.value) })
-                              }
-                              className="text-center"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              onClick={() => updateLine(index, { quantity: line.quantity + 1 })}
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label>Total ligne</Label>
-                          <div className="flex h-10 items-center justify-end rounded-xl border border-border bg-background px-3 text-sm font-semibold">
-                            {formatMoneyWithCurrency(lineTotal, currency)}
-                          </div>
-                        </div>
-
-                        {/* Actions de ligne groupées sur mobile, séparées dans la grille desktop. */}
-                        <div className="grid grid-cols-2 gap-2 lg:contents">
-                          <div className="flex items-end">
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="w-full lg:w-8"
-                              onClick={() => removeLine(index)}
-                              title="Retirer la ligne"
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-
-                          <div className="flex items-end">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="w-full lg:w-8"
-                              onClick={addLine}
-                              title="Ajouter une ligne"
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-            </section>
-
-            <aside className="h-fit rounded-2xl border border-border bg-card shadow-sm">
-              <div className="border-b border-border p-4">
-                <div className="flex items-center gap-2">
-                  <ReceiptText className="size-5" />
-                  <h2 className="font-semibold">Résumé</h2>
-                </div>
+            <aside className="rounded-2xl border border-border bg-card shadow-sm lg:sticky lg:top-6">
+              <div className="flex items-center gap-2 border-b border-border p-4">
+                <ReceiptText className="size-5" />
+                <h2 className="font-semibold">Ticket</h2>
               </div>
 
-              <div className="space-y-4 p-4">
-                <SaleSummaryLine
-                  label="Montant théorique"
-                  value={formatMoneyWithCurrency(theoreticalAmount, currency)}
-                />
+              <SaleTicketFields
+                paymentType={paymentType}
+                onPaymentTypeChange={setPaymentType}
+                currency={currency}
+                onCurrencyChange={setCurrency}
+                operatorId={operatorId}
+                onOperatorChange={setOperatorId}
+                customerId={customerId}
+                onCustomerChange={setCustomerId}
+                operators={operators}
+                customers={customers}
+              />
 
-                <div className="grid gap-2">
-                  <Label htmlFor="sale-payable-amount">Montant à payer</Label>
-                  <Input
-                    id="sale-payable-amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={effectivePayableAmount}
-                    onChange={(event) => {
-                      setHasCustomPayableAmount(true)
-                      setPayableAmount(
-                        normalizeSalePayableAmount(Number(event.target.value), theoreticalAmount)
-                      )
-                    }}
-                  />
-                </div>
-
-                <SaleSummaryLine
-                  label="Remise calculée"
-                  value={formatMoneyWithCurrency(discountAmount, currency)}
-                />
-
-                <SaleSummaryLine
-                  label="Total à payer"
-                  value={formatMoneyWithCurrency(totalAmount, currency)}
-                  strong
-                />
-
-                <Button
-                  type="button"
-                  className="h-11 w-full"
-                  disabled={!canSubmit || isSubmitting}
-                  onClick={submitSale}
-                >
-                  <Save className="size-4" />
-                  {isSubmitting ? 'Enregistrement...' : 'Enregistrer la vente'}
-                </Button>
+              <div className="max-h-[40vh] overflow-y-auto px-4">
+                {lines.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Touchez un service pour l&apos;ajouter au ticket.
+                  </p>
+                ) : (
+                  lines.map((line, index) => (
+                    <SaleTicketLine
+                      key={line.productServiceId}
+                      line={line}
+                      service={getSaleLineService(line, serviceById)}
+                      currency={currency}
+                      stockMessage={getSaleLineStockMessage(line, serviceById)}
+                      hasStockIssue={hasSaleLineStockIssue(line, serviceById)}
+                      onChange={(patch) => updateLine(index, patch)}
+                      onRemove={() => removeLine(index)}
+                    />
+                  ))
+                )}
               </div>
+
+              <SaleTicketSummary
+                currency={currency}
+                theoreticalAmount={theoreticalAmount}
+                payableAmount={effectivePayableAmount}
+                onPayableAmountChange={changePayableAmount}
+                discountAmount={discountAmount}
+                totalAmount={totalAmount}
+                canSubmit={canSubmit}
+                isSubmitting={isSubmitting}
+                onSubmit={submitSale}
+              />
             </aside>
           </div>
         )}
