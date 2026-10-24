@@ -8,31 +8,6 @@ export enum StatusFilter {
 }
 
 /**
- * Enum représentant le statut d'activation d'une entité.
- */
-export enum EntityStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-}
-
-/**
- * Libellés conviviaux en français pour chaque statut.
- */
-export const STATUS_LABELS: Record<EntityStatus, string> = {
-  [EntityStatus.ACTIVE]: 'Actif',
-  [EntityStatus.INACTIVE]: 'Inactif',
-}
-
-/**
- * Options pré-formatées pour les sélecteurs de filtres par statut.
- */
-export const STATUS_FILTER_OPTIONS = [
-  { value: StatusFilter.ALL, label: 'Toutes' },
-  { value: StatusFilter.ACTIVE, label: 'Actives' },
-  { value: StatusFilter.INACTIVE, label: 'Inactives' },
-] as const
-
-/**
  * Options pre-formatees pour les selects qui soumettent un statut booleen.
  */
 export const ACTIVE_STATUS_OPTIONS = [
@@ -60,21 +35,4 @@ export function matchesStatusFilter(isActive: boolean, filter: StatusFilter | st
   }
 
   return true
-}
-
-/**
- * Convertit un statut booléen en enum EntityStatus.
- */
-export function toEntityStatus(isActive: boolean): EntityStatus {
-  return isActive ? EntityStatus.ACTIVE : EntityStatus.INACTIVE
-}
-
-/**
- * Convertit une valeur de Select ('true'/'false') en booléen.
- */
-export function parseStatusBoolean(value: string | boolean): boolean {
-  if (typeof value === 'boolean') {
-    return value
-  }
-  return value === 'true'
 }

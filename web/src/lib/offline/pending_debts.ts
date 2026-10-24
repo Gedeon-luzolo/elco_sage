@@ -4,7 +4,7 @@ import type { DebtItem, DebtStats } from '~/types/debt_types'
 import { addAmount } from '~/utils/money_map.utils'
 
 // Résultat de la liste des dettes une fois les recouvrements en attente déduits.
-export interface DebtsWithPending {
+interface DebtsWithPending {
   debts: DebtItem[]
   stats: DebtStats
 }

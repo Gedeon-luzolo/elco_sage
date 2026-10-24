@@ -8,7 +8,7 @@ import { addAmount } from '~/utils/money_map.utils'
 type ReportSession = { id: string; status: string }
 
 // Opérations de la session encore dans la file : les ventes locales et les montants encaissés.
-export interface PendingActivity {
+interface PendingActivity {
   sales: SaleItemRow[]
   recoveries: Array<{ amount: number; currency: string }>
 }

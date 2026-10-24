@@ -6,7 +6,7 @@ import { invalidateQueriesByPrefix } from '~/lib/react-query/query_client'
 // Bilan d'un envoi de la file.
 // interrupted vaut vrai si l'envoi s'est arrêté sur une panne (réseau, serveur, session) :
 // des entrées restent alors à rejouer.
-export interface FlushResult {
+interface FlushResult {
   synced: number
   conflicts: number
   interrupted: boolean

@@ -8,7 +8,7 @@ interface ProductUnitSource {
   productPackagingCapacity: number | null
 }
 
-export type ProductUnitOption = {
+type ProductUnitOption = {
   label: string
   value: StockUnit
 }

@@ -12,8 +12,3 @@ export type ProductCategoriesPageProps = {
   categories: ProductCategoryItem[]
   stats: ProductCategoryStats
 }
-
-export interface ProductCategoryFormData {
-  name: string
-  isActive?: boolean
-}

@@ -17,7 +17,7 @@ type StatCardColor =
   | 'amber'
   | 'neutral'
 
-export interface StatCardProps {
+interface StatCardProps {
   label: string
   value: ReactNode
   color?: StatCardColor

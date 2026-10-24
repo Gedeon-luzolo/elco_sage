@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-export interface NavigationModuleItem {
+interface NavigationModuleItem {
   title: string
   description: string
   icon: LucideIcon

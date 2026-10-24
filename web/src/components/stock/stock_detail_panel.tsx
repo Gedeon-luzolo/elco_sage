@@ -4,7 +4,7 @@ import type { StockMovementItem } from '~/types/stock_types'
 import { formatQuantityWithUnit, hasSignificantVariance } from '~/utils/stock'
 import { cn } from '~/lib/utils'
 
-export interface StockDetailPanelProps {
+interface StockDetailPanelProps {
   movement: StockMovementItem
   onClose: () => void
   onCreateEntry?: (movement: StockMovementItem) => void

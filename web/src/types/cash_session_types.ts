@@ -1,8 +1,5 @@
 import type { JSONDataTypes } from '~/types/json'
-import type { CustomerDTO } from '~/types/dto'
-import type { ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
-import type { UserListItem } from '~/types/user_types'
 
 export type MoneyMap = Record<string, number>
 
@@ -25,19 +22,6 @@ export type CashSessionItem = Record<string, JSONDataTypes> & {
   closedByName: string | null
 }
 
-// Props de la page d'ouverture de caisse.
-export interface CashSessionOpeningPageProps extends Record<string, JSONDataTypes> {
-  currentCashSession: CashSessionItem | null
-}
-
-export interface CashSessionsPageProps extends Record<string, JSONDataTypes> {
-  sessions: CashSessionItem[]
-  filters: {
-    startDate: string | null
-    endDate: string | null
-  }
-}
-
 // Type pour les totaux d'un rapport de ventes, regroupés par devise.
 export type SaleReportTotals = Record<string, JSONDataTypes> & {
   theoreticalAmounts: MoneyMap
@@ -54,19 +38,4 @@ export interface CashSessionDetailPageProps extends Record<string, JSONDataTypes
   session: CashSessionItem
   sales: SaleItemRow[]
   totals: SaleReportTotals
-}
-
-// Props de la page de navigation du module vente.
-export interface SalesPageProps extends Record<string, JSONDataTypes> {
-  currentCashSession: CashSessionItem | null
-  sessionTotals: SaleReportTotals | null
-}
-
-// Props du formulaire de création de vente.
-export interface SaleCreatePageProps extends Record<string, JSONDataTypes> {
-  currentCashSession: CashSessionItem | null
-  saleServices: Array<Record<string, JSONDataTypes> & ProductServiceDTO>
-  operators: Array<Record<string, JSONDataTypes> & UserListItem>
-  customers: Array<Record<string, JSONDataTypes> & CustomerDTO>
-  printSale: SaleItemRow | null
 }

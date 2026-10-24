@@ -5,7 +5,7 @@ import { Button } from '~/components/ui/button'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import type { ProductServiceItem } from '~/types/product_service_types'
 
-export interface ProductCardProps {
+interface ProductCardProps {
   /** Article (produit ou service) à afficher */
   item: ProductServiceItem
   /** Handler déclenché lors du clic sur le bouton Modifier */

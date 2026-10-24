@@ -1,5 +1,5 @@
 // Formate une clé YYYY-MM-DD sans conversion timezone.
-export const formatDateKeyLabel = (dateKey: string) => {
+const formatDateKeyLabel = (dateKey: string) => {
   const [year, month, day] = dateKey.split('-')
 
   if (!year || !month || !day) {
@@ -78,11 +78,8 @@ export const formatShortDate = (dateStr: string) => {
   }
 }
 
-// Clé locale du jour pour les formulaires métier.
-export const dateKey = getLocalDateKey()
-
 // Fuseau de référence du métier (caisse, stock) : il doit rester identique à celui du backend.
-export const BUSINESS_TIME_ZONE = 'Africa/Kinshasa'
+const BUSINESS_TIME_ZONE = 'Africa/Kinshasa'
 
 // Jour métier d'une date au format YYYY-MM-DD, quel que soit le fuseau de l'appareil.
 export const businessDateKey = (date: Date | string) =>

@@ -53,9 +53,3 @@ export type SalesHistoryFilters = Record<string, JSONDataTypes> & {
   additionNumber: string | null
   status: string
 }
-
-// Props de la page historique des ventes.
-export interface SalesHistoryPageProps extends Record<string, JSONDataTypes> {
-  sales: SaleItemRow[]
-  filters: SalesHistoryFilters
-}

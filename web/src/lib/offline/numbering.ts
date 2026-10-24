@@ -2,7 +2,7 @@ import { api } from '~/lib/api/fetch'
 import { getDb, type NumberingState } from '~/lib/offline/db'
 
 // En dessous de ce nombre de numéros restants, une nouvelle plage est réservée (si le serveur répond).
-export const LOW_NUMBERS_THRESHOLD = 20
+const LOW_NUMBERS_THRESHOLD = 20
 
 // Réponse du serveur : les plages réservées à l'utilisateur et son dernier numéro utilisé.
 interface ServerNumberingState {
@@ -11,7 +11,7 @@ interface ServerNumberingState {
 }
 
 // Format des numéros d'addition : 5 chiffres (ex : 42 devient "00042").
-export const formatAdditionNumber = (value: number) => String(value).padStart(5, '0')
+const formatAdditionNumber = (value: number) => String(value).padStart(5, '0')
 
 // Trie les plages par ordre croissant pour parcourir les numéros dans l'ordre.
 function sortedBlocks(state: NumberingState) {
@@ -19,7 +19,7 @@ function sortedBlocks(state: NumberingState) {
 }
 
 // Prochain numéro libre dans les plages réservées, ou null si elles sont épuisées.
-export function nextNumber(state: NumberingState): number | null {
+function nextNumber(state: NumberingState): number | null {
   for (const block of sortedBlocks(state)) {
     // Premier numéro de la plage qui n'a pas encore été consommé
     const candidate = Math.max(block.startNumber, state.cursor + 1)
@@ -33,7 +33,7 @@ export function nextNumber(state: NumberingState): number | null {
 }
 
 // Nombre de numéros encore utilisables sur l'ensemble des plages.
-export function remainingNumbers(state: NumberingState) {
+function remainingNumbers(state: NumberingState) {
   return state.blocks.reduce((total, block) => {
     const first = Math.max(block.startNumber, state.cursor + 1)
 
@@ -47,13 +47,13 @@ function numberingKey(cashSessionId: string, userId: string) {
 }
 
 // Lit l'état de la numérotation locale d'un utilisateur dans une session.
-export async function getNumberingState(cashSessionId: string, userId: string) {
+async function getNumberingState(cashSessionId: string, userId: string) {
   return (await (await getDb()).get('numbering', numberingKey(cashSessionId, userId))) ?? null
 }
 
 // Fusionne l'état du serveur avec l'état local : le curseur ne recule jamais,
 // même après une perte du cache local.
-export function mergeServerState(
+function mergeServerState(
   local: NumberingState | null,
   cashSessionId: string,
   userId: string,

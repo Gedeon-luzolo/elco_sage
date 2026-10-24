@@ -9,7 +9,7 @@ type QueuedFields = Pick<
 >
 
 // Résultat d'un envoi : soit la réponse du serveur, soit l'entrée mise en file.
-export type SubmitResult<T> = { queued: false; data: T } | { queued: true; entry: OutboxEntry }
+type SubmitResult<T> = { queued: false; data: T } | { queued: true; entry: OutboxEntry }
 
 // Envoie une écriture au serveur ; si le réseau est coupé, la met dans la file pour plus tard.
 export async function submitOrQueue<T>(operation: QueuedFields): Promise<SubmitResult<T>> {

@@ -13,7 +13,7 @@ export interface SaleLineState {
 }
 
 // Donnees necessaires pour valider le formulaire avant l'envoi.
-export interface SaleFormState {
+interface SaleFormState {
   currentCashSessionId?: string | null
   paymentType: SalePaymentType
   operatorId: string
@@ -23,7 +23,7 @@ export interface SaleFormState {
 }
 
 // Donnees utilisees pour construire le payload backend sans exposer les calculs dans la page.
-export interface BuildSalePayloadInput {
+interface BuildSalePayloadInput {
   paymentType: SalePaymentType
   customerId: string
   operatorId: string
@@ -33,7 +33,7 @@ export interface BuildSalePayloadInput {
   lines: SaleLineState[]
 }
 
-export type SaleServiceOption = Record<string, JSONDataTypes> & ProductServiceDTO
+type SaleServiceOption = Record<string, JSONDataTypes> & ProductServiceDTO
 
 // Options affichees dans le select du type de paiement.
 export const SALE_PAYMENT_OPTIONS: Array<{ label: string; value: SalePaymentType }> = [
@@ -172,7 +172,7 @@ export function canSubmitSaleForm(form: SaleFormState) {
 }
 
 // Prepare uniquement les lignes valides attendues par le backend.
-export function buildSaleItemsPayload(lines: SaleLineState[]) {
+function buildSaleItemsPayload(lines: SaleLineState[]) {
   // Les lignes incompletes ne sont pas envoyees au serveur.
   const validLines = lines.filter(
     (line) => line.orderNumber.trim().length > 0 && line.productServiceId && line.quantity > 0

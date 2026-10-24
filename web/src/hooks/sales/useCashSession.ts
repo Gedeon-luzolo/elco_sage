@@ -1,7 +1,7 @@
 import { useCrud } from '~/hooks/common/useCrud'
 import type { CashSessionItem } from '~/types/cash_session_types'
 
-export const CASH_SESSIONS_ENDPOINT = '/cash-sessions'
+const CASH_SESSIONS_ENDPOINT = '/cash-sessions'
 
 // Session de caisse ouverte de l'utilisateur (null quand aucune n'est ouverte).
 export function useCurrentCashSession(enabled = true) {

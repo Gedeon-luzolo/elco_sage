@@ -1,6 +1,6 @@
 import { CalendarDays, CreditCard, HandCoins, History, type LucideIcon } from 'lucide-react'
 
-export interface SalesNavLink {
+interface SalesNavLink {
   title: string
   description: string
   href: string

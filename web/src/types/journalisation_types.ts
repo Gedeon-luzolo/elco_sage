@@ -15,7 +15,7 @@ export type JournalisationModule =
 export type JournalisationModuleFilter = JournalisationModule | 'ALL'
 
 // Utilisateur lié à une entrée de journalisation.
-export type JournalisationUser = Record<string, JSONDataTypes> & {
+type JournalisationUser = Record<string, JSONDataTypes> & {
   fullName: string | null
 }
 
@@ -26,19 +26,6 @@ export type JournalisationListItem = Record<string, JSONDataTypes> & {
   message: string
   createdAt: string
   user: JournalisationUser | null
-}
-
-// Filtres appliqués par le controller Inertia.
-export type JournalisationFilters = Record<string, JSONDataTypes> & {
-  module: JournalisationModuleFilter
-  startDate: string | null
-  endDate: string | null
-}
-
-// Props envoyées à la page journalisation.
-export interface JournalisationsPageProps extends Record<string, JSONDataTypes> {
-  journalisations: JournalisationListItem[]
-  filters: JournalisationFilters
 }
 
 // Option générique pour le select de filtre module.

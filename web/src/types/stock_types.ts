@@ -1,5 +1,3 @@
-import { dateKey } from '~/utils/date'
-
 export type StockUnit = 'base' | 'packaging'
 
 export type StockMovementItem = {
@@ -21,43 +19,4 @@ export type StockMovementItem = {
   variance: number | null
   observation: string | null
   isPhysicalStockValidated: boolean
-}
-
-export interface InventoryPageProps {
-  stockItems: StockMovementItem[]
-  currentDate: string
-}
-
-export interface StockFormState {
-  productId: string
-  date: string
-  entries: number
-  unit: StockUnit
-  observation?: string | null
-}
-
-export interface PhysicalStockFormState {
-  productId: string
-  date: string
-  physicalStock: number
-  physicalStockUnit: StockUnit
-  losses?: number
-  lossesUnit?: StockUnit
-  observation?: string | null
-}
-
-export const EMPTY_STOCK_FORM: StockFormState = {
-  productId: '',
-  date: dateKey,
-  entries: 0,
-  unit: 'base',
-}
-
-export const EMPTY_PHYSICAL_STOCK_FORM: PhysicalStockFormState = {
-  productId: '',
-  date: dateKey,
-  physicalStock: 0,
-  physicalStockUnit: 'base',
-  losses: 0,
-  lossesUnit: 'base',
 }

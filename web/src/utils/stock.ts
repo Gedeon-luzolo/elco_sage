@@ -45,24 +45,8 @@ export function getConversionPreview(
 }
 
 /**
- * Vérifie si un mouvement a des données enregistrées.
- */
-export function hasMovementData(movement: StockMovementItem): boolean {
-  return movement.id !== -1
-}
-
-/**
  * Vérifie si un mouvement a un écart significatif.
  */
 export function hasSignificantVariance(movement: StockMovementItem): boolean {
   return movement.variance !== null && Math.abs(movement.variance) > 0
-}
-
-/**
- * Retourne la couleur de bordure selon le statut du mouvement.
- */
-export function getMovementBorderColor(movement: StockMovementItem): string {
-  if (!hasMovementData(movement)) return 'border-t-gray-400'
-  if (movement.isPhysicalStockValidated) return 'border-t-emerald-500'
-  return 'border-t-amber-500'
 }

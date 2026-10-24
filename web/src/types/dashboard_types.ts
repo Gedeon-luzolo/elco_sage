@@ -25,7 +25,7 @@ export interface DashboardStats extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour les points du graphique d'évolution journalière des ventes.
-export interface DashboardDailySale extends Record<string, JSONDataTypes> {
+interface DashboardDailySale extends Record<string, JSONDataTypes> {
   date: string
   label: string
   cdf: number
@@ -34,7 +34,7 @@ export interface DashboardDailySale extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour la répartition des ventes par mode de paiement.
-export interface DashboardPaymentDistribution extends Record<string, JSONDataTypes> {
+interface DashboardPaymentDistribution extends Record<string, JSONDataTypes> {
   paymentType: string
   count: number
   amountCdf: number

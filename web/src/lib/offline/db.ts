@@ -6,10 +6,6 @@ export type OutboxType = 'sale' | 'recovery'
 
 // Écriture faite hors ligne, rejouée telle quelle au retour du réseau.
 // L'id est généré par le client et sert aussi de clé d'idempotence côté serveur.
-// userId est l'utilisateur qui a fait l'opération : une entrée n'est rejouée que pour lui.
-// summary est le libellé affiché dans la file (ex : "Vente 00203").
-// sale est la vente locale utilisée pour le ticket tant que le serveur ne la connaît pas.
-// error contient la raison du refus du serveur quand le statut vaut "conflict".
 export interface OutboxEntry {
   id: string
   type: OutboxType
@@ -25,9 +21,7 @@ export interface OutboxEntry {
 }
 
 // État de la numérotation locale d'un utilisateur dans une session de caisse.
-// id combine l'utilisateur et la session : la session est partagée, mais chaque utilisateur
-// a ses propres plages de numéros.
-// cursor est le dernier numéro consommé (0 si aucun) : il n'est jamais réutilisé.
+// id combine l'utilisateur et la session 
 export interface NumberingState {
   id: string
   cashSessionId: string
@@ -67,9 +61,4 @@ export function getDb() {
   })
 
   return dbPromise
-}
-
-// Oublie la connexion courante : utilisé par les tests pour repartir d'une base vide.
-export function resetDbConnection() {
-  dbPromise = null
 }

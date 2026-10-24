@@ -20,7 +20,7 @@ interface CreateSaleVariables {
 
 // Résultat d'une création de vente.
 // queued vaut vrai si le serveur n'a pas répondu : la vente est dans la file et partira plus tard.
-export interface CreateSaleResult {
+interface CreateSaleResult {
   sale: SaleItemRow
   queued: boolean
 }
