@@ -13,10 +13,12 @@ const persistOptions = {
   maxAge: OFFLINE_CACHE_MAX_AGE_MS,
   // À changer quand la forme des données en cache évolue : l'ancien cache est alors ignoré
   buster: 'v1',
-  // Seules les requêtes réussies et utiles hors ligne sont sauvegardées
+  // Seules les requêtes utiles hors ligne et qui ont des données sont sauvegardées.
+  // Une relecture qui échoue (serveur injoignable) garde sa dernière valeur : sans cette règle,
+  // elle serait retirée de la sauvegarde et les données hors ligne disparaîtraient.
   dehydrateOptions: {
-    shouldDehydrateQuery: (query: { state: { status: string }; queryKey: readonly unknown[] }) =>
-      query.state.status === 'success' &&
+    shouldDehydrateQuery: (query: { state: { data: unknown }; queryKey: readonly unknown[] }) =>
+      query.state.data !== undefined &&
       OFFLINE_QUERY_PREFIXES.some((prefix) => String(query.queryKey[0]).startsWith(prefix)),
   },
 }
