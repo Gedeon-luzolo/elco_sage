@@ -5,6 +5,7 @@ import type { CreateSaleInput } from '#types/sales'
 import { apiAction } from '#utils/api_action'
 import { isManagementRole } from '#utils/user_role_utils'
 import { createSaleValidator } from '#validators/sale'
+import { parseBatchParam } from '#utils/paginated_batch'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -19,13 +20,15 @@ export default class ApiSalesController {
     const status = request.input('status')
 
     // Un statut inconnu est ignoré plutôt que de provoquer une erreur
-    const sales = await this.saleService.findAllBatch({
+    const { items, pagination } = await this.saleService.findAllBatch({
+      offset: parseBatchParam(request.input('offset')),
+      limit: parseBatchParam(request.input('limit')),
       facturationDate: request.input('facturationDate') || undefined,
       additionNumber: request.input('additionNumber') || undefined,
       status: Object.values(SaleStatus).includes(status) ? status : undefined,
     })
 
-    return serialize(SaleTransformer.transform(sales))
+    return serialize({ items: SaleTransformer.transform(items), pagination })
   }
 
   /**

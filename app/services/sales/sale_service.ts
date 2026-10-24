@@ -10,10 +10,14 @@ import SaleItemService from '#services/sales/sale_item_service'
 import SaleValidationService from '#services/sales/sale_validation_service'
 import type { CreateSaleInput, FindSalesHistoryParams } from '#types/sales'
 import { dateKeyToDay, dateTimeToDateKey } from '#utils/date_utils'
+import { paginateBatch } from '#utils/paginated_batch'
 import { findReplayedRecord } from '#utils/idempotency'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+
+// Nombre maximum de ventes renvoyées par lot pour l'historique.
+const SALES_HISTORY_MAX_BATCH = 40
 
 @inject()
 export default class SaleService {
@@ -30,23 +34,13 @@ export default class SaleService {
    * Permet de retrouver une addition passée pour la réimprimer.
    */
   async findAllBatch({
-    offset = 0,
-    limit = 20,
+    offset,
+    limit,
     facturationDate,
     additionNumber,
     status,
   }: FindSalesHistoryParams = {}) {
     const query = Sale.query()
-      .preload('cashSession')
-      .preload('customer')
-      .preload('operator')
-      .preload('seller')
-      .preload('items', (itemsQuery) => {
-        itemsQuery.preload('productService')
-      })
-      .preload('recoveries')
-      .orderBy('saleDate', 'desc')
-      .offset(offset)
 
     // Applique le filtre de date de facturation si précisé.
     if (facturationDate) {
@@ -66,7 +60,22 @@ export default class SaleService {
       query.where('status', status)
     }
 
-    return query.limit(limit)
+    // Le total est compté sur les filtres, puis les relations et le tri sont ajoutés au lot
+    return paginateBatch(
+      query,
+      { offset, limit, maxLimit: SALES_HISTORY_MAX_BATCH, defaultLimit: SALES_HISTORY_MAX_BATCH },
+      (batchQuery) =>
+        batchQuery
+          .preload('cashSession')
+          .preload('customer')
+          .preload('operator')
+          .preload('seller')
+          .preload('items', (itemsQuery) => {
+            itemsQuery.preload('productService')
+          })
+          .preload('recoveries')
+          .orderBy('saleDate', 'desc')
+    )
   }
 
   /**

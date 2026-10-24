@@ -1,6 +1,10 @@
 import Journalisation from '#models/journalisation'
 import type { CreateJournalisationParams, FindJournalisationsParams } from '#types/journalisation'
 import { normalizeDateRange } from '#utils/date_utils'
+import { paginateBatch } from '#utils/paginated_batch'
+
+// Nombre maximum d'entrées renvoyées par lot pour le journal.
+const JOURNALISATIONS_MAX_BATCH = 50
 
 export default class JournalisationService {
   /**
@@ -22,19 +26,14 @@ export default class JournalisationService {
    * Les bornes de date couvrent toujours la journee complete.
    */
   async findAllBatch({
-    offset = 0,
-    limit = 50,
+    offset,
+    limit,
     module,
     startDate,
     endDate,
   }: FindJournalisationsParams = {}) {
     // Cree la requete de base pour recuperer les entrees de journalisation.
     const query = Journalisation.query()
-      .preload('user', (userQuery) => {
-        userQuery.select('id', 'fullName')
-      })
-      .orderBy('createdAt', 'desc')
-      .offset(offset)
 
     // Applique les filtres de module si fournis.
     if (module) {
@@ -48,8 +47,22 @@ export default class JournalisationService {
       query.whereBetween('createdAt', [dateRange.startDate, dateRange.endDate])
     }
 
-    // Limite le nombre d'entrees retournees pour eviter de surcharger la page.
-    return query.limit(limit)
+    // Le total est compté sur les filtres, puis la relation et le tri sont ajoutés au lot.
+    return paginateBatch(
+      query,
+      {
+        offset,
+        limit,
+        maxLimit: JOURNALISATIONS_MAX_BATCH,
+        defaultLimit: JOURNALISATIONS_MAX_BATCH,
+      },
+      (batchQuery) =>
+        batchQuery
+          .preload('user', (userQuery) => {
+            userQuery.select('id', 'fullName')
+          })
+          .orderBy('createdAt', 'desc')
+    )
   }
 
   // Supprime toutes les entrees de journalisation.
