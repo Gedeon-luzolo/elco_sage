@@ -1,0 +1,27 @@
+import { BaseSchema } from '@adonisjs/lucid/schema'
+
+export default class extends BaseSchema {
+  protected tableName = 'auth_access_tokens'
+
+  async up() {
+    // Les tokens d'accès vivent maintenant dans Redis : la table n'est plus lue ni écrite
+    this.schema.dropTable(this.tableName)
+  }
+
+  async down() {
+    // Recrée la table telle que la migration d'origine la définissait
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table.uuid('tokenable_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
+
+      table.string('type').notNullable()
+      table.string('name').nullable()
+      table.string('hash').notNullable()
+      table.text('abilities').notNullable()
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
+      table.timestamp('last_used_at').nullable()
+      table.timestamp('expires_at').nullable()
+    })
+  }
+}
