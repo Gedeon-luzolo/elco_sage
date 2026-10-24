@@ -1,5 +1,6 @@
 import CashSession from '#models/cash_session'
 import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
+import SaleRecovery from '#models/sale_recovery'
 import {
   normalizeMoneyMap,
   sumMoneyByCurrency,
@@ -35,10 +36,14 @@ export default class SaleReportService {
     // Les ventes portent les lignes et les recouvrements du rapport.
     const sales = await this.findSessionSales(session.id)
 
+    // Les recouvrements sont ceux encaissés pendant la session, comme à la clôture,
+    // même si la dette vient d'une vente d'une autre session.
+    const recoveries = await SaleRecovery.query().where('cashSessionId', session.id)
+
     return {
       session,
       sales,
-      totals: this.buildReportTotals(sales),
+      totals: this.buildReportTotals(sales, recoveries),
     }
   }
 
@@ -84,13 +89,10 @@ export default class SaleReportService {
    * Calcule les totaux financiers du rapport de session.
    * Les montants restent sous forme de MoneyMap pour laisser le formatage au frontend.
    */
-  private buildReportTotals(sales: Sale[]): SaleReportTotals {
+  private buildReportTotals(sales: Sale[], recoveries: SaleRecovery[]): SaleReportTotals {
     // Les ventes cash et les dettes ne participent pas aux memes indicateurs.
     const cashSales = sales.filter((sale) => sale.paymentType === SalePaymentType.CASH)
     const debtSales = sales.filter((sale) => sale.paymentType === SalePaymentType.CREDIT)
-
-    // Les recouvrements sont aplatis pour etre sommes par devise.
-    const recoveries = sales.flatMap((sale) => sale.recoveries ?? [])
 
     // Les montants sont regroupes par devise; le frontend se charge du formatage.
     const theoreticalAmounts = sumMoneyByCurrency(
