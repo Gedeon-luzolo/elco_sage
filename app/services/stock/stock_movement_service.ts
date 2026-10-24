@@ -54,7 +54,15 @@ export default class StockMovementService {
     const [products, movements] = await Promise.all([
       // Recuperer les produits
       ProductService.query()
-        .select('id', 'name', 'baseUnit', 'packagingUnit', 'packagingCapacity', 'categoryId')
+        .select(
+          'id',
+          'name',
+          'baseUnit',
+          'packagingUnit',
+          'packagingCapacity',
+          'materialCostCdf',
+          'categoryId'
+        )
         .where('type', ProductServiceType.PRODUCT)
         .where('isActive', true)
         .preload('category', (query) => query.select('id', 'name'))
@@ -83,6 +91,7 @@ export default class StockMovementService {
           productBaseUnit: product.baseUnit ?? '',
           productPackagingUnit: product.packagingUnit,
           productPackagingCapacity: product.packagingCapacity,
+          unitCostCdf: Number(product.materialCostCdf),
           categoryName: product.category?.name ?? null,
           date: movement.date.toISODate()!,
           initialStock: movement.initialStock,
@@ -108,6 +117,7 @@ export default class StockMovementService {
           productBaseUnit: product.baseUnit ?? '',
           productPackagingUnit: product.packagingUnit,
           productPackagingCapacity: product.packagingCapacity,
+          unitCostCdf: Number(product.materialCostCdf),
           categoryName: product.category?.name ?? null,
           date,
           initialStock,

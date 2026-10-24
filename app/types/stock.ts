@@ -8,6 +8,7 @@ export interface StockMovementDTO {
   productBaseUnit: string
   productPackagingUnit: string | null
   productPackagingCapacity: number | null
+  unitCostCdf: number
   categoryName: string | null
   date: string
   initialStock: number | null
