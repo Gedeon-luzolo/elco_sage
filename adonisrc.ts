@@ -18,6 +18,7 @@ export default defineConfig({
     () => import('@adonisjs/cors/cors_provider'),
     () => import('@adonisjs/auth/auth_provider'),
     () => import('#providers/api_provider'),
+    () => import('@adonisjs/redis/redis_provider')
   ],
 
   // Modules importés avant le démarrage
