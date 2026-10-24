@@ -29,8 +29,8 @@ export default class StaffProductivityService {
       )
 
       row.additionsCount += 1
-      // Un bon est identifié par orderNumber; on évite de compter deux fois le même bon dans une vente.
-      row.orderFormsCount += new Set((sale.items ?? []).map((item) => item.orderNumber)).size
+      // Chaque addition porte un seul bon.
+      row.orderFormsCount += 1
 
       // Les offerts ne participent pas au réel, au cash, ni aux dettes.
       if (sale.paymentType === SalePaymentType.CASH) {

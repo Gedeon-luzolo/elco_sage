@@ -5,7 +5,6 @@ import ProductServiceTransformer from '#transformers/product_service_transformer
 export interface SaleItemDTO {
   id: string
   saleId: string
-  orderNumber: string
   productServiceId: string
   quantity: number
   currency: string
@@ -22,7 +21,6 @@ export default class SaleItemTransformer {
     return {
       id: item.id,
       saleId: item.saleId,
-      orderNumber: item.orderNumber,
       productServiceId: item.productServiceId,
       quantity: item.quantity,
       currency: item.currency,

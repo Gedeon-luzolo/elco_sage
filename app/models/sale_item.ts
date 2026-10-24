@@ -17,9 +17,6 @@ export default class SaleItem extends BaseModel {
   declare saleId: string
 
   @column()
-  declare orderNumber: string
-
-  @column()
   declare productServiceId: string
 
   @column(decimalColumn)

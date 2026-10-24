@@ -6,7 +6,6 @@ import vine from '@vinejs/vine'
  * Valide la creation d'une ligne de vente.
  */
 const saleItemSchema = vine.object({
-  orderNumber: vine.string().trim().minLength(1).maxLength(100),
   productServiceId: vine.string().uuid(),
   quantity: vine.number().min(0.01),
 })
@@ -20,6 +19,7 @@ export const createSaleValidator = vine.create({
     .string()
     .regex(/^\d{1,6}$/)
     .optional(),
+  orderNumber: vine.string().trim().minLength(1).maxLength(100),
   cashSessionId: vine.string().uuid().nullable().optional(),
   customerId: vine.string().uuid().nullable(),
   operatorId: vine.string().uuid(),

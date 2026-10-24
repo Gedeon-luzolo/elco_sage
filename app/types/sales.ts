@@ -3,13 +3,11 @@ import type { SalePaymentType } from '#models/sale'
 import type ProductService from '#models/product_service'
 
 export interface CreateSaleItemInput {
-  orderNumber: string
   productServiceId: string
   quantity: number
 }
 
 export interface PreparedSaleItemInput {
-  orderNumber: string
   productServiceId: string
   stockProduct: ProductService
   quantity: number
@@ -28,6 +26,8 @@ export interface CreateSaleInput {
   id?: string
   // Numéro issu de la plage réservée à la caisse (vente hors ligne).
   additionNumber?: string
+  // Bon unique de l'addition, partagé par toutes ses lignes.
+  orderNumber: string
   cashSessionId?: string
   customerId?: string | null
   operatorId: string

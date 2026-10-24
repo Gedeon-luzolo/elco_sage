@@ -60,7 +60,6 @@ export default class SaleItemService {
       const totalPrice = unitPrice * quantity
 
       return {
-        orderNumber: item.orderNumber.trim(),
         productServiceId: service.id,
         stockProduct: service.stockProduct,
         quantity,
@@ -86,7 +85,6 @@ export default class SaleItemService {
   ) {
     const rows = items.map((item) => ({
       saleId,
-      orderNumber: item.orderNumber,
       productServiceId: item.productServiceId,
       quantity: item.quantity,
       currency: item.currency,

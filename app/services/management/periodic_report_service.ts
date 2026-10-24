@@ -93,8 +93,8 @@ export default class PeriodicReportService {
 
     // Une addition correspond à une vente enregistrée.
     report.additionsCount += 1
-    // Les bons sont comptés distinctement pour éviter de compter deux fois le même orderNumber.
-    report.orderFormsCount += new Set((sale.items ?? []).map((item) => item.orderNumber)).size
+    // Chaque addition porte un seul bon.
+    report.orderFormsCount += 1
     // Les services vendus représentent la somme des quantités sur les lignes de vente.
     report.soldServicesCount += (sale.items ?? []).reduce(
       (total, item) => total + Number(item.quantity || 0),

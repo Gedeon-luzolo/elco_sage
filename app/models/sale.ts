@@ -45,6 +45,9 @@ export default class Sale extends BaseModel {
   @column()
   declare additionNumber: string
 
+  @column()
+  declare orderNumber: string
+
   @column.dateTime()
   declare saleDate: DateTime
 

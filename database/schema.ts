@@ -180,7 +180,7 @@ export class ProductServiceSchema extends BaseModel {
 }
 
 export class SaleItemSchema extends BaseModel {
-  static $columns = ['createdAt', 'currency', 'id', 'orderNumber', 'productServiceId', 'quantity', 'saleId', 'totalPrice', 'unitPrice', 'updatedAt'] as const
+  static $columns = ['createdAt', 'currency', 'id', 'productServiceId', 'quantity', 'saleId', 'totalPrice', 'unitPrice', 'updatedAt'] as const
   $columns = SaleItemSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -188,8 +188,6 @@ export class SaleItemSchema extends BaseModel {
   declare currency: string
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare orderNumber: string
   @column()
   declare productServiceId: string
   @column()
@@ -228,7 +226,7 @@ export class SaleRecoverySchema extends BaseModel {
 }
 
 export class SaleSchema extends BaseModel {
-  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
+  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'orderNumber', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
   $columns = SaleSchema.$columns
   @column()
   declare additionNumber: string
@@ -246,6 +244,8 @@ export class SaleSchema extends BaseModel {
   declare id: string
   @column()
   declare operatorId: string
+  @column()
+  declare orderNumber: string
   @column()
   declare paymentType: string
   @column.dateTime()

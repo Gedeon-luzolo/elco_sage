@@ -14,6 +14,7 @@ export interface SaleDTO {
   sellerId: string
   paymentType: string
   additionNumber: string
+  orderNumber: string
   saleDate: string | null
   currency: string
   theoreticalAmount: number
@@ -41,6 +42,7 @@ export default class SaleTransformer {
       sellerId: sale.sellerId,
       paymentType: sale.paymentType,
       additionNumber: sale.additionNumber,
+      orderNumber: sale.orderNumber,
       saleDate: sale.saleDate?.toISO() ?? null,
       currency: sale.currency,
       theoreticalAmount: sale.theoreticalAmount,
