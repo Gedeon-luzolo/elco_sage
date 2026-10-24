@@ -6,7 +6,7 @@ import { CacheKeys, CacheTtl } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { DateTime } from 'luxon'
-import type { StockMovementDTO } from '#transformers/stock_movement_transformer'
+import type { StockMovementDTO } from '#types/stock'
 import type {
   CreateStockMovementInput,
   ValidatePhysicalStockInput,

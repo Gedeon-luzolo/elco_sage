@@ -1,7 +1,6 @@
 import { SalePaymentType } from '#models/sale'
 import { Currency } from '#types/currency'
 import vine from '@vinejs/vine'
-import type { InferInput } from '@vinejs/vine/types'
 
 /**
  * Valide la creation d'une ligne de vente.
@@ -30,5 +29,3 @@ export const createSaleValidator = vine.create({
   discountAmount: vine.number().min(0).nullable().optional(),
   items: vine.array(saleItemSchema).minLength(1),
 })
-
-export type CreateSaleValidatorInput = InferInput<typeof createSaleValidator>

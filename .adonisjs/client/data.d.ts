@@ -16,7 +16,6 @@ import type RecoveryPaymentTransformer from '#transformers/recovery_payment_tran
 import type SaleItemTransformer from '#transformers/sale_item_transformer'
 import type SaleRecoveryTransformer from '#transformers/sale_recovery_transformer'
 import type SaleTransformer from '#transformers/sale_transformer'
-import type StockMovementTransformer from '#transformers/stock_movement_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 
 export namespace Data {
@@ -63,10 +62,6 @@ export namespace Data {
   export type Sale = InferData<SaleTransformer>
   export namespace Sale {
     export type Variants = InferVariants<SaleTransformer>
-  }
-  export type StockMovement = InferData<StockMovementTransformer>
-  export namespace StockMovement {
-    export type Variants = InferVariants<StockMovementTransformer>
   }
   export type User = InferData<UserTransformer>
   export namespace User {

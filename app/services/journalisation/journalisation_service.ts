@@ -64,14 +64,4 @@ export default class JournalisationService {
           .orderBy('createdAt', 'desc')
     )
   }
-
-  // Supprime toutes les entrees de journalisation.
-  async deleteAll() {
-    return Journalisation.query().delete()
-  }
-
-  // Supprime une entree de journalisation par son id.
-  async delete(id: string) {
-    return Journalisation.query().where('id', id).delete()
-  }
 }

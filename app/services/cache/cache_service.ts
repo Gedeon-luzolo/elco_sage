@@ -49,11 +49,6 @@ export default class CacheService {
     })
   }
 
-  // Supprime une cle precise du cache.
-  forget(key: string) {
-    store.delete(key)
-  }
-
   //Supprime toutes les cles d'un domaine fonctionnel.
   forgetByPrefix(prefix: string) {
     // Les prefixes servent a invalider un domaine sans connaitre toutes ses cles.
@@ -62,10 +57,5 @@ export default class CacheService {
         store.delete(key)
       }
     }
-  }
-
-  // Vide completement le cache applicatif.
-  flush() {
-    store.clear()
   }
 }

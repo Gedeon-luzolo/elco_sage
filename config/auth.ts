@@ -3,15 +3,11 @@ import { tokensGuard, tokensUserProvider } from '@adonisjs/auth/access_tokens'
 import type { InferAuthenticators, InferAuthEvents, Authenticators } from '@adonisjs/auth/types'
 
 const authConfig = defineConfig({
-  /**
-   * Default guard used when no guard is explicitly specified.
-   */
+  // Garde utilisée quand aucune n'est précisée
   default: 'api',
 
   guards: {
-    /**
-     * Access token guard used by the SPA through the /api routes.
-     */
+    // Token d'accès utilisé par la SPA sur les routes /api
     api: tokensGuard({
       provider: tokensUserProvider({
         tokens: 'accessTokens',
@@ -23,10 +19,7 @@ const authConfig = defineConfig({
 
 export default authConfig
 
-/**
- * Inferring types from the configured auth
- * guards.
- */
+// Types déduits des gardes configurées
 declare module '@adonisjs/auth/types' {
   export interface Authenticators extends InferAuthenticators<typeof authConfig> {}
 }
