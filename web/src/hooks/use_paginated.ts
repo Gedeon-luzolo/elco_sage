@@ -19,10 +19,15 @@ export function usePaginated<T>({ initialItems, pageSize = 10 }: UsePaginatedPar
   // Nombre de pages disponibles avec les lignes déjà chargées en mémoire.
   const totalLoadedPages = Math.max(1, Math.ceil(items.length / pageSize))
 
+  // La liste affichée suit toujours les données reçues
   useEffect(() => {
     setItems(initialItems)
-    setCurrentPage(1)
   }, [initialItems])
+
+  // On revient à la première page seulement quand le nombre d'éléments change :
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [initialItems.length])
 
   // Tranche réellement affichée dans le tableau pour la page courante.
   const visibleItems = useMemo(() => {
