@@ -1,13 +1,11 @@
 import CashSession from '#models/cash_session'
 import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
-import type User from '#models/user'
 import {
   normalizeMoneyMap,
   sumMoneyByCurrency,
   sumMoneyMaps,
   type MoneyMapDTO,
 } from '#utils/money_map'
-import { isManagementRole } from '#utils/user_role_utils'
 
 export interface SaleReportTotals {
   theoreticalAmounts: MoneyMapDTO
@@ -30,9 +28,9 @@ export default class SaleReportService {
    * Charge le rapport d'une session visible par l'utilisateur courant.
    * Le resultat contient l'entete de session, les ventes actives et les totaux.
    */
-  async getSessionReport(actor: User, cashSessionId: string): Promise<SaleReport> {
-    // La session est chargee avec son caissier pour l'entete du rapport.
-    const session = await this.findVisibleSession(actor, cashSessionId)
+  async getSessionReport(cashSessionId: string): Promise<SaleReport> {
+    // La session est chargée avec ses utilisateurs pour l'entête du rapport.
+    const session = await this.findSession(cashSessionId)
 
     // Les ventes portent les lignes et les recouvrements du rapport.
     const sales = await this.findSessionSales(session.id)
@@ -45,19 +43,15 @@ export default class SaleReportService {
   }
 
   /**
-   * Retrouve une session accessible par l'utilisateur courant.
-   * Les roles non-management sont limites a leurs propres sessions.
+   * Retrouve une session de caisse avec son ouvreur et celui qui l'a fermée.
+   * La caisse est partagee : tous les utilisateurs peuvent lire les sessions.
    */
-  private async findVisibleSession(actor: User, cashSessionId: string) {
-    // Le caissier est precharge pour afficher les informations de l'entete.
-    const query = CashSession.query().where('id', cashSessionId).preload('user')
-
-    // Les caissiers et operateurs ne lisent que leurs propres sessions.
-    if (!isManagementRole(actor.role)) {
-      query.where('userId', actor.id)
-    }
-
-    return query.firstOrFail()
+  private async findSession(cashSessionId: string) {
+    return CashSession.query()
+      .where('id', cashSessionId)
+      .preload('openedBy')
+      .preload('closedBy')
+      .firstOrFail()
   }
 
   /**
@@ -65,23 +59,25 @@ export default class SaleReportService {
    * Les relations utiles au tableau sont prechargees en une seule lecture.
    */
   private async findSessionSales(cashSessionId: string) {
-    return Sale.query()
-      // Le rapport ne doit afficher que les ventes valides de la session demandee.
-      .where('cashSessionId', cashSessionId)
-      .where('status', SaleStatus.ACTIVE)
-      // Les relations simples alimentent les colonnes client, operateur et vendeur.
-      .preload('customer')
-      .preload('operator')
-      .preload('seller')
-      // Chaque ligne de vente garde son service pour le detail du tableau.
-      .preload('items', (itemsQuery) => {
-        itemsQuery.preload('productService')
-      })
-      // Les recouvrements restent disponibles pour les totaux et le detail financier.
-      .preload('recoveries', (recoveriesQuery) => {
-        recoveriesQuery.preload('receivedBy').orderBy('recoveredAt', 'desc')
-      })
-      .orderBy('saleDate', 'asc')
+    return (
+      Sale.query()
+        // Le rapport ne doit afficher que les ventes valides de la session demandee.
+        .where('cashSessionId', cashSessionId)
+        .where('status', SaleStatus.ACTIVE)
+        // Les relations simples alimentent les colonnes client, operateur et vendeur.
+        .preload('customer')
+        .preload('operator')
+        .preload('seller')
+        // Chaque ligne de vente garde son service pour le detail du tableau.
+        .preload('items', (itemsQuery) => {
+          itemsQuery.preload('productService')
+        })
+        // Les recouvrements restent disponibles pour les totaux et le detail financier.
+        .preload('recoveries', (recoveriesQuery) => {
+          recoveriesQuery.preload('receivedBy').orderBy('recoveredAt', 'desc')
+        })
+        .orderBy('saleDate', 'asc')
+    )
   }
 
   /**

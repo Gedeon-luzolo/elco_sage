@@ -19,10 +19,10 @@ export default class ApiCashSessionsController {
   ) {}
 
   /**
-   * Liste les sessions visibles par l'utilisateur (filtrables par période).
+   * Liste les sessions de caisse, partagées par tous (filtrables par période).
    */
-  async index({ auth, request, serialize }: HttpContext) {
-    const sessions = await this.cashSessionService.findVisibleSessions(auth.getUserOrFail(), {
+  async index({ request, serialize }: HttpContext) {
+    const sessions = await this.cashSessionService.findSessions({
       startDate: request.input('startDate'),
       endDate: request.input('endDate'),
     })
@@ -31,10 +31,10 @@ export default class ApiCashSessionsController {
   }
 
   /**
-   * Session ouverte de l'utilisateur, ou null : la SPA en déduit si la vente est possible.
+   * Session ouverte (la même pour tous), ou null : la SPA en déduit si la vente est possible.
    */
-  async current({ auth, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
+  async current({ serialize }: HttpContext) {
+    const session = await this.cashSessionService.getOpenSession()
 
     return serialize(CashSessionTransformer.transformNullable(session))
   }
@@ -42,8 +42,8 @@ export default class ApiCashSessionsController {
   /**
    * Détail d'une session : rapport avec ventes et totaux.
    */
-  async show({ auth, params, serialize }: HttpContext) {
-    const report = await this.saleReportService.getSessionReport(auth.getUserOrFail(), params.id)
+  async show({ params, serialize }: HttpContext) {
+    const report = await this.saleReportService.getSessionReport(params.id)
 
     return serialize({
       session: CashSessionTransformer.transformSingle(report.session),
@@ -53,7 +53,8 @@ export default class ApiCashSessionsController {
   }
 
   /**
-   * Ouvre la session de caisse et réserve une première plage de numéros d'addition.
+   * Ouvre la session de caisse (refusé si une autre est encore ouverte) et réserve
+   * une première plage de numéros d'addition à l'utilisateur.
    */
   async store(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
@@ -61,15 +62,13 @@ export default class ApiCashSessionsController {
     return apiAction(ctx, async () => {
       const session = await this.cashSessionService.open(actor)
 
-      // Une session sans plage (nouvelle ou ouverte avant cette fonction) en reçoit une
-      if ((await this.additionNumberService.listBlocks(session.id)).length === 0) {
-        await this.additionNumberService.reserveBlock(session.id)
-      }
+      // Chaque utilisateur a ses propres plages : celui qui ouvre reçoit la première
+      await this.additionNumberService.reserveBlock(session.id, actor.id)
 
       return ctx.response.created(
         await ctx.serialize({
           session: CashSessionTransformer.transformSingle(session),
-          additionNumbers: await this.additionNumberState(session.id),
+          additionNumbers: await this.additionNumberState(session.id, actor.id),
         })
       )
     })
@@ -78,8 +77,8 @@ export default class ApiCashSessionsController {
   /**
    * Montants système affichés dans le dialogue de clôture.
    */
-  async systemAmounts({ auth, response, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
+  async systemAmounts({ response, serialize }: HttpContext) {
+    const session = await this.cashSessionService.getOpenSession()
 
     // Sans session ouverte, il n'y a rien à calculer
     if (!session) {
@@ -90,7 +89,7 @@ export default class ApiCashSessionsController {
   }
 
   /**
-   * Ferme la session ouverte de l'utilisateur.
+   * Ferme la session ouverte : n'importe quel utilisateur peut le faire.
    */
   async close(ctx: HttpContext) {
     const actor = ctx.auth.getUserOrFail()
@@ -104,39 +103,41 @@ export default class ApiCashSessionsController {
   }
 
   /**
-   * Plages de numéros réservées pour la session ouverte et dernier numéro utilisé.
+   * Plages de numéros réservées à l'utilisateur pour la session ouverte et dernier numéro utilisé.
    */
   async additionNumbers({ auth, response, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
+    const userId = auth.getUserOrFail().id
+    const session = await this.cashSessionService.getOpenSession()
 
     if (!session) {
       return response.notFound({ message: NO_OPEN_SESSION_MESSAGE })
     }
 
-    return serialize(await this.additionNumberState(session.id))
+    return serialize(await this.additionNumberState(session.id, userId))
   }
 
   /**
-   * Réserve une nouvelle plage quand la précédente est presque consommée (client en ligne).
+   * Réserve une nouvelle plage à l'utilisateur quand la précédente est presque consommée.
    */
   async reserveAdditionNumbers({ auth, response, serialize }: HttpContext) {
-    const session = await this.cashSessionService.getOpenSessionForUser(auth.getUserOrFail().id)
+    const userId = auth.getUserOrFail().id
+    const session = await this.cashSessionService.getOpenSession()
 
     if (!session) {
       return response.notFound({ message: NO_OPEN_SESSION_MESSAGE })
     }
 
     // Nouvelle plage, puis état complet renvoyé au client
-    await this.additionNumberService.reserveBlock(session.id)
+    await this.additionNumberService.reserveBlock(session.id, userId)
 
-    return response.created(await serialize(await this.additionNumberState(session.id)))
+    return response.created(await serialize(await this.additionNumberState(session.id, userId)))
   }
 
-  // État de la numérotation d'une session : ses plages et le dernier numéro utilisé.
-  private async additionNumberState(cashSessionId: string) {
+  // État de la numérotation d'un utilisateur dans une session : ses plages et son dernier numéro utilisé.
+  private async additionNumberState(cashSessionId: string, userId: string) {
     return {
-      blocks: await this.additionNumberService.listBlocks(cashSessionId),
-      lastUsedNumber: await this.additionNumberService.lastUsedNumber(cashSessionId),
+      blocks: await this.additionNumberService.listBlocks(cashSessionId, userId),
+      lastUsedNumber: await this.additionNumberService.lastUsedNumber(cashSessionId, userId),
     }
   }
 }

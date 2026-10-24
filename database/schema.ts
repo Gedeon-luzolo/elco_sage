@@ -8,7 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AdditionNumberBlockSchema extends BaseModel {
-  static $columns = ['cashSessionId', 'createdAt', 'endNumber', 'id', 'startNumber'] as const
+  static $columns = ['cashSessionId', 'createdAt', 'endNumber', 'id', 'startNumber', 'userId'] as const
   $columns = AdditionNumberBlockSchema.$columns
   @column()
   declare cashSessionId: string
@@ -20,6 +20,8 @@ export class AdditionNumberBlockSchema extends BaseModel {
   declare id: string
   @column()
   declare startNumber: number
+  @column()
+  declare userId: string
 }
 
 export class AuthAccessTokenSchema extends BaseModel {
@@ -48,10 +50,12 @@ export class AuthAccessTokenSchema extends BaseModel {
 }
 
 export class CashSessionSchema extends BaseModel {
-  static $columns = ['closedAt', 'closingAmounts', 'createdAt', 'differenceAmounts', 'id', 'openedAt', 'status', 'systemAmounts', 'updatedAt', 'userId'] as const
+  static $columns = ['closedAt', 'closedById', 'closingAmounts', 'createdAt', 'differenceAmounts', 'id', 'openedAt', 'openedById', 'status', 'systemAmounts', 'updatedAt'] as const
   $columns = CashSessionSchema.$columns
   @column.dateTime()
   declare closedAt: DateTime | null
+  @column()
+  declare closedById: string | null
   @column()
   declare closingAmounts: any | null
   @column.dateTime({ autoCreate: true })
@@ -63,13 +67,13 @@ export class CashSessionSchema extends BaseModel {
   @column.dateTime()
   declare openedAt: DateTime
   @column()
+  declare openedById: string
+  @column()
   declare status: string
   @column()
   declare systemAmounts: any | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
-  @column()
-  declare userId: string
 }
 
 export class CustomerSchema extends BaseModel {

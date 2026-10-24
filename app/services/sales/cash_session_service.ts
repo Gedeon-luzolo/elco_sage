@@ -7,9 +7,8 @@ import { CacheKeys } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
 import JournalisationService from '#services/journalisation/journalisation_service'
 import { Currency } from '#types/currency'
-import { normalizeDateRange } from '#utils/date_utils'
+import { BUSINESS_TIME_ZONE, normalizeDateRange } from '#utils/date_utils'
 import { buildDifferenceMoneyMap, buildMoneyMap, type MoneyMap } from '#utils/money_map'
-import { isManagementRole } from '#utils/user_role_utils'
 import type { CloseCashSessionInput } from '#validators/cash_session'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
@@ -31,27 +30,26 @@ export default class CashSessionService {
   ) {}
 
   /**
-   * Recupere la session de caisse ouverte pour un utilisateur.
+   * Récupère la session de caisse ouverte : il n'y en a qu'une seule à la fois, pour tous.
    */
-  async getOpenSessionForUser(userId: string) {
-    // Une seule session OPEN est autorisee par utilisateur grace a l'index unique partiel.
+  async getOpenSession() {
+    // L'index unique partiel garantit qu'au plus une session est ouverte.
     return CashSession.query()
-      .where('userId', userId)
       .where('status', CashSessionStatus.OPEN)
+      .preload('openedBy')
       .orderBy('openedAt', 'desc')
       .first()
   }
 
   /**
-   * Recupere les sessions de caisse visibles par l'utilisateur courant.
+   * Récupère les sessions de caisse, de la plus récente à la plus ancienne.
+   * La caisse est partagee : tous les utilisateurs voient toutes les sessions.
    */
-  async findVisibleSessions(actor: User, params: FindCashSessionsParams = {}) {
-    const query = CashSession.query().preload('user').orderBy('openedAt', 'desc')
-
-    // Les admins et directeurs voient toutes les sessions; les autres voient uniquement les leurs.
-    if (!isManagementRole(actor.role)) {
-      query.where('userId', actor.id)
-    }
+  async findSessions(params: FindCashSessionsParams = {}) {
+    const query = CashSession.query()
+      .preload('openedBy')
+      .preload('closedBy')
+      .orderBy('openedAt', 'desc')
 
     // La periode couvre les journees completes selectionnees.
     if (params.startDate && params.endDate) {
@@ -64,28 +62,44 @@ export default class CashSessionService {
   }
 
   /**
-   * Ouvre une nouvelle session de caisse pour l'utilisateur connecte.
+   * Ouvre une nouvelle session de caisse, à condition que la précédente soit fermée.
    */
   async open(actor: User) {
-    // Evite un message SQL brut si une session active existe deja.
-    const existingSession = await this.getOpenSessionForUser(actor.id)
+    // Une seule session ouverte à la fois : on dit qui l'a ouverte et depuis quand.
+    const existingSession = await this.getOpenSession()
     if (existingSession) {
-      return existingSession
+      throw new Error(this.buildAlreadyOpenMessage(existingSession))
     }
 
     // La date et l'heure d'ouverture viennent du serveur pour rester fiables.
     const now = DateTime.now()
-    const cashSession = await CashSession.create({
-      userId: actor.id,
-      status: CashSessionStatus.OPEN,
-      openedAt: now,
-      closedAt: null,
-      systemAmounts: null,
-      closingAmounts: null,
-      differenceAmounts: null,
-    })
+    let cashSession: CashSession
+    try {
+      cashSession = await CashSession.create({
+        openedById: actor.id,
+        closedById: null,
+        status: CashSessionStatus.OPEN,
+        openedAt: now,
+        closedAt: null,
+        systemAmounts: null,
+        closingAmounts: null,
+        differenceAmounts: null,
+      })
+    } catch (error) {
+      // Deux ouvertures simultanées : l'index unique refuse la seconde (violation d'unicité)
+      if ((error as { code?: string }).code === '23505') {
+        const openedSession = await this.getOpenSession()
+        throw new Error(
+          openedSession
+            ? this.buildAlreadyOpenMessage(openedSession)
+            : 'Une session de caisse est déjà ouverte.'
+        )
+      }
 
-    // Journaliser l'operation
+      throw error
+    }
+
+    // Journaliser l'opération
     await this.journalisationService.create({
       module: JournalisationModule.SALES,
       message: `Session de caisse ouverte par ${actor.fullName ?? actor.email}.`,
@@ -95,14 +109,24 @@ export default class CashSessionService {
     // Invalider le cache pour forcer la lecture depuis la base de données
     this.invalidateCashSessionDomains()
 
+    await cashSession.load('openedBy')
+
     return cashSession
   }
 
+  // Message affiche quand on tente d'ouvrir une session alors qu'une autre est encore ouverte.
+  private buildAlreadyOpenMessage(session: CashSession) {
+    const openedBy = session.openedBy?.fullName ?? session.openedBy?.email ?? 'un utilisateur'
+    const openedAt = session.openedAt.setZone(BUSINESS_TIME_ZONE).toFormat("dd/MM/yyyy 'à' HH:mm")
+
+    return `Une session de caisse est déjà ouverte par ${openedBy} depuis le ${openedAt}. Fermez-la avant d'en ouvrir une nouvelle.`
+  }
+
   /**
-   * Ferme la session de caisse ouverte de l'utilisateur connecte.
+   * Ferme la session de caisse ouverte : n'importe quel utilisateur peut la fermer.
    */
   async close(actor: User, payload: CloseCashSessionInput) {
-    const cashSession = await this.getOpenSessionForUser(actor.id)
+    const cashSession = await this.getOpenSession()
 
     if (!cashSession) {
       throw new Error("Aucune session de caisse ouverte n'a ete trouvee.")
@@ -127,6 +151,7 @@ export default class CashSessionService {
     // La fermeture complete la session existante au lieu d'en creer une autre.
     cashSession.status = CashSessionStatus.CLOSED
     cashSession.closedAt = DateTime.now()
+    cashSession.closedById = actor.id
     cashSession.systemAmounts = systemAmounts
     cashSession.closingAmounts = closingAmounts
     cashSession.differenceAmounts = differenceAmounts

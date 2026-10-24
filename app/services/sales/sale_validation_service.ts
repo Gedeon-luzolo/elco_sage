@@ -1,10 +1,11 @@
 import Customer from '#models/customer'
-import type CashSession from '#models/cash_session'
+import CashSession, { CashSessionStatus } from '#models/cash_session'
 import { SalePaymentType } from '#models/sale'
 import User, { UserRole, UserStatus } from '#models/user'
 import CashSessionService from '#services/sales/cash_session_service'
 import type { CreateSaleInput } from '#types/sales'
 import { inject } from '@adonisjs/core'
+import { DateTime } from 'luxon'
 
 interface ValidateCreateSaleProps {
   actor: User
@@ -21,8 +22,9 @@ export default class SaleValidationService {
    * Valide toutes les contraintes metier avant la creation d'une vente.
    */
   async validateCreateSale(props: ValidateCreateSaleProps): Promise<CashSession> {
-    // La vente doit toujours etre rattachee a une caisse ouverte du caissier.
-    const cashSession = await this.resolveOpenCashSession(props.actor, props.payload.cashSessionId)
+    // La vente doit toujours être rattachée à la caisse ouverte, ou à sa caisse si elle a été
+    // faite avant la fermeture (vente hors ligne envoyée après coup).
+    const cashSession = await this.resolveCashSession(props.payload)
 
     // Ces controles async sont independants, donc on les lance en parallele.
     await Promise.all([
@@ -41,21 +43,51 @@ export default class SaleValidationService {
 
   /**
    * Recupere et valide la session de caisse utilisee pour une vente.
+   * La caisse est partagée : la session ouverte convient à tous les utilisateurs.
    */
-  private async resolveOpenCashSession(actor: User, cashSessionId?: string): Promise<CashSession> {
-    // On lit la session depuis le serveur, pas depuis une valeur de confiance frontend.
-    const cashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
+  private async resolveCashSession(payload: CreateSaleInput): Promise<CashSession> {
+    // Le client indique la caisse sur laquelle il a vendu : c'est la seule façon de rattacher
+    // une vente hors ligne à la bonne caisse si une autre a été ouverte depuis.
+    if (payload.cashSessionId) {
+      const session = await CashSession.find(payload.cashSessionId)
 
-    if (!cashSession) {
-      throw new Error('Ouvrez une session de caisse avant de creer une vente.')
+      if (!session) {
+        throw new Error('La session de caisse sélectionnée est invalide.')
+      }
+
+      if (session.status === CashSessionStatus.OPEN) {
+        return session
+      }
+
+      // Une vente faite pendant la session, mais reçue après sa fermeture, reste acceptée :
+      // elle a déjà été encaissée et son ticket imprimé.
+      if (this.wasSoldDuringSession(session, payload.saleDate)) {
+        return session
+      }
+
+      throw new Error('La session de caisse est fermée. Ouvrez une nouvelle session pour vendre.')
     }
 
-    // Si une session est forcee, elle doit rester celle du user connecte.
-    if (cashSessionId && cashSession.id !== cashSessionId) {
-      throw new Error('La session de caisse selectionnee est invalide ou fermee.')
+    // Sans caisse indiquée, la vente va sur la session ouverte lue côté serveur.
+    const openSession = await this.cashSessionService.getOpenSession()
+
+    if (!openSession) {
+      throw new Error('Ouvrez une session de caisse avant de créer une vente.')
     }
 
-    return cashSession
+    return openSession
+  }
+
+  // Vrai si la date de vente tombe entre l'ouverture et la fermeture de la session.
+  private wasSoldDuringSession(session: CashSession, saleDate?: string | Date | null) {
+    if (!saleDate || !session.closedAt) {
+      return false
+    }
+
+    const soldAt =
+      saleDate instanceof Date ? DateTime.fromJSDate(saleDate) : DateTime.fromISO(saleDate)
+
+    return soldAt.isValid && soldAt >= session.openedAt && soldAt <= session.closedAt
   }
 
   /**

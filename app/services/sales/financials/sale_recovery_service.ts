@@ -54,7 +54,8 @@ export default class SaleRecoveryService {
     this.ensureRecoveryCurrencyMatchesSale(sale, payload)
     this.ensureRecoveryDoesNotExceedRemainingAmount(sale, payload)
 
-    const cashSession = await this.cashSessionService.getOpenSessionForUser(actor.id)
+    // La caisse est partagee : le recouvrement va sur la session ouverte, quel que soit son ouvreur.
+    const cashSession = await this.cashSessionService.getOpenSession()
     if (!cashSession) {
       throw new Error('Ouvrez une session de caisse avant de faire un recouvrement.')
     }

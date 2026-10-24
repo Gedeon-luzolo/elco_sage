@@ -6,7 +6,8 @@ import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
 export interface CashSessionDTO extends Record<string, JSONDataTypes> {
   id: string
-  userId: string
+  openedById: string
+  closedById: string | null
   status: string
   openedAt: string | null
   openingDate: string | null
@@ -17,8 +18,8 @@ export interface CashSessionDTO extends Record<string, JSONDataTypes> {
   systemAmounts: MoneyMapDTO
   closingAmounts: MoneyMapDTO | null
   differenceAmounts: MoneyMapDTO | null
-  userName: string | null
-  userRole: string | null
+  openedByName: string | null
+  closedByName: string | null
 }
 
 export default class CashSessionTransformer {
@@ -31,7 +32,8 @@ export default class CashSessionTransformer {
   ): CashSessionDTO {
     return {
       id: item.id,
-      userId: item.userId,
+      openedById: item.openedById,
+      closedById: item.closedById,
       status: item.status,
       openedAt: item.openedAt?.toISO() ?? null,
       openingDate: item.openedAt ? dateTimeToDateKey(item.openedAt) : null,
@@ -42,8 +44,8 @@ export default class CashSessionTransformer {
       systemAmounts: normalizeMoneyMap(systemAmounts?.systemAmounts ?? item.systemAmounts),
       closingAmounts: item.closingAmounts ? normalizeMoneyMap(item.closingAmounts) : null,
       differenceAmounts: item.differenceAmounts ? normalizeMoneyMap(item.differenceAmounts) : null,
-      userName: item.user?.fullName ?? null,
-      userRole: item.user?.role ?? null,
+      openedByName: item.openedBy?.fullName ?? item.openedBy?.email ?? null,
+      closedByName: item.closedBy?.fullName ?? item.closedBy?.email ?? null,
     }
   }
 

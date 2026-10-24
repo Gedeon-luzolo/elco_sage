@@ -7,7 +7,8 @@ export default class extends BaseSchema {
     await this.db.rawQuery(`
       CREATE TABLE IF NOT EXISTS cash_sessions (
         id uuid PRIMARY KEY,
-        user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        opened_by_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        closed_by_id uuid NULL REFERENCES users(id) ON DELETE RESTRICT,
         status text NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'CLOSED')),
         opened_at timestamptz NOT NULL,
         closed_at timestamptz NULL,
@@ -20,7 +21,7 @@ export default class extends BaseSchema {
     `)
 
     await this.db.rawQuery(
-      `CREATE INDEX IF NOT EXISTS cash_sessions_user_id_index ON cash_sessions (user_id);`
+      `CREATE INDEX IF NOT EXISTS cash_sessions_opened_by_id_index ON cash_sessions (opened_by_id);`
     )
     await this.db.rawQuery(
       `CREATE INDEX IF NOT EXISTS cash_sessions_status_index ON cash_sessions (status);`
@@ -28,19 +29,17 @@ export default class extends BaseSchema {
     await this.db.rawQuery(
       `CREATE INDEX IF NOT EXISTS cash_sessions_opened_at_index ON cash_sessions (opened_at);`
     )
-    await this.db.rawQuery(
-      `CREATE INDEX IF NOT EXISTS cash_sessions_user_id_status_index ON cash_sessions (user_id, status);`
-    )
 
+    // Une seule session peut être ouverte à la fois pour toute la caisse, quel que soit l'utilisateur.
     await this.db.rawQuery(`
-      CREATE UNIQUE INDEX IF NOT EXISTS cash_sessions_one_open_per_user
-      ON cash_sessions (user_id)
+      CREATE UNIQUE INDEX IF NOT EXISTS cash_sessions_one_open
+      ON cash_sessions ((true))
       WHERE status = 'OPEN';
     `)
   }
 
   async down() {
-    await this.db.rawQuery('DROP INDEX IF EXISTS cash_sessions_one_open_per_user')
+    await this.db.rawQuery('DROP INDEX IF EXISTS cash_sessions_one_open')
     await this.db.rawQuery(`DROP TABLE IF EXISTS ${this.tableName}`)
   }
 }

@@ -56,9 +56,13 @@ export default class AdditionNumberService {
   }
 
   /**
-   * Réserve une nouvelle plage de numéros pour une session de caisse.
+   * Réserve une nouvelle plage de numéros à un utilisateur pour une session de caisse.
    */
-  async reserveBlock(cashSessionId: string, size = BLOCK_SIZE): Promise<AdditionNumberBlock> {
+  async reserveBlock(
+    cashSessionId: string,
+    userId: string,
+    size = BLOCK_SIZE
+  ): Promise<AdditionNumberBlock> {
     return db.transaction(async (trx) => {
       await trx.rawQuery(ADDITION_NUMBER_LOCK)
 
@@ -74,6 +78,7 @@ export default class AdditionNumberService {
       await trx.table('addition_number_blocks').insert({
         id: randomUUID(),
         cash_session_id: cashSessionId,
+        user_id: userId,
         start_number: startNumber,
         end_number: endNumber,
         created_at: DateTime.now().toSQL({ includeOffset: false }),
@@ -84,12 +89,13 @@ export default class AdditionNumberService {
   }
 
   /**
-   * Plages déjà réservées pour une session (le client les recharge après une reconnexion).
+   * Plages déjà réservées à un utilisateur pour une session (le client les recharge après une reconnexion).
    */
-  async listBlocks(cashSessionId: string): Promise<AdditionNumberBlock[]> {
+  async listBlocks(cashSessionId: string, userId: string): Promise<AdditionNumberBlock[]> {
     const rows = await db
       .from('addition_number_blocks')
       .where('cash_session_id', cashSessionId)
+      .where('user_id', userId)
       .orderBy('start_number')
 
     // Conversion des colonnes SQL vers les noms utilisés par l'API
@@ -97,13 +103,14 @@ export default class AdditionNumberService {
   }
 
   /**
-   * Plus grand numéro déjà utilisé par une vente de la session (null si aucune vente).
+   * Plus grand numéro déjà utilisé par une vente de l'utilisateur dans la session (null si aucune).
    * Le client s'en sert pour retrouver son curseur après un rechargement ou une perte de cache.
    */
-  async lastUsedNumber(cashSessionId: string): Promise<number | null> {
+  async lastUsedNumber(cashSessionId: string, userId: string): Promise<number | null> {
     const row = await db
       .from('sales')
       .where('cash_session_id', cashSessionId)
+      .where('seller_id', userId)
       .max('addition_number as last')
       .first()
 
@@ -111,25 +118,27 @@ export default class AdditionNumberService {
   }
 
   /**
-   * Vérifie qu'un numéro émis hors ligne appartient bien à une plage de la session.
+   * Vérifie qu'un numéro émis hors ligne appartient bien à une plage réservée à ce vendeur.
    */
   async assertReservedFor(
     cashSessionId: string,
+    userId: string,
     additionNumber: string,
     trx: TransactionClientContract
   ) {
     const value = Number(additionNumber)
 
-    // Le numéro doit tomber dans une plage réservée à cette session
+    // Le numéro doit tomber dans une plage réservée à cet utilisateur pour cette session
     const block = await trx
       .from('addition_number_blocks')
       .where('cash_session_id', cashSessionId)
+      .where('user_id', userId)
       .where('start_number', '<=', value)
       .where('end_number', '>=', value)
       .first()
 
     if (!block) {
-      throw new Error(`Le numéro d'addition ${additionNumber} n'est pas réservé pour cette caisse.`)
+      throw new Error(`Le numéro d'addition ${additionNumber} ne vous est pas réservé.`)
     }
   }
 }

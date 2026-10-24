@@ -12,12 +12,15 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('cash_sessions')
         .onDelete('RESTRICT')
-      // Plage reservee a la caisse : le client hors ligne n'emet que des numeros de cette plage.
+      // Utilisateur à qui la plage est réservée : la session est partagée, donc deux appareils
+      // ne doivent jamais émettre les mêmes numéros.
+      table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('RESTRICT')
+      // Plage réservée à l'utilisateur : le client hors ligne n'émet que des numéros de cette plage.
       table.integer('start_number').notNullable()
       table.integer('end_number').notNullable()
       table.timestamp('created_at').notNullable()
 
-      table.index('cash_session_id')
+      table.index(['cash_session_id', 'user_id'])
     })
   }
 

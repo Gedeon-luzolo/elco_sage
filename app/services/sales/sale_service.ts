@@ -118,6 +118,7 @@ export default class SaleService {
       if (payload.additionNumber) {
         await this.additionNumberService.assertReservedFor(
           cashSession.id,
+          actor.id,
           payload.additionNumber,
           trx
         )

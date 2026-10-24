@@ -17,7 +17,10 @@ export default class CashSession extends BaseModel {
   declare id: string
 
   @column()
-  declare userId: string
+  declare openedById: string
+
+  @column()
+  declare closedById: string | null
 
   @column()
   declare status: CashSessionStatus
@@ -43,8 +46,11 @@ export default class CashSession extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  @belongsTo(() => User)
-  declare user: BelongsTo<typeof User>
+  @belongsTo(() => User, { foreignKey: 'openedById' })
+  declare openedBy: BelongsTo<typeof User>
+
+  @belongsTo(() => User, { foreignKey: 'closedById' })
+  declare closedBy: BelongsTo<typeof User>
 
   @beforeCreate()
   static assignUuid(cashSession: CashSession) {
