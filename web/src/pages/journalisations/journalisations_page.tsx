@@ -110,7 +110,7 @@ export default function JournalisationsPage() {
           <DataLoader title="Chargement des journalisations..." />
         ) : (
           <Card className={`bg-background transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
-            <CardHeader>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-md bg-muted">
                   <History className="size-5" />
@@ -123,13 +123,15 @@ export default function JournalisationsPage() {
                   </CardDescription>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+
               <PaginationControls
                 currentPage={journalisations.currentPage}
                 totalPages={journalisations.totalPages}
                 onPageChange={journalisations.goToPage}
+                className=""
               />
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
