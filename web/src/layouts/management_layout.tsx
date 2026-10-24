@@ -13,14 +13,15 @@ export function ManagementLayout({ title, children }: ManagementLayoutProps) {
   return (
     <SidebarProvider>
       <ManagementSidebar />
-      <SidebarInset>
+      {/* min-w-0 : un tableau large défile dans la page au lieu d'élargir le layout. */}
+      <SidebarInset className="min-w-0">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-medium">{title}</h1>
         </header>
 
-        <main className="flex flex-1 flex-col gap-4 p-4 sm:px-26  px-2">{children}</main>
+        <div className="flex min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6 lg:px-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )
