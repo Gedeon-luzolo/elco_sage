@@ -54,7 +54,6 @@ export interface DashboardStaffProductivityRow {
   staffId: string
   staffName: string
   additionsCount: number
-  orderFormsCount: number
   realAmounts: MoneyMapDTO
   cashAmounts: MoneyMapDTO
   recoveryAmounts: MoneyMapDTO
@@ -106,7 +105,6 @@ export interface DashboardPeriodicReport {
   cashAmounts: MoneyMapDTO
   recoveryAmounts: MoneyMapDTO
   collectionAmounts: MoneyMapDTO
-  orderFormsCount: number
   additionsCount: number
   soldServicesCount: number
 }

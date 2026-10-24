@@ -29,8 +29,6 @@ export default class StaffProductivityService {
       )
 
       row.additionsCount += 1
-      // Chaque addition porte un seul bon.
-      row.orderFormsCount += 1
 
       // Les offerts ne participent pas au réel, au cash, ni aux dettes.
       if (sale.paymentType === SalePaymentType.CASH) {
@@ -87,7 +85,6 @@ export default class StaffProductivityService {
         staffId,
         staffName,
         additionsCount: 0,
-        orderFormsCount: 0,
         realAmounts: emptyMoneyMap(),
         cashAmounts: emptyMoneyMap(),
         recoveryAmounts: emptyMoneyMap(),
@@ -107,7 +104,6 @@ export default class StaffProductivityService {
       staffId: 'total',
       staffName: 'Total',
       additionsCount: 0,
-      orderFormsCount: 0,
       realAmounts: emptyMoneyMap(),
       cashAmounts: emptyMoneyMap(),
       recoveryAmounts: emptyMoneyMap(),
@@ -117,7 +113,6 @@ export default class StaffProductivityService {
 
     for (const row of rows) {
       totals.additionsCount += row.additionsCount
-      totals.orderFormsCount += row.orderFormsCount
 
       // Les maps sont additionnées sans conversion entre devises.
       for (const [currency, amount] of Object.entries(row.realAmounts)) {

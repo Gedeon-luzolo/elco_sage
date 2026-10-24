@@ -72,7 +72,6 @@ export default class PeriodicReportService {
         cashAmounts: emptyMoneyMap(),
         recoveryAmounts: emptyMoneyMap(),
         collectionAmounts: emptyMoneyMap(),
-        orderFormsCount: 0,
         additionsCount: 0,
         soldServicesCount: 0,
       })
@@ -93,8 +92,6 @@ export default class PeriodicReportService {
 
     // Une addition correspond à une vente enregistrée.
     report.additionsCount += 1
-    // Chaque addition porte un seul bon.
-    report.orderFormsCount += 1
     // Les services vendus représentent la somme des quantités sur les lignes de vente.
     report.soldServicesCount += (sale.items ?? []).reduce(
       (total, item) => total + Number(item.quantity || 0),

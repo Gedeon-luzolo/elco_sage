@@ -55,7 +55,6 @@ export interface DashboardStaffProductivityRow extends Record<string, JSONDataTy
   staffId: string
   staffName: string
   additionsCount: number
-  orderFormsCount: number
   realAmounts: MoneyMap
   cashAmounts: MoneyMap
   recoveryAmounts: MoneyMap
@@ -107,7 +106,6 @@ export interface DashboardPeriodicReport extends Record<string, JSONDataTypes> {
   cashAmounts: MoneyMap
   recoveryAmounts: MoneyMap
   collectionAmounts: MoneyMap
-  orderFormsCount: number
   additionsCount: number
   soldServicesCount: number
 }

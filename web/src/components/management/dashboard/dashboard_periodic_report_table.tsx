@@ -31,7 +31,6 @@ export function DashboardPeriodicReportTable({ reports }: DashboardPeriodicRepor
           <TableHead className="text-right">Cash</TableHead>
           <TableHead className="text-right">Recouvrement</TableHead>
           <TableHead className="text-right">Total encaissements</TableHead>
-          <TableHead className="text-right">Bons</TableHead>
           <TableHead className="text-right">Additions</TableHead>
           <TableHead className="text-right">Services vendus</TableHead>
         </TableRow>
@@ -54,7 +53,6 @@ export function DashboardPeriodicReportTable({ reports }: DashboardPeriodicRepor
             <TableCell className="text-right font-semibold">
               {renderMoneyMap(report.collectionAmounts)}
             </TableCell>
-            <TableCell className="text-right">{formatNumber(report.orderFormsCount)}</TableCell>
             <TableCell className="text-right">{formatNumber(report.additionsCount)}</TableCell>
             <TableCell className="text-right">{formatNumber(report.soldServicesCount)}</TableCell>
           </TableRow>
