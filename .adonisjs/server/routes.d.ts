@@ -47,7 +47,6 @@ export type ScannedRoutes = {
     'api.api_product_services_admin.index': { paramsTuple?: []; params?: {} }
     'api.api_product_services_admin.store': { paramsTuple?: []; params?: {} }
     'api.api_product_services_admin.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_product_services_admin.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   POST: {
     'api.api_session.login': { paramsTuple?: []; params?: {} }
@@ -121,7 +120,6 @@ export type ScannedRoutes = {
   DELETE: {
     'api.api_users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.api_product_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.api_product_services_admin.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {
