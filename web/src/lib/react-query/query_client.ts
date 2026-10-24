@@ -18,6 +18,23 @@ export const queryClient = new QueryClient({
   },
 })
 
+// Données qui changent rarement : elles restent fraîches plus longtemps que les 5 minutes par défaut.
+// Chaque écriture concernée vide déjà ces lectures (invalidateQueries), donc la durée ne retarde
+// que les changements faits depuis un autre appareil, et un rechargement de la page les relit toujours.
+const ONE_DAY_MS = 1000 * 60 * 60 * 24
+
+const LONG_STALE_TIME_BY_KEY: Record<string, number> = {
+  '/product-services/active-for-sale': ONE_DAY_MS,
+  '/product-services': ONE_DAY_MS,
+  '/product-categories': ONE_DAY_MS,
+  '/customers/active-for-sale': ONE_DAY_MS,
+  '/operators': ONE_DAY_MS,
+}
+
+Object.entries(LONG_STALE_TIME_BY_KEY).forEach(([key, staleTime]) => {
+  queryClient.setQueryDefaults([key], { staleTime })
+})
+
 // Invalide les requêtes dont la clé (premier élément) commence par un préfixe.
 export const invalidateQueriesByPrefix = (prefixes: string | string[]) => {
   const prefixList = Array.isArray(prefixes) ? prefixes : [prefixes]
