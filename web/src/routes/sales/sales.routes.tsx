@@ -1,4 +1,5 @@
 import { useRoutes } from 'react-router-dom'
+import { usePrefetchSalesData } from '~/hooks/sales/usePrefetchSalesData'
 import CashSessionDetailPage from '~/pages/sales/cash_session_detail_page'
 import CashSessionsPage from '~/pages/sales/cash_sessions_page'
 import DebtsPage from '~/pages/sales/debts_page'
@@ -22,5 +23,8 @@ const salesRoutes = [
 
 // Entrée du module Ventes montée depuis la route de base /sales/*.
 export function SalesRoutesModule() {
+  // Les données du module sont mises en cache dès son ouverture, sans attendre la visite des pages
+  usePrefetchSalesData()
+
   return useRoutes(salesRoutes)
 }
