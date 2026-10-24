@@ -275,27 +275,6 @@ export default class ProductServiceService {
     return item
   }
 
-  /**
-   * Supprime un produit ou service.
-   */
-  async delete(actor: User, id: string) {
-    const item = await ProductService.findOrFail(id)
-    const itemName = item.name
-
-    await item.delete()
-
-    await this.journalisationService.create({
-      module: JournalisationModule.PRODUCT_SERVICES,
-      message: `Le produit/service "${itemName}" a été supprimé par ${actor.fullName ?? actor.email}.`,
-      user: actor,
-    })
-
-    // Invalider le cache pour forcer la lecture depuis la base de données
-    this.invalidateProductServiceCache()
-
-    return true
-  }
-
   // Invalide le cache des produits et services pour forcer la lecture depuis la base de données.
   private invalidateProductServiceCache() {
     this.cacheService.forgetByPrefix(CacheKeys.productServices.prefix)

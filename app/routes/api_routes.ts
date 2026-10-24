@@ -107,7 +107,6 @@ export function registerApiRoutes() {
               router.get('product-services', [ApiProductServicesAdminController, 'index'])
               router.post('product-services', [ApiProductServicesAdminController, 'store'])
               router.patch('product-services/:id', [ApiProductServicesAdminController, 'update'])
-              router.delete('product-services/:id', [ApiProductServicesAdminController, 'destroy'])
             })
             .use(middleware.apiManagement())
         })

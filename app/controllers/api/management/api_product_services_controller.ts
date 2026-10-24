@@ -60,17 +60,4 @@ export default class ApiProductServicesAdminController {
       return ctx.response.noContent()
     })
   }
-
-  /**
-   * Supprime un produit ou un service.
-   */
-  async destroy(ctx: HttpContext) {
-    const actor = ctx.auth.getUserOrFail()
-
-    return apiAction(ctx, async () => {
-      await this.productServiceService.delete(actor, ctx.params.id)
-
-      return ctx.response.noContent()
-    })
-  }
 }
