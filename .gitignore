@@ -1,6 +1,8 @@
 # Dependencies and AdonisJS build
 node_modules
 build
+# Fichiers générés par AdonisJS (dev et build les recréent)
+.adonisjs
 tmp/*
 !tmp/.gitkeep
 
