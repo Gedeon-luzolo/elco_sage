@@ -14,9 +14,9 @@ const redisConfig = defineConfig({
       // Numéro de la base logique Redis, lu depuis l'environnement
       db: env.get('REDIS_DB'),
       keyPrefix: '',
-      // Réessaie 10 fois avec un délai croissant, puis abandonne la connexion
+      // Réessaie sans abandonner, avec un délai croissant plafonné à 2 secondes
       retryStrategy(times) {
-        return times > 10 ? null : times * 50
+        return Math.min(times * 50, 2000)
       },
     },
   },
