@@ -1,4 +1,4 @@
 import { registerApiRoutes } from '#routes/api_routes'
 
-// Le backend ne sert que du JSON : toutes les routes vivent sous /api
+// L'API JSON vit sous /api ; le front compilé est servi par le middleware spa_static
 registerApiRoutes()

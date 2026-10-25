@@ -5,6 +5,9 @@ export default defineConfig({
   // Commandes ace des paquets (les commandes de l'application seraient lues dans ./commands)
   commands: [() => import('@adonisjs/core/commands'), () => import('@adonisjs/lucid/commands')],
 
+  // Fichiers copiés tels quels dans le build : le front compilé (pnpm build:web) est servi par le backend
+  metaFiles: [{ pattern: 'web/dist/**', reloadServer: false }],
+
   // Providers chargés au démarrage de l'application
   providers: [
     () => import('@adonisjs/core/providers/app_provider'),

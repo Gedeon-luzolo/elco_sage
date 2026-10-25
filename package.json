@@ -10,6 +10,8 @@
   "scripts": {
     "start": "cd build && node --env-file-if-exists=../.env bin/server.js",
     "build": "node ace build",
+    "build:web": "pnpm --dir web build",
+    "build:all": "pnpm build:web && pnpm build",
     "dev": "node ace serve --hmr",
     "lint": "eslint .",
     "format": "prettier --write .",

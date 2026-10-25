@@ -12,7 +12,8 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 }
 
 // URL de base de l'API (se termine par un slash pour que les endpoints relatifs s'y ajoutent).
-const API_URL = import.meta.env.VITE_API_URL as string
+// Peut être relative (/api/) quand le backend sert la SPA : elle est résolue sur l'origine courante.
+const API_URL = new URL(import.meta.env.VITE_API_URL as string, window.location.origin).href
 
 // Erreur normalisée pour toutes les réponses API non valides.
 // details contient la réponse brute du serveur, utile pour lire les erreurs de validation.

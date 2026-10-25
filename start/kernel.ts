@@ -8,6 +8,8 @@ server.errorHandler(() => import('#exceptions/handler'))
 server.use([
   () => import('#middleware/container_bindings_middleware'),
   () => import('@adonisjs/cors/cors_middleware'),
+  // Sert web/dist avant le routage : les fichiers statiques évitent le bodyparser et l'auth
+  () => import('#middleware/spa_static_middleware'),
 ])
 
 // Middlewares des requêtes qui correspondent à une route
