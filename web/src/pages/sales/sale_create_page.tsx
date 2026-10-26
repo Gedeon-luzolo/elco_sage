@@ -262,13 +262,13 @@ export default function SaleCreatePage() {
               onPick={pickService}
             />
 
-            <aside className="rounded-2xl border border-border bg-card shadow-sm lg:sticky lg:top-6">
+            <aside className="rounded-2xl border border-border bg-card shadow-sm">
               <div className="flex items-center gap-2 border-b border-border p-4">
                 <ReceiptText className="size-5" />
                 <h2 className="font-semibold">Ticket</h2>
               </div>
 
-              <div className="max-h-[40vh] overflow-y-auto px-4">
+              <div className="px-4">
                 {lines.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">
                     Touchez un service pour l&apos;ajouter au ticket.
