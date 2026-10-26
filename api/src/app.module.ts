@@ -9,6 +9,7 @@ import { RedisModule } from './common/redis/redis.module.js';
 import { createAppTypeOrmOptions } from './config/database.config.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CatalogModule } from './modules/catalog/catalog.module.js';
+import { CustomersModule } from './modules/customers/customers.module.js';
 import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module.js';
 import { JournalisationsModule } from './modules/journalisations/journalisations.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -28,6 +29,7 @@ import { UsersModule } from './modules/users/users.module.js';
     UsersModule,
     ExchangeRatesModule,
     CatalogModule,
+    CustomersModule,
   ],
   controllers: [AppController],
 })
