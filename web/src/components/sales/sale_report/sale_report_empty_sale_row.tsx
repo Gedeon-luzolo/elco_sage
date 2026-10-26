@@ -29,7 +29,6 @@ export function SaleReportEmptySaleRow({
           <span className="ml-1 text-[10px] font-normal text-amber-600">Non envoyée</span>
         )}
       </TableCell>
-      <TableCell>-</TableCell>
       <TableCell>{sale.customer?.fullName ?? '-'}</TableCell>
       <TableCell className="text-muted-foreground">Aucune ligne</TableCell>
       <TableCell className="text-center">-</TableCell>

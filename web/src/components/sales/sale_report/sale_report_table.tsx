@@ -31,7 +31,6 @@ export function SaleReportTable({ sales, totals, pendingSaleIds }: SaleReportTab
           <TableHead className="w-12">N°</TableHead>
           <TableHead>Date</TableHead>
           <TableHead>N° Add</TableHead>
-          <TableHead>N° BC</TableHead>
           <TableHead>Clients</TableHead>
           <TableHead>Services</TableHead>
           <TableHead className="text-center">Qté</TableHead>
@@ -69,7 +68,7 @@ export function SaleReportTable({ sales, totals, pendingSaleIds }: SaleReportTab
       </TableBody>
       <TableFooter className="border-black bg-black/50 text-white print:bg-black print:text-white [&_td]:text-white">
         <TableRow>
-          <TableCell colSpan={8} className="font-semibold">
+          <TableCell colSpan={7} className="font-semibold">
             Totaux généraux
           </TableCell>
           <TableCell className="text-right font-bold">

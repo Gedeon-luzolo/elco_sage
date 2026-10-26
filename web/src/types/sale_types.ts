@@ -32,7 +32,6 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   sellerId: string
   paymentType: string
   additionNumber: string
-  orderNumber: string
   saleDate: string | null
   currency: string
   theoreticalAmount: number

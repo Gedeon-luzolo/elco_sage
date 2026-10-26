@@ -69,7 +69,6 @@ export function SaleDetailPanel({
           </p>
         )}
         <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-          <DetailLine label="Bon" value={sale.orderNumber} />
           <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
           <DetailLine label="Opérateur" value={sale.operatorName ?? '-'} />
           <DetailLine label="Vendeur" value={sale.sellerName ?? '-'} />

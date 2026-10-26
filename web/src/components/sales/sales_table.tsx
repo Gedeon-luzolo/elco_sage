@@ -49,7 +49,6 @@ export function SalesTable({
           <TableHeader>
             <TableRow>
               <TableHead className="font-semibold">Addition</TableHead>
-              <TableHead className="font-semibold">Bon</TableHead>
               <TableHead className="font-semibold">Client</TableHead>
               <TableHead className="text-right font-semibold">Théorique</TableHead>
               <TableHead className="text-right font-semibold">Remise</TableHead>
@@ -71,9 +70,6 @@ export function SalesTable({
                   }`}
                 >
                   <TableCell className="font-medium">{sale.additionNumber}</TableCell>
-                  <TableCell className="font-medium">
-                    {sale.orderNumber}
-                  </TableCell>
                   <TableCell>{sale.customer?.fullName ?? '-'}</TableCell>
                   <TableCell className="text-right">
                     {formatMoneyWithCurrency(sale.theoreticalAmount, sale.currency as CurrencyCode)}
@@ -136,7 +132,6 @@ function SaleMobileCard({
 
       <div className="grid gap-1.5 text-xs">
         <MobileSaleMetric label="Client" value={sale.customer?.fullName ?? '-'} />
-        <MobileSaleMetric label="Bon" value={sale.orderNumber || '-'} />
         <MobileSaleMetric
           label="Total"
           value={formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}

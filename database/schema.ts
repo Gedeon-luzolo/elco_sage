@@ -201,7 +201,7 @@ export class SaleRecoverySchema extends BaseModel {
 }
 
 export class SaleSchema extends BaseModel {
-  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'orderNumber', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
+  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
   $columns = SaleSchema.$columns
   @column()
   declare additionNumber: string
@@ -219,8 +219,6 @@ export class SaleSchema extends BaseModel {
   declare id: string
   @column()
   declare operatorId: string
-  @column()
-  declare orderNumber: string
   @column()
   declare paymentType: string
   @column.dateTime()

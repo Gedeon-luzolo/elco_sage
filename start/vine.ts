@@ -50,7 +50,6 @@ const fields = {
   name: 'nom',
   observation: 'observation',
   operatorId: 'opérateur',
-  orderNumber: 'numéro de bon',
   packagingCapacity: 'capacité du conditionnement',
   packagingUnit: 'unité de conditionnement',
   password: 'mot de passe',

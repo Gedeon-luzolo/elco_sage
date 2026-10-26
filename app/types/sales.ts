@@ -24,8 +24,6 @@ export interface CreateSaleInput {
   id?: string
   // Numéro issu de la plage réservée à la caisse (vente hors ligne).
   additionNumber?: string
-  // Bon unique de l'addition, partagé par toutes ses lignes.
-  orderNumber: string
   cashSessionId?: string
   customerId?: string | null
   operatorId: string

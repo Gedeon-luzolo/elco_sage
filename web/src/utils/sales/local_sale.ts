@@ -10,7 +10,6 @@ interface SalePayload {
   operatorId: string
   currency: string
   discountAmount: number
-  orderNumber: string
   items: Array<{ productServiceId: string; quantity: number }>
 }
 
@@ -64,7 +63,6 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     sellerId: input.seller.id,
     paymentType: payload.paymentType,
     additionNumber: input.additionNumber,
-    orderNumber: payload.orderNumber,
     saleDate: input.saleDate,
     currency: payload.currency,
     theoreticalAmount,

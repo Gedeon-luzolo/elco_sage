@@ -15,7 +15,6 @@ export interface SaleLineState {
 interface SaleFormState {
   currentCashSessionId?: string | null
   paymentType: SalePaymentType
-  orderNumber: string
   operatorId: string
   customerId: string
   discountAmount: number
@@ -25,7 +24,6 @@ interface SaleFormState {
 // Donnees utilisees pour construire le payload backend sans exposer les calculs dans la page.
 interface BuildSalePayloadInput {
   paymentType: SalePaymentType
-  orderNumber: string
   customerId: string
   operatorId: string
   currency: CurrencyCode
@@ -110,7 +108,6 @@ export function canSubmitSaleForm(form: SaleFormState) {
   return (
     Boolean(form.currentCashSessionId) &&
     Boolean(form.operatorId) &&
-    form.orderNumber.trim().length > 0 &&
     form.lines.some((line) => line.productServiceId && line.quantity > 0) &&
     (!requiresCustomer || Boolean(form.customerId))
   )
@@ -130,8 +127,6 @@ function buildSaleItemsPayload(lines: SaleLineState[]) {
 // Construit le payload attendu par POST /sales.
 export function buildCreateSalePayload(input: BuildSalePayloadInput) {
   return {
-    // Le bon est unique pour toute l'addition ; il est nettoye pour eviter les espaces parasites.
-    orderNumber: input.orderNumber.trim(),
     customerId: input.customerId || null,
     operatorId: input.operatorId,
     paymentType: input.paymentType,

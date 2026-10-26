@@ -1,6 +1,5 @@
 import { OptionSelect } from '~/components/common/option_select'
 import { SearchableSelect } from '~/components/common/searchable_select'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { cn } from '~/lib/utils'
 import type { CustomerDTO } from '~/types/dto'
@@ -9,8 +8,6 @@ import { CURRENCY_OPTIONS, type CurrencyCode } from '~/utils/currency'
 import { SALE_PAYMENT_OPTIONS, type SalePaymentType } from '~/utils/sales/sale.utils'
 
 interface SaleTicketFieldsProps {
-  orderNumber: string
-  onOrderNumberChange: (value: string) => void
   paymentType: SalePaymentType
   onPaymentTypeChange: (value: SalePaymentType) => void
   currency: CurrencyCode
@@ -25,8 +22,6 @@ interface SaleTicketFieldsProps {
 
 // Informations générales de la vente : client, opérateur, devise et type de paiement.
 export function SaleTicketFields({
-  orderNumber,
-  onOrderNumberChange,
   paymentType,
   onPaymentTypeChange,
   currency,
@@ -40,31 +35,18 @@ export function SaleTicketFields({
 }: SaleTicketFieldsProps) {
   return (
     <div className="space-y-3 border-b border-border p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <Label htmlFor="sale-order-number">N° de bon</Label>
-          <Input
-            id="sale-order-number"
-            value={orderNumber}
-            onChange={(event) => onOrderNumberChange(event.target.value)}
-            placeholder="ex: BC-001"
-            className="h-10"
-          />
-        </div>
-
-        <div className="grid gap-1.5">
-          <Label htmlFor="sale-customer">Client</Label>
-          <SearchableSelect
-            id="sale-customer"
-            items={customers}
-            value={customerId}
-            onValueChange={onCustomerChange}
-            getValue={(customer) => customer.id}
-            getLabel={(customer) => customer.fullName}
-            placeholder="Passager"
-            emptyMessage="Aucun client trouvé."
-          />
-        </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="sale-customer">Client</Label>
+        <SearchableSelect
+          id="sale-customer"
+          items={customers}
+          value={customerId}
+          onValueChange={onCustomerChange}
+          getValue={(customer) => customer.id}
+          getLabel={(customer) => customer.fullName}
+          placeholder="Passager"
+          emptyMessage="Aucun client trouvé."
+        />
       </div>
 
       <div className="grid grid-cols-[1fr_6.5rem] gap-3">

@@ -19,7 +19,6 @@ export const createSaleValidator = vine.create({
     .string()
     .regex(/^\d{1,6}$/)
     .optional(),
-  orderNumber: vine.string().trim().minLength(1).maxLength(100),
   cashSessionId: vine.string().uuid().nullable().optional(),
   customerId: vine.string().uuid().nullable(),
   operatorId: vine.string().uuid(),

@@ -14,7 +14,6 @@ import { paginateBatch } from '#utils/paginated_batch'
 import { findReplayedRecord } from '#utils/idempotency'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
-import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 
 // Nombre maximum de ventes renvoyées par lot pour l'historique.
@@ -126,9 +125,6 @@ export default class SaleService {
         additionNumber = await this.additionNumberService.generateOnlineNumber(trx)
       }
 
-      // Le bon ne peut servir qu'à une seule addition active.
-      await this.assertOrderNumberAvailable(payload.orderNumber.trim(), trx)
-
       // L'entete porte les informations communes a toutes les lignes de vente.
       const sale = await Sale.create(
         {
@@ -139,7 +135,6 @@ export default class SaleService {
           sellerId: actor.id,
           paymentType: payload.paymentType,
           additionNumber,
-          orderNumber: payload.orderNumber.trim(),
           saleDate,
           currency: payload.currency,
           theoreticalAmount,
@@ -233,20 +228,6 @@ export default class SaleService {
       })
       .preload('recoveries')
       .firstOrFail()
-  }
-
-  // Refuse un bon déjà porté par une autre addition active (le bon d'une addition annulée est libre).
-  private async assertOrderNumberAvailable(orderNumber: string, trx: TransactionClientContract) {
-    const existing = await Sale.query({ client: trx })
-      .where('orderNumber', orderNumber)
-      .where('status', SaleStatus.ACTIVE)
-      .first()
-
-    if (existing) {
-      throw new Error(
-        `Le bon ${orderNumber} est déjà utilisé par l'addition ${existing.additionNumber}.`
-      )
-    }
   }
 
   // Convertit la date reçue en DateTime, ou utilise l'heure serveur par défaut.
