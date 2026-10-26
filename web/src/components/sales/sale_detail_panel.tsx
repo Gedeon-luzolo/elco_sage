@@ -4,6 +4,7 @@ import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
 
 // Propriétés du panneau ; isPending marque une vente faite hors ligne et pas encore envoyée.
 interface SaleDetailPanelProps {
@@ -72,7 +73,10 @@ export function SaleDetailPanel({
           <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
           <DetailLine label="Opérateur" value={sale.operatorName ?? '-'} />
           <DetailLine label="Vendeur" value={sale.sellerName ?? '-'} />
-          <DetailLine label="Paiement" value={sale.paymentType} />
+          <DetailLine label="Paiement" value={formatSalePaymentLabel(sale)} />
+          {sale.paymentReference && (
+            <DetailLine label="Référence" value={sale.paymentReference} />
+          )}
           <DetailLine label="Statut" value={sale.status} />
         </div>
 

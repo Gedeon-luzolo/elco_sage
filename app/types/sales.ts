@@ -1,4 +1,5 @@
 import type { Currency } from '#types/currency'
+import type { PaymentMethod } from '#types/payment_method'
 import type { SalePaymentType } from '#models/sale'
 
 export interface CreateSaleItemInput {
@@ -28,6 +29,8 @@ export interface CreateSaleInput {
   customerId?: string | null
   operatorId: string
   paymentType: SalePaymentType
+  paymentMethod?: PaymentMethod
+  paymentReference?: string | null
   saleDate?: string | Date | null
   currency: Currency
   discountAmount?: number | null
@@ -39,6 +42,8 @@ export interface CreateSaleRecoveryInput {
   id?: string
   amount: number
   currency: Currency
+  paymentMethod: PaymentMethod
+  paymentReference?: string | null
   recoveredAt?: string | Date | null
 }
 

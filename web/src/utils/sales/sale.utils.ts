@@ -2,6 +2,7 @@ import type { ProductServiceDTO } from '~/types/dto'
 import type { JSONDataTypes } from '~/types/json'
 import type { CurrencyCode } from '~/utils/currency'
 import { Currency } from '~/utils/currency'
+import { buildPaymentFields, type PaymentMethod } from '~/utils/sales/payment.utils'
 
 export type SalePaymentType = 'CASH' | 'CREDIT' | 'OFFERED'
 
@@ -24,6 +25,8 @@ interface SaleFormState {
 // Donnees utilisees pour construire le payload backend sans exposer les calculs dans la page.
 interface BuildSalePayloadInput {
   paymentType: SalePaymentType
+  paymentMethod: PaymentMethod
+  paymentReference: string
   customerId: string
   operatorId: string
   currency: CurrencyCode
@@ -130,6 +133,10 @@ export function buildCreateSalePayload(input: BuildSalePayloadInput) {
     customerId: input.customerId || null,
     operatorId: input.operatorId,
     paymentType: input.paymentType,
+    // Seule une vente payée tout de suite a un mode ; un crédit se règle par recouvrement.
+    ...(input.paymentType === 'CASH'
+      ? buildPaymentFields(input.paymentMethod, input.paymentReference)
+      : { paymentMethod: null, paymentReference: null }),
     currency: input.currency,
     // Le backend recevra uniquement la remise; il recalculera le total theorique depuis les services.
     discountAmount: getSaleDiscountAmountFromPayableAmount(

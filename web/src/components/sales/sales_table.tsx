@@ -11,6 +11,7 @@ import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
 
 // Données du tableau ; pendingSaleIds liste les ventes faites hors ligne et pas encore envoyées.
 interface SalesTableProps {
@@ -80,7 +81,7 @@ export function SalesTable({
                   <TableCell className="text-right font-semibold">
                     {formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}
                   </TableCell>
-                  <TableCell>{sale.paymentType}</TableCell>
+                  <TableCell>{formatSalePaymentLabel(sale)}</TableCell>
                   <TableCell>
                     {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
                     {/* Vente faite hors ligne : le serveur ne la connaît pas encore */}
@@ -124,7 +125,7 @@ function SaleMobileCard({
           <p className="text-xs text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <Badge variant="outline">{sale.paymentType}</Badge>
+          <Badge variant="outline">{formatSalePaymentLabel(sale)}</Badge>
           {sale.status === 'CANCELLED' && <Badge variant="destructive">Annulée</Badge>}
           {isPending && <Badge variant="secondary">Non envoyée</Badge>}
         </div>

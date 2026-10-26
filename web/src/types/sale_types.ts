@@ -20,6 +20,8 @@ export type SaleRecovery = Record<string, JSONDataTypes> & {
   receivedById: string
   amount: number
   currency: string
+  paymentMethod: string
+  paymentReference: string | null
   recoveredAt: string | null
   receivedByName: string | null
 }
@@ -31,6 +33,8 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   operatorId: string
   sellerId: string
   paymentType: string
+  paymentMethod: string | null
+  paymentReference: string | null
   additionNumber: string
   saleDate: string | null
   currency: string

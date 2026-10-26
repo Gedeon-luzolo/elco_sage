@@ -22,6 +22,10 @@ export default class extends BaseSchema {
 
       table.decimal('amount', 15, 2).notNullable()
       table.enu('currency', ['CDF', 'USD']).notNullable().defaultTo('CDF')
+      table
+        .enu('payment_method', ['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'BANK_CARD', 'CHEQUE'])
+        .notNullable()
+      table.string('payment_reference', 100).nullable()
       table.timestamp('recovered_at').notNullable()
 
       table.timestamp('created_at').notNullable()

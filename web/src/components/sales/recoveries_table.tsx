@@ -9,9 +9,10 @@ import {
 } from '~/components/ui/table'
 import type { RecoveryPaymentItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
-import { formatDateTimeLabel } from '~/utils/date'
+import { formatDateLabel} from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
-import { formatDebtSaleDate, formatDebtStatusLabel } from '~/utils/sales/debt.utils'
+import {  formatDebtStatusLabel } from '~/utils/sales/debt.utils'
+import { formatPaymentMethodLabel } from '~/utils/sales/payment.utils'
 
 interface RecoveriesTableProps {
   recoveries: RecoveryPaymentItem[]
@@ -32,25 +33,29 @@ export function RecoveriesTable({ recoveries, showStatusBadge = true }: Recoveri
           <TableHead>Addition</TableHead>
           <TableHead>Date de vente</TableHead>
           <TableHead className="text-right">Montant payé</TableHead>
+          <TableHead>Mode</TableHead>
+          <TableHead>Référence</TableHead>
           <TableHead className="text-right">Total payé</TableHead>
-          <TableHead className="text-right">Reste après paiement</TableHead>
+          <TableHead className="text-right">Reste</TableHead>
           <TableHead>Statut</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {recoveries.map((payment) => (
           <TableRow key={payment.recovery.id}>
-            <TableCell>{formatDateTimeLabel(payment.recovery.recoveredAt)}</TableCell>
+            <TableCell>{formatDateLabel(payment.recovery.recoveredAt as string)}</TableCell>
             <TableCell>{payment.recovery.receivedByName ?? '-'}</TableCell>
             <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
             <TableCell>{payment.sale.additionNumber}</TableCell>
-            <TableCell>{formatDebtSaleDate(payment.sale.saleDate)}</TableCell>
+            <TableCell>{formatDateLabel(payment.sale.saleDate as string)}</TableCell>
             <TableCell className="text-right font-semibold">
               {formatMoneyWithCurrency(
                 payment.paidAmount,
                 payment.recovery.currency as CurrencyCode
               )}
             </TableCell>
+            <TableCell>{formatPaymentMethodLabel(payment.recovery.paymentMethod)}</TableCell>
+            <TableCell>{payment.recovery.paymentReference ?? '-'}</TableCell>
             <TableCell className="text-right">
               {formatMoneyWithCurrency(
                 payment.paidAfterAmount,

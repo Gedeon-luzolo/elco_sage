@@ -7,6 +7,8 @@ export interface SaleRecoveryDTO {
   receivedById: string
   amount: number
   currency: string
+  paymentMethod: string
+  paymentReference: string | null
   recoveredAt: string | null
   receivedByName: string | null
 }
@@ -23,6 +25,8 @@ export default class SaleRecoveryTransformer {
       receivedById: item.receivedById,
       amount: item.amount,
       currency: item.currency,
+      paymentMethod: item.paymentMethod,
+      paymentReference: item.paymentReference,
       recoveredAt: item.recoveredAt?.toISO() ?? null,
       receivedByName: item.receivedBy?.fullName ?? item.receivedBy?.email ?? null,
     }

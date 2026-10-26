@@ -1,4 +1,6 @@
 import { CreditCard } from 'lucide-react'
+import { useState } from 'react'
+import { OptionSelect } from '~/components/common/option_select'
 import { SubmitButton } from '~/components/common/submit_button'
 import { Button } from '~/components/ui/button'
 import {
@@ -17,6 +19,12 @@ import type { CurrencyCode } from '~/utils/currency'
 import { todayDateKey } from '~/utils/date'
 import { formatDebtSaleDate } from '~/utils/sales/debt.utils'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import {
+  buildPaymentFields,
+  PAYMENT_METHOD_OPTIONS,
+  paymentMethodNeedsReference,
+  type PaymentMethod,
+} from '~/utils/sales/payment.utils'
 
 interface DebtPaymentDialogProps {
   debt: DebtItem | null
@@ -29,7 +37,12 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
   // En ligne le recouvrement part au serveur ; sans réseau il va dans la file d'attente
   const recover = useRecoverDebt()
 
+  // Le mode pilote l'affichage de la référence, il est donc gardé en état.
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
+
   const closeDialog = () => {
+    // Le prochain encaissement repart sur les espèces.
+    setPaymentMethod('CASH')
     onOpenChange(false)
   }
 
@@ -37,7 +50,12 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
     if (!debt) return
 
     // Les champs visibles viennent du FormData, les champs de contexte viennent de la dette.
-    const payload = { ...Object.fromEntries(formData), currency: debt.sale.currency }
+    const { paymentReference, ...fields } = Object.fromEntries(formData)
+    const payload = {
+      ...fields,
+      ...buildPaymentFields(paymentMethod, String(paymentReference ?? '')),
+      currency: debt.sale.currency,
+    }
 
     recover.mutate(
       { saleId: debt.sale.id, additionNumber: debt.sale.additionNumber, payload },
@@ -80,20 +98,46 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
                 />
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="debt-payment-amount">Montant encaissé</Label>
-                <Input
-                  id="debt-payment-amount"
-                  name="amount"
-                  type="number"
-                  min="0.01"
-                  max={debt.remainingAmount}
-                  step="0.01"
-                  inputMode="decimal"
-                  placeholder="0"
-                  required
-                />
+              {/* Montant et mode côte à côte */}
+              <div className="flex gap-3">
+                <div className="grid min-w-0 flex-1 gap-2">
+                  <Label htmlFor="debt-payment-amount">Montant encaissé</Label>
+                  <Input
+                    id="debt-payment-amount"
+                    name="amount"
+                    type="number"
+                    min="0.01"
+                    max={debt.remainingAmount}
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="0"
+                    required
+                  />
+                </div>
+
+                <div className="grid min-w-0 flex-1 gap-2">
+                  <Label htmlFor="debt-payment-method">Mode de paiement</Label>
+                  <OptionSelect
+                    id="debt-payment-method"
+                    options={PAYMENT_METHOD_OPTIONS}
+                    value={paymentMethod}
+                    onValueChange={setPaymentMethod}
+                  />
+                </div>
               </div>
+
+              {/* Pas de référence pour les espèces : rien à tracer */}
+              {paymentMethodNeedsReference(paymentMethod) && (
+                <div className="grid gap-2">
+                  <Label htmlFor="debt-payment-reference">Référence</Label>
+                  <Input
+                    id="debt-payment-reference"
+                    name="paymentReference"
+                    placeholder="N° de transaction (facultatif)"
+                    maxLength={100}
+                  />
+                </div>
+              )}
 
               <div className="grid gap-2">
                 <Label htmlFor="debt-payment-date">Date de paiement</Label>

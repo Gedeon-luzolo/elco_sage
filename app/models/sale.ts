@@ -2,6 +2,7 @@ import CashSession from '#models/cash_session'
 import Customer from '#models/customer'
 import User from '#models/user'
 import { Currency } from '#types/currency'
+import { PaymentMethod } from '#types/payment_method'
 import { decimalColumn } from '#utils/decimal_column'
 import { randomUUID } from 'node:crypto'
 import { BaseModel, beforeCreate, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
@@ -41,6 +42,12 @@ export default class Sale extends BaseModel {
 
   @column()
   declare paymentType: SalePaymentType
+
+  @column()
+  declare paymentMethod: PaymentMethod | null
+
+  @column()
+  declare paymentReference: string | null
 
   @column()
   declare additionNumber: string

@@ -40,6 +40,7 @@ export function SaleReportTable({ sales, totals, pendingSaleIds }: SaleReportTab
           <TableHead className="text-right">Total réel</TableHead>
           <TableHead>Opérateurs</TableHead>
           <TableHead>Paiements</TableHead>
+          <TableHead>Référence</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -80,7 +81,7 @@ export function SaleReportTable({ sales, totals, pendingSaleIds }: SaleReportTab
           <TableCell className="text-right font-bold text-green-200">
             {renderMoneyMap(totals.realAmounts)}
           </TableCell>
-          <TableCell colSpan={2} />
+          <TableCell colSpan={3} />
         </TableRow>
       </TableFooter>
     </Table>

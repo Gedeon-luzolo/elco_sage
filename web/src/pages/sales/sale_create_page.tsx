@@ -16,6 +16,7 @@ import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCreateSale } from '~/hooks/sales/useCreateSale'
 import { buildLocalSale } from '~/utils/sales/local_sale'
+import type { PaymentMethod } from '~/utils/sales/payment.utils'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { UserListItem } from '~/types/user_types'
@@ -59,6 +60,8 @@ export default function SaleCreatePage() {
   const [autoPrintSaleId, setAutoPrintSaleId] = useState<string | null>(null)
 
   const [paymentType, setPaymentType] = useState<SalePaymentType>('CASH')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
+  const [paymentReference, setPaymentReference] = useState('')
   const [currency, setCurrency] = useState<CurrencyCode>(Currency.CDF)
   const [operatorId, setOperatorId] = useState('')
   const [customerId, setCustomerId] = useState('')
@@ -167,6 +170,8 @@ export default function SaleCreatePage() {
    */
   const resetForm = () => {
     setPaymentType('CASH')
+    setPaymentMethod('CASH')
+    setPaymentReference('')
     setCustomerId('')
     setPayableAmount(0)
     setHasCustomPayableAmount(false)
@@ -183,7 +188,9 @@ export default function SaleCreatePage() {
 
     const payload = buildCreateSalePayload({
       paymentType,
-        customerId,
+      paymentMethod,
+      paymentReference,
+      customerId,
       operatorId,
       currency,
       payableAmount: effectivePayableAmount,
@@ -261,19 +268,6 @@ export default function SaleCreatePage() {
                 <h2 className="font-semibold">Ticket</h2>
               </div>
 
-              <SaleTicketFields
-                paymentType={paymentType}
-                onPaymentTypeChange={setPaymentType}
-                currency={currency}
-                onCurrencyChange={setCurrency}
-                operatorId={operatorId}
-                onOperatorChange={setOperatorId}
-                customerId={customerId}
-                onCustomerChange={setCustomerId}
-                operators={operators}
-                customers={customers}
-              />
-
               <div className="max-h-[40vh] overflow-y-auto px-4">
                 {lines.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">
@@ -292,6 +286,24 @@ export default function SaleCreatePage() {
                   ))
                 )}
               </div>
+
+              {/* Les informations de la vente viennent après les produits et leurs prix */}
+              <SaleTicketFields
+                paymentType={paymentType}
+                onPaymentTypeChange={setPaymentType}
+                paymentMethod={paymentMethod}
+                onPaymentMethodChange={setPaymentMethod}
+                paymentReference={paymentReference}
+                onPaymentReferenceChange={setPaymentReference}
+                currency={currency}
+                onCurrencyChange={setCurrency}
+                operatorId={operatorId}
+                onOperatorChange={setOperatorId}
+                customerId={customerId}
+                onCustomerChange={setCustomerId}
+                operators={operators}
+                customers={customers}
+              />
 
               <SaleTicketSummary
                 currency={currency}

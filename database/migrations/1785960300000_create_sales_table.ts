@@ -22,6 +22,11 @@ export default class extends BaseSchema {
       table.uuid('seller_id').notNullable().references('id').inTable('users').onDelete('RESTRICT')
 
       table.enu('payment_type', ['CASH', 'CREDIT', 'OFFERED']).notNullable()
+      // Renseignés pour une vente payée tout de suite ; vides pour un crédit ou un offert.
+      table
+        .enu('payment_method', ['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'BANK_CARD', 'CHEQUE'])
+        .nullable()
+      table.string('payment_reference', 100).nullable()
       table.string('addition_number', 6).notNullable().unique()
       table.timestamp('sale_date').notNullable()
 

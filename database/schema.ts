@@ -178,7 +178,7 @@ export class SaleItemSchema extends BaseModel {
 }
 
 export class SaleRecoverySchema extends BaseModel {
-  static $columns = ['amount', 'cashSessionId', 'createdAt', 'currency', 'id', 'receivedById', 'recoveredAt', 'saleId', 'updatedAt'] as const
+  static $columns = ['amount', 'cashSessionId', 'createdAt', 'currency', 'id', 'paymentMethod', 'paymentReference', 'receivedById', 'recoveredAt', 'saleId', 'updatedAt'] as const
   $columns = SaleRecoverySchema.$columns
   @column()
   declare amount: string
@@ -191,6 +191,10 @@ export class SaleRecoverySchema extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare paymentMethod: string
+  @column()
+  declare paymentReference: string | null
+  @column()
   declare receivedById: string
   @column.dateTime()
   declare recoveredAt: DateTime
@@ -201,7 +205,7 @@ export class SaleRecoverySchema extends BaseModel {
 }
 
 export class SaleSchema extends BaseModel {
-  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
+  static $columns = ['additionNumber', 'cashSessionId', 'createdAt', 'currency', 'customerId', 'discountAmount', 'id', 'operatorId', 'paymentMethod', 'paymentReference', 'paymentType', 'saleDate', 'sellerId', 'status', 'theoreticalAmount', 'totalAmount', 'updatedAt'] as const
   $columns = SaleSchema.$columns
   @column()
   declare additionNumber: string
@@ -219,6 +223,10 @@ export class SaleSchema extends BaseModel {
   declare id: string
   @column()
   declare operatorId: string
+  @column()
+  declare paymentMethod: string | null
+  @column()
+  declare paymentReference: string | null
   @column()
   declare paymentType: string
   @column.dateTime()

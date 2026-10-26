@@ -68,6 +68,8 @@ export default class SaleRecoveryService {
       receivedById: actor.id,
       amount: Number(payload.amount),
       currency: payload.currency,
+      paymentMethod: payload.paymentMethod,
+      paymentReference: payload.paymentReference ?? null,
       recoveredAt: this.resolveRecoveredAt(payload.recoveredAt),
     })
 

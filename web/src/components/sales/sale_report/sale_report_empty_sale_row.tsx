@@ -3,6 +3,7 @@ import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
 
 // Ligne d'une vente sans service ; isPending marque une vente pas encore envoyée au serveur.
 interface SaleReportEmptySaleRowProps {
@@ -43,7 +44,8 @@ export function SaleReportEmptySaleRow({
         {formatMoneyWithCurrency(sale.totalAmount, currency)}
       </TableCell>
       <TableCell>{sale.operatorName ?? '-'}</TableCell>
-      <TableCell>{sale.paymentType}</TableCell>
+      <TableCell>{formatSalePaymentLabel(sale)}</TableCell>
+      <TableCell>{sale.paymentReference ?? '-'}</TableCell>
     </TableRow>
   )
 }

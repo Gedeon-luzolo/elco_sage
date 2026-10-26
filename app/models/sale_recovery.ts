@@ -2,6 +2,7 @@ import CashSession from '#models/cash_session'
 import Sale from '#models/sale'
 import User from '#models/user'
 import { Currency } from '#types/currency'
+import { PaymentMethod } from '#types/payment_method'
 import { decimalColumn } from '#utils/decimal_column'
 import { randomUUID } from 'node:crypto'
 import { BaseModel, beforeCreate, belongsTo, column } from '@adonisjs/lucid/orm'
@@ -28,6 +29,12 @@ export default class SaleRecovery extends BaseModel {
 
   @column()
   declare currency: Currency
+
+  @column()
+  declare paymentMethod: PaymentMethod
+
+  @column()
+  declare paymentReference: string | null
 
   @column.dateTime()
   declare recoveredAt: DateTime

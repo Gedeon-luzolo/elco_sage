@@ -1,6 +1,6 @@
 import { CashSessionStatus } from '#models/cash_session'
 import { JournalisationModule } from '#models/journalisation'
-import Sale, { SaleStatus } from '#models/sale'
+import Sale, { SalePaymentType, SaleStatus } from '#models/sale'
 import type User from '#models/user'
 import { CacheKeys } from '#services/cache/cache_keys'
 import CacheService from '#services/cache/cache_service'
@@ -125,6 +125,9 @@ export default class SaleService {
         additionNumber = await this.additionNumberService.generateOnlineNumber(trx)
       }
 
+      // Seule une vente payée tout de suite a un mode de paiement ; un crédit se règle par recouvrement.
+      const isPaidNow = payload.paymentType === SalePaymentType.CASH
+
       // L'entete porte les informations communes a toutes les lignes de vente.
       const sale = await Sale.create(
         {
@@ -134,6 +137,8 @@ export default class SaleService {
           operatorId: payload.operatorId,
           sellerId: actor.id,
           paymentType: payload.paymentType,
+          paymentMethod: isPaidNow ? payload.paymentMethod! : null,
+          paymentReference: isPaidNow ? (payload.paymentReference ?? null) : null,
           additionNumber,
           saleDate,
           currency: payload.currency,

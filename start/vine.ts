@@ -53,6 +53,8 @@ const fields = {
   packagingCapacity: 'capacité du conditionnement',
   packagingUnit: 'unité de conditionnement',
   password: 'mot de passe',
+  paymentMethod: 'mode de paiement',
+  paymentReference: 'référence du paiement',
   paymentType: 'type de paiement',
   phoneNumber: 'numéro de téléphone',
   physicalStock: 'stock physique',

@@ -6,6 +6,8 @@ import { getSaleServiceUnitPrice } from '~/utils/sales/sale.utils'
 // Corps d'une vente tel que construit par le formulaire.
 interface SalePayload {
   paymentType: string
+  paymentMethod: string | null
+  paymentReference: string | null
   customerId: string | null
   operatorId: string
   currency: string
@@ -62,6 +64,8 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     operatorId: payload.operatorId,
     sellerId: input.seller.id,
     paymentType: payload.paymentType,
+    paymentMethod: payload.paymentMethod,
+    paymentReference: payload.paymentReference,
     additionNumber: input.additionNumber,
     saleDate: input.saleDate,
     currency: payload.currency,
