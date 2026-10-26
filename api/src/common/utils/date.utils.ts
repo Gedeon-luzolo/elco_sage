@@ -42,11 +42,48 @@ export function dayRange(startDateKey: string, endDateKey = startDateKey) {
 }
 
 /**
+ * Jour courant à Kinshasa, au format YYYY-MM-DD.
+ */
+export function todayKey() {
+  return toDateKey(new Date());
+}
+
+/**
+ * Premier jour du mois d'une clé YYYY-MM-DD.
+ */
+export function monthStartKey(dateKey: string) {
+  return `${dateKey.slice(0, 7)}-01`;
+}
+
+/**
+ * Chaque jour d'une période, bornes comprises, au format YYYY-MM-DD.
+ */
+export function eachDayKey(startDateKey: string, endDateKey: string) {
+  const days: string[] = [];
+  // Les clés sont des jours sans heure : on les parcourt en UTC, sans effet de fuseau.
+  const cursor = new Date(`${startDateKey}T00:00:00.000Z`);
+  const end = new Date(`${endDateKey}T00:00:00.000Z`);
+
+  while (cursor <= end) {
+    days.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return days;
+}
+
+/**
+ * Libellé français d'un jour : « 26/10/2026 », ou « 26/10 » sans l'année.
+ */
+export function toDayLabel(dateKey: string, withYear = true) {
+  const [year, month, day] = dateKey.split('-');
+
+  return withYear ? `${day}/${month}/${year}` : `${day}/${month}`;
+}
+
+/**
  * Date et heure lisibles d'un instant, par exemple « 26/10/2026 à 14:05 ».
  */
 export function toDateTimeLabel(date: Date) {
-  // Le jour est remis dans l'ordre français à partir de la clé YYYY-MM-DD.
-  const [year, month, day] = toDateKey(date).split('-');
-
-  return `${day}/${month}/${year} à ${toTimeLabel(date)}`;
+  return `${toDayLabel(toDateKey(date))} à ${toTimeLabel(date)}`;
 }

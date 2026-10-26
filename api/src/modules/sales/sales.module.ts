@@ -49,5 +49,7 @@ import { SalesService } from './sales/sales.service.js';
     DebtsService,
     RecoveriesService,
   ],
+  // Le pilotage relit les dettes pour calculer les restes à payer.
+  exports: [DebtsService],
 })
 export class SalesModule {}

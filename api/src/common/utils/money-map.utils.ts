@@ -19,6 +19,17 @@ export function normalizeMoneyMap(values: MoneyMap | null | undefined) {
 }
 
 /**
+ * Ajoute un montant dans un accumulateur par devise.
+ */
+export function addMoneyAmount(
+  amounts: MoneyMap,
+  currency: Currency,
+  amount: number,
+) {
+  amounts[currency] = roundAmount((amounts[currency] ?? 0) + amount);
+}
+
+/**
  * Additionne des montants en les groupant par devise, sans conversion.
  */
 export function sumMoneyByCurrency<T>(
@@ -52,6 +63,13 @@ export function sumMoneyMaps(...maps: MoneyMap[]) {
   }
 
   return totals;
+}
+
+/**
+ * Accumulateur vide : chaque devise part de 0.
+ */
+export function emptyMoneyMap() {
+  return normalizeMoneyMap(null);
 }
 
 /**
