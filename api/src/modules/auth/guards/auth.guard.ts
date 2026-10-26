@@ -20,12 +20,14 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    // Le token arrive dans l'en-tête « Authorization: Bearer <token> ».
     const [scheme, value] = (request.headers.authorization ?? '').split(' ');
 
     if (scheme !== 'Bearer' || !value) {
       throw new UnauthorizedException(UNAUTHORIZED);
     }
 
+    // Le token doit exister dans Redis et correspondre à son empreinte.
     const token = await this.accessTokensService.verify(value);
 
     if (!token) {
@@ -36,6 +38,7 @@ export class AuthGuard implements CanActivate {
     const user = await this.authService.findAuthenticatedUser(token.userId);
 
     if (!user) {
+      // Le token d'un compte qui n'est plus valide est supprimé tout de suite.
       await this.accessTokensService.delete(token.identifier);
       throw new UnauthorizedException(UNAUTHORIZED);
     }

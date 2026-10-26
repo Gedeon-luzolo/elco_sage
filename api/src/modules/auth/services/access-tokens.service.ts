@@ -30,11 +30,14 @@ export class AccessTokensService {
    * Émet un token pour un appareil. Sa valeur n'est visible qu'ici.
    */
   async create(userId: string) {
+    // L'identifiant retrouve le token dans Redis ; le secret le prouve.
     const identifier = randomBytes(18).toString('base64url');
     const secret = randomBytes(30).toString('base64url');
     const now = new Date();
+    // Le token expire au bout de 10 jours, même sans déconnexion.
     const expiresAt = new Date(now.getTime() + TOKEN_TTL_SECONDS * 1000);
 
+    // Seule l'empreinte du secret est enregistrée : un vol de Redis ne donne aucun token valide.
     const stored: StoredToken = {
       userId,
       hash: hashSecret(secret),
@@ -50,10 +53,12 @@ export class AccessTokensService {
         'EX',
         TOKEN_TTL_SECONDS,
       )
+      // L'index par utilisateur permet de révoquer tous ses appareils d'un coup.
       .sadd(USER_TOKENS_KEY + userId, identifier)
       .expire(USER_TOKENS_KEY + userId, TOKEN_TTL_SECONDS)
       .exec();
 
+    // La valeur complète n'existe qu'ici : elle part à la SPA et n'est plus jamais relue.
     return { value: `${TOKEN_PREFIX}${identifier}.${secret}`, expiresAt };
   }
 
@@ -62,12 +67,14 @@ export class AccessTokensService {
    * Retourne null s'il est mal formé, inconnu, expiré ou falsifié.
    */
   async verify(value: string) {
+    // Un token mal formé est refusé sans interroger Redis.
     const decoded = this.decode(value);
 
     if (!decoded) {
       return null;
     }
 
+    // Token inconnu, expiré par Redis ou révoqué : il n'existe plus.
     const raw = await this.redis.get(TOKEN_KEY + decoded.identifier);
 
     if (!raw) {
@@ -75,6 +82,7 @@ export class AccessTokensService {
     }
 
     const stored = JSON.parse(raw) as StoredToken;
+    // On compare les empreintes, jamais les secrets eux-mêmes.
     const expected = Buffer.from(stored.hash, 'hex');
     const actual = Buffer.from(hashSecret(decoded.secret), 'hex');
 
@@ -86,6 +94,7 @@ export class AccessTokensService {
       return null;
     }
 
+    // Le guard relit ensuite l'utilisateur pour vérifier que son compte est actif.
     return { identifier: decoded.identifier, userId: stored.userId };
   }
 
@@ -93,6 +102,7 @@ export class AccessTokensService {
    * Révoque un token précis (déconnexion d'un appareil).
    */
   async delete(identifier: string) {
+    // Déjà révoqué ou expiré : rien à faire.
     const raw = await this.redis.get(TOKEN_KEY + identifier);
 
     if (!raw) {
@@ -103,6 +113,7 @@ export class AccessTokensService {
 
     await this.redis
       .multi()
+      // Le token et sa référence dans l'index de l'utilisateur disparaissent ensemble.
       .unlink(TOKEN_KEY + identifier)
       .srem(USER_TOKENS_KEY + stored.userId, identifier)
       .exec();
@@ -113,16 +124,19 @@ export class AccessTokensService {
    */
   async deleteAllForUser(userId: string) {
     const userKey = USER_TOKENS_KEY + userId;
+    // Tous les appareils connectés de l'utilisateur.
     const identifiers = await this.redis.smembers(userKey);
 
     await this.redis.unlink(
       userKey,
+      // L'index et chaque token sont supprimés en une seule commande.
       ...identifiers.map((identifier) => TOKEN_KEY + identifier),
     );
   }
 
   // Sépare l'identifiant du secret : « elco_<identifiant>.<secret> ».
   private decode(value: string) {
+    // Les tokens d'elco commencent tous par leur préfixe.
     if (!value.startsWith(TOKEN_PREFIX)) {
       return null;
     }

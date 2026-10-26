@@ -21,6 +21,7 @@ export class JournalisationsService {
     message: string,
     user?: Pick<User, 'id'> | null,
   ) {
+    // Sans utilisateur, la ligne reste attribuée au système.
     return this.journalisationsRepository.save(
       this.journalisationsRepository.create({
         module,

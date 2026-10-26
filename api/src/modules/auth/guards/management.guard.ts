@@ -11,6 +11,7 @@ import type { AuthenticatedRequest } from '../types/authenticated-request.type.j
 @Injectable()
 export class ManagementGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
+    // L'utilisateur a été attaché par AuthGuard, qui passe avant.
     const { user } = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     if (!user || !isManagementRole(user.role)) {

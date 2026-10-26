@@ -13,6 +13,7 @@ export function isManagementRole(role: UserRole) {
  * Initiales lisibles pour l'avatar : celles du nom complet, sinon celles de l'email.
  */
 export function getUserInitials(user: Pick<User, 'fullName' | 'email'>) {
+  // Le nom complet en priorité ; à défaut, la partie avant et après le @ de l'email.
   const [first, last] = user.fullName
     ? user.fullName.split(' ')
     : user.email.split('@');
@@ -22,6 +23,7 @@ export function getUserInitials(user: Pick<User, 'fullName' | 'email'>) {
     return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
   }
 
+  // Un seul mot : ses deux premières lettres.
   return first.slice(0, 2).toUpperCase();
 }
 

@@ -8,7 +8,10 @@ import { CacheModule } from './common/cache/cache.module.js';
 import { RedisModule } from './common/redis/redis.module.js';
 import { createAppTypeOrmOptions } from './config/database.config.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { CatalogModule } from './modules/catalog/catalog.module.js';
+import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module.js';
 import { JournalisationsModule } from './modules/journalisations/journalisations.module.js';
+import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { JournalisationsModule } from './modules/journalisations/journalisations
     CacheModule,
     JournalisationsModule,
     AuthModule,
+    UsersModule,
+    ExchangeRatesModule,
+    CatalogModule,
   ],
   controllers: [AppController],
 })
