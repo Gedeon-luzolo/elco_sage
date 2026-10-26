@@ -28,6 +28,15 @@ export function getUserInitials(user: Pick<User, 'fullName' | 'email'>) {
 }
 
 /**
+ * Nom affiché d'un utilisateur : son nom complet, sinon son email (null si absent).
+ */
+export function getUserDisplayName(
+  user: Pick<User, 'fullName' | 'email'> | null | undefined,
+) {
+  return user ? (user.fullName ?? user.email) : null;
+}
+
+/**
  * Ce que l'API expose d'un utilisateur : jamais le mot de passe ni le compteur d'échecs.
  */
 export function toUserResponse(user: User) {

@@ -12,6 +12,7 @@ import { CatalogModule } from './modules/catalog/catalog.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
 import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module.js';
 import { JournalisationsModule } from './modules/journalisations/journalisations.module.js';
+import { SalesModule } from './modules/sales/sales.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
@@ -30,6 +31,7 @@ import { UsersModule } from './modules/users/users.module.js';
     ExchangeRatesModule,
     CatalogModule,
     CustomersModule,
+    SalesModule,
   ],
   controllers: [AppController],
 })

@@ -1,0 +1,15 @@
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
+import {
+  nonNegativeNumber,
+  nullable,
+} from '../../../../common/utils/zod.utils.js';
+
+// Montants comptés dans le tiroir : une devise peut rester vide, pas les deux (vérifié par le service).
+export const CloseCashSessionSchema = z.object({
+  closingAmountCdf: nullable(nonNegativeNumber('Le montant compté en CDF')),
+  closingAmountUsd: nullable(nonNegativeNumber('Le montant compté en USD')),
+});
+
+// DTO Nest généré depuis le schéma Zod.
+export class CloseCashSessionDto extends createZodDto(CloseCashSessionSchema) {}

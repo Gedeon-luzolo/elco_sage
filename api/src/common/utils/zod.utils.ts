@@ -8,6 +8,13 @@ const emptyToNull = (value: unknown) =>
 export const nullable = <Schema extends z.ZodType>(schema: Schema) =>
   z.preprocess(emptyToNull, schema.nullable());
 
+// Filtre de requête facultatif : vide ou absent donnent undefined (le filtre est ignoré).
+export const optional = <Schema extends z.ZodType>(schema: Schema) =>
+  z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    schema.optional(),
+  );
+
 // Texte obligatoire, nettoyé de ses espaces, entre min et max caractères.
 export const requiredText = (
   label: string,
@@ -55,9 +62,27 @@ export const requiredEnum = <Values extends Record<string, string>>(
 // Devise de la caisse, toujours obligatoire.
 export const requiredCurrency = requiredEnum(Currency, 'La devise choisie');
 
+// Identifiant obligatoire d'une autre ligne (opérateur, service…).
+export const requiredUuid = (label: string) =>
+  z.uuid({
+    // Absent : obligatoire ; mal formé : invalide.
+    error: (issue) =>
+      issue.input === undefined || issue.input === null || issue.input === ''
+        ? `${label} est obligatoire.`
+        : `${label} est invalide.`,
+  });
+
 // Identifiant facultatif d'une autre ligne (catégorie, client…).
 export const nullableUuid = (label: string) =>
   nullable(z.uuid(`${label} est invalide.`));
+
+// Jour au format YYYY-MM-DD, utilisé par les filtres de période.
+export const dateKey = (label: string) =>
+  z.iso.date({ error: `${label} est invalide.` });
+
+// Date et heure ISO 8601 (avec Z ou un décalage horaire).
+export const isoDateTime = (label: string) =>
+  z.iso.datetime({ offset: true, error: `${label} est invalide.` });
 
 // Nombre obligatoire, envoyé en nombre ou en texte.
 export const numberLike = (label: string) =>
