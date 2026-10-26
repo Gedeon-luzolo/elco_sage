@@ -18,9 +18,13 @@ export class ExchangeRate {
   @DecimalColumn({ name: 'sell_rate' })
   sellRate: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   updatedAt: Date | null;
 }

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
@@ -17,6 +18,11 @@ import { Sale } from '../../sales/entities/sale.entity.js';
 
 // Paiement reçu sur une vente à crédit.
 @Entity('sale_recoveries')
+@Index('sale_recoveries_sale_id_index', ['saleId'])
+@Index('sale_recoveries_cash_session_id_recovered_at_index', [
+  'cashSessionId',
+  'recoveredAt',
+]) // Encaissements d'une session
 export class SaleRecovery {
   // L'id peut venir du client hors ligne : il rend l'envoi rejouable sans doublon.
   @PrimaryColumn({ type: 'uuid', default: () => 'gen_random_uuid()' })
@@ -52,15 +58,24 @@ export class SaleRecovery {
   @Column({ name: 'payment_method', type: 'text' })
   paymentMethod: PaymentMethod;
 
-  @Column({ name: 'payment_reference', type: 'varchar', nullable: true })
+  @Column({
+    name: 'payment_reference',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   paymentReference: string | null;
 
-  @Column({ name: 'recovered_at', type: 'timestamptz' })
+  @Column({ name: 'recovered_at', type: 'timestamp with time zone' })
   recoveredAt: Date;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   updatedAt: Date | null;
 }

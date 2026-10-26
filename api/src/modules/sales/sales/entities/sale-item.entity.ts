@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -15,6 +16,7 @@ import { Sale } from './sale.entity.js';
 
 // Une ligne garde le prix appliqué au moment de la vente.
 @Entity('sale_items')
+@Index('sale_items_sale_id_index', ['saleId'])
 export class SaleItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -45,9 +47,13 @@ export class SaleItem {
   @DecimalColumn({ name: 'total_price' })
   totalPrice: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   updatedAt: Date | null;
 }

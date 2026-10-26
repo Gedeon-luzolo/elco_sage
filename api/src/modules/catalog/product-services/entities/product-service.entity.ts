@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -13,6 +15,8 @@ import { ProductCategory } from '../../product-categories/entities/product-categ
 import { ProductServiceType } from '../enums/product-service-type.enum.js';
 
 @Entity('product_services')
+@Unique('product_services_name_unique', ['name'])
+@Index('product_services_stock_product_id_index', ['stockProductId'])
 export class ProductService {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -24,10 +28,10 @@ export class ProductService {
   @JoinColumn({ name: 'category_id' })
   category: Relation<ProductCategory> | null;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', length: 255 })
   type: ProductServiceType;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @Column({ name: 'is_active', type: 'boolean' })
@@ -42,11 +46,16 @@ export class ProductService {
   stockProduct: Relation<ProductService> | null;
 
   // Unité de vente ou de consommation (ex : feuille).
-  @Column({ name: 'base_unit', type: 'varchar', nullable: true })
+  @Column({ name: 'base_unit', type: 'varchar', length: 255, nullable: true })
   baseUnit: string | null;
 
   // Unité de conditionnement (ex : rame), uniquement pour un produit.
-  @Column({ name: 'packaging_unit', type: 'varchar', nullable: true })
+  @Column({
+    name: 'packaging_unit',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   packagingUnit: string | null;
 
   // Nombre d'unités de base dans le conditionnement (ex : 500 feuilles par rame).
@@ -66,9 +75,13 @@ export class ProductService {
   @DecimalColumn({ name: 'material_cost_cdf' })
   materialCostCdf: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   updatedAt: Date | null;
 }

@@ -2,10 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Unique,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -20,6 +22,8 @@ import { SalePaymentType, SaleStatus } from '../enums/sale.enums.js';
 import { SaleItem } from './sale-item.entity.js';
 
 @Entity('sales')
+@Unique('sales_addition_number_unique', ['additionNumber'])
+@Index('sales_cash_session_id_sale_date_index', ['cashSessionId', 'saleDate']) // Ventes d'une session, dans l'ordre
 export class Sale {
   // L'id peut venir du client hors ligne : il rend la création rejouable sans doublon.
   @PrimaryColumn({ type: 'uuid', default: () => 'gen_random_uuid()' })
@@ -60,13 +64,18 @@ export class Sale {
   @Column({ name: 'payment_method', type: 'text', nullable: true })
   paymentMethod: PaymentMethod | null;
 
-  @Column({ name: 'payment_reference', type: 'varchar', nullable: true })
+  @Column({
+    name: 'payment_reference',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   paymentReference: string | null;
 
-  @Column({ name: 'addition_number', type: 'varchar' })
+  @Column({ name: 'addition_number', type: 'varchar', length: 6 })
   additionNumber: string;
 
-  @Column({ name: 'sale_date', type: 'timestamptz' })
+  @Column({ name: 'sale_date', type: 'timestamp with time zone' })
   saleDate: Date;
 
   @Column({ type: 'text' })
@@ -90,9 +99,13 @@ export class Sale {
   @OneToMany(() => SaleRecovery, (recovery) => recovery.sale)
   recoveries: Relation<SaleRecovery[]>;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   updatedAt: Date | null;
 }
