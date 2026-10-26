@@ -13,7 +13,12 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('cash_sessions')
         .onDelete('SET NULL')
-      table.uuid('received_by_id').notNullable().references('id').inTable('users').onDelete('RESTRICT')
+      table
+        .uuid('received_by_id')
+        .notNullable()
+        .references('id')
+        .inTable('users')
+        .onDelete('RESTRICT')
 
       table.decimal('amount', 15, 2).notNullable()
       table.enu('currency', ['CDF', 'USD']).notNullable().defaultTo('CDF')
