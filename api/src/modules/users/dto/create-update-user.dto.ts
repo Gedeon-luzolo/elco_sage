@@ -1,34 +1,28 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import {
+  nullableText,
+  requiredEmail,
+  requiredEnum,
+} from '../../../common/utils/zod.utils.js';
 import { UserRole, UserStatus } from '../enums/user.enums.js';
 
 const userFields = {
-  fullName: z
-    .string({ error: 'Le nom complet est invalide.' })
-    .trim()
-    .max(255)
-    .nullable(),
-  email: z
-    .string({ error: "L'adresse email est requise." })
-    .trim()
-    .email("L'adresse email est invalide.")
-    .max(254, "L'adresse email ne doit pas dépasser 254 caractères."),
-  role: z.nativeEnum(UserRole, { error: 'Le rôle choisi est invalide.' }),
+  fullName: nullableText('Le nom complet', 255),
+  email: requiredEmail,
+  role: requiredEnum(UserRole, 'Le rôle choisi'),
 };
+
+const status = requiredEnum(UserStatus, 'Le statut choisi');
 
 // Le statut est facultatif à la création : un nouveau compte est actif.
 export const CreateUserSchema = z.object({
   ...userFields,
-  status: z
-    .nativeEnum(UserStatus, { error: 'Le statut choisi est invalide.' })
-    .optional(),
+  status: status.optional(),
 });
 
 // En édition, le formulaire présente toujours le statut.
-export const UpdateUserSchema = z.object({
-  ...userFields,
-  status: z.nativeEnum(UserStatus, { error: 'Le statut choisi est invalide.' }),
-});
+export const UpdateUserSchema = z.object({ ...userFields, status });
 
 // DTO Nest générés depuis les schémas Zod.
 export class CreateUserDto extends createZodDto(CreateUserSchema) {}
