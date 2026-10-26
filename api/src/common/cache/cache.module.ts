@@ -1,10 +1,15 @@
 import { Global, Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheInterceptor } from './cache.interceptor.js';
 import { CacheService } from './cache.service.js';
 
-// Disponible partout : chaque domaine met en cache et invalide ses propres clés.
+// Les routes déclarent leur cache par décorateurs ; l'intercepteur global les applique.
 @Global()
 @Module({
-  providers: [CacheService],
+  providers: [
+    CacheService,
+    { provide: APP_INTERCEPTOR, useClass: CacheInterceptor },
+  ],
   exports: [CacheService],
 })
 export class CacheModule {}

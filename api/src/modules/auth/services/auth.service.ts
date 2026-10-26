@@ -2,8 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
-import { CacheKeys } from '../../../common/cache/cache-keys.js';
-import { CacheService } from '../../../common/cache/cache.service.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
 import { User } from '../../users/entities/user.entity.js';
@@ -23,7 +21,6 @@ export class AuthService {
     private readonly usersRepository: Repository<User>,
     private readonly accessTokensService: AccessTokensService,
     private readonly journalisationsService: JournalisationsService,
-    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -38,6 +35,7 @@ export class AuthService {
       .where('user.email = :email', { email })
       .getOne();
 
+    // Email inconnu : même message qu'un mauvais mot de passe.
     if (!user) {
       throw new UnauthorizedException(INVALID_CREDENTIALS);
     }
@@ -51,6 +49,7 @@ export class AuthService {
       );
     }
 
+    // Un mauvais mot de passe est compté, et peut bloquer le compte.
     if (!(await bcrypt.compare(password, user.password))) {
       await this.registerFailedAttempt(user);
     }
@@ -58,13 +57,14 @@ export class AuthService {
     // Une connexion réussie remet le compteur à zéro.
     if (user.failedLoginAttempts > 0) {
       await this.usersRepository.update(user.id, { failedLoginAttempts: 0 });
-      await this.cacheService.forgetByPrefix(CacheKeys.users.prefix);
     }
 
+    // Un token est émis pour cet appareil.
     const token = await this.accessTokensService.create(user.id);
 
     await this.journalisationsService.create(
       JournalisationModule.AUTHENTIFICATION,
+      // La connexion est tracée dans le journal.
       `${user.fullName ?? user.email} vient de se connecter au système`,
       user,
     );
@@ -83,10 +83,12 @@ export class AuthService {
   async logout(user: User, accessTokenId: string) {
     await this.journalisationsService.create(
       JournalisationModule.AUTHENTIFICATION,
+      // La déconnexion est tracée dans le journal.
       `${user.fullName ?? user.email} vient de se déconnecter du système`,
       user,
     );
 
+    // Seul le token de cet appareil est révoqué ; les autres restent connectés.
     await this.accessTokensService.delete(accessTokenId);
   }
 
@@ -95,6 +97,7 @@ export class AuthService {
    */
   async findAuthenticatedUser(userId: string) {
     return this.usersRepository.findOne({
+      // Un compte bloqué ou désactivé depuis l'émission du token n'est plus reconnu.
       where: { id: userId, status: UserStatus.ACTIVE },
     });
   }
@@ -102,14 +105,16 @@ export class AuthService {
   // Compte une erreur de mot de passe, bloque au seuil, puis refuse toujours la connexion.
   private async registerFailedAttempt(user: User): Promise<never> {
     const failedLoginAttempts = user.failedLoginAttempts + 1;
+    // On incrémente avant de comparer pour bloquer exactement à la 3e erreur.
     const isBlocked = failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
 
     await this.usersRepository.update(user.id, {
       failedLoginAttempts,
+      // Au seuil, le blocage est enregistré avec le compteur.
       ...(isBlocked ? { status: UserStatus.BLOCKED } : {}),
     });
-    await this.cacheService.forgetByPrefix(CacheKeys.users.prefix);
 
+    // Sous le seuil : simple refus, avec le message habituel.
     if (!isBlocked) {
       throw new UnauthorizedException(INVALID_CREDENTIALS);
     }
@@ -119,6 +124,7 @@ export class AuthService {
 
     await this.journalisationsService.create(
       JournalisationModule.AUTHENTIFICATION,
+      // Le blocage automatique est tracé dans le journal.
       `Le compte de ${user.fullName ?? user.email} a été automatiquement bloqué après ${MAX_FAILED_LOGIN_ATTEMPTS} tentatives de connexion échouées`,
       user,
     );

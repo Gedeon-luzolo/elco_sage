@@ -7,6 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { CacheInvalidate } from '../../common/cache/decorators/cache.decorators.js';
 import { toUserResponse } from '../users/utils/user.utils.js';
 import type { User } from '../users/entities/user.entity.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
@@ -24,6 +25,7 @@ export class AuthController {
    */
   @Post('login')
   @HttpCode(200)
+  @CacheInvalidate({ patterns: ['users:'] })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.email, loginDto.password);
   }
@@ -47,6 +49,7 @@ export class AuthController {
     @CurrentUser() user: User,
     @Req() request: AuthenticatedRequest,
   ) {
+    // AuthGuard a retenu le token utilisé : c'est lui qui est révoqué.
     await this.authService.logout(user, request.accessTokenId!);
   }
 }

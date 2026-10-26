@@ -2,9 +2,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { REDIS } from '../redis/redis.module.js';
 
-// Préfixe commun qui isole le cache applicatif des autres usages de Redis (tokens).
-const CACHE_PREFIX = 'cache:';
-
+/**
+ * Cache Redis avec invalidation par préfixe.
+ * Une panne de Redis ne casse jamais une requête : la lecture retombe sur la base.
+ */
 @Injectable()
 export class CacheService {
   private readonly logger = new Logger(CacheService.name);
@@ -12,54 +13,27 @@ export class CacheService {
   constructor(@Inject(REDIS) private readonly redis: Redis) {}
 
   /**
-   * Retourne la valeur du cache, ou exécute le loader si la clé est absente ou expirée.
-   * La valeur doit être un objet simple : elle passe par JSON.
+   * Lit une valeur ; null si elle est absente, illisible ou si Redis est injoignable.
    */
-  async remember<T>(
-    key: string,
-    ttlMs: number,
-    loader: () => Promise<T>,
-  ): Promise<T> {
-    const cached = await this.get<T>(key);
-
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    // Valeur absente ou expirée : on la recalcule puis on la garde.
-    const value = await loader();
-    await this.set(key, value, ttlMs);
-
-    return value;
-  }
-
-  /**
-   * Lit une valeur. Une panne Redis ne casse jamais une lecture : on retombe sur la base.
-   */
-  async get<T>(key: string): Promise<T | undefined> {
+  async get<T>(key: string): Promise<T | null> {
     try {
-      const raw = await this.redis.get(CACHE_PREFIX + key);
+      const raw = await this.redis.get(key);
 
-      return raw === null ? undefined : (JSON.parse(raw) as T);
+      return raw === null ? null : (JSON.parse(raw) as T);
     } catch (error) {
       this.logger.warn(
         `Lecture du cache impossible (${key}) : ${String(error)}`,
       );
-      return undefined;
+      return null;
     }
   }
 
   /**
-   * Enregistre une valeur pour une durée donnée (PX = millisecondes).
+   * Enregistre une valeur pour une durée donnée (EX = secondes).
    */
-  async set<T>(key: string, value: T, ttlMs: number) {
+  async set<T>(key: string, value: T, ttlSeconds: number) {
     try {
-      await this.redis.set(
-        CACHE_PREFIX + key,
-        JSON.stringify(value),
-        'PX',
-        ttlMs,
-      );
+      await this.redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
     } catch (error) {
       this.logger.warn(
         `Écriture du cache impossible (${key}) : ${String(error)}`,
@@ -68,25 +42,46 @@ export class CacheService {
   }
 
   /**
-   * Supprime toutes les clés d'un domaine fonctionnel.
+   * Supprime toutes les clés qui commencent par l'un des préfixes.
    */
-  async forgetByPrefix(prefix: string) {
+  async invalidateByPattern(patterns: string[]) {
     try {
-      // SCAN évite de bloquer Redis, contrairement à KEYS.
-      const stream = this.redis.scanStream({
-        match: `${CACHE_PREFIX}${prefix}*`,
-        count: 100,
-      });
-
-      for await (const keys of stream as AsyncIterable<string[]>) {
-        if (keys.length > 0) {
-          await this.redis.unlink(...keys);
-        }
-      }
+      await Promise.all(
+        patterns.map((pattern) => this.scanAndDelete(`${pattern}*`)),
+      );
     } catch (error) {
       this.logger.warn(
-        `Invalidation du cache impossible (${prefix}) : ${String(error)}`,
+        `Invalidation du cache impossible (${patterns.join(', ')}) : ${String(error)}`,
       );
     }
+  }
+
+  /**
+   * Remplace {0}, {1}… dans un modèle de clé par les arguments donnés.
+   */
+  resolveKey(template: string, args: unknown[]) {
+    return template.replace(/\{(\d+)\}/g, (_, index: string) =>
+      String(args[Number(index)] ?? 'null'),
+    );
+  }
+
+  // SCAN parcourt les clés par lots sans bloquer Redis, contrairement à KEYS.
+  private async scanAndDelete(pattern: string) {
+    let cursor = '0';
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await this.redis.unlink(...keys);
+      }
+    } while (cursor !== '0');
   }
 }
