@@ -10,6 +10,7 @@ import { isUniqueViolation } from '../../../common/database/database-error.utils
 import { Currency } from '../../../common/enums/currency.enum.js';
 import { dayRange } from '../../../common/utils/date.utils.js';
 import { roundAmount } from '../../../common/utils/money-map.utils.js';
+import { paginateBatch } from '../../../common/utils/pagination.utils.js';
 import type { ProductService } from '../../catalog/product-services/entities/product-service.entity.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
@@ -38,8 +39,6 @@ const PRODUCT_SERVICE_SUMMARY_FIELDS = [
   'productService.name',
 ];
 
-type SaleCountRow = { stats_total: number };
-
 @Injectable()
 export class SalesService {
   constructor(
@@ -58,22 +57,14 @@ export class SalesService {
    * Historique des ventes par lot, toutes caisses et tous statuts, pour retrouver et réimprimer une addition.
    */
   async findHistory({
-    offset = 0,
-    limit = SALES_HISTORY_MAX_BATCH,
+    offset,
+    limit,
     facturationDate,
     additionNumber,
     status,
   }: FindSalesDto) {
-    // Le lot est borné pour protéger l'API.
-    const batchLimit = Math.min(limit, SALES_HISTORY_MAX_BATCH);
-
-    // Une seule requête sur les ventes : le lot, ses relations simples et le total filtré.
-    // Sans jointure multiple, le LIMIT porte bien sur les ventes et « over () » compte avant lui.
-    const query = this.saleQuery()
-      .addSelect('count(*) over ()::int', 'stats_total')
-      .orderBy('sale.saleDate', 'DESC')
-      .offset(offset)
-      .limit(batchLimit);
+    // Seules les relations simples sont jointes : le lot et son total restent justes.
+    const query = this.saleQuery().orderBy('sale.saleDate', 'DESC');
 
     // Ventes d'une journée de facturation, à l'heure de Kinshasa.
     if (facturationDate) {
@@ -81,30 +72,22 @@ export class SalesService {
       query.andWhere('sale.sale_date BETWEEN :start AND :end', { start, end });
     }
 
-    // Recherche partielle sur le numéro d'addition.
-    if (additionNumber) {
-      query.andWhere('sale.addition_number ILIKE :additionNumber', {
-        additionNumber: `%${additionNumber}%`,
-      });
-    }
-
     if (status) {
       query.andWhere('sale.status = :status', { status });
     }
 
-    const { entities: sales, raw } =
-      await query.getRawAndEntities<SaleCountRow>();
-
-    // Le total est répété sur chaque ligne ; un lot vide ne le porte pas.
-    const totalItems = raw[0]?.stats_total ?? 0;
+    // Le numéro d'addition se cherche en partie : « 12 » trouve 00012 et 00120.
+    const batch = await paginateBatch(query, {
+      offset,
+      limit,
+      maxLimit: SALES_HISTORY_MAX_BATCH,
+      search: { term: additionNumber, fields: ['sale.addition_number'] },
+    });
 
     // Les lignes et les recouvrements du lot sont chargés à part, sur leurs propres tables.
-    await this.attachItemsAndRecoveries(sales);
+    await this.attachItemsAndRecoveries(batch.items);
 
-    return {
-      items: sales,
-      pagination: { offset, limit: batchLimit, totalItems },
-    };
+    return batch;
   }
 
   /**
