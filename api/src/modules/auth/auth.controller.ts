@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CacheInvalidate } from '../../common/cache/decorators/cache.decorators.js';
-import { toUserResponse } from '../users/utils/user.utils.js';
 import type { User } from '../users/entities/user.entity.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
 import { LoginDto } from './dto/login.dto.js';
@@ -36,7 +35,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard)
   me(@CurrentUser() user: User) {
-    return { user: toUserResponse(user) };
+    return { user };
   }
 
   /**

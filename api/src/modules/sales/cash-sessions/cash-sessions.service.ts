@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { Currency } from '../../../common/enums/currency.enum.js';
 import type { MoneyMap } from '../../../common/types/money-map.type.js';
@@ -17,7 +17,10 @@ import {
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
 import type { User } from '../../users/entities/user.entity.js';
-import { getUserDisplayName } from '../../users/utils/user.utils.js';
+import {
+  getUserDisplayName,
+  userSummaryFields,
+} from '../../users/utils/user.utils.js';
 import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
 import type { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
@@ -47,10 +50,9 @@ export class CashSessionsService {
    */
   async getOpenSession() {
     // L'index unique partiel garantit qu'au plus une session est ouverte.
-    return this.cashSessionsRepository.findOne({
-      where: { status: CashSessionStatus.OPEN },
-      relations: { openedBy: true },
-    });
+    return this.sessionQuery()
+      .where('session.status = :open', { open: CashSessionStatus.OPEN })
+      .getOne();
   }
 
   /**
@@ -70,14 +72,15 @@ export class CashSessionsService {
    * Sessions de la plus récente à la plus ancienne. La caisse est partagée : tout le monde les voit.
    */
   async findSessions({ startDate, endDate }: FindCashSessionsDto) {
-    // La période couvre les journées complètes sélectionnées.
-    const range = startDate && endDate ? dayRange(startDate, endDate) : null;
+    const query = this.sessionQuery().orderBy('session.openedAt', 'DESC');
 
-    return this.cashSessionsRepository.find({
-      where: range ? { openedAt: Between(range.start, range.end) } : {},
-      relations: { openedBy: true, closedBy: true },
-      order: { openedAt: 'DESC' },
-    });
+    // La période couvre les journées complètes sélectionnées.
+    if (startDate && endDate) {
+      const { start, end } = dayRange(startDate, endDate);
+      query.where('session.opened_at BETWEEN :start AND :end', { start, end });
+    }
+
+    return query.getMany();
   }
 
   /**
@@ -203,11 +206,20 @@ export class CashSessionsService {
     );
   }
 
+  // Session avec celui qui l'a ouverte et celui qui l'a fermée, réduits à leur nom.
+  private sessionQuery() {
+    return this.cashSessionsRepository
+      .createQueryBuilder('session')
+      .leftJoin('session.openedBy', 'openedBy')
+      .leftJoin('session.closedBy', 'closedBy')
+      .addSelect([
+        ...userSummaryFields('openedBy'),
+        ...userSummaryFields('closedBy'),
+      ]);
+  }
+
   private async findWithUsers(id: string) {
     // Relue avec ses utilisateurs pour la réponse.
-    return this.cashSessionsRepository.findOneOrFail({
-      where: { id },
-      relations: { openedBy: true, closedBy: true },
-    });
+    return this.sessionQuery().where('session.id = :id', { id }).getOneOrFail();
   }
 }

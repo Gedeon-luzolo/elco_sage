@@ -9,6 +9,7 @@ import { Transactional } from 'typeorm-transactional';
 import { isUniqueViolation } from '../../../common/database/database-error.utils.js';
 import { Currency } from '../../../common/enums/currency.enum.js';
 import { dayRange } from '../../../common/utils/date.utils.js';
+import { roundAmount } from '../../../common/utils/money-map.utils.js';
 import { ProductService } from '../../catalog/product-services/entities/product-service.entity.js';
 import { ProductServiceType } from '../../catalog/product-services/enums/product-service-type.enum.js';
 import { Customer } from '../../customers/entities/customer.entity.js';
@@ -16,7 +17,10 @@ import { JournalisationModule } from '../../journalisations/enums/journalisation
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
 import { User } from '../../users/entities/user.entity.js';
 import { UserRole, UserStatus } from '../../users/enums/user.enums.js';
-import { getUserDisplayName } from '../../users/utils/user.utils.js';
+import {
+  getUserDisplayName,
+  userSummaryFields,
+} from '../../users/utils/user.utils.js';
 import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { CashSession } from '../cash-sessions/entities/cash-session.entity.js';
 import { CashSessionStatus } from '../cash-sessions/enums/cash-session-status.enum.js';
@@ -26,10 +30,17 @@ import type { FindSalesDto } from './dto/find-sales.dto.js';
 import { SaleItem } from './entities/sale-item.entity.js';
 import { Sale } from './entities/sale.entity.js';
 import { SalePaymentType, SaleStatus } from './enums/sale.enums.js';
-import { roundAmount, toSaleResponse } from './utils/sale.utils.js';
 
 // Nombre maximum de ventes renvoyées par lot dans l'historique.
 const SALES_HISTORY_MAX_BATCH = 40;
+
+// Colonnes des relations jointes à une vente : de quoi l'afficher sur le ticket, rien de plus.
+const CASH_SESSION_SUMMARY_FIELDS = ['cashSession.id', 'cashSession.status'];
+const CUSTOMER_SUMMARY_FIELDS = ['customer.id', 'customer.fullName'];
+const PRODUCT_SERVICE_SUMMARY_FIELDS = [
+  'productService.id',
+  'productService.name',
+];
 
 type SaleCountRow = { stats_total: number };
 
@@ -69,12 +80,7 @@ export class SalesService {
 
     // Une seule requête sur les ventes : le lot, ses relations simples et le total filtré.
     // Sans jointure multiple, le LIMIT porte bien sur les ventes et « over () » compte avant lui.
-    const query = this.salesRepository
-      .createQueryBuilder('sale')
-      .leftJoinAndSelect('sale.cashSession', 'cashSession')
-      .leftJoinAndSelect('sale.customer', 'customer')
-      .leftJoinAndSelect('sale.operator', 'operator')
-      .leftJoinAndSelect('sale.seller', 'seller')
+    const query = this.saleQuery()
       .addSelect('count(*) over ()::int', 'stats_total')
       .orderBy('sale.saleDate', 'DESC')
       .offset(offset)
@@ -107,7 +113,7 @@ export class SalesService {
     await this.attachItemsAndRecoveries(sales);
 
     return {
-      items: sales.map(toSaleResponse),
+      items: sales,
       pagination: { offset, limit: batchLimit, totalItems },
     };
   }
@@ -238,21 +244,38 @@ export class SalesService {
     return this.findResponse(sale.id);
   }
 
+  // Vente avec ses relations simples, chacune réduite à ce que la SPA affiche.
+  private saleQuery() {
+    return this.salesRepository
+      .createQueryBuilder('sale')
+      .leftJoin('sale.cashSession', 'cashSession')
+      .leftJoin('sale.customer', 'customer')
+      .leftJoin('sale.operator', 'operator')
+      .leftJoin('sale.seller', 'seller')
+      .addSelect([
+        ...CASH_SESSION_SUMMARY_FIELDS,
+        ...CUSTOMER_SUMMARY_FIELDS,
+        ...userSummaryFields('operator'),
+        ...userSummaryFields('seller'),
+      ]);
+  }
+
   // Charge une vente avec tout ce que la SPA affiche sur le ticket.
   private async findResponse(id: string) {
-    const sale = await this.salesRepository.findOneOrFail({
-      where: { id },
-      relations: {
-        cashSession: true,
-        customer: true,
-        operator: true,
-        seller: true,
-        items: { productService: true },
-        recoveries: { receivedBy: true },
-      },
-    });
-
-    return toSaleResponse(sale);
+    // Une seule vente : ses lignes et recouvrements viennent dans la même requête.
+    return this.saleQuery()
+      .leftJoin('sale.items', 'item')
+      .leftJoin('item.productService', 'productService')
+      .leftJoin('sale.recoveries', 'recovery')
+      .leftJoin('recovery.receivedBy', 'receivedBy')
+      .addSelect([
+        'item',
+        ...PRODUCT_SERVICE_SUMMARY_FIELDS,
+        'recovery',
+        ...userSummaryFields('receivedBy'),
+      ])
+      .where('sale.id = :id', { id })
+      .getOneOrFail();
   }
 
   // Vente déjà enregistrée sous cet id, ou null. Un id pris par un autre vendeur est un conflit.
@@ -476,15 +499,19 @@ export class SalesService {
     }
 
     const saleIds = sales.map((sale) => sale.id);
-    const items = await this.saleItemsRepository.find({
-      where: { saleId: In(saleIds) },
-      relations: { productService: true },
-    });
-    const recoveries = await this.recoveriesRepository.find({
-      where: { saleId: In(saleIds) },
-      relations: { receivedBy: true },
-      order: { recoveredAt: 'DESC' },
-    });
+    const items = await this.saleItemsRepository
+      .createQueryBuilder('item')
+      .leftJoin('item.productService', 'productService')
+      .addSelect(PRODUCT_SERVICE_SUMMARY_FIELDS)
+      .where('item.sale_id IN (:...saleIds)', { saleIds })
+      .getMany();
+    const recoveries = await this.recoveriesRepository
+      .createQueryBuilder('recovery')
+      .leftJoin('recovery.receivedBy', 'receivedBy')
+      .addSelect(userSummaryFields('receivedBy'))
+      .where('recovery.sale_id IN (:...saleIds)', { saleIds })
+      .orderBy('recovery.recoveredAt', 'DESC')
+      .getMany();
 
     // Chaque vente reçoit les siennes, dans l'ordre de lecture.
     for (const sale of sales) {

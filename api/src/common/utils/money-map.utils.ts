@@ -2,6 +2,13 @@ import { Currency } from '../enums/currency.enum.js';
 import type { MoneyMap } from '../types/money-map.type.js';
 
 /**
+ * Arrondit un montant au centime, comme les colonnes numeric(15, 2).
+ */
+export function roundAmount(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+/**
  * Garantit une valeur pour chaque devise : la SPA reçoit toujours CDF et USD.
  */
 export function normalizeMoneyMap(values: MoneyMap | null | undefined) {

@@ -6,7 +6,6 @@ import { JournalisationModule } from '../../journalisations/enums/journalisation
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
 import { User } from '../../users/entities/user.entity.js';
 import { UserStatus } from '../../users/enums/user.enums.js';
-import { toUserResponse } from '../../users/utils/user.utils.js';
 import { AccessTokensService } from './access-tokens.service.js';
 
 const MAX_FAILED_LOGIN_ATTEMPTS = 3;
@@ -28,10 +27,10 @@ export class AuthService {
    * Bloque le compte à la 3e erreur de mot de passe.
    */
   async login(email: string, password: string) {
-    // Le mot de passe n'est jamais lu par défaut : on le demande explicitement ici.
+    // Le mot de passe et le compteur d'échecs ne sont jamais lus par défaut : on les demande ici.
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .addSelect('user.password')
+      .addSelect(['user.password', 'user.failedLoginAttempts'])
       .where('user.email = :email', { email })
       .getOne();
 
@@ -69,11 +68,18 @@ export class AuthService {
       user,
     );
 
+    // Le mot de passe et le compteur, lus pour la vérification, ne repartent jamais.
+    const {
+      password: _password,
+      failedLoginAttempts: _failedLoginAttempts,
+      ...profile
+    } = user;
+
     // Le token n'est visible qu'ici : il ne pourra plus être relu ensuite.
     return {
       token: token.value,
       expiresAt: token.expiresAt,
-      user: toUserResponse(user),
+      user: profile,
     };
   }
 

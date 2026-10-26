@@ -30,7 +30,8 @@ export class User {
   @Column({ type: 'text' })
   status: UserStatus;
 
-  @Column({ name: 'failed_login_attempts', type: 'integer' })
+  // Jamais lu par défaut non plus : seule la connexion en a besoin.
+  @Column({ name: 'failed_login_attempts', type: 'integer', select: false })
   failedLoginAttempts: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })

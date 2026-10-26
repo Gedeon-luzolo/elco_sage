@@ -7,15 +7,13 @@ import type { User } from '../users/entities/user.entity.js';
 import type { CreateExchangeRateDto } from './dto/create-exchange-rate.dto.js';
 import { ExchangeRate } from './entities/exchange-rate.entity.js';
 
-// Ce que l'API expose d'un taux (le cache ne garde que des objets simples).
-const toRateResponse = (rate: ExchangeRate) => ({
-  id: rate.id,
-  exchangeRate: rate.exchangeRate,
-  sellRate: rate.sellRate,
-  createdAt: rate.createdAt,
-});
-
-type RateResponse = ReturnType<typeof toRateResponse>;
+// Colonnes d'un taux renvoyées à la SPA.
+const RATE_FIELDS = {
+  id: true,
+  exchangeRate: true,
+  sellRate: true,
+  createdAt: true,
+} as const;
 
 @Injectable()
 export class ExchangeRatesService {
@@ -28,14 +26,15 @@ export class ExchangeRatesService {
   /**
    * Dernier taux encodé : c'est le taux courant.
    */
-  async getCurrentRate(): Promise<RateResponse | null> {
+  async getCurrentRate() {
     // Le taux le plus récent fait foi.
     const [rate] = await this.exchangeRatesRepository.find({
+      select: RATE_FIELDS,
       order: { createdAt: 'DESC' },
       take: 1,
     });
 
-    return rate ? toRateResponse(rate) : null;
+    return rate ?? null;
   }
 
   /**
@@ -43,12 +42,11 @@ export class ExchangeRatesService {
    */
   async getHistory(limit = 20) {
     // Du plus récent au plus ancien : le premier est le taux courant.
-    const rates = await this.exchangeRatesRepository.find({
+    return this.exchangeRatesRepository.find({
+      select: RATE_FIELDS,
       order: { createdAt: 'DESC' },
       take: limit,
     });
-
-    return rates.map(toRateResponse);
   }
 
   /**

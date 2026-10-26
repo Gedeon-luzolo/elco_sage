@@ -17,7 +17,7 @@ import type {
 } from '../dto/create-update-user.dto.js';
 import { User } from '../entities/user.entity.js';
 import { UserRole, UserStatus } from '../enums/user.enums.js';
-import { isManagementRole, toUserResponse } from '../utils/user.utils.js';
+import { isManagementRole } from '../utils/user.utils.js';
 
 // Mot de passe initial à communiquer au nouvel utilisateur.
 const DEFAULT_USER_PASSWORD = '12345678';
@@ -80,7 +80,7 @@ export class UsersService {
 
     // Liste, compteurs et répartition alimentent les cartes et le graphique de la page.
     return {
-      users: users.map(toUserResponse),
+      users,
       stats,
       statusDistribution: [
         { status: UserStatus.ACTIVE, total: stats.active },
@@ -94,13 +94,12 @@ export class UsersService {
    * Opérateurs sélectionnables sur une vente : toute personne active sauf l'administrateur.
    */
   async getActiveOperatorsForSale() {
-    // Triés par nom pour la liste déroulante de la caisse.
-    const operators = await this.usersRepository.find({
+    // Triés par nom pour la liste déroulante de la caisse ; seul de quoi les afficher sort.
+    return this.usersRepository.find({
+      select: { id: true, fullName: true, email: true },
       where: { role: Not(UserRole.ADMIN), status: UserStatus.ACTIVE },
       order: { fullName: 'ASC' },
     });
-
-    return operators.map(toUserResponse);
   }
 
   /**

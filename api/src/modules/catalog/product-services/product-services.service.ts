@@ -15,10 +15,6 @@ import type {
 } from './dto/create-update-product-service.dto.js';
 import { ProductService } from './entities/product-service.entity.js';
 import { ProductServiceType } from './enums/product-service-type.enum.js';
-import {
-  buildPriceFields,
-  toProductServiceResponse,
-} from './utils/product-service.utils.js';
 
 @Injectable()
 export class ProductServicesService {
@@ -33,14 +29,10 @@ export class ProductServicesService {
    * Catalogue complet, séparé en produits et services, avec ses compteurs.
    */
   async getOverview() {
-    // Tout le catalogue est renvoyé, sans pagination, avec la catégorie de chaque article.
-    const entities = await this.productServicesRepository.find({
-      relations: { category: true },
-      order: { name: 'ASC' },
-    });
+    // Tout le catalogue est renvoyé, sans pagination, avec le nom de sa catégorie.
+    const items = await this.catalogQuery().getMany();
 
     // L'écran présente les produits et les services dans deux onglets.
-    const items = entities.map(toProductServiceResponse);
     const products = items.filter(
       (item) => item.type === ProductServiceType.PRODUCT,
     );
@@ -69,14 +61,11 @@ export class ProductServicesService {
    * Services actifs vendables : la vente ne vend que des prestations, pas les produits en stock.
    */
   async getActiveServicesForSale() {
-    return (
-      await this.productServicesRepository.find({
-        // Seuls les services actifs se vendent à la caisse.
-        where: { type: ProductServiceType.SERVICE, isActive: true },
-        relations: { category: true },
-        order: { name: 'ASC' },
-      })
-    ).map(toProductServiceResponse);
+    // Seuls les services actifs se vendent à la caisse.
+    return this.catalogQuery()
+      .where('item.type = :service', { service: ProductServiceType.SERVICE })
+      .andWhere('item.is_active')
+      .getMany();
   }
 
   /**
@@ -161,7 +150,7 @@ export class ProductServicesService {
       baseUnit: isService ? null : dto.baseUnit,
       packagingUnit: dto.packagingUnit,
       packagingCapacity: dto.packagingCapacity,
-      ...buildPriceFields(dto.type, prices, dto.packagingCapacity),
+      ...this.buildPriceFields(dto.type, prices, dto.packagingCapacity),
     };
   }
 
@@ -176,5 +165,34 @@ export class ProductServicesService {
         'Un article portant ce nom existe déjà.',
       );
     }
+  }
+
+  // Prix enregistrés et coût matière d'une unité de base.
+  // Un service n'a pas de coût matière direct ; un produit est saisi au prix du conditionnement.
+  private buildPriceFields(
+    type: ProductServiceType,
+    prices: { usd: number; cdf: number },
+    packagingCapacity: number | null,
+  ) {
+    // Un service n'a pas de diviseur ; un conditionnement sans capacité compte pour une unité.
+    const divider =
+      type === ProductServiceType.SERVICE ? null : packagingCapacity || 1;
+
+    return {
+      priceUsd: prices.usd,
+      priceCdf: prices.cdf,
+      // Le coût matière d'un produit est le prix du conditionnement divisé par sa capacité.
+      materialCostUsd: divider ? prices.usd / divider : 0,
+      materialCostCdf: divider ? prices.cdf / divider : 0,
+    };
+  }
+
+  // Articles triés par nom, avec seulement l'id et le nom de leur catégorie.
+  private catalogQuery() {
+    return this.productServicesRepository
+      .createQueryBuilder('item')
+      .leftJoin('item.category', 'category')
+      .addSelect(['category.id', 'category.name'])
+      .orderBy('item.name', 'ASC');
   }
 }

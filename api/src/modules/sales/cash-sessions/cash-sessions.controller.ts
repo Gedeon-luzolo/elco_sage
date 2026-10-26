@@ -14,7 +14,6 @@ import { AdditionNumbersService } from '../addition-numbers/addition-numbers.ser
 import { CashSessionsService } from './cash-sessions.service.js';
 import { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
 import { FindCashSessionsDto } from './dto/find-cash-sessions.dto.js';
-import { toCashSessionResponse } from './utils/cash-session.utils.js';
 
 // La caisse est partagée : tout utilisateur connecté l'ouvre, y vend et la clôture.
 @Controller('cash-sessions')
@@ -29,20 +28,16 @@ export class CashSessionsController {
    * Sessions de caisse, filtrables par période.
    */
   @Get()
-  async findAll(@Query() query: FindCashSessionsDto) {
-    const sessions = await this.cashSessionsService.findSessions(query);
-
-    return sessions.map(toCashSessionResponse);
+  findAll(@Query() query: FindCashSessionsDto) {
+    return this.cashSessionsService.findSessions(query);
   }
 
   /**
    * Session ouverte ou null : la SPA en déduit si la vente est possible.
    */
   @Get('current')
-  async findCurrent() {
-    const session = await this.cashSessionsService.getOpenSession();
-
-    return session ? toCashSessionResponse(session) : null;
+  findCurrent() {
+    return this.cashSessionsService.getOpenSession();
   }
 
   /**
@@ -87,10 +82,8 @@ export class CashSessionsController {
    */
   @Post('close')
   @HttpCode(200)
-  async close(@CurrentUser() actor: User, @Body() dto: CloseCashSessionDto) {
-    return toCashSessionResponse(
-      await this.cashSessionsService.close(actor, dto),
-    );
+  close(@CurrentUser() actor: User, @Body() dto: CloseCashSessionDto) {
+    return this.cashSessionsService.close(actor, dto);
   }
 
   /**
@@ -101,7 +94,7 @@ export class CashSessionsController {
     const session = await this.cashSessionsService.open(actor);
 
     return {
-      session: toCashSessionResponse(session),
+      session,
       additionNumbers: await this.additionNumbersService.getState(
         session.id,
         actor.id,
