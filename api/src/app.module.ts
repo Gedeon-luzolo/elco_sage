@@ -4,8 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { AppController } from './app.controller.js';
+import { CacheModule } from './common/cache/cache.module.js';
 import { RedisModule } from './common/redis/redis.module.js';
 import { createAppTypeOrmOptions } from './config/database.config.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { JournalisationsModule } from './modules/journalisations/journalisations.module.js';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { createAppTypeOrmOptions } from './config/database.config.js';
       inject: [ConfigService],
     }),
     RedisModule,
+    CacheModule,
+    JournalisationsModule,
+    AuthModule,
   ],
   controllers: [AppController],
 })
