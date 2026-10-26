@@ -1,28 +1,17 @@
-# Dependencies and AdonisJS build
+# Dépendances et builds (api/ et web/ ont aussi leur propre .gitignore)
 node_modules
-build
-# Fichiers générés par AdonisJS (dev et build les recréent)
-.adonisjs
-tmp/*
-!tmp/.gitkeep
+dist
 
 # Secrets
 .env
 .env.local
-.env.production.local
-.env.development.local
+.env.*.local
 
-# Frontend assets compiled code
-public/assets
-
-# Build tools specific
-npm-debug.log
-yarn-error.log
-
-# Editors specific
+# Éditeurs
 .fleet
 .idea
 .vscode
 
-# Platform specific
+# Système
 .DS_Store
+npm-debug.log
