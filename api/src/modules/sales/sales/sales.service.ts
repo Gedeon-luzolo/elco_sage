@@ -237,9 +237,11 @@ export class SalesService {
       ]);
   }
 
-  // Charge une vente avec tout ce que la SPA affiche sur le ticket.
-  private async findResponse(id: string) {
-    // Une seule vente : ses lignes et recouvrements viennent dans la même requête.
+  /**
+   * Ventes avec tout ce que la SPA affiche : relations simples, lignes et recouvrements.
+   * À réserver aux listes non paginées : les lignes et recouvrements multiplient les rangées.
+   */
+  detailedQuery() {
     return this.saleQuery()
       .leftJoin('sale.items', 'item')
       .leftJoin('item.productService', 'productService')
@@ -250,9 +252,13 @@ export class SalesService {
         ...PRODUCT_SERVICE_SUMMARY_FIELDS,
         'recovery',
         ...userSummaryFields('receivedBy'),
-      ])
-      .where('sale.id = :id', { id })
-      .getOneOrFail();
+      ]);
+  }
+
+  // Charge une vente avec tout ce que la SPA affiche sur le ticket.
+  private async findResponse(id: string) {
+    // Une seule vente : ses lignes et recouvrements viennent dans la même requête.
+    return this.detailedQuery().where('sale.id = :id', { id }).getOneOrFail();
   }
 
   // Vente déjà enregistrée sous cet id, ou null. Un id pris par un autre vendeur est un conflit.

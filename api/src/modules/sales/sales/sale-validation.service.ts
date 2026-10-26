@@ -6,6 +6,7 @@ import { ProductServiceType } from '../../catalog/product-services/enums/product
 import { Customer } from '../../customers/entities/customer.entity.js';
 import { User } from '../../users/entities/user.entity.js';
 import { UserRole, UserStatus } from '../../users/enums/user.enums.js';
+import { CashSessionsService } from '../cash-sessions/cash-sessions.service.js';
 import { CashSession } from '../cash-sessions/entities/cash-session.entity.js';
 import { CashSessionStatus } from '../cash-sessions/enums/cash-session-status.enum.js';
 import type { CreateSaleDto } from './dto/create-sale.dto.js';
@@ -23,6 +24,7 @@ export class SaleValidationService {
     private readonly customersRepository: Repository<Customer>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly cashSessionsService: CashSessionsService,
   ) {}
 
   /**
@@ -103,9 +105,7 @@ export class SaleValidationService {
     }
 
     // Sans caisse indiquée, la vente va sur la session ouverte.
-    const openSession = await query
-      .where('session.status = :open', { open: CashSessionStatus.OPEN })
-      .getOne();
+    const openSession = await this.cashSessionsService.lockOpenSession();
 
     if (!openSession) {
       throw new UnprocessableEntityException(

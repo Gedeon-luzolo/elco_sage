@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
+import type { PeriodDto } from '../../../common/dto/period.dto.js';
 import { Currency } from '../../../common/enums/currency.enum.js';
 import type { MoneyMap } from '../../../common/types/money-map.type.js';
 import { dayRange, toDateTimeLabel } from '../../../common/utils/date.utils.js';
@@ -24,7 +25,6 @@ import {
 import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
 import type { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
-import type { FindCashSessionsDto } from './dto/find-cash-sessions.dto.js';
 import { CashSession } from './entities/cash-session.entity.js';
 import { CashSessionStatus } from './enums/cash-session-status.enum.js';
 
@@ -56,6 +56,18 @@ export class CashSessionsService {
   }
 
   /**
+   * Session ouverte, verrouillée en lecture jusqu'à la fin de la transaction, ou null.
+   * Une clôture attend ainsi la fin de la vente ou du recouvrement qui l'utilise.
+   */
+  async lockOpenSession() {
+    return this.cashSessionsRepository
+      .createQueryBuilder('session')
+      .where('session.status = :open', { open: CashSessionStatus.OPEN })
+      .setLock('pessimistic_read')
+      .getOne();
+  }
+
+  /**
    * Session ouverte, ou 404 : pour les routes qui n'ont de sens que caisse ouverte.
    */
   async getOpenSessionOrFail() {
@@ -69,9 +81,24 @@ export class CashSessionsService {
   }
 
   /**
+   * Une session avec ses utilisateurs, ou 404.
+   */
+  async findOneOrFail(id: string) {
+    const session = await this.sessionQuery()
+      .where('session.id = :id', { id })
+      .getOne();
+
+    if (!session) {
+      throw new NotFoundException('Session de caisse introuvable.');
+    }
+
+    return session;
+  }
+
+  /**
    * Sessions de la plus récente à la plus ancienne. La caisse est partagée : tout le monde les voit.
    */
-  async findSessions({ startDate, endDate }: FindCashSessionsDto) {
+  async findSessions({ startDate, endDate }: PeriodDto) {
     const query = this.sessionQuery().orderBy('session.openedAt', 'DESC');
 
     // La période couvre les journées complètes sélectionnées.
@@ -123,7 +150,7 @@ export class CashSessionsService {
       actor,
     );
 
-    return this.findWithUsers(session.id);
+    return this.findOneOrFail(session.id);
   }
 
   /**
@@ -177,7 +204,7 @@ export class CashSessionsService {
       actor,
     );
 
-    return this.findWithUsers(session.id);
+    return this.findOneOrFail(session.id);
   }
 
   /**
@@ -216,10 +243,5 @@ export class CashSessionsService {
         ...userSummaryFields('openedBy'),
         ...userSummaryFields('closedBy'),
       ]);
-  }
-
-  private async findWithUsers(id: string) {
-    // Relue avec ses utilisateurs pour la réponse.
-    return this.sessionQuery().where('session.id = :id', { id }).getOneOrFail();
   }
 }

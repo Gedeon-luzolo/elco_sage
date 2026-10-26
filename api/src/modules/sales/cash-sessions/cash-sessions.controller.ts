@@ -7,13 +7,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { PeriodDto } from '../../../common/dto/period.dto.js';
+import { UuidParam } from '../../../common/decorators/uuid-param.decorator.js';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator.js';
 import { AuthGuard } from '../../auth/guards/auth.guard.js';
 import type { User } from '../../users/entities/user.entity.js';
 import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
+import { CashSessionReportService } from './cash-session-report.service.js';
 import { CashSessionsService } from './cash-sessions.service.js';
 import { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
-import { FindCashSessionsDto } from './dto/find-cash-sessions.dto.js';
 
 // La caisse est partagée : tout utilisateur connecté l'ouvre, y vend et la clôture.
 @Controller('cash-sessions')
@@ -22,13 +24,14 @@ export class CashSessionsController {
   constructor(
     private readonly cashSessionsService: CashSessionsService,
     private readonly additionNumbersService: AdditionNumbersService,
+    private readonly cashSessionReportService: CashSessionReportService,
   ) {}
 
   /**
    * Sessions de caisse, filtrables par période.
    */
   @Get()
-  findAll(@Query() query: FindCashSessionsDto) {
+  findAll(@Query() query: PeriodDto) {
     return this.cashSessionsService.findSessions(query);
   }
 
@@ -100,5 +103,13 @@ export class CashSessionsController {
         actor.id,
       ),
     };
+  }
+
+  /**
+   * Rapport d'une session : ventes actives et totaux. Déclarée après les routes fixes (current, close).
+   */
+  @Get(':id')
+  findReport(@UuidParam() id: string) {
+    return this.cashSessionReportService.getReport(id);
   }
 }

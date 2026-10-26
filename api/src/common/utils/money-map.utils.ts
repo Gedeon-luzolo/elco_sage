@@ -19,6 +19,42 @@ export function normalizeMoneyMap(values: MoneyMap | null | undefined) {
 }
 
 /**
+ * Additionne des montants en les groupant par devise, sans conversion.
+ */
+export function sumMoneyByCurrency<T>(
+  items: T[],
+  getCurrency: (item: T) => Currency,
+  getAmount: (item: T) => number,
+) {
+  const amounts: MoneyMap = {};
+
+  for (const item of items) {
+    // La devise n'est qu'une clé de regroupement.
+    const currency = getCurrency(item);
+    amounts[currency] = roundAmount((amounts[currency] ?? 0) + getAmount(item));
+  }
+
+  return amounts;
+}
+
+/**
+ * Additionne plusieurs maps devise par devise.
+ */
+export function sumMoneyMaps(...maps: MoneyMap[]) {
+  const totals: MoneyMap = {};
+
+  for (const map of maps) {
+    for (const [currency, amount] of Object.entries(map)) {
+      // Chaque montant reste dans sa devise d'origine.
+      const key = currency as Currency;
+      totals[key] = roundAmount((totals[key] ?? 0) + amount);
+    }
+  }
+
+  return totals;
+}
+
+/**
  * Montants saisis par devise : une devise non saisie reste absente.
  */
 export function buildMoneyMap(values: Record<Currency, number | null>) {
