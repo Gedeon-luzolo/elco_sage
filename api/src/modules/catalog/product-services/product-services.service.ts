@@ -20,13 +20,6 @@ import {
   toProductServiceResponse,
 } from './utils/product-service.utils.js';
 
-type ProductServiceStatsRow = {
-  stats_total: number;
-  stats_active: number;
-  stats_products: number;
-  stats_services: number;
-};
-
 @Injectable()
 export class ProductServicesService {
   constructor(
@@ -40,51 +33,34 @@ export class ProductServicesService {
    * Catalogue complet, séparé en produits et services, avec ses compteurs.
    */
   async getOverview() {
-    // Une seule requête : les articles, et les compteurs de tout le catalogue répétés sur chaque ligne.
-    const { entities, raw } = await this.productServicesRepository
-      .createQueryBuilder('item')
-      .leftJoinAndSelect('item.category', 'category')
-      .addSelect('count(*) over ()::int', 'stats_total')
-      .addSelect(
-        'count(*) filter (where item.is_active) over ()::int',
-        'stats_active',
-      )
-      .addSelect(
-        'count(*) filter (where item.type = :product) over ()::int',
-        'stats_products',
-      )
-      .addSelect(
-        'count(*) filter (where item.type = :service) over ()::int',
-        'stats_services',
-      )
-      .setParameters({
-        product: ProductServiceType.PRODUCT,
-        service: ProductServiceType.SERVICE,
-      })
-      .orderBy('item.name', 'ASC')
-      .getRawAndEntities<ProductServiceStatsRow>();
-
-    // Les compteurs sont identiques sur toutes les lignes : on lit la première (absente si le catalogue est vide).
-    const [counts] = raw;
-    const total = counts?.stats_total ?? 0;
-    const activeCount = counts?.stats_active ?? 0;
+    // Tout le catalogue est renvoyé, sans pagination, avec la catégorie de chaque article.
+    const entities = await this.productServicesRepository.find({
+      relations: { category: true },
+      order: { name: 'ASC' },
+    });
 
     // L'écran présente les produits et les services dans deux onglets.
     const items = entities.map(toProductServiceResponse);
+    const products = items.filter(
+      (item) => item.type === ProductServiceType.PRODUCT,
+    );
+    const services = items.filter(
+      (item) => item.type === ProductServiceType.SERVICE,
+    );
+
+    // Les compteurs se calculent sur la liste déjà chargée.
+    const total = items.length;
+    const activeCount = items.filter((item) => item.isActive).length;
 
     return {
-      products: items.filter(
-        (item) => item.type === ProductServiceType.PRODUCT,
-      ),
-      services: items.filter(
-        (item) => item.type === ProductServiceType.SERVICE,
-      ),
+      products,
+      services,
       stats: {
         total,
         activeCount,
         inactiveCount: total - activeCount,
-        productCount: counts?.stats_products ?? 0,
-        serviceCount: counts?.stats_services ?? 0,
+        productCount: products.length,
+        serviceCount: services.length,
       },
     };
   }

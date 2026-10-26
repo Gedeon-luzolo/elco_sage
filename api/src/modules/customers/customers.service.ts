@@ -14,11 +14,6 @@ import type {
 } from './dto/create-update-customer.dto.js';
 import { Customer } from './entities/customer.entity.js';
 
-type CustomerStatsRow = {
-  stats_total: number;
-  stats_active: number;
-};
-
 @Injectable()
 export class CustomersService {
   constructor(
@@ -31,21 +26,16 @@ export class CustomersService {
    * Tous les clients, du plus récent au plus ancien, avec leurs compteurs.
    */
   async getOverview() {
-    // Une seule requête : les clients, et les compteurs de toute la table répétés sur chaque ligne.
-    const { entities: customers, raw } = await this.customersRepository
-      .createQueryBuilder('customer')
-      .addSelect('count(*) over ()::int', 'stats_total')
-      .addSelect(
-        'count(*) filter (where customer.is_active) over ()::int',
-        'stats_active',
-      )
-      .orderBy('customer.created_at', 'DESC')
-      .getRawAndEntities<CustomerStatsRow>();
+    // Toute la table est renvoyée, sans pagination.
+    const customers = await this.customersRepository.find({
+      order: { createdAt: 'DESC' },
+    });
 
-    // Les compteurs sont identiques sur toutes les lignes : on lit la première (absente si la table est vide).
-    const [counts] = raw;
-    const total = counts?.stats_total ?? 0;
-    const activeCount = counts?.stats_active ?? 0;
+    // Les compteurs se calculent sur la liste déjà chargée.
+    const total = customers.length;
+    const activeCount = customers.filter(
+      (customer) => customer.isActive,
+    ).length;
 
     return {
       customers,

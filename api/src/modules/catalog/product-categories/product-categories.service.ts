@@ -15,11 +15,6 @@ import type {
 } from './dto/create-update-product-category.dto.js';
 import { ProductCategory } from './entities/product-category.entity.js';
 
-type CategoryStatsRow = {
-  stats_total: number;
-  stats_active: number;
-};
-
 @Injectable()
 export class ProductCategoriesService {
   constructor(
@@ -32,21 +27,16 @@ export class ProductCategoriesService {
    * Toutes les catégories avec leurs compteurs. Elles changent rarement : cache long.
    */
   async getOverview() {
-    // Une seule requête : les catégories, et les compteurs de toute la table répétés sur chaque ligne.
-    const { entities: categories, raw } = await this.categoriesRepository
-      .createQueryBuilder('category')
-      .addSelect('count(*) over ()::int', 'stats_total')
-      .addSelect(
-        'count(*) filter (where category.is_active) over ()::int',
-        'stats_active',
-      )
-      .orderBy('category.name', 'ASC')
-      .getRawAndEntities<CategoryStatsRow>();
+    // Toute la table est renvoyée, sans pagination.
+    const categories = await this.categoriesRepository.find({
+      order: { name: 'ASC' },
+    });
 
-    // Les compteurs sont identiques sur toutes les lignes : on lit la première (absente si la table est vide).
-    const [counts] = raw;
-    const total = counts?.stats_total ?? 0;
-    const activeCount = counts?.stats_active ?? 0;
+    // Les compteurs se calculent sur la liste déjà chargée.
+    const total = categories.length;
+    const activeCount = categories.filter(
+      (category) => category.isActive,
+    ).length;
 
     return {
       categories,
