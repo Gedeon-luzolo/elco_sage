@@ -233,7 +233,7 @@ export default function SalesHistoryPage() {
                   isPending={pendingSaleIds.has(selectedSale.id)}
                   canCancelSale={
                     isManagementUser &&
-                    selectedSale.cashSessionStatus !== 'CLOSED' &&
+                    selectedSale.cashSession?.status !== 'CLOSED' &&
                     !pendingSaleIds.has(selectedSale.id)
                   }
                   onPrintSale={printInvoice}

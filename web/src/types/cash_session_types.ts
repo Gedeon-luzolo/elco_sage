@@ -1,29 +1,26 @@
-import type { JSONDataTypes } from '~/types/json'
+import type { UserSummaryDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
 
 export type MoneyMap = Record<string, number>
 
-// Forme exposée au frontend pour la session de caisse courante.
-export type CashSessionItem = Record<string, JSONDataTypes> & {
+// Session de caisse telle que renvoyée par l'API.
+// Les montants sont vides tant qu'elle est ouverte ; à la clôture, seules les devises comptées figurent.
+export type CashSessionItem = {
   id: string
   openedById: string
   closedById: string | null
   status: string
-  openedAt: string | null
-  openingDate: string | null
-  openingTime: string | null
+  openedAt: string
   closedAt: string | null
-  closingDate: string | null
-  closingTime: string | null
-  systemAmounts: MoneyMap
+  systemAmounts: MoneyMap | null
   closingAmounts: MoneyMap | null
   differenceAmounts: MoneyMap | null
-  openedByName: string | null
-  closedByName: string | null
+  openedBy: UserSummaryDTO | null
+  closedBy: UserSummaryDTO | null
 }
 
 // Type pour les totaux d'un rapport de ventes, regroupés par devise.
-export type SaleReportTotals = Record<string, JSONDataTypes> & {
+export type SaleReportTotals = {
   theoreticalAmounts: MoneyMap
   discountAmounts: MoneyMap
   cashAmounts: MoneyMap
@@ -34,7 +31,7 @@ export type SaleReportTotals = Record<string, JSONDataTypes> & {
 }
 
 // Props de la page de détail d'une session de caisse.
-export interface CashSessionDetailPageProps extends Record<string, JSONDataTypes> {
+export interface CashSessionDetailPageProps {
   session: CashSessionItem
   sales: SaleItemRow[]
   totals: SaleReportTotals

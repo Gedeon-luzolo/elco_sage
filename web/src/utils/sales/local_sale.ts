@@ -1,4 +1,4 @@
-import type { CustomerDTO, ProductServiceDTO, UserDTO } from '~/types/dto'
+import type { CustomerDTO, ProductServiceDTO, UserSummaryDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { getSaleServiceUnitPrice } from '~/utils/sales/sale.utils'
@@ -24,8 +24,8 @@ interface BuildLocalSaleInput {
   payload: SalePayload
   services: ProductServiceDTO[]
   customers: CustomerDTO[]
-  operators: Array<Pick<UserDTO, 'id' | 'fullName'>>
-  seller: UserDTO
+  operators: UserSummaryDTO[]
+  seller: UserSummaryDTO
 }
 
 // Construit la vente telle que le serveur la renverrait, pour imprimer le ticket
@@ -48,13 +48,16 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
       currency: payload.currency,
       unitPrice,
       totalPrice: unitPrice * Number(item.quantity),
-      productService: service ?? null,
+      // Comme le serveur, le service est réduit à son id et à son nom.
+      productService: service ? { id: service.id, name: service.name } : null,
     }
   })
 
   // Le total théorique est la somme des lignes, la remise vient du corps de la vente
   const theoreticalAmount = items.reduce((total, item) => total + item.totalPrice, 0)
   const discountAmount = Number(payload.discountAmount ?? 0)
+
+  const customer = input.customers.find((item) => item.id === payload.customerId)
 
   // Mêmes champs que la réponse du serveur, pour que le ticket s'affiche à l'identique
   return {
@@ -73,11 +76,10 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     discountAmount,
     totalAmount: theoreticalAmount - discountAmount,
     status: 'ACTIVE',
-    cashSessionStatus: 'OPEN',
-    customer: input.customers.find((customer) => customer.id === payload.customerId) ?? null,
-    operatorName:
-      input.operators.find((operator) => operator.id === payload.operatorId)?.fullName ?? null,
-    sellerName: input.seller.fullName,
+    cashSession: { id: input.cashSessionId, status: 'OPEN' },
+    customer: customer ? { id: customer.id, fullName: customer.fullName } : null,
+    operator: input.operators.find((operator) => operator.id === payload.operatorId) ?? null,
+    seller: { id: input.seller.id, fullName: input.seller.fullName, email: input.seller.email },
     items,
     recoveries: [],
   }

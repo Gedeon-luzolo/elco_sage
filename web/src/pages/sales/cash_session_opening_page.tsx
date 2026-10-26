@@ -9,6 +9,7 @@ import { useCrud } from '~/hooks/common/useCrud'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import type { CashSessionItem } from '~/types/cash_session_types'
 import { formatLongDate, formatShortTime } from '~/utils/date'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 export default function CashSessionOpeningPage() {
   const { user } = useAuth()
@@ -56,7 +57,7 @@ export default function CashSessionOpeningPage() {
                 Date d&apos;ouverture
               </div>
               <p className="mt-2 text-sm font-medium">
-                {currentCashSession?.openingDate ?? openingDateLabel}
+                {currentCashSession ? formatLongDate(new Date(currentCashSession.openedAt)) : openingDateLabel}
               </p>
             </div>
 
@@ -66,7 +67,7 @@ export default function CashSessionOpeningPage() {
                 Heure
               </div>
               <p className="mt-2 text-sm font-medium">
-                {currentCashSession?.openingTime ?? openingTimeLabel}
+                {currentCashSession ? formatShortTime(new Date(currentCashSession.openedAt)) : openingTimeLabel}
               </p>
             </div>
           </div>
@@ -78,7 +79,7 @@ export default function CashSessionOpeningPage() {
                 <p className="text-sm text-muted-foreground">
                   Une session est déjà ouverte par{' '}
                   <span className="font-medium text-foreground">
-                    {currentCashSession.openedByName ?? 'un utilisateur'}
+                    {getUserDisplayName(currentCashSession.openedBy) ?? 'un utilisateur'}
                   </span>
                   . Continuez dessus ou fermez-la avant d&apos;en ouvrir une nouvelle.
                 </p>

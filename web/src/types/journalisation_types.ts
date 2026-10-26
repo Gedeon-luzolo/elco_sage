@@ -1,4 +1,3 @@
-import type { JSONDataTypes } from '~/types/json'
 
 // Modules connus côté backend pour le journal des actions.
 export type JournalisationModule =
@@ -15,12 +14,12 @@ export type JournalisationModule =
 export type JournalisationModuleFilter = JournalisationModule | 'ALL'
 
 // Utilisateur lié à une entrée de journalisation.
-type JournalisationUser = Record<string, JSONDataTypes> & {
+type JournalisationUser = {
   fullName: string | null
 }
 
 // Ligne sérialisée affichée dans la page journalisation.
-export type JournalisationListItem = Record<string, JSONDataTypes> & {
+export type JournalisationListItem = {
   id: string
   module: JournalisationModule
   message: string

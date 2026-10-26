@@ -29,7 +29,7 @@ export function SaleServiceGrid({
 
   // Les catégories viennent des services eux-mêmes ; ceux sans catégorie vont dans « Autres »
   const categories = useMemo(() => {
-    const names = new Set(services.map((service) => service.categoryName ?? OTHER_CATEGORY))
+    const names = new Set(services.map((service) => service.category?.name ?? OTHER_CATEGORY))
 
     return [ALL_CATEGORIES, ...names]
   }, [services])
@@ -39,7 +39,7 @@ export function SaleServiceGrid({
 
     return services.filter(
       (service) =>
-        (category === ALL_CATEGORIES || (service.categoryName ?? OTHER_CATEGORY) === category) &&
+        (category === ALL_CATEGORIES || (service.category?.name ?? OTHER_CATEGORY) === category) &&
         service.name.toLowerCase().includes(term)
     )
   }, [category, search, services])

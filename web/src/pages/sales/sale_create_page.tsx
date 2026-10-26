@@ -19,7 +19,7 @@ import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { PaymentMethod } from '~/utils/sales/payment.utils'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
 import type { SaleItemRow } from '~/types/sale_types'
-import type { UserListItem } from '~/types/user_types'
+import type { UserSummaryDTO } from '~/types/dto'
 import { Currency, type CurrencyCode } from '~/utils/currency'
 import {
   buildCreateSalePayload,
@@ -47,7 +47,7 @@ export default function SaleCreatePage() {
   const { data: saleServices = EMPTY_SERVICES } = useCrud<ProductServiceDTO>({
     endpoint: '/product-services/active-for-sale',
   }).useList()
-  const { data: operators = [] } = useCrud<UserListItem>({ endpoint: '/operators' }).useList()
+  const { data: operators = [] } = useCrud<UserSummaryDTO>({ endpoint: '/operators' }).useList()
   const { data: customers = [] } = useCrud<CustomerDTO>({
     endpoint: '/customers/active-for-sale',
   }).useList()

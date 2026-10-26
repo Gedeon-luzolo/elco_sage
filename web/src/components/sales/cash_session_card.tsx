@@ -6,6 +6,7 @@ import { cn } from '~/lib/utils'
 import type { CashSessionItem } from '~/types/cash_session_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 interface CashSessionCardProps {
   session: CashSessionItem
@@ -24,7 +25,7 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {session.openedByName ?? 'Utilisateur'}
+              {getUserDisplayName(session.openedBy) ?? 'Utilisateur'}
             </CardTitle>
             <CardDescription className="truncate text-xs">
               {formatDateTimeLabel(session.openedAt)}
@@ -50,7 +51,7 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
           <SessionMetric
             className="col-span-2"
             label="Fermée par"
-            value={session.closedByName ?? '-'}
+            value={getUserDisplayName(session.closedBy) ?? '-'}
           />
         </div>
         <Button type="button" size="sm" variant="outline" className="w-full" onClick={onSelect}>

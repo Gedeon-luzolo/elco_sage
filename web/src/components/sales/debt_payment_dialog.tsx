@@ -25,6 +25,7 @@ import {
   paymentMethodNeedsReference,
   type PaymentMethod,
 } from '~/utils/sales/payment.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 interface DebtPaymentDialogProps {
   debt: DebtItem | null
@@ -83,7 +84,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
                   label="Date de vente"
                   value={formatDebtSaleDate(debt.sale.saleDate)}
                 />
-                <DebtPaymentLine label="Opérateur" value={debt.sale.operatorName ?? '-'} />
+                <DebtPaymentLine label="Opérateur" value={getUserDisplayName(debt.sale.operator) ?? '-'} />
                 <DebtPaymentLine
                   label="Dette totale"
                   value={formatMoneyWithCurrency(debt.debtTotalAmount, saleCurrency!)}

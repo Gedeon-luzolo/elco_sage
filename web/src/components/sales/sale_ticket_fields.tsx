@@ -3,7 +3,7 @@ import { SearchableSelect } from '~/components/common/searchable_select'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import type { CustomerDTO } from '~/types/dto'
-import type { UserListItem } from '~/types/user_types'
+import type { UserSummaryDTO } from '~/types/dto'
 import { CURRENCY_OPTIONS, type CurrencyCode } from '~/utils/currency'
 import {
   PAYMENT_METHOD_OPTIONS,
@@ -25,7 +25,7 @@ interface SaleTicketFieldsProps {
   onOperatorChange: (value: string) => void
   customerId: string
   onCustomerChange: (value: string) => void
-  operators: UserListItem[]
+  operators: UserSummaryDTO[]
   customers: CustomerDTO[]
 }
 

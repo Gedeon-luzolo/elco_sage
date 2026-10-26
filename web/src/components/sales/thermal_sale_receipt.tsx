@@ -4,6 +4,7 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 interface ThermalSaleReceiptProps {
   sale: SaleItemRow
@@ -32,7 +33,7 @@ export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
       <div className="mt-[2mm]">
         <ReceiptLine label="Date" value={formatDateTimeLabel(sale.saleDate)} />
         {sale.customer && <ReceiptLine label="Client" value={sale.customer.fullName} />}
-        <ReceiptLine label="Opérateur" value={sale.operatorName ?? '-'} />
+        <ReceiptLine label="Opérateur" value={getUserDisplayName(sale.operator) ?? '-'} />
         <ReceiptLine label="Paiement" value={formatSalePaymentLabel(sale)} />
         {sale.paymentReference && <ReceiptLine label="Réf." value={sale.paymentReference} />}
       </div>

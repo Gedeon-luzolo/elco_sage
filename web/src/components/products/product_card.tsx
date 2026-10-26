@@ -41,7 +41,7 @@ export function ProductCard({ item, onEdit }: ProductCardProps) {
               )}
             />
             {item.isActive ? 'Actif' : 'Inactif'}
-            {item.categoryName && <span>· {item.categoryName}</span>}
+            {item.category && <span>· {item.category.name}</span>}
           </p>
         </div>
 

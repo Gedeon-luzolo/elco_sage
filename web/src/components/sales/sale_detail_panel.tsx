@@ -5,6 +5,7 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 // Propriétés du panneau ; isPending marque une vente faite hors ligne et pas encore envoyée.
 interface SaleDetailPanelProps {
@@ -71,8 +72,8 @@ export function SaleDetailPanel({
         )}
         <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
-          <DetailLine label="Opérateur" value={sale.operatorName ?? '-'} />
-          <DetailLine label="Vendeur" value={sale.sellerName ?? '-'} />
+          <DetailLine label="Opérateur" value={getUserDisplayName(sale.operator) ?? '-'} />
+          <DetailLine label="Vendeur" value={getUserDisplayName(sale.seller) ?? '-'} />
           <DetailLine label="Paiement" value={formatSalePaymentLabel(sale)} />
           {sale.paymentReference && (
             <DetailLine label="Référence" value={sale.paymentReference} />

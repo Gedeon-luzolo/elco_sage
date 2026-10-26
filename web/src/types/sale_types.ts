@@ -1,8 +1,6 @@
-import type { CustomerDTO } from '~/types/dto'
-import type { ProductServiceDTO } from '~/types/dto'
-import type { JSONDataTypes } from '~/types/json'
+import type { UserSummaryDTO } from '~/types/dto'
 
-export type SaleItem = Record<string, JSONDataTypes> & {
+export type SaleItem = {
   id: string
   saleId: string
   productServiceId: string
@@ -10,10 +8,10 @@ export type SaleItem = Record<string, JSONDataTypes> & {
   currency: string
   unitPrice: number
   totalPrice: number
-  productService: (Record<string, JSONDataTypes> & ProductServiceDTO) | null
+  productService: { id: string; name: string } | null
 }
 
-export type SaleRecovery = Record<string, JSONDataTypes> & {
+export type SaleRecovery = {
   id: string
   saleId: string
   cashSessionId: string | null
@@ -22,11 +20,11 @@ export type SaleRecovery = Record<string, JSONDataTypes> & {
   currency: string
   paymentMethod: string
   paymentReference: string | null
-  recoveredAt: string | null
-  receivedByName: string | null
+  recoveredAt: string
+  receivedBy: UserSummaryDTO | null
 }
 
-export type SaleItemRow = Record<string, JSONDataTypes> & {
+export type SaleItemRow = {
   id: string
   cashSessionId: string
   customerId: string | null
@@ -36,22 +34,22 @@ export type SaleItemRow = Record<string, JSONDataTypes> & {
   paymentMethod: string | null
   paymentReference: string | null
   additionNumber: string
-  saleDate: string | null
+  saleDate: string
   currency: string
   theoreticalAmount: number
   discountAmount: number
   totalAmount: number
   status: string
-  cashSessionStatus: string | null
-  customer: (Record<string, JSONDataTypes> & CustomerDTO) | null
-  operatorName: string | null
-  sellerName: string | null
+  cashSession: { id: string; status: string } | null
+  customer: { id: string; fullName: string } | null
+  operator: UserSummaryDTO | null
+  seller: UserSummaryDTO | null
   items: SaleItem[]
   recoveries: SaleRecovery[]
 }
 
-// Filtres appliqués par le controller Inertia sur l'historique des ventes.
-export type SalesHistoryFilters = Record<string, JSONDataTypes> & {
+// Filtres de l'historique des ventes.
+export type SalesHistoryFilters = {
   facturationDate: string | null
   additionNumber: string | null
   status: string

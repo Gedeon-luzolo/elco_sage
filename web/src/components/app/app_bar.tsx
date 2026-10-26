@@ -10,6 +10,7 @@ import { useOnlineStatus } from '~/hooks/useOnlineStatus'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCurrentExchangeRate } from '~/hooks/sales/useExchangeRate'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
+import { getUserInitials } from '~/utils/user.utils'
 
 export function AppBar() {
   const { user: authUser, logout: endSession } = useAuth()
@@ -85,7 +86,7 @@ export function AppBar() {
             title={displayName}
             onClick={() => setIsProfileMenuOpen((isOpen) => !isOpen)}
           >
-            {user.initials}
+            {getUserInitials(user)}
           </Button>
 
           {isProfileMenuOpen && (

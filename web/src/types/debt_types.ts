@@ -1,10 +1,9 @@
-import type { JSONDataTypes } from '~/types/json'
 import type { SaleItemRow, SaleRecovery } from '~/types/sale_types'
 import type { MoneyMap } from '~/utils/money_map.utils'
 
 export type DebtStatus = 'UNPAID' | 'PARTIAL' | 'PAID'
 
-export type DebtItem = Record<string, JSONDataTypes> & {
+export type DebtItem = {
   sale: SaleItemRow
   debtTotalAmount: number
   recoveredAmount: number
@@ -12,14 +11,14 @@ export type DebtItem = Record<string, JSONDataTypes> & {
   debtStatus: DebtStatus
 }
 
-export type DebtStats = Record<string, JSONDataTypes> & {
+export type DebtStats = {
   totalDebts: number
   totalDebtAmounts: MoneyMap
   recoveredAmounts: MoneyMap
   remainingAmounts: MoneyMap
 }
 
-export interface DebtsPageProps extends Record<string, JSONDataTypes> {
+export interface DebtsPageProps {
   debts: DebtItem[]
   stats: DebtStats
   filters: {
@@ -28,7 +27,7 @@ export interface DebtsPageProps extends Record<string, JSONDataTypes> {
   }
 }
 
-export type RecoveryPaymentItem = Record<string, JSONDataTypes> & {
+export type RecoveryPaymentItem = {
   recovery: SaleRecovery
   sale: SaleItemRow
   debtTotalAmount: number
@@ -38,7 +37,7 @@ export type RecoveryPaymentItem = Record<string, JSONDataTypes> & {
   debtStatus: DebtStatus
 }
 
-export interface RecoveriesPageProps extends Record<string, JSONDataTypes> {
+export interface RecoveriesPageProps {
   recoveries: RecoveryPaymentItem[]
   stats: DebtStats
   filters: {

@@ -1,4 +1,4 @@
-// Formes JSON renvoyées par l'API (miroir des transformers du backend).
+// Formes JSON renvoyées par l'API : les entités du backend, relations réduites à ce qui s'affiche.
 // Le frontend ne dépend volontairement d'aucun fichier du dossier app/.
 export type CustomerType = 'MALE' | 'FEMALE' | 'COMPANY'
 
@@ -29,7 +29,7 @@ export type ProductServiceDTO = {
   type: string
   name: string
   categoryId: string | null
-  categoryName: string | null
+  category: { id: string; name: string } | null
   isActive: boolean
   baseUnit: string | null
   packagingUnit: string | null
@@ -42,6 +42,13 @@ export type ProductServiceDTO = {
   updatedAt: string | null
 }
 
+// Utilisateur joint à une autre ligne (vendeur, opérateur, encaisseur…).
+export type UserSummaryDTO = {
+  id: string
+  fullName: string | null
+  email: string
+}
+
 // Utilisateur du système.
 export type UserDTO = {
   id: string
@@ -51,7 +58,6 @@ export type UserDTO = {
   status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
   createdAt: string
   updatedAt: string | null
-  initials: string
 }
 
 // Taux de change (createdAt n'est présent que dans l'historique).

@@ -1,4 +1,3 @@
-import type { JSONDataTypes } from '~/types/json'
 
 // Rôles connus côté backend pour le formulaire utilisateur.
 export type UserRole = 'ADMIN' | 'DIRECTOR' | 'CASHIER' | 'OPERATOR'
@@ -7,7 +6,7 @@ export type UserRole = 'ADMIN' | 'DIRECTOR' | 'CASHIER' | 'OPERATOR'
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
 
 // Statistiques globales affichées au-dessus de la liste.
-export type UserStats = Record<string, JSONDataTypes> & {
+export type UserStats = {
   total: number
   active: number
   inactive: number
@@ -15,13 +14,13 @@ export type UserStats = Record<string, JSONDataTypes> & {
 }
 
 // Ligne de distribution utilisée pour les compteurs par statut.
-export type UserStatusDistribution = Record<string, JSONDataTypes> & {
+export type UserStatusDistribution = {
   status: UserStatus
   total: number
 }
 
-// Forme sérialisée exposée par UserTransformer pour la page.
-export type UserListItem = Record<string, JSONDataTypes> & {
+// Compte tel que renvoyé par l'API (sans mot de passe ni compteur d'échecs).
+export type UserListItem = {
   id: string
   fullName: string | null
   email: string
@@ -29,11 +28,10 @@ export type UserListItem = Record<string, JSONDataTypes> & {
   status: UserStatus
   createdAt: string | null
   updatedAt: string | null
-  initials: string
 }
 
-// Props envoyées par le controller Inertia.
-export interface UsersPageProps extends Record<string, JSONDataTypes> {
+// Réponse de la liste des comptes.
+export interface UsersPageProps {
   users: UserListItem[]
   stats: UserStats
   statusDistribution: UserStatusDistribution[]

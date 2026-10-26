@@ -1,14 +1,13 @@
-import type { JSONDataTypes } from '~/types/json'
 import type { MoneyMap } from '~/types/cash_session_types'
 
 // Type frontend pour la période appliquée au dashboard.
-export interface DashboardPeriod extends Record<string, JSONDataTypes> {
+export interface DashboardPeriod {
   startDate: string
   endDate: string
 }
 
 // Type frontend pour les cartes statistiques principales du dashboard.
-export interface DashboardStats extends Record<string, JSONDataTypes> {
+export interface DashboardStats {
   salesCount: number
   cashSalesCount: number
   creditSalesCount: number
@@ -25,7 +24,7 @@ export interface DashboardStats extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour les points du graphique d'évolution journalière des ventes.
-interface DashboardDailySale extends Record<string, JSONDataTypes> {
+interface DashboardDailySale {
   date: string
   label: string
   cdf: number
@@ -34,7 +33,7 @@ interface DashboardDailySale extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour la répartition des ventes par mode de paiement.
-interface DashboardPaymentDistribution extends Record<string, JSONDataTypes> {
+interface DashboardPaymentDistribution {
   paymentType: string
   count: number
   amountCdf: number
@@ -42,7 +41,7 @@ interface DashboardPaymentDistribution extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour le classement des services les plus vendus.
-export interface DashboardTopService extends Record<string, JSONDataTypes> {
+export interface DashboardTopService {
   id: string
   name: string
   quantity: number
@@ -51,7 +50,7 @@ export interface DashboardTopService extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour une ligne de productivité du personnel.
-export interface DashboardStaffProductivityRow extends Record<string, JSONDataTypes> {
+export interface DashboardStaffProductivityRow {
   staffId: string
   staffName: string
   additionsCount: number
@@ -63,13 +62,13 @@ export interface DashboardStaffProductivityRow extends Record<string, JSONDataTy
 }
 
 // Type frontend pour les données de productivité du personnel avec la ligne total.
-export interface DashboardStaffProductivity extends Record<string, JSONDataTypes> {
+export interface DashboardStaffProductivity {
   rows: DashboardStaffProductivityRow[]
   totals: DashboardStaffProductivityRow
 }
 
 // Type frontend pour une ligne du rapport périodique des ventes.
-export interface DashboardPeriodicReport extends Record<string, JSONDataTypes> {
+export interface DashboardPeriodicReport {
   date: string
   label: string
   theoreticalAmounts: MoneyMap
@@ -85,7 +84,7 @@ export interface DashboardPeriodicReport extends Record<string, JSONDataTypes> {
 }
 
 // Type frontend pour les props complètes de la page dashboard management.
-export interface ManagementDashboardPageProps extends Record<string, JSONDataTypes> {
+export interface ManagementDashboardPageProps {
   period: DashboardPeriod
   stats: DashboardStats
   periodicReports: DashboardPeriodicReport[]

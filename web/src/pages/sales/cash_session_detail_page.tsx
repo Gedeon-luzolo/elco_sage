@@ -21,6 +21,7 @@ import type {
 import type { SaleItemRow } from '~/types/sale_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 export default function CashSessionDetailPage() {
   const { id = '' } = useParams()
@@ -75,9 +76,9 @@ function CashSessionDetail({
   const { PrintContainer, handlePrint } = useSimplePrint()
   const renderSessionHeaderDetails = () => (
     <>
-      <HeaderDetail label="Ouverte par" value={session.openedByName ?? 'Utilisateur'} />
+      <HeaderDetail label="Ouverte par" value={getUserDisplayName(session.openedBy) ?? 'Utilisateur'} />
       <HeaderDetail label="Ouverture" value={formatDateTimeLabel(session.openedAt)} />
-      <HeaderDetail label="Fermée par" value={session.closedByName ?? '-'} />
+      <HeaderDetail label="Fermée par" value={getUserDisplayName(session.closedBy) ?? '-'} />
       <HeaderDetail label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
       <HeaderDetail label="Système" value={renderMoneyMap(session.systemAmounts)} strong />
       <HeaderDetail label="Physique" value={renderMoneyMap(session.closingAmounts)} strong />

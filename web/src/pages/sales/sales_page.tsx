@@ -12,9 +12,10 @@ import {
   mergePendingTotals,
 } from '~/lib/offline/pending_report'
 import type { SaleReportTotals } from '~/types/cash_session_types'
-import { formatDateLabel } from '~/utils/date'
+import { formatDateTimeLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 import { isManagementRole } from '~/utils/user_role.utils'
+import { getUserDisplayName } from '~/utils/user.utils'
 
 export default function SalesPage() {
   const { user } = useAuth()
@@ -73,17 +74,16 @@ export default function SalesPage() {
         <div className="flex w-full flex-wrap items-end justify-between gap-6">
           <div className="text-left">
             <p className="text-3xl font-semibold">Gestion des ventes</p>
-            {currentCashSession?.openingDate ? (
+            {currentCashSession ? (
               <>
                 <p className="mt-2.5 text-base text-muted-foreground">
-                  Session ouverte le {formatDateLabel(currentCashSession.openingDate)} à{' '}
-                  {currentCashSession.openingTime ?? '--:--'}.
+                  Session ouverte le {formatDateTimeLabel(currentCashSession.openedAt)}.
                 </p>
-                {currentCashSession.openedByName && (
+                {currentCashSession.openedBy && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     Ouverte par{' '}
                     <span className="font-semibold text-foreground">
-                      {currentCashSession.openedByName}
+                      {getUserDisplayName(currentCashSession.openedBy)}
                     </span>
                   </p>
                 )}

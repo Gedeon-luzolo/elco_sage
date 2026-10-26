@@ -27,7 +27,7 @@ type ActionOptions<TVars> = {
 
 // Hook générique CRUD : lectures, création, modification, suppression et actions,
 // avec toasts et invalidation du cache.
-export function useCrud<T extends Record<string, unknown>>({
+export function useCrud<T extends object>({
   endpoint,
   queryKey,
   invalidateQueries = [],
