@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { Currency } from '../enums/currency.enum.js';
+// Vrai pour une valeur non saisie : absente, nulle ou vide.
+const isMissing = (input: unknown) =>
+  input === undefined || input === null || input === '';
+
 // Une chaîne vide ou un champ absent deviennent null avant la validation.
 const emptyToNull = (value: unknown) =>
   value === '' || value === undefined ? null : value;
@@ -57,7 +61,14 @@ export const nullableEmail = z.preprocess(
 export const requiredEnum = <Values extends Record<string, string>>(
   values: Values,
   label: string,
-) => z.enum(values, { error: `${label} est invalide.` });
+) =>
+  z.enum(values, {
+    // Absent : obligatoire ; hors de la liste : invalide.
+    error: (issue) =>
+      isMissing(issue.input)
+        ? `${label} est obligatoire.`
+        : `${label} est invalide.`,
+  });
 
 // Devise de la caisse, toujours obligatoire.
 export const requiredCurrency = requiredEnum(Currency, 'La devise choisie');
@@ -67,7 +78,7 @@ export const requiredUuid = (label: string) =>
   z.uuid({
     // Absent : obligatoire ; mal formé : invalide.
     error: (issue) =>
-      issue.input === undefined || issue.input === null || issue.input === ''
+      isMissing(issue.input)
         ? `${label} est obligatoire.`
         : `${label} est invalide.`,
   });
@@ -93,9 +104,7 @@ export const numberLike = (label: string) =>
       .number({
         // Absent : obligatoire ; texte non numérique (NaN) : pas un nombre.
         error: (issue) =>
-          issue.input === undefined ||
-          issue.input === null ||
-          issue.input === ''
+          isMissing(issue.input)
             ? `${label} est obligatoire.`
             : `${label} doit être un nombre.`,
       })
