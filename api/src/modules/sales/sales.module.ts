@@ -12,6 +12,7 @@ import { SaleRecovery } from './recoveries/entities/sale-recovery.entity.js';
 import { SaleItem } from './sales/entities/sale-item.entity.js';
 import { Sale } from './sales/entities/sale.entity.js';
 import { SalesController } from './sales/sales.controller.js';
+import { SaleValidationService } from './sales/sale-validation.service.js';
 import { SalesService } from './sales/sales.service.js';
 
 // Caisse : sessions, numérotation des additions et ventes.
@@ -29,6 +30,11 @@ import { SalesService } from './sales/sales.service.js';
     ]),
   ],
   controllers: [CashSessionsController, SalesController],
-  providers: [CashSessionsService, AdditionNumbersService, SalesService],
+  providers: [
+    CashSessionsService,
+    AdditionNumbersService,
+    SaleValidationService,
+    SalesService,
+  ],
 })
 export class SalesModule {}
