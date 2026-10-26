@@ -9,9 +9,9 @@ import {
 } from '~/components/ui/table'
 import type { RecoveryPaymentItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
-import { formatDateLabel} from '~/utils/date'
+import { formatDateLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
-import {  formatDebtStatusLabel } from '~/utils/sales/debt.utils'
+import { formatDebtStatusLabel } from '~/utils/sales/debt.utils'
 import { formatPaymentMethodLabel } from '~/utils/sales/payment.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
 

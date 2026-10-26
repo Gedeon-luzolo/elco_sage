@@ -57,7 +57,9 @@ export default function CashSessionOpeningPage() {
                 Date d&apos;ouverture
               </div>
               <p className="mt-2 text-sm font-medium">
-                {currentCashSession ? formatLongDate(new Date(currentCashSession.openedAt)) : openingDateLabel}
+                {currentCashSession
+                  ? formatLongDate(new Date(currentCashSession.openedAt))
+                  : openingDateLabel}
               </p>
             </div>
 
@@ -67,7 +69,9 @@ export default function CashSessionOpeningPage() {
                 Heure
               </div>
               <p className="mt-2 text-sm font-medium">
-                {currentCashSession ? formatShortTime(new Date(currentCashSession.openedAt)) : openingTimeLabel}
+                {currentCashSession
+                  ? formatShortTime(new Date(currentCashSession.openedAt))
+                  : openingTimeLabel}
               </p>
             </div>
           </div>

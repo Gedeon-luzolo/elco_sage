@@ -1,4 +1,3 @@
-
 // Rôles connus côté backend pour le formulaire utilisateur.
 export type UserRole = 'ADMIN' | 'DIRECTOR' | 'CASHIER' | 'OPERATOR'
 

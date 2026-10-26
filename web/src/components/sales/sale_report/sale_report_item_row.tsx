@@ -40,9 +40,7 @@ export function SaleReportItemRow({
       <TableCell className="min-w-56 whitespace-normal">
         <span className="font-medium">{item.productService?.name ?? 'Service inconnu'}</span>
       </TableCell>
-      <TableCell className="text-center">
-        {item.quantity}
-      </TableCell>
+      <TableCell className="text-center">{item.quantity}</TableCell>
       <TableCell className="text-right">
         {formatMoneyWithCurrency(item.unitPrice, itemCurrency)}
       </TableCell>

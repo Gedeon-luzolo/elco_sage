@@ -1,7 +1,9 @@
 import type { UserSummaryDTO } from '~/types/dto'
 
 // Nom affiché d'un utilisateur : son nom complet, sinon son email.
-export function getUserDisplayName(user: Pick<UserSummaryDTO, 'fullName' | 'email'> | null | undefined) {
+export function getUserDisplayName(
+  user: Pick<UserSummaryDTO, 'fullName' | 'email'> | null | undefined
+) {
   return user ? (user.fullName ?? user.email) : null
 }
 

@@ -75,9 +75,7 @@ export function SaleDetailPanel({
           <DetailLine label="Opérateur" value={getUserDisplayName(sale.operator) ?? '-'} />
           <DetailLine label="Vendeur" value={getUserDisplayName(sale.seller) ?? '-'} />
           <DetailLine label="Paiement" value={formatSalePaymentLabel(sale)} />
-          {sale.paymentReference && (
-            <DetailLine label="Référence" value={sale.paymentReference} />
-          )}
+          {sale.paymentReference && <DetailLine label="Référence" value={sale.paymentReference} />}
           <DetailLine label="Statut" value={sale.status} />
         </div>
 
@@ -107,9 +105,7 @@ export function SaleDetailPanel({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                   <div className="min-w-0">
                     <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Quantité : {item.quantity}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Quantité : {item.quantity}</p>
                   </div>
                   <p className="shrink-0 font-semibold">
                     {formatMoneyWithCurrency(item.totalPrice, item.currency as CurrencyCode)}

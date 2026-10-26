@@ -21,7 +21,7 @@ export interface OutboxEntry {
 }
 
 // État de la numérotation locale d'un utilisateur dans une session de caisse.
-// id combine l'utilisateur et la session 
+// id combine l'utilisateur et la session
 export interface NumberingState {
   id: string
   cashSessionId: string

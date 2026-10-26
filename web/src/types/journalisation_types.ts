@@ -1,4 +1,3 @@
-
 // Modules connus côté backend pour le journal des actions.
 export type JournalisationModule =
   | 'AUTHENTIFICATION'

@@ -1,0 +1,3 @@
+# Vite s'appuie sur esbuild, dont le binaire est installé par son script.
+allowBuilds:
+  esbuild: true
