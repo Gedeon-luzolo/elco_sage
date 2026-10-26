@@ -19,6 +19,7 @@ import { Sale } from '../../sales/entities/sale.entity.js';
 // Paiement reçu sur une vente à crédit.
 @Entity('sale_recoveries')
 @Index('sale_recoveries_sale_id_index', ['saleId'])
+@Index('sale_recoveries_recovered_at_index', ['recoveredAt']) // Paiements d'une période
 @Index('sale_recoveries_cash_session_id_recovered_at_index', [
   'cashSessionId',
   'recoveredAt',

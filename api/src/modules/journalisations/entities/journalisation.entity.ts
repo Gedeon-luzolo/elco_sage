@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { User } from '../../users/entities/user.entity.js';
 import { JournalisationModule } from '../enums/journalisation-module.enum.js';
 
 @Entity('journalisations')
+@Index('journalisations_created_at_index', ['createdAt']) // Journal du plus récent au plus ancien
 export class Journalisation {
   @PrimaryGeneratedColumn('uuid')
   id: string;

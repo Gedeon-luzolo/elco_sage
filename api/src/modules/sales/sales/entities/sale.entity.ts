@@ -24,6 +24,7 @@ import { SaleItem } from './sale-item.entity.js';
 @Entity('sales')
 @Unique('sales_addition_number_unique', ['additionNumber'])
 @Index('sales_cash_session_id_sale_date_index', ['cashSessionId', 'saleDate']) // Ventes d'une session, dans l'ordre
+@Index('sales_sale_date_index', ['saleDate']) // Historique et pilotage par période
 export class Sale {
   // L'id peut venir du client hors ligne : il rend la création rejouable sans doublon.
   @PrimaryColumn({ type: 'uuid', default: () => 'gen_random_uuid()' })
