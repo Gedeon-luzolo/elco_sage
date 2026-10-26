@@ -1,0 +1,11 @@
+// Domaine concerné par une ligne du journal d'audit.
+export enum JournalisationModule {
+  AUTHENTIFICATION = 'AUTHENTIFICATION',
+  EXCHANGE_RATES = 'EXCHANGE_RATES',
+  USERS = 'USERS',
+  PRODUCT_CATEGORIES = 'PRODUCT_CATEGORIES',
+  PRODUCT_SERVICES = 'PRODUCT_SERVICES',
+  INVENTORY = 'INVENTORY',
+  CUSTOMERS = 'CUSTOMERS',
+  SALES = 'SALES',
+}

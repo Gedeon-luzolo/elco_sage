@@ -1,0 +1,49 @@
+{
+  "name": "elco-sage-api",
+  "version": "1.0.0",
+  "description": "API d'Elco Sage (caisse, ventes, crédits) construite avec NestJS et TypeORM.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "oxlint src/",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
+    "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js",
+    "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
+    "seed": "pnpm build && node dist/database/seeders/run-seeders.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.1",
+    "@nestjs/config": "^12.0.0",
+    "@nestjs/core": "^12.0.1",
+    "@nestjs/platform-express": "^12.0.1",
+    "@nestjs/typeorm": "^12.0.1",
+    "dotenv": "^18.0.1",
+    "helmet": "^8.3.0",
+    "ioredis": "^6.0.0",
+    "nestjs-zod": "^5.5.0",
+    "pg": "^8.23.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "typeorm": "^1.1.1",
+    "typeorm-transactional": "^0.5.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.0",
+    "@nestjs/schematics": "^12.0.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "oxlint": "^1.58.0",
+    "prettier": "^3.4.2",
+    "source-map-support": "^0.5.21",
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.2"
+  }
+}
