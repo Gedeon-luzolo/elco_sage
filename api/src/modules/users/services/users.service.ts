@@ -138,10 +138,9 @@ export class UsersService {
   async update(actor: User, userId: string, dto: UpdateUserDto) {
     this.ensureCanManageUsers(actor);
 
-    if (actor.id === userId && dto.status !== UserStatus.ACTIVE) {
-      throw new UnprocessableEntityException(
-        'Vous ne pouvez pas désactiver votre propre compte',
-      );
+    // On ne se coupe jamais soi-même l'accès : ni désactivation, ni perte du rôle de direction.
+    if (actor.id === userId) {
+      this.ensureKeepsOwnAccess(dto);
     }
 
     const user = await this.findOrFail(userId);
@@ -157,7 +156,8 @@ export class UsersService {
       email: dto.email,
       role: dto.role,
       status: dto.status,
-      ...(dto.status === UserStatus.ACTIVE && user.status === UserStatus.BLOCKED
+      // Un compte qui redevient actif repart sans échec de connexion, sinon il serait rebloqué à la prochaine erreur.
+      ...(dto.status === UserStatus.ACTIVE && user.status !== UserStatus.ACTIVE
         ? { failedLoginAttempts: 0 }
         : {}),
     });
@@ -173,6 +173,21 @@ export class UsersService {
       `Le compte ${dto.fullName ?? dto.email} a été mis à jour par ${actor.fullName ?? actor.email}`,
       actor,
     );
+  }
+
+  // Refuse qu'on désactive son propre compte ou qu'on se retire le rôle de direction.
+  private ensureKeepsOwnAccess(dto: UpdateUserDto) {
+    if (dto.status !== UserStatus.ACTIVE) {
+      throw new UnprocessableEntityException(
+        'Vous ne pouvez pas désactiver votre propre compte',
+      );
+    }
+
+    if (!isManagementRole(dto.role)) {
+      throw new UnprocessableEntityException(
+        'Vous ne pouvez pas vous retirer le rôle de direction',
+      );
+    }
   }
 
   private async findOrFail(userId: string) {

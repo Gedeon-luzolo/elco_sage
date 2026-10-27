@@ -1,8 +1,5 @@
 import { QueryFailedError } from 'typeorm';
 
-// Code PostgreSQL d'une ligne encore référencée par une clé étrangère.
-const FOREIGN_KEY_VIOLATION = '23503';
-
 // Code PostgreSQL d'une valeur déjà prise par une contrainte d'unicité.
 const UNIQUE_VIOLATION = '23505';
 
@@ -11,13 +8,6 @@ function driverError(error: unknown) {
   return error instanceof QueryFailedError
     ? (error.driverError as { code?: string; constraint?: string } | undefined)
     : undefined;
-}
-
-/**
- * Vrai si la base a refusé l'opération parce que la ligne est encore utilisée ailleurs.
- */
-export function isForeignKeyViolation(error: unknown) {
-  return driverError(error)?.code === FOREIGN_KEY_VIOLATION;
 }
 
 /**
