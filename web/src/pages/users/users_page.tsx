@@ -2,7 +2,6 @@ import { Plus, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
-import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { StatCard } from '~/components/common/stat_card'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
@@ -43,7 +42,7 @@ const EMPTY_STATS: UserStats = { total: 0, active: 0, inactive: 0, blocked: 0 }
 const EMPTY_DISTRIBUTION: UserStatusDistribution[] = []
 
 export default function UsersPage() {
-  const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<UsersPageProps>({
+  const { useGetWithParams, useCreate, usePatch } = useCrud<UsersPageProps>({
     endpoint: '/users',
     // Les opérateurs de vente dépendent des comptes : on invalide aussi leur liste
     invalidateQueries: ['/operators'],
@@ -55,11 +54,9 @@ export default function UsersPage() {
   const statusDistribution = data?.statusDistribution ?? EMPTY_DISTRIBUTION
   const createUser = useCreate<UserFormState, { temporaryPassword: string }>()
   const updateUser = usePatch<UserFormState>()
-  const deleteUser = useDelete()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserListItem | null>(null)
-  const [deletingUser, setDeletingUser] = useState<UserListItem | null>(null)
 
   // Memoize les cartes de stats pour eviter de recalculer a chaque rendu.
   const statCards = [
@@ -86,7 +83,6 @@ export default function UsersPage() {
   const closeDialogs = () => {
     setIsCreateOpen(false)
     setEditingUser(null)
-    setDeletingUser(null)
   }
 
   // Envoie le formulaire vers la creation ou la modification selon le mode courant.
@@ -114,18 +110,6 @@ export default function UsersPage() {
         },
       })
     }
-  }
-
-  // Supprime le compte apres confirmation explicite.
-  const confirmDelete = () => {
-    if (!deletingUser) return
-
-    deleteUser.mutate(deletingUser.id, {
-      onSuccess: () => {
-        toast.success('Utilisateur supprimé.')
-        closeDialogs()
-      },
-    })
   }
 
   return (
@@ -164,7 +148,6 @@ export default function UsersPage() {
                 roleLabels={USER_ROLE_LABELS}
                 statusLabels={USER_STATUS_LABELS}
                 onEdit={openEditDialog}
-                onDelete={setDeletingUser}
               />
             ))}
           </section>
@@ -192,21 +175,6 @@ export default function UsersPage() {
           setIsCreateOpen(true)
         }}
         action={saveUser}
-      />
-
-      <ConfirmationDialog
-        open={Boolean(deletingUser)}
-        title="Supprimer l'utilisateur"
-        description={`Etes-vous sur de vouloir supprimer ${deletingUser?.fullName} ? Cette action est irreversible.`}
-        confirmLabel="Supprimer"
-        variant="destructive"
-        onOpenChange={(open) => {
-          if (!open) {
-            closeDialogs()
-          }
-        }}
-        onCancel={closeDialogs}
-        onConfirm={confirmDelete}
       />
     </ManagementLayout>
   )

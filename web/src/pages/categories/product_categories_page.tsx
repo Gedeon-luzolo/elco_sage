@@ -1,10 +1,9 @@
-import { CheckCircle2, Edit2, Plus, Tags, Trash2, XCircle } from 'lucide-react'
+import { CheckCircle2, Edit2, Plus, Tags, XCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ProductCategoryModal } from '~/components/categories/product_category_modal'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
-import { ConfirmationDialog } from '~/components/ui/confirmation_dialog'
 import { StatCard } from '~/components/common/stat_card'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
@@ -35,7 +34,7 @@ const EMPTY_STATS: ProductCategoryStats = { total: 0, activeCount: 0, inactiveCo
 
 export default function ProductCategoriesPage() {
   // Les articles affichent le nom de leur catégorie : on invalide aussi le catalogue
-  const { useGetWithParams, useCreate, usePatch, useDelete } = useCrud<ProductCategoriesPageProps>({
+  const { useGetWithParams, useCreate, usePatch } = useCrud<ProductCategoriesPageProps>({
     endpoint: '/product-categories',
     invalidateQueries: ['/product-services'],
   })
@@ -44,11 +43,9 @@ export default function ProductCategoriesPage() {
   const stats = data?.stats ?? EMPTY_STATS
   const createCategory = useCreate<{ name: string }>()
   const updateCategory = usePatch<{ name: string; isActive: boolean }>()
-  const deleteCategory = useDelete()
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(StatusFilter.ALL)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ProductCategoryItem | null>(null)
-  const [deletingCategory, setDeletingCategory] = useState<ProductCategoryItem | null>(null)
   const {
     search,
     setSearch,
@@ -97,7 +94,6 @@ export default function ProductCategoriesPage() {
   const closeModal = () => {
     setIsModalOpen(false)
     setEditingCategory(null)
-    setDeletingCategory(null)
   }
 
   // Envoie le formulaire vers la création ou la modification selon le mode courant.
@@ -118,13 +114,6 @@ export default function ProductCategoriesPage() {
       }
       createCategory.mutate(payload, options)
     }
-  }
-
-  // Supprime la catégorie après confirmation explicite de l'utilisateur.
-  const confirmDelete = () => {
-    if (!deletingCategory) return
-
-    deleteCategory.mutate(deletingCategory.id, { onSuccess: closeModal })
   }
 
   return (
@@ -255,17 +244,6 @@ export default function ProductCategoriesPage() {
                           <Edit2 className="size-4" />
                           <span className="sr-only">Modifier</span>
                         </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:bg-destructive/10"
-                          onClick={() => setDeletingCategory(cat)}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="size-4" />
-                          <span className="sr-only">Supprimer</span>
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -292,20 +270,6 @@ export default function ProductCategoriesPage() {
           else setIsModalOpen(true)
         }}
         action={saveCategory}
-      />
-
-      {/* Dialog de confirmation de suppression */}
-      <ConfirmationDialog
-        open={Boolean(deletingCategory)}
-        title="Supprimer la catégorie"
-        description={`Êtes-vous sûr de vouloir supprimer la catégorie "${deletingCategory?.name ?? ''}" ? Cette action est irréversible.`}
-        confirmLabel="Supprimer"
-        variant="destructive"
-        onOpenChange={(open) => {
-          if (!open) closeModal()
-        }}
-        onCancel={closeModal}
-        onConfirm={confirmDelete}
       />
     </ManagementLayout>
   )

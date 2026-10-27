@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Patch,
@@ -57,15 +56,5 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     await this.usersService.update(actor, id, updateUserDto);
-  }
-
-  /**
-   * Supprime un compte (jamais soi-même).
-   */
-  @Delete(':id')
-  @HttpCode(204)
-  @CacheInvalidate({ patterns: ['users:'] })
-  async delete(@CurrentUser() actor: User, @UuidParam() id: string) {
-    await this.usersService.delete(actor, id);
   }
 }

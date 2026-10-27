@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
-import { isForeignKeyViolation } from '../../../common/database/database-error.utils.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
 import type { User } from '../../users/entities/user.entity.js';
@@ -98,33 +97,6 @@ export class ProductCategoriesService {
       JournalisationModule.PRODUCT_CATEGORIES,
       // La modification est tracée dans le journal.
       `La catégorie "${category.name}" a été mise à jour par ${actor.fullName ?? actor.email}.`,
-      actor,
-    );
-  }
-
-  /**
-   * Supprime une catégorie qui ne contient plus aucun article.
-   */
-  async delete(actor: User, id: string) {
-    const category = await this.findOrFail(id);
-
-    try {
-      // La base refuse si des articles sont encore rangés dans la catégorie.
-      await this.categoriesRepository.delete(id);
-    } catch (error) {
-      if (isForeignKeyViolation(error)) {
-        throw new UnprocessableEntityException(
-          'Cette catégorie contient encore des articles : désactivez-la plutôt.',
-        );
-      }
-
-      throw error;
-    }
-
-    await this.journalisationsService.create(
-      JournalisationModule.PRODUCT_CATEGORIES,
-      // La suppression est tracée dans le journal.
-      `La catégorie "${category.name}" a été supprimée par ${actor.fullName ?? actor.email}.`,
       actor,
     );
   }

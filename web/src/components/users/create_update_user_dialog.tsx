@@ -84,7 +84,7 @@ export function CreateUpdateUserDialog({
             </div>
 
             <div className="grid flex-1 gap-2">
-              <Label htmlFor={`${title}-status`}>Statut</Label>
+              <Label htmlFor={`${title}-status`}>Statut du compte</Label>
               <OptionSelect
                 id={`${title}-status`}
                 name="status"

@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
 import { Not, Repository } from 'typeorm';
-import { isForeignKeyViolation } from '../../../common/database/database-error.utils.js';
 import { AccessTokensService } from '../../auth/services/access-tokens.service.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
@@ -139,6 +138,12 @@ export class UsersService {
   async update(actor: User, userId: string, dto: UpdateUserDto) {
     this.ensureCanManageUsers(actor);
 
+    if (actor.id === userId && dto.status !== UserStatus.ACTIVE) {
+      throw new UnprocessableEntityException(
+        'Vous ne pouvez pas désactiver votre propre compte',
+      );
+    }
+
     const user = await this.findOrFail(userId);
 
     // L'email n'est revérifié que s'il change réellement.
@@ -152,6 +157,9 @@ export class UsersService {
       email: dto.email,
       role: dto.role,
       status: dto.status,
+      ...(dto.status === UserStatus.ACTIVE && user.status === UserStatus.BLOCKED
+        ? { failedLoginAttempts: 0 }
+        : {}),
     });
 
     // Un compte qui n'est plus actif perd immédiatement toutes ses connexions.
@@ -163,46 +171,6 @@ export class UsersService {
       JournalisationModule.USERS,
       // La modification est tracée dans le journal.
       `Le compte ${dto.fullName ?? dto.email} a été mis à jour par ${actor.fullName ?? actor.email}`,
-      actor,
-    );
-  }
-
-  /**
-   * Supprime un compte. On ne supprime jamais son propre compte,
-   * ni un compte encore lié à des ventes ou des sessions de caisse.
-   */
-  async delete(actor: User, userId: string) {
-    this.ensureCanManageUsers(actor);
-
-    // On ne supprime jamais le compte avec lequel on est connecté.
-    if (actor.id === userId) {
-      throw new UnprocessableEntityException(
-        'Vous ne pouvez pas supprimer votre propre compte',
-      );
-    }
-
-    const user = await this.findOrFail(userId);
-
-    try {
-      // La base refuse si le compte a déjà servi (ventes, sessions de caisse).
-      await this.usersRepository.delete(user.id);
-    } catch (error) {
-      if (isForeignKeyViolation(error)) {
-        throw new UnprocessableEntityException(
-          'Ce compte est lié à des ventes ou des sessions de caisse : désactivez-le plutôt.',
-        );
-      }
-
-      throw error;
-    }
-
-    // Les tokens vivent dans Redis : ils ne disparaissent pas avec la ligne de la base.
-    await this.accessTokensService.deleteAllForUser(user.id);
-
-    await this.journalisationsService.create(
-      JournalisationModule.USERS,
-      // La suppression est tracée dans le journal.
-      `Le compte ${user.fullName ?? user.email} a été supprimé par ${actor.fullName ?? actor.email}`,
       actor,
     );
   }

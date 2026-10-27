@@ -12,7 +12,7 @@ export const USER_ROLE_OPTIONS: Array<UserSelectOption<UserRole>> = [
 export const USER_STATUS_OPTIONS: Array<UserSelectOption<UserStatus>> = [
   { value: 'ACTIVE', label: 'Actif' },
   { value: 'INACTIVE', label: 'Inactif' },
-  { value: 'BLOCKED', label: 'Bloque' },
+  { value: 'BLOCKED', label: 'Bloqué' },
 ]
 
 // Etat initial du formulaire utilisateur.

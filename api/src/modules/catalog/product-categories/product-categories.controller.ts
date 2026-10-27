@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Patch,
@@ -60,15 +59,5 @@ export class ProductCategoriesController {
     @Body() dto: UpdateProductCategoryDto,
   ) {
     await this.categoriesService.update(actor, id, dto);
-  }
-
-  /**
-   * Supprime une catégorie vide.
-   */
-  @Delete(':id')
-  @HttpCode(204)
-  @CacheInvalidate({ patterns: ['product_categories:', 'product_services:'] })
-  async delete(@CurrentUser() actor: User, @UuidParam() id: string) {
-    await this.categoriesService.delete(actor, id);
   }
 }

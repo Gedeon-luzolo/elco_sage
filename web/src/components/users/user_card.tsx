@@ -1,4 +1,4 @@
-import { Edit3, Trash2, UserRound } from 'lucide-react'
+import { Edit3, UserRound } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -9,11 +9,10 @@ interface UserCardProps {
   roleLabels: Record<UserRole, string>
   statusLabels: Record<UserStatus, string>
   onEdit: (user: UserListItem) => void
-  onDelete: (user: UserListItem) => void
 }
 
 // Card compacte pour scanner rapidement un utilisateur et ses actions.
-export function UserCard({ user, roleLabels, statusLabels, onEdit, onDelete }: UserCardProps) {
+export function UserCard({ user, roleLabels, statusLabels, onEdit }: UserCardProps) {
   const status = user.status as UserStatus
   const role = user.role as UserRole
 
@@ -46,15 +45,6 @@ export function UserCard({ user, roleLabels, statusLabels, onEdit, onDelete }: U
           <Button type="button" variant="outline" className="flex-1" onClick={() => onEdit(user)}>
             <Edit3 className="size-4" />
             Modifier
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            aria-label="Supprimer le compte"
-            onClick={() => onDelete(user)}
-          >
-            <Trash2 className="size-4" />
           </Button>
         </div>
       </CardContent>
