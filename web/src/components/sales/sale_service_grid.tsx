@@ -45,8 +45,8 @@ export function SaleServiceGrid({
   }, [category, search, services])
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
+    <div className="flex flex-col gap-4 lg:min-h-0">
+      <div className="relative shrink-0">
         <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           aria-label="Rechercher un service"
@@ -57,7 +57,7 @@ export function SaleServiceGrid({
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex shrink-0 flex-wrap gap-2">
         {categories.map((name) => (
           <button
             key={name}
@@ -75,12 +75,13 @@ export function SaleServiceGrid({
         ))}
       </div>
 
+      {/* Seules les tuiles défilent ; la marge laisse déborder le badge de quantité */}
       {visibleServices.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
           Aucun service trouvé.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 content-start gap-2.5 sm:grid-cols-3 lg:min-h-0 lg:flex-1 lg:grid-cols-4 lg:overflow-y-auto lg:pt-2 lg:pr-2">
           {visibleServices.map((service) => {
             const quantity = quantityByServiceId.get(service.id) ?? 0
 

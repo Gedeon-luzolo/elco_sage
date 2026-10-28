@@ -1,5 +1,5 @@
-import { ArrowLeft, Banknote, ReceiptText, ShoppingCart } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, Banknote, ShoppingCart } from 'lucide-react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleServiceGrid } from '~/components/sales/sale_service_grid'
@@ -9,8 +9,10 @@ import { SaleTicketSummary } from '~/components/sales/sale_ticket_summary'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
+import { useRemainingViewportHeight } from '~/hooks/useRemainingViewportHeight'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
@@ -37,6 +39,9 @@ const EMPTY_SERVICES: ProductServiceDTO[] = []
 
 // Le ticket est toujours celui de la vente chargée par le serveur : aucune sélection manuelle ici.
 const ignoreSaleSelection = () => {}
+
+// Onglets du ticket : les lignes d'un côté, les informations de paiement de l'autre.
+type TicketTab = 'lines' | 'payment'
 
 export default function SaleCreatePage() {
   const navigate = useNavigate()
@@ -68,7 +73,11 @@ export default function SaleCreatePage() {
   const [payableAmount, setPayableAmount] = useState(0)
   const [hasCustomPayableAmount, setHasCustomPayableAmount] = useState(false)
   const [lines, setLines] = useState<SaleLineState[]>([])
+  const [ticketTab, setTicketTab] = useState<TicketTab>('lines')
   const isSubmitting = createSale.isPending
+
+  // La page tient dans l'écran : seuls le catalogue et l'onglet ouvert défilent
+  const { ref: pageRef, height: pageHeight } = useRemainingViewportHeight<HTMLElement>()
 
   // Imprime automatiquement le ticket de la vente venant d'être enregistrée.
   const { receiptRef } = usePrintInvoice({
@@ -110,6 +119,12 @@ export default function SaleCreatePage() {
     lines,
   })
 
+  // Champs obligatoires encore vides : ils sont signalés sur l'onglet Paiement
+  const requiresCustomer = paymentType !== 'CASH' || discountAmount > 0
+  const operatorMissing = !operatorId
+  const customerMissing = requiresCustomer && !customerId
+  const hasMissingField = operatorMissing || customerMissing
+
   // Quantité déjà au ticket pour chaque service, affichée en badge sur la grille
   const quantityByServiceId = useMemo(() => {
     const quantities = new Map<string, number>()
@@ -128,6 +143,8 @@ export default function SaleCreatePage() {
    * Ajoute un service au ticket : une ligne existante du même service gagne une unité.
    */
   const pickService = (serviceId: string) => {
+    // L'ajout se voit tout de suite : on revient sur les lignes si le paiement était ouvert
+    setTicketTab('lines')
     setLines((current) => {
       const existingIndex = current.findIndex((line) => line.productServiceId === serviceId)
 
@@ -176,12 +193,19 @@ export default function SaleCreatePage() {
     setPayableAmount(0)
     setHasCustomPayableAmount(false)
     setLines([])
+    setTicketTab('lines')
   }
 
   /**
    * Enregistre la vente via le backend.
    */
   const submitSale = () => {
+    // Un champ requis manque : on ouvre l'onglet Paiement où il est signalé
+    if (hasMissingField) {
+      setTicketTab('payment')
+      return
+    }
+
     if (!canSubmit) return
 
     if (!currentCashSession || !user) return
@@ -225,7 +249,11 @@ export default function SaleCreatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 text-foreground">
+    <main
+      ref={pageRef}
+      style={{ '--sale-page-height': pageHeight } as CSSProperties}
+      className="flex min-h-screen flex-col bg-muted/40 text-foreground lg:h-(--sale-page-height) lg:min-h-0 lg:overflow-hidden"
+    >
       <div className="fixed left-[10000px] top-0" aria-hidden="true">
         {/* Le ticket reste monté hors écran pour que react-to-print puisse le lire via ref. */}
         <div ref={receiptRef} className="bg-white">
@@ -233,7 +261,7 @@ export default function SaleCreatePage() {
         </div>
       </div>
 
-      <section className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-6 py-8 lg:px-10">
+      <section className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col gap-4 px-6 py-5 lg:px-10">
         <PageHeader
           title="Nouvelle vente"
           description="Enregistrer une vente de services dans la session de caisse courante."
@@ -254,7 +282,8 @@ export default function SaleCreatePage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid items-start gap-6 lg:grid-cols-[1fr_540px]">
+          // Sur grand écran, la grille occupe la hauteur restante et chaque colonne défile seule
+          <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_480px]">
             <SaleServiceGrid
               services={saleServices}
               currency={currency}
@@ -262,49 +291,69 @@ export default function SaleCreatePage() {
               onPick={pickService}
             />
 
-            <aside className="rounded-2xl border border-border bg-card shadow-sm">
-              <div className="flex items-center gap-2 border-b border-border p-4">
-                <ReceiptText className="size-5" />
-                <h2 className="font-semibold">Ticket</h2>
-              </div>
+            <aside className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:min-h-0">
+              <Tabs
+                value={ticketTab}
+                onValueChange={(value) => setTicketTab(value as TicketTab)}
+                className="min-h-0 flex-1 flex-col gap-0"
+              >
+                {/* Onglets de hauteur fixe : passer de l'un à l'autre ne déplace jamais le total */}
+                <TabsList className="m-3 mb-0 h-12! w-auto shrink-0">
+                  <TabsTrigger value="lines" className="h-full! text-sm">
+                    Articles ({lines.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="payment" className="h-full! text-sm">
+                    Paiement
+                    {hasMissingField && (
+                      <span className="size-2 rounded-full bg-destructive">
+                        <span className="sr-only">Champ requis manquant</span>
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="px-4">
-                {lines.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
-                    Touchez un service pour l&apos;ajouter au ticket.
-                  </p>
-                ) : (
-                  lines.map((line, index) => (
-                    <SaleTicketLine
-                      key={line.productServiceId}
-                      line={line}
-                      service={getSaleLineService(line, serviceById)}
-                      currency={currency}
-                      onChange={(patch) => updateLine(index, patch)}
-                      onRemove={() => removeLine(index)}
-                    />
-                  ))
-                )}
-              </div>
+                <TabsContent value="lines" className="min-h-0 overflow-y-auto px-4 pt-1">
+                  {lines.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      Touchez un service pour l&apos;ajouter au ticket.
+                    </p>
+                  ) : (
+                    lines.map((line, index) => (
+                      <SaleTicketLine
+                        key={line.productServiceId}
+                        line={line}
+                        service={getSaleLineService(line, serviceById)}
+                        currency={currency}
+                        onChange={(patch) => updateLine(index, patch)}
+                        onRemove={() => removeLine(index)}
+                      />
+                    ))
+                  )}
+                </TabsContent>
 
-              {/* Les informations de la vente viennent après les produits et leurs prix */}
-              <SaleTicketFields
-                paymentType={paymentType}
-                onPaymentTypeChange={setPaymentType}
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={setPaymentMethod}
-                paymentReference={paymentReference}
-                onPaymentReferenceChange={setPaymentReference}
-                currency={currency}
-                onCurrencyChange={setCurrency}
-                operatorId={operatorId}
-                onOperatorChange={setOperatorId}
-                customerId={customerId}
-                onCustomerChange={setCustomerId}
-                operators={operators}
-                customers={customers}
-              />
+                <TabsContent value="payment" className="min-h-0 overflow-y-auto">
+                  <SaleTicketFields
+                    paymentType={paymentType}
+                    onPaymentTypeChange={setPaymentType}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
+                    paymentReference={paymentReference}
+                    onPaymentReferenceChange={setPaymentReference}
+                    currency={currency}
+                    onCurrencyChange={setCurrency}
+                    operatorId={operatorId}
+                    onOperatorChange={setOperatorId}
+                    customerId={customerId}
+                    onCustomerChange={setCustomerId}
+                    operators={operators}
+                    customers={customers}
+                    operatorMissing={operatorMissing}
+                    customerMissing={customerMissing}
+                  />
+                </TabsContent>
+              </Tabs>
 
+              {/* Le résumé reste sous les onglets, toujours visible */}
               <SaleTicketSummary
                 currency={currency}
                 theoreticalAmount={theoreticalAmount}
@@ -312,7 +361,8 @@ export default function SaleCreatePage() {
                 onPayableAmountChange={changePayableAmount}
                 discountAmount={discountAmount}
                 totalAmount={totalAmount}
-                canSubmit={canSubmit}
+                // Le bouton reste actif malgré un champ manquant : il ouvre alors l'onglet Paiement
+                canSubmit={lines.length > 0}
                 isSubmitting={isSubmitting}
                 onSubmit={submitSale}
               />

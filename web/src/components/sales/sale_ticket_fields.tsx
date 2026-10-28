@@ -2,6 +2,7 @@ import { OptionSelect } from '~/components/common/option_select'
 import { SearchableSelect } from '~/components/common/searchable_select'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import { cn } from '~/lib/utils'
 import type { CustomerDTO } from '~/types/dto'
 import type { UserSummaryDTO } from '~/types/dto'
 import { CURRENCY_OPTIONS, type CurrencyCode } from '~/utils/currency'
@@ -27,7 +28,12 @@ interface SaleTicketFieldsProps {
   onCustomerChange: (value: string) => void
   operators: UserSummaryDTO[]
   customers: CustomerDTO[]
+  operatorMissing?: boolean
+  customerMissing?: boolean
 }
+
+// Contour rouge d'un champ obligatoire resté vide.
+const MISSING_FIELD_CLASS = 'border-destructive ring-3 ring-destructive/20'
 
 // Informations générales de la vente : client, opérateur, devise, type et mode de paiement.
 export function SaleTicketFields({
@@ -45,13 +51,17 @@ export function SaleTicketFields({
   onCustomerChange,
   operators,
   customers,
+  operatorMissing = false,
+  customerMissing = false,
 }: SaleTicketFieldsProps) {
   return (
-    <div className="space-y-3 border-t border-border p-4">
+    <div className="space-y-3 p-4">
       {/* Opérateur d'abord, avec la devise : il est toujours requis */}
       <div className="flex gap-3">
         <div className="grid min-w-0 flex-1 gap-1.5">
-          <Label htmlFor="sale-operator">Opérateur</Label>
+          <Label htmlFor="sale-operator" className={cn(operatorMissing && 'text-destructive')}>
+            Opérateur{operatorMissing && ' · requis'}
+          </Label>
           <OptionSelect
             id="sale-operator"
             options={operators.map((operator) => ({
@@ -61,6 +71,7 @@ export function SaleTicketFields({
             value={operatorId}
             onValueChange={onOperatorChange}
             placeholder="Sélectionner..."
+            className={cn('h-10 w-full', operatorMissing && MISSING_FIELD_CLASS)}
           />
         </div>
 
@@ -117,7 +128,10 @@ export function SaleTicketFields({
 
       {/* Le client vient en dernier, sur sa propre ligne : il n'est pas toujours requis */}
       <div className="grid gap-1.5">
-        <Label htmlFor="sale-customer">Client</Label>
+        {/* Requis pour un crédit, une vente offerte ou une remise : signalé en rouge s'il manque */}
+        <Label htmlFor="sale-customer" className={cn(customerMissing && 'text-destructive')}>
+          Client{customerMissing && ' · requis'}
+        </Label>
         <SearchableSelect
           id="sale-customer"
           items={customers}
@@ -125,8 +139,9 @@ export function SaleTicketFields({
           onValueChange={onCustomerChange}
           getValue={(customer) => customer.id}
           getLabel={(customer) => customer.fullName}
-          placeholder="Passager"
+          placeholder={customerMissing ? 'Choisir un client' : 'Passager'}
           emptyMessage="Aucun client trouvé."
+          className={cn('h-10', customerMissing && MISSING_FIELD_CLASS)}
         />
       </div>
     </div>
