@@ -347,6 +347,7 @@ export default function SaleCreatePage() {
                     onCustomerChange={setCustomerId}
                     operators={operators}
                     customers={customers}
+                    onCustomerCreated={(customer) => setCustomerId(customer.id)}
                     operatorMissing={operatorMissing}
                     customerMissing={customerMissing}
                   />

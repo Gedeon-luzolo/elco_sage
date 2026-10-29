@@ -24,6 +24,7 @@ interface CustomerDialogProps {
   customer: CustomerItem | null
   submitLabel: string
   onOpenChange: (open: boolean) => void
+  onCreated?: (customer: CustomerItem) => void
 }
 
 export function CustomerDialog({
@@ -33,13 +34,14 @@ export function CustomerDialog({
   customer,
   submitLabel,
   onOpenChange,
+  onCreated,
 }: CustomerDialogProps) {
   // Les clients actifs alimentent aussi la vente : on invalide les deux listes.
   const { useCreate, usePatch } = useCrud<CustomerItem>({
     endpoint: '/customers',
     invalidateQueries: ['/customers'],
   })
-  const createCustomer = useCreate<Record<string, unknown>>()
+  const createCustomer = useCreate<Record<string, unknown>, CustomerItem>()
   const updateCustomer = usePatch<Record<string, unknown>>()
 
   // Indique si on est en mode edition ou creation.
@@ -66,7 +68,12 @@ export function CustomerDialog({
       )
     } else {
       // En creation, isActive est absent et le backend le fixe a true.
-      createCustomer.mutate(payload, options)
+      createCustomer.mutate(payload, {
+        onSuccess: (createdCustomer) => {
+          onOpenChange(false)
+          onCreated?.(createdCustomer)
+        },
+      })
     }
   }
 
