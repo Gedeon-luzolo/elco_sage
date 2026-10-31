@@ -67,6 +67,9 @@ export function InvoicePaperPreview({ invoice }: { invoice: InvoiceDocument }) {
         </p>
         <p className="mt-1.5 font-bold">Caisse</p>
       </div>
+
+      {/* Lien avec le ticket imprimé hors ligne, ou mention de la facture provisoire */}
+      {invoice.note && <p className="mt-6 text-[12px] italic">{invoice.note}</p>}
     </div>
   )
 }

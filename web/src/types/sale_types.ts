@@ -33,7 +33,8 @@ export type SaleItemRow = {
   paymentType: string
   paymentMethod: string | null
   paymentReference: string | null
-  additionNumber: string
+  invoiceNumber: number | null
+  offlineReference: string | null
   saleDate: string
   currency: string
   theoreticalAmount: number
@@ -51,6 +52,6 @@ export type SaleItemRow = {
 // Filtres de l'historique des ventes.
 export type SalesHistoryFilters = {
   facturationDate: string | null
-  additionNumber: string | null
+  search: string | null
   status: string
 }

@@ -13,7 +13,10 @@ export class CreateSalesTable1800000007000 implements MigrationInterface {
         -- Renseignés pour une vente payée tout de suite ; vides pour un crédit ou un offert
         payment_method text CHECK (payment_method IN ('CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'BANK_CARD', 'CHEQUE')),
         payment_reference varchar(100),
-        addition_number varchar(6) NOT NULL CONSTRAINT sales_addition_number_unique UNIQUE,
+        -- Numéro officiel de la facture, attribué par l'API sans trou
+        invoice_number integer NOT NULL CONSTRAINT sales_invoice_number_unique UNIQUE,
+        -- Référence créée par l'appareil hors ligne (ex : A0009) ; vide pour une vente faite en ligne
+        offline_reference varchar(10) CONSTRAINT sales_offline_reference_unique UNIQUE,
         sale_date timestamptz NOT NULL,
         currency text NOT NULL DEFAULT 'CDF' CHECK (currency IN ('CDF', 'USD')),
         theoretical_amount numeric(15, 2) NOT NULL DEFAULT 0,
@@ -26,6 +29,10 @@ export class CreateSalesTable1800000007000 implements MigrationInterface {
     `);
     await queryRunner.query(`
       CREATE INDEX sales_cash_session_id_sale_date_index ON sales (cash_session_id, sale_date)
+    `);
+    // Historique et pilotage par période
+    await queryRunner.query(`
+      CREATE INDEX sales_sale_date_index ON sales (sale_date)
     `);
   }
 

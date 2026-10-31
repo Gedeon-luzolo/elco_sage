@@ -21,8 +21,11 @@ import {
   getUserDisplayName,
   userSummaryFields,
 } from '../../users/utils/user.utils.js';
-import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { SaleRecovery } from '../recoveries/entities/sale-recovery.entity.js';
+import {
+  formatInvoiceNumber,
+  SaleNumbersService,
+} from '../sale-numbers/sale-numbers.service.js';
 import type { CreateSaleDto } from './dto/create-sale.dto.js';
 import type { FindSalesDto } from './dto/find-sales.dto.js';
 import { SaleItem } from './entities/sale-item.entity.js';
@@ -51,19 +54,19 @@ export class SalesService {
     @InjectRepository(SaleRecovery)
     private readonly recoveriesRepository: Repository<SaleRecovery>,
     private readonly saleValidationService: SaleValidationService,
-    private readonly additionNumbersService: AdditionNumbersService,
+    private readonly saleNumbersService: SaleNumbersService,
     private readonly proformasService: ProformasService,
     private readonly journalisationsService: JournalisationsService,
   ) {}
 
   /**
-   * Historique des ventes par lot, toutes caisses et tous statuts, pour retrouver et réimprimer une addition.
+   * Historique des ventes par lot, toutes caisses et tous statuts, pour retrouver et réimprimer une facture.
    */
   async findHistory({
     offset,
     limit,
     facturationDate,
-    additionNumber,
+    search,
     status,
   }: FindSalesDto) {
     // Seules les relations simples sont jointes : le lot et son total restent justes.
@@ -79,12 +82,18 @@ export class SalesService {
       query.andWhere('sale.status = :status', { status });
     }
 
-    // Le numéro d'addition se cherche en partie : « 12 » trouve 00012 et 00120.
+    // Le numéro de facture et la référence hors ligne se cherchent en partie : « 12 » trouve 00012 et A0120.
     const batch = await paginateBatch(query, {
       offset,
       limit,
       maxLimit: SALES_HISTORY_MAX_BATCH,
-      search: { term: additionNumber, fields: ['sale.addition_number'] },
+      search: {
+        term: search,
+        fields: [
+          "LPAD(CAST(sale.invoice_number AS text), 5, '0')",
+          'sale.offline_reference',
+        ],
+      },
     });
 
     // Les lignes et les recouvrements du lot sont chargés à part, sur leurs propres tables.
@@ -99,7 +108,7 @@ export class SalesService {
   @Transactional()
   async create(actor: User, dto: CreateSaleDto) {
     // Les créations de vente passent l'une après l'autre : rejeu et numérotation ne peuvent pas se croiser.
-    await this.additionNumbersService.lock();
+    await this.saleNumbersService.lock();
 
     // Un client hors ligne qui renvoie sa vente reçoit celle déjà créée, sans doublon.
     if (dto.id) {
@@ -122,14 +131,16 @@ export class SalesService {
     );
     const amounts = applyDiscount(theoreticalAmount, dto.discountAmount);
 
-    // Numéro pris dans la plage de la caisse hors ligne, sinon attribué par le serveur.
-    const additionNumber = dto.additionNumber
-      ? await this.useReservedNumber(
-          cashSession.id,
-          actor.id,
-          dto.additionNumber,
-        )
-      : await this.additionNumbersService.generateOnlineNumber();
+    // Une vente faite hors ligne garde la référence de son appareil, qui doit être celle du vendeur.
+    if (dto.offlineReference) {
+      await this.saleNumbersService.assertOfflineReference(
+        actor.id,
+        dto.offlineReference,
+      );
+    }
+
+    // Le numéro officiel suit le dernier attribué, quel que soit le moment de la vente.
+    const invoiceNumber = await this.saleNumbersService.nextInvoiceNumber();
 
     // Seule une vente payée tout de suite a un mode de paiement ; un crédit se règle par recouvrement.
     const isPaidNow = dto.paymentType === SalePaymentType.CASH;
@@ -143,7 +154,8 @@ export class SalesService {
       paymentType: dto.paymentType,
       paymentMethod: isPaidNow ? dto.paymentMethod : null,
       paymentReference: isPaidNow ? dto.paymentReference : null,
-      additionNumber,
+      invoiceNumber,
+      offlineReference: dto.offlineReference ?? null,
       // L'heure réelle de la vente hors ligne est conservée ; sinon celle du serveur.
       saleDate: dto.saleDate ? new Date(dto.saleDate) : new Date(),
       currency: dto.currency,
@@ -171,7 +183,7 @@ export class SalesService {
     await this.journalisationsService.create(
       JournalisationModule.SALES,
       // La création est tracée dans le journal.
-      `Addition ${sale.additionNumber} créée par ${getUserDisplayName(actor)}.`,
+      `Facture ${formatInvoiceNumber(sale.invoiceNumber)} créée par ${getUserDisplayName(actor)}.`,
       actor,
     );
 
@@ -209,7 +221,7 @@ export class SalesService {
     await this.journalisationsService.create(
       JournalisationModule.SALES,
       // L'annulation est tracée dans le journal.
-      `Addition ${sale.additionNumber} annulée par ${getUserDisplayName(actor)}.`,
+      `Facture ${formatInvoiceNumber(sale.invoiceNumber)} annulée par ${getUserDisplayName(actor)}.`,
       actor,
     );
 
@@ -278,32 +290,18 @@ export class SalesService {
     return this.findResponse(existing.id);
   }
 
-  // Numéro émis hors ligne : il doit appartenir à une plage du vendeur dans cette session.
-  private async useReservedNumber(
-    cashSessionId: string,
-    sellerId: string,
-    additionNumber: string,
-  ) {
-    await this.additionNumbersService.assertReservedFor(
-      cashSessionId,
-      sellerId,
-      additionNumber,
-    );
-
-    return this.additionNumbersService.format(Number(additionNumber));
-  }
-
-  // Enregistre l'en-tête ; un numéro déjà pris devient une erreur lisible.
+  // Enregistre l'en-tête ; une référence hors ligne déjà prise devient une erreur lisible.
   private async insertSale(fields: Partial<Sale>) {
     try {
       return await this.salesRepository.save(
         this.salesRepository.create(fields),
       );
     } catch (error) {
-      // Seul le même numéro renvoyé avec un autre id peut buter ici : le verrou exclut le reste.
-      if (isUniqueViolation(error, 'sales_addition_number_unique')) {
+      // Le numéro de facture ne peut pas buter ici, le verrou l'exclut ; seule la référence le peut,
+      // par exemple si le même vendeur a vendu hors ligne sur deux appareils.
+      if (isUniqueViolation(error, 'sales_offline_reference_unique')) {
         throw new UnprocessableEntityException(
-          `Le numéro d'addition ${fields.additionNumber} est déjà utilisé.`,
+          `La commande ${fields.offlineReference} est déjà enregistrée.`,
         );
       }
 

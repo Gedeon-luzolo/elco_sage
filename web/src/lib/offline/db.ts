@@ -20,13 +20,11 @@ export interface OutboxEntry {
   attempts: number
 }
 
-// État de la numérotation locale d'un utilisateur dans une session de caisse.
-// id combine l'utilisateur et la session
+// État de la numérotation hors ligne d'un vendeur : sa lettre et son dernier compteur.
+// id est celui de l'utilisateur
 export interface NumberingState {
   id: string
-  cashSessionId: string
-  userId: string
-  blocks: Array<{ startNumber: number; endNumber: number }>
+  sellerCode: string
   cursor: number
 }
 
@@ -41,7 +39,7 @@ let dbPromise: Promise<IDBPDatabase<ElcoDB>> | null = null
 
 // Ouvre la base une seule fois et réutilise la connexion ensuite.
 export function getDb() {
-  dbPromise ??= openDB<ElcoDB>('elco_sage', 2, {
+  dbPromise ??= openDB<ElcoDB>('elco_sage', 3, {
     // Création des tables au premier lancement, puis évolutions des versions suivantes
     upgrade(db, oldVersion) {
       if (oldVersion < 1) {
@@ -54,6 +52,14 @@ export function getDb() {
       // Version 2 : la numérotation est rangée par utilisateur et par session.
       // L'ancien état est supprimé : il est relu depuis le serveur à la prochaine connexion.
       if (oldVersion < 2) {
+        db.deleteObjectStore('numbering')
+        db.createObjectStore('numbering', { keyPath: 'id' })
+        return
+      }
+
+      // Version 3 : les plages de numéros laissent la place à une lettre et un compteur par vendeur.
+      // L'ancien état est supprimé : il est relu depuis le serveur à la prochaine connexion.
+      if (oldVersion < 3) {
         db.deleteObjectStore('numbering')
         db.createObjectStore('numbering', { keyPath: 'id' })
       }

@@ -25,6 +25,7 @@ import { useCrud } from '~/hooks/common/useCrud'
 import type { SaleItemRow } from '~/types/sale_types'
 import { todayDateKey } from '~/utils/date'
 import { isManagementRole } from '~/utils/user_role.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 // Options du filtre de statut, alignees sur l'enum backend SaleStatus.
 const SALE_STATUS_OPTIONS = [
@@ -36,13 +37,13 @@ const SALE_STATUS_OPTIONS = [
 export default function SalesHistoryPage() {
   const { user } = useAuth()
   const isManagementUser = isManagementRole(user?.role)
-  const [additionNumber, setAdditionNumber] = useState('')
+  const [search, setSearch] = useState('')
   const [status, setStatus] = useState('ALL')
   const [facturationDate, setFacturationDate] = useState('')
   // Les filtres ne sont envoyes au serveur qu'au clic sur "Chercher".
   const [appliedFilters, setAppliedFilters] = useState<{
     facturationDate?: string
-    additionNumber?: string
+    search?: string
     status: string
   }>({ status: 'ALL' })
 
@@ -115,7 +116,7 @@ export default function SalesHistoryPage() {
   const searchSalesHistory = () => {
     setAppliedFilters({
       facturationDate: facturationDate || undefined,
-      additionNumber: additionNumber || undefined,
+      search: search || undefined,
       status,
     })
   }
@@ -147,19 +148,19 @@ export default function SalesHistoryPage() {
             <div>
               <CardTitle>Filtres</CardTitle>
               <CardDescription>
-                Chercher par numéro d&apos;addition, statut et/ou date de facturation.
+                Chercher par numéro de facture ou de commande, statut et/ou date de facturation.
               </CardDescription>
             </div>
 
             <div className="flex w-full flex-col gap-4 xl:w-auto xl:flex-row xl:items-end xl:justify-end">
               <div className="grid gap-2 xl:w-56">
-                <Label htmlFor="addition-number">Numéro d&apos;addition</Label>
+                <Label htmlFor="sale-number">Facture ou commande</Label>
                 <Input
-                  id="addition-number"
+                  id="sale-number"
                   className="h-10"
-                  placeholder="Ex: 000123"
-                  value={additionNumber}
-                  onChange={(event) => setAdditionNumber(event.target.value)}
+                  placeholder="Ex: 00123 ou A0009"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
 
@@ -248,7 +249,7 @@ export default function SalesHistoryPage() {
       <ConfirmationDialog
         open={Boolean(saleToCancel)}
         title="Annuler cette vente ?"
-        description={`L'addition ${saleToCancel?.additionNumber ?? ''} sera annulée.`}
+        description={`La facture ${saleToCancel ? getSaleNumberLabel(saleToCancel) : ''} sera annulée.`}
         confirmLabel="Annuler la vente"
         variant="destructive"
         onOpenChange={(open) => {

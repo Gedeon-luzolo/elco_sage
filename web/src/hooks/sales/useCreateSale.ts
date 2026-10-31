@@ -4,18 +4,18 @@ import { useAuth } from '~/hooks/auth/useAuth'
 import { ApiError } from '~/lib/api/fetch'
 import { getErrorMessage } from '~/lib/error/get_error_message'
 import { OFFLINE_QUERY_PREFIXES } from '~/lib/offline/config'
-import { commitNumber, peekNextNumber, refreshNumbering } from '~/lib/offline/numbering'
+import { commitOfflineReference, peekOfflineReference } from '~/lib/offline/numbering'
 import { submitOrQueue } from '~/lib/offline/submit'
 import { invalidateQueriesByPrefix } from '~/lib/react-query/query_client'
 import type { SaleItemRow } from '~/types/sale_types'
 
 // Données d'une création de vente.
-// payload est celui du formulaire (sans id ni numéro : ils sont attribués ici).
-// buildSale construit la vente locale (ticket) une fois l'id et le numéro connus.
+// payload est celui du formulaire (sans id ni référence : ils sont attribués ici).
+// buildSale construit la vente locale (ticket) d'une vente mise en file, une fois sa référence connue.
 interface CreateSaleVariables {
   cashSessionId: string
   payload: Record<string, unknown>
-  buildSale: (meta: { id: string; additionNumber: string; saleDate: string }) => SaleItemRow
+  buildSale: (meta: { id: string; offlineReference: string; saleDate: string }) => SaleItemRow
 }
 
 // Résultat d'une création de vente.
@@ -25,12 +25,12 @@ interface CreateSaleResult {
   queued: boolean
 }
 
-const NO_NUMBER_MESSAGE =
-  "Plus de numéros d'addition disponibles. Reconnectez-vous au serveur pour en réserver."
+const NO_SELLER_CODE_MESSAGE =
+  'Connectez-vous une première fois au serveur pour pouvoir vendre hors ligne.'
 
-// Crée une vente en ligne quand le serveur répond, sinon la met dans la file d'attente.
-// Le numéro d'addition vient toujours de la plage réservée à la caisse, pour que le ticket
-// imprimé reste valable quel que soit le chemin emprunté.
+// Crée une vente en ligne quand le serveur répond : elle reçoit tout de suite son numéro de facture.
+// Sinon la vente est mise en file avec une référence hors ligne (ex : A0009), imprimée sur le ticket
+// provisoire ; le numéro de facture lui sera attribué à l'envoi.
 export function useCreateSale() {
   const { user } = useAuth()
 
@@ -40,40 +40,50 @@ export function useCreateSale() {
       payload,
       buildSale,
     }: CreateSaleVariables): Promise<CreateSaleResult> => {
-      // Prochain numéro de la plage réservée à cette caisse
-      let additionNumber = await peekNextNumber(cashSessionId, user!.id)
-
-      // Plages épuisées ou jamais chargées : une tentative de réservation si le serveur répond
-      if (!additionNumber) {
-        await refreshNumbering(cashSessionId, user!.id).catch(() => undefined)
-        additionNumber = await peekNextNumber(cashSessionId, user!.id)
-      }
-
-      // Sans numéro, impossible d'imprimer un ticket valable
-      if (!additionNumber) {
-        throw new ApiError(NO_NUMBER_MESSAGE, 409)
-      }
-
       // L'id généré ici rend l'envoi rejouable sans doublon
       const id = crypto.randomUUID()
       const saleDate = new Date().toISOString()
-      const sale = buildSale({ id, additionNumber, saleDate })
+      let offlineReference: string | null = null
+      let queuedSale: SaleItemRow | null = null
 
-      // Envoi au serveur, ou mise en file si le réseau est coupé
-      const result = await submitOrQueue<SaleItemRow>({
-        id,
-        type: 'sale',
-        userId: user!.id,
-        path: '/sales',
-        body: { ...payload, id, additionNumber, cashSessionId, saleDate },
-        summary: `Vente ${additionNumber}`,
-        sale,
-      })
+      const result = await submitOrQueue<SaleItemRow>(
+        {
+          id,
+          type: 'sale',
+          userId: user!.id,
+          path: '/sales',
+          body: { ...payload, id, cashSessionId, saleDate },
+          summary: 'Vente',
+          sale: null,
+        },
+        // Serveur injoignable : la vente prend la prochaine référence du vendeur avant la mise en file
+        async (operation) => {
+          offlineReference = await peekOfflineReference(user!.id)
 
-      // Le numéro n'est consommé qu'une fois la vente envoyée ou mise en file
-      await commitNumber(cashSessionId, user!.id, additionNumber)
+          // Sans lettre de vendeur, impossible d'imprimer un ticket identifiable
+          if (!offlineReference) {
+            throw new ApiError(NO_SELLER_CODE_MESSAGE, 409)
+          }
 
-      return result.queued ? { sale, queued: true } : { sale: result.data, queued: false }
+          queuedSale = buildSale({ id, offlineReference, saleDate })
+
+          return {
+            ...operation,
+            body: { ...operation.body, offlineReference },
+            summary: `Vente ${offlineReference}`,
+            sale: queuedSale,
+          }
+        }
+      )
+
+      if (!result.queued) {
+        return { sale: result.data, queued: false }
+      }
+
+      // La référence n'est consommée qu'une fois la vente mise en file
+      await commitOfflineReference(user!.id, offlineReference!)
+
+      return { sale: queuedSale!, queued: true }
     },
     onSuccess: ({ queued }) => {
       // Vente gardée sur l'appareil : la personne doit savoir qu'elle n'est pas encore envoyée

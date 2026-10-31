@@ -22,11 +22,11 @@ const saleItemSchema = z.object({
 
 export const CreateSaleSchema = z
   .object({
-    // Fournis par la caisse hors ligne : l'id rend l'envoi rejouable, le numéro vient de sa plage.
+    // Fournis par le client : l'id rend l'envoi rejouable, la référence marque une vente faite hors ligne.
     id: z.uuid("L'identifiant de la vente est invalide.").optional(),
-    additionNumber: z
+    offlineReference: z
       .string()
-      .regex(/^\d{1,6}$/, "Le numéro d'addition est invalide.")
+      .regex(/^[A-Z]{1,2}\d{4,8}$/, 'Le numéro de commande est invalide.')
       .optional(),
     proformaId: nullableUuid('La proforma'),
     cashSessionId: nullableUuid('La session de caisse'),

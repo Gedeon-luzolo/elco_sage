@@ -24,6 +24,7 @@ import { CashSessionsService } from '../cash-sessions/cash-sessions.service.js';
 import { DebtsService } from '../debts/debts.service.js';
 import { Sale } from '../sales/entities/sale.entity.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
+import { formatInvoiceNumber } from '../sale-numbers/sale-numbers.service.js';
 import { SalesService } from '../sales/sales.service.js';
 import type { CreateSaleRecoveryDto } from './dto/create-sale-recovery.dto.js';
 import { SaleRecovery } from './entities/sale-recovery.entity.js';
@@ -108,7 +109,7 @@ export class RecoveriesService {
     await this.journalisationsService.create(
       JournalisationModule.SALES,
       // Le paiement est tracé dans le journal.
-      `Recouvrement de ${amount} ${dto.currency} enregistré sur l'addition ${sale.additionNumber} par ${getUserDisplayName(actor)}.`,
+      `Recouvrement de ${amount} ${dto.currency} enregistré sur la facture ${formatInvoiceNumber(sale.invoiceNumber)} par ${getUserDisplayName(actor)}.`,
       actor,
     );
 

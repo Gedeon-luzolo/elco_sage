@@ -22,7 +22,8 @@ import { SalePaymentType, SaleStatus } from '../enums/sale.enums.js';
 import { SaleItem } from './sale-item.entity.js';
 
 @Entity('sales')
-@Unique('sales_addition_number_unique', ['additionNumber'])
+@Unique('sales_invoice_number_unique', ['invoiceNumber'])
+@Unique('sales_offline_reference_unique', ['offlineReference'])
 @Index('sales_cash_session_id_sale_date_index', ['cashSessionId', 'saleDate']) // Ventes d'une session, dans l'ordre
 @Index('sales_sale_date_index', ['saleDate']) // Historique et pilotage par période
 export class Sale {
@@ -73,8 +74,18 @@ export class Sale {
   })
   paymentReference: string | null;
 
-  @Column({ name: 'addition_number', type: 'varchar', length: 6 })
-  additionNumber: string;
+  // Numéro officiel, attribué par l'API à l'arrivée de la vente, sans trou.
+  @Column({ name: 'invoice_number', type: 'integer' })
+  invoiceNumber: number;
+
+  // Référence créée hors ligne par l'appareil (ex : A0009) ; vide pour une vente faite en ligne.
+  @Column({
+    name: 'offline_reference',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+  })
+  offlineReference: string | null;
 
   @Column({ name: 'sale_date', type: 'timestamp with time zone' })
   saleDate: Date;

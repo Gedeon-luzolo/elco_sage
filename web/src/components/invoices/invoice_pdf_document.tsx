@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
   right: { textAlign: 'right' },
   signature: { marginTop: 34, alignSelf: 'flex-end', alignItems: 'center', fontSize: 12 },
   signatureRole: { marginTop: 8, fontFamily: 'Helvetica-Bold' },
+  note: { marginTop: 24, fontSize: 10, fontFamily: 'Helvetica-Oblique' },
   footer: {
     position: 'absolute',
     bottom: 30,
@@ -148,6 +149,9 @@ export function InvoicePdfDocument({ invoice }: InvoicePdfDocumentProps) {
           </Text>
           <Text style={styles.signatureRole}>Caisse</Text>
         </View>
+
+        {/* Lien avec le ticket imprimé hors ligne, ou mention de la facture provisoire */}
+        {invoice.note && <Text style={styles.note}>{invoice.note}</Text>}
 
         {/* Pied de page répété sur chaque page */}
         <View style={styles.footer} fixed>

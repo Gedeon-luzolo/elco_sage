@@ -13,6 +13,7 @@ import type { DebtItem } from '~/types/debt_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatDebtSaleDate, formatDebtStatusLabel } from '~/utils/sales/debt.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 interface DebtsTableProps {
   debts: DebtItem[]
@@ -49,7 +50,7 @@ export function DebtsTable({
           <TableRow key={debt.sale.id}>
             <TableCell>{formatDebtSaleDate(debt.sale.saleDate)}</TableCell>
             <TableCell>{debt.sale.customer?.fullName ?? '-'}</TableCell>
-            <TableCell>{debt.sale.additionNumber}</TableCell>
+            <TableCell>{getSaleNumberLabel(debt.sale)}</TableCell>
             <TableCell className="text-right">
               {formatMoneyWithCurrency(debt.debtTotalAmount, debt.sale.currency as CurrencyCode)}
             </TableCell>

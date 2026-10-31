@@ -18,7 +18,7 @@ interface SalePayload {
 // Données nécessaires pour reconstruire la vente : le corps, les listes de référence et le vendeur.
 interface BuildLocalSaleInput {
   id: string
-  additionNumber: string
+  offlineReference: string
   saleDate: string
   cashSessionId: string
   payload: SalePayload
@@ -69,7 +69,9 @@ export function buildLocalSale(input: BuildLocalSaleInput): SaleItemRow {
     paymentType: payload.paymentType,
     paymentMethod: payload.paymentMethod,
     paymentReference: payload.paymentReference,
-    additionNumber: input.additionNumber,
+    // Le numéro de facture sera attribué par le serveur à l'envoi
+    invoiceNumber: null,
+    offlineReference: input.offlineReference,
     saleDate: input.saleDate,
     currency: payload.currency,
     theoreticalAmount,

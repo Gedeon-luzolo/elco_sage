@@ -4,8 +4,6 @@ import { CatalogModule } from '../catalog/catalog.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { ProformasModule } from '../proformas/proformas.module.js';
 import { User } from '../users/entities/user.entity.js';
-import { AdditionNumbersService } from './addition-numbers/addition-numbers.service.js';
-import { AdditionNumberBlock } from './addition-numbers/entities/addition-number-block.entity.js';
 import { CashSessionReportService } from './cash-sessions/cash-session-report.service.js';
 import { CashSessionsController } from './cash-sessions/cash-sessions.controller.js';
 import { CashSessionsService } from './cash-sessions/cash-sessions.service.js';
@@ -15,23 +13,17 @@ import { DebtsService } from './debts/debts.service.js';
 import { RecoveriesController } from './recoveries/recoveries.controller.js';
 import { RecoveriesService } from './recoveries/recoveries.service.js';
 import { SaleRecovery } from './recoveries/entities/sale-recovery.entity.js';
+import { SaleNumbersService } from './sale-numbers/sale-numbers.service.js';
 import { SaleItem } from './sales/entities/sale-item.entity.js';
 import { Sale } from './sales/entities/sale.entity.js';
 import { SalesController } from './sales/sales.controller.js';
 import { SaleValidationService } from './sales/sale-validation.service.js';
 import { SalesService } from './sales/sales.service.js';
 
-// Caisse : sessions et leur rapport, numérotation des additions, ventes, dettes et recouvrements.
+// Caisse : sessions et leur rapport, numérotation des factures, ventes, dettes et recouvrements.
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      CashSession,
-      AdditionNumberBlock,
-      Sale,
-      SaleItem,
-      SaleRecovery,
-      User,
-    ]),
+    TypeOrmModule.forFeature([CashSession, Sale, SaleItem, SaleRecovery, User]),
     CatalogModule,
     CustomersModule,
     ProformasModule,
@@ -44,7 +36,7 @@ import { SalesService } from './sales/sales.service.js';
   ],
   providers: [
     CashSessionsService,
-    AdditionNumbersService,
+    SaleNumbersService,
     SaleValidationService,
     SalesService,
     CashSessionReportService,

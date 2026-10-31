@@ -12,7 +12,6 @@ import { UuidParam } from '../../../common/decorators/uuid-param.decorator.js';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator.js';
 import { AuthGuard } from '../../auth/guards/auth.guard.js';
 import type { User } from '../../users/entities/user.entity.js';
-import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { CashSessionReportService } from './cash-session-report.service.js';
 import { CashSessionsService } from './cash-sessions.service.js';
 import { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
@@ -23,7 +22,6 @@ import { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
 export class CashSessionsController {
   constructor(
     private readonly cashSessionsService: CashSessionsService,
-    private readonly additionNumbersService: AdditionNumbersService,
     private readonly cashSessionReportService: CashSessionReportService,
   ) {}
 
@@ -58,29 +56,6 @@ export class CashSessionsController {
   }
 
   /**
-   * Plages de numéros réservées à l'utilisateur et dernier numéro utilisé.
-   */
-  @Get('current/addition-numbers')
-  async findAdditionNumbers(@CurrentUser() actor: User) {
-    const session = await this.cashSessionsService.getOpenSessionOrFail();
-
-    return this.additionNumbersService.getState(session.id, actor.id);
-  }
-
-  /**
-   * Réserve une nouvelle plage quand la précédente est presque consommée.
-   */
-  @Post('current/addition-numbers')
-  async reserveAdditionNumbers(@CurrentUser() actor: User) {
-    const session = await this.cashSessionsService.getOpenSessionOrFail();
-
-    // Nouvelle plage, puis état complet renvoyé au client.
-    await this.additionNumbersService.reserveBlock(session.id, actor.id);
-
-    return this.additionNumbersService.getState(session.id, actor.id);
-  }
-
-  /**
    * Clôture la session ouverte.
    */
   @Post('close')
@@ -90,19 +65,11 @@ export class CashSessionsController {
   }
 
   /**
-   * Ouvre la session de caisse, avec la première plage de numéros de celui qui l'ouvre.
+   * Ouvre la session de caisse.
    */
   @Post()
   async open(@CurrentUser() actor: User) {
-    const session = await this.cashSessionsService.open(actor);
-
-    return {
-      session,
-      additionNumbers: await this.additionNumbersService.getState(
-        session.id,
-        actor.id,
-      ),
-    };
+    return { session: await this.cashSessionsService.open(actor) };
   }
 
   /**

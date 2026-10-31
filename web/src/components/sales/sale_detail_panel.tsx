@@ -5,6 +5,7 @@ import { Button } from '~/components/ui/button'
 import type { SaleItemRow } from '~/types/sale_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import { saleToInvoice } from '~/utils/invoices/invoice.utils'
+import { getSaleTitle } from '~/utils/sales/sale.utils'
 
 // Propriétés du panneau ; isPending marque une vente faite hors ligne et pas encore envoyée.
 interface SaleDetailPanelProps {
@@ -31,7 +32,7 @@ export function SaleDetailPanel({
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
       <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border bg-card p-4">
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
+          <h3 className="text-lg font-semibold">{getSaleTitle(sale)}</h3>
           <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
         {/* Actions sous le titre : elles se partagent la largeur du panneau étroit */}

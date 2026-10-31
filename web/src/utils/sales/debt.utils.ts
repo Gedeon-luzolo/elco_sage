@@ -1,6 +1,7 @@
 import type { DebtItem, RecoveryPaymentItem } from '~/types/debt_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import type { DebtStatus } from '~/types/debt_types'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 // Formate une date liée aux dettes pour garder le même rendu sur page et dialog.
 export function formatDebtSaleDate(value: string | null) {
@@ -24,11 +25,11 @@ export function formatDebtStatusLabel(status: DebtStatus) {
 // Champs de recherche utilisés dans la page des dettes.
 export const debtSearchFields = [
   (debt: DebtItem) => debt.sale.customer?.fullName,
-  (debt: DebtItem) => debt.sale.additionNumber,
+  (debt: DebtItem) => getSaleNumberLabel(debt.sale),
 ]
 
 // Champs de recherche utilisés dans la page des paiements de recouvrement.
 export const recoverySearchFields = [
   (payment: RecoveryPaymentItem) => payment.sale.customer?.fullName,
-  (payment: RecoveryPaymentItem) => payment.sale.additionNumber,
+  (payment: RecoveryPaymentItem) => getSaleNumberLabel(payment.sale),
 ]

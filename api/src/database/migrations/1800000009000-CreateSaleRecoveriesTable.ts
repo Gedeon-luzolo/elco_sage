@@ -23,6 +23,10 @@ export class CreateSaleRecoveriesTable1800000009000 implements MigrationInterfac
     await queryRunner.query(`
       CREATE INDEX sale_recoveries_cash_session_id_recovered_at_index ON sale_recoveries (cash_session_id, recovered_at)
     `);
+    // Recouvrements filtrés par période, toutes caisses confondues
+    await queryRunner.query(`
+      CREATE INDEX sale_recoveries_recovered_at_index ON sale_recoveries (recovered_at)
+    `);
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {

@@ -22,7 +22,6 @@ import {
   getUserDisplayName,
   userSummaryFields,
 } from '../../users/utils/user.utils.js';
-import { AdditionNumbersService } from '../addition-numbers/addition-numbers.service.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
 import type { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
 import { CashSession } from './entities/cash-session.entity.js';
@@ -41,7 +40,6 @@ export class CashSessionsService {
   constructor(
     @InjectRepository(CashSession)
     private readonly cashSessionsRepository: Repository<CashSession>,
-    private readonly additionNumbersService: AdditionNumbersService,
     private readonly journalisationsService: JournalisationsService,
   ) {}
 
@@ -139,9 +137,6 @@ export class CashSessionsService {
         differenceAmounts: null,
       }),
     );
-
-    // Chaque utilisateur a ses propres plages : celui qui ouvre reçoit la première.
-    await this.additionNumbersService.reserveBlock(session.id, actor.id);
 
     await this.journalisationsService.create(
       JournalisationModule.SALES,

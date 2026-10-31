@@ -12,6 +12,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator.js';
 import { AuthGuard } from '../../auth/guards/auth.guard.js';
 import { ManagementGuard } from '../../auth/guards/management.guard.js';
 import type { User } from '../../users/entities/user.entity.js';
+import { SaleNumbersService } from '../sale-numbers/sale-numbers.service.js';
 import { CreateSaleDto } from './dto/create-sale.dto.js';
 import { FindSalesDto } from './dto/find-sales.dto.js';
 import { SalesService } from './sales.service.js';
@@ -19,7 +20,10 @@ import { SalesService } from './sales.service.js';
 @Controller('sales')
 @UseGuards(AuthGuard)
 export class SalesController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(
+    private readonly salesService: SalesService,
+    private readonly saleNumbersService: SaleNumbersService,
+  ) {}
 
   /**
    * Historique des ventes (toutes caisses), filtrable par date, numéro et statut.
@@ -27,6 +31,14 @@ export class SalesController {
   @Get()
   findHistory(@Query() query: FindSalesDto) {
     return this.salesService.findHistory(query);
+  }
+
+  /**
+   * Lettre du vendeur et dernier compteur utilisé, pour créer des références hors ligne.
+   */
+  @Get('offline-reference')
+  findOfflineReference(@CurrentUser() actor: User) {
+    return this.saleNumbersService.getOfflineState(actor.id);
   }
 
   /**

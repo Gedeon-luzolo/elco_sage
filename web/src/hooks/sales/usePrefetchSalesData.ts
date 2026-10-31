@@ -44,11 +44,11 @@ export function usePrefetchSalesData() {
     void prefetch('/debts', {})
     void prefetch('/recoveries', {})
 
+    // Lettre et compteur du vendeur gardés sur l'appareil, pour pouvoir vendre si le réseau se coupe
+    void refreshNumbering(user.id).catch(() => undefined)
+
     // Ces données dépendent de la session de caisse ouverte
     if (sessionId) {
-      // Plages de numéros d'addition gardées en réserve pour pouvoir vendre si le réseau se coupe
-      void refreshNumbering(sessionId, user.id).catch(() => undefined)
-
       // Rapport de la session (résumé de la page Ventes), lu par id
       void queryClient
         .query({

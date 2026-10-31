@@ -2,11 +2,12 @@ import type { OutboxEntry } from '~/lib/offline/db'
 import { getPendingEntries } from '~/lib/offline/pending_entries'
 import type { SaleItemRow } from '~/types/sale_types'
 import { businessDateKey } from '~/utils/date'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 // Filtres de l'historique des ventes, les mêmes que ceux envoyés au serveur.
 export interface SalesHistoryFilters {
   facturationDate?: string
-  additionNumber?: string
+  search?: string
   status: string
 }
 
@@ -20,14 +21,14 @@ export function getPendingSales(
   // Une vente en file est toujours active : elle ne peut pas correspondre au filtre "annulées"
   if (filters.status === 'CANCELLED') return []
 
-  const search = filters.additionNumber?.toLowerCase()
+  const search = filters.search?.toLowerCase()
 
   return getPendingEntries(entries, 'sale')
     .filter((entry) => entry.userId === userId)
     .flatMap((entry) => (entry.sale ? [entry.sale] : []))
     .filter((sale) => {
-      // Recherche partielle sur le numéro d'addition, sans tenir compte de la casse
-      if (search && !sale.additionNumber.toLowerCase().includes(search)) return false
+      // Recherche partielle sur la référence hors ligne, sans tenir compte de la casse
+      if (search && !getSaleNumberLabel(sale).toLowerCase().includes(search)) return false
 
       // Filtre sur le jour de facturation, dans le fuseau métier
       if (filters.facturationDate && sale.saleDate) {

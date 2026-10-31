@@ -26,6 +26,7 @@ import {
   type PaymentMethod,
 } from '~/utils/sales/payment.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 interface DebtPaymentDialogProps {
   debt: DebtItem | null
@@ -59,7 +60,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
     }
 
     recover.mutate(
-      { saleId: debt.sale.id, additionNumber: debt.sale.additionNumber, payload },
+      { saleId: debt.sale.id, saleNumber: getSaleNumberLabel(debt.sale), payload },
       { onSuccess: closeDialog }
     )
   }
@@ -79,7 +80,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
             <>
               <div className="grid gap-2 rounded-xl border border-border bg-muted/30 p-4 text-sm">
                 <DebtPaymentLine label="Client" value={debt.sale.customer?.fullName ?? '-'} />
-                <DebtPaymentLine label="Addition" value={debt.sale.additionNumber} />
+                <DebtPaymentLine label="Facture" value={getSaleNumberLabel(debt.sale)} />
                 <DebtPaymentLine
                   label="Date de vente"
                   value={formatDebtSaleDate(debt.sale.saleDate)}

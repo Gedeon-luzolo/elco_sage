@@ -6,6 +6,27 @@ import { buildPaymentFields, type PaymentMethod } from '~/utils/sales/payment.ut
 
 export type SalePaymentType = 'CASH' | 'CREDIT' | 'OFFERED'
 
+// Numéro officiel d'une facture sur 5 chiffres (ex : 1 devient "00001").
+export const formatInvoiceNumber = (value: number) => String(value).padStart(5, '0')
+
+// Numéro affiché d'une vente : celui de la facture, ou la référence hors ligne tant qu'elle n'est pas envoyée.
+export function getSaleNumberLabel(sale: {
+  invoiceNumber: number | null
+  offlineReference: string | null
+}) {
+  return sale.invoiceNumber !== null
+    ? formatInvoiceNumber(sale.invoiceNumber)
+    : (sale.offlineReference ?? '-')
+}
+
+// Titre d'une vente : « Facture 00001 », ou « Commande A0002 » tant qu'elle n'a pas de numéro officiel.
+export function getSaleTitle(sale: {
+  invoiceNumber: number | null
+  offlineReference: string | null
+}) {
+  return `${sale.invoiceNumber === null ? 'Commande' : 'Facture'} ${getSaleNumberLabel(sale)}`
+}
+
 // Etat minimal d'une ligne dans le formulaire de vente.
 export interface SaleLineState {
   productServiceId: string

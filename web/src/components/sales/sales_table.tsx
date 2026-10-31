@@ -12,6 +12,7 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
+import { getSaleNumberLabel, getSaleTitle } from '~/utils/sales/sale.utils'
 
 // Données du tableau ; pendingSaleIds liste les ventes faites hors ligne et pas encore envoyées.
 interface SalesTableProps {
@@ -49,7 +50,7 @@ export function SalesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="font-semibold">Addition</TableHead>
+              <TableHead className="font-semibold">Facture</TableHead>
               <TableHead className="font-semibold">Client</TableHead>
               <TableHead className="text-right font-semibold">Théorique</TableHead>
               <TableHead className="text-right font-semibold">Remise</TableHead>
@@ -70,7 +71,7 @@ export function SalesTable({
                     isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''
                   }`}
                 >
-                  <TableCell className="font-medium">{sale.additionNumber}</TableCell>
+                  <TableCell className="font-medium">{getSaleNumberLabel(sale)}</TableCell>
                   <TableCell>{sale.customer?.fullName ?? '-'}</TableCell>
                   <TableCell className="text-right">
                     {formatMoneyWithCurrency(sale.theoreticalAmount, sale.currency as CurrencyCode)}
@@ -121,7 +122,7 @@ function SaleMobileCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">Addition {sale.additionNumber}</p>
+          <p className="truncate text-sm font-semibold">{getSaleTitle(sale)}</p>
           <p className="text-xs text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">

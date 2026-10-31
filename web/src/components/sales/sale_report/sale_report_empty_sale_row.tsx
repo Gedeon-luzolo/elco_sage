@@ -5,6 +5,7 @@ import { formatDateLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 // Ligne d'une vente sans service ; isPending marque une vente pas encore envoyée au serveur.
 interface SaleReportEmptySaleRowProps {
@@ -25,7 +26,7 @@ export function SaleReportEmptySaleRow({
       <TableCell>{saleIndex + 1}</TableCell>
       <TableCell>{sale.saleDate ? formatDateLabel(sale.saleDate) : '-'}</TableCell>
       <TableCell className="font-medium">
-        {sale.additionNumber}
+        {getSaleNumberLabel(sale)}
         {/* Vente faite hors ligne : le serveur ne la connaît pas encore */}
         {isPending && (
           <span className="ml-1 text-[10px] font-normal text-amber-600">Non envoyée</span>

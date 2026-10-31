@@ -10,6 +10,7 @@ import { UserRole, UserStatus } from '../enums/user.enums.js';
 
 @Entity('users')
 @Unique('users_email_unique', ['email'])
+@Unique('users_seller_code_unique', ['sellerCode'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -29,6 +30,10 @@ export class User {
 
   @Column({ type: 'text' })
   status: UserStatus;
+
+  // Attribuée à la première vente préparée hors ligne : elle ouvre ses références (A0009).
+  @Column({ name: 'seller_code', type: 'varchar', length: 2, nullable: true })
+  sellerCode: string | null;
 
   // Jamais lu par défaut non plus : seule la connexion en a besoin.
   @Column({ name: 'failed_login_attempts', type: 'integer', select: false })

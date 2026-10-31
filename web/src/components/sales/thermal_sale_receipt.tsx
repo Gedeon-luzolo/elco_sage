@@ -5,6 +5,7 @@ import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
 
 interface ThermalSaleReceiptProps {
@@ -33,10 +34,14 @@ export function ThermalSaleReceipt({ sale, compact = false }: ThermalSaleReceipt
             compact ? 'h-[12mm] w-[30mm]' : 'h-[35mm] w-[50mm]'
           )}
         />
-        <p className="mt-[1mm]">Facture de vente</p>
+        {/* Une vente faite hors ligne n'a pas encore de numéro officiel : c'est une commande */}
+        <p className="mt-[1mm]">{sale.invoiceNumber === null ? 'Commande' : 'Facture de vente'}</p>
         <p className="mt-[1mm] text-center text-[18px] font-bold leading-none">
-          {sale.additionNumber}
+          {getSaleNumberLabel(sale)}
         </p>
+        {sale.invoiceNumber !== null && sale.offlineReference && (
+          <p className="mt-[1mm]">Commande : {sale.offlineReference}</p>
+        )}
       </header>
 
       <div className="mt-[2mm]">

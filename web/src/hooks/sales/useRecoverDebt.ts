@@ -9,7 +9,7 @@ import { invalidateQueriesByPrefix } from '~/lib/react-query/query_client'
 // Données d'un recouvrement : la vente concernée, son numéro (pour le libellé) et le corps de la requête.
 interface RecoverDebtVariables {
   saleId: string
-  additionNumber: string
+  saleNumber: string
   payload: Record<string, unknown>
 }
 
@@ -18,7 +18,7 @@ export function useRecoverDebt() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({ saleId, additionNumber, payload }: RecoverDebtVariables) => {
+    mutationFn: ({ saleId, saleNumber, payload }: RecoverDebtVariables) => {
       // L'id généré ici rend l'envoi rejouable sans doublon
       const id = crypto.randomUUID()
 
@@ -28,7 +28,7 @@ export function useRecoverDebt() {
         userId: user!.id,
         path: `/sales/${saleId}/recoveries`,
         body: { ...payload, id },
-        summary: `Recouvrement sur l'addition ${additionNumber}`,
+        summary: `Recouvrement sur la facture ${saleNumber}`,
         sale: null,
       })
     },

@@ -12,7 +12,11 @@ type QueuedFields = Pick<
 type SubmitResult<T> = { queued: false; data: T } | { queued: true; entry: OutboxEntry }
 
 // Envoie une écriture au serveur ; si le réseau est coupé, la met dans la file pour plus tard.
-export async function submitOrQueue<T>(operation: QueuedFields): Promise<SubmitResult<T>> {
+// prepareQueued complète l'opération juste avant sa mise en file (ex : la référence hors ligne d'une vente).
+export async function submitOrQueue<T>(
+  operation: QueuedFields,
+  prepareQueued?: (operation: QueuedFields) => QueuedFields | Promise<QueuedFields>
+): Promise<SubmitResult<T>> {
   try {
     // Inutile d'attendre un délai d'expiration quand le navigateur sait déjà qu'il est hors ligne
     if (!navigator.onLine) {
@@ -23,7 +27,9 @@ export async function submitOrQueue<T>(operation: QueuedFields): Promise<SubmitR
   } catch (error) {
     // Statut 0 : le serveur n'a pas répondu, l'opération est gardée pour plus tard
     if (error instanceof ApiError && error.status === 0) {
-      return { queued: true, entry: await enqueue(operation) }
+      const queued = prepareQueued ? await prepareQueued(operation) : operation
+
+      return { queued: true, entry: await enqueue(queued) }
     }
 
     // Tout autre échec est un vrai refus à montrer tout de suite

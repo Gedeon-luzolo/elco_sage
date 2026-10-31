@@ -14,6 +14,7 @@ import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatDebtStatusLabel } from '~/utils/sales/debt.utils'
 import { formatPaymentMethodLabel } from '~/utils/sales/payment.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
+import { getSaleNumberLabel } from '~/utils/sales/sale.utils'
 
 interface RecoveriesTableProps {
   recoveries: RecoveryPaymentItem[]
@@ -47,7 +48,7 @@ export function RecoveriesTable({ recoveries, showStatusBadge = true }: Recoveri
             <TableCell>{formatDateLabel(payment.recovery.recoveredAt)}</TableCell>
             <TableCell>{getUserDisplayName(payment.recovery.receivedBy) ?? '-'}</TableCell>
             <TableCell>{payment.sale.customer?.fullName ?? '-'}</TableCell>
-            <TableCell>{payment.sale.additionNumber}</TableCell>
+            <TableCell>{getSaleNumberLabel(payment.sale)}</TableCell>
             <TableCell>{formatDateLabel(payment.sale.saleDate as string)}</TableCell>
             <TableCell className="text-right font-semibold">
               {formatMoneyWithCurrency(
