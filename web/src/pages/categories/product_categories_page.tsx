@@ -1,23 +1,14 @@
-import { CheckCircle2, Edit2, Plus, Tags, XCircle } from 'lucide-react'
+import { Plus, Tags } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { CategoryCard } from '~/components/categories/category_card'
 import { ProductCategoryModal } from '~/components/categories/product_category_modal'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
-import { Card } from '~/components/ui/card'
 import { StatCard } from '~/components/common/stat_card'
 import { PageHeader } from '~/components/common/page_header'
 import { EmptyState } from '~/components/common/empty_state'
 import { SearchInput } from '~/components/common/search_input'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { useSearch } from '~/hooks/use_search'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
 import { ManagementLayout } from '~/layouts/management_layout'
 import { useCrud } from '~/hooks/common/useCrud'
 import type {
@@ -25,7 +16,6 @@ import type {
   ProductCategoriesPageProps,
   ProductCategoryStats,
 } from '~/types/product_category_types'
-import { formatShortDate } from '~/utils/date'
 import { StatusFilter, matchesStatusFilter } from '~/utils/status.utils'
 import { fieldFormData } from '~/utils/form.utils'
 
@@ -182,76 +172,20 @@ export default function ProductCategoriesPage() {
           </div>
         </div>
 
-        {/* Tableau des catégories */}
-        <Card className="overflow-hidden p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-62.5">Nom de la catégorie</TableHead>
-                <TableHead className="w-30">Statut</TableHead>
-                <TableHead className="w-30">Date de création</TableHead>
-                <TableHead className="w-30 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCategories.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-64">
-                    <EmptyState
-                      icon={Tags}
-                      title="Aucune catégorie trouvée"
-                      description="Il n'y a aucune catégorie correspondant à votre recherche ou aucun enregistrement n'existe encore."
-                      className="border-none shadow-none bg-transparent"
-                    />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <TableRow key={cat.id}>
-                    <TableCell className="font-semibold text-foreground">{cat.name}</TableCell>
-                    <TableCell>
-                      {cat.isActive ? (
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1"
-                        >
-                          <CheckCircle2 className="size-3" />
-                          Actif
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-muted bg-muted/50 text-muted-foreground gap-1"
-                        >
-                          <XCircle className="size-3" />
-                          Inactif
-                        </Badge>
-                      )}
-                    </TableCell>
-                    {/* Utilise formatShortDate depuis ~/utils/date au lieu d'une fonction locale */}
-                    <TableCell className="text-xs text-muted-foreground">
-                      {formatShortDate(cat.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => openEditModal(cat)}
-                          title="Modifier"
-                        >
-                          <Edit2 className="size-4" />
-                          <span className="sr-only">Modifier</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </Card>
+        {/* Catégories en cartes, au même format que les produits et services */}
+        {filteredCategories.length === 0 ? (
+          <EmptyState
+            icon={Tags}
+            title="Aucune catégorie trouvée"
+            description="Il n'y a aucune catégorie correspondant à votre recherche ou aucun enregistrement n'existe encore."
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+            {filteredCategories.map((category) => (
+              <CategoryCard key={category.id} category={category} onEdit={openEditModal} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Modal Création / Édition */}

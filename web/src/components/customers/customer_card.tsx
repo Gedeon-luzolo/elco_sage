@@ -51,7 +51,7 @@ export function CustomerCard({ customer, onEdit }: CustomerCardProps) {
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="text-muted-foreground">Email</span>
-          <span className="truncate font-medium text-foreground">
+          <span className="min-w-0 truncate font-medium text-foreground">
             {customer.email || 'Non renseigne'}
           </span>
         </div>

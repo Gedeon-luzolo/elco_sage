@@ -203,7 +203,7 @@ export default function ProductServicesPage() {
                   />
                 )}
 
-                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                   {paginatedProducts.visibleItems.map((item) => (
                     <ProductCard key={item.id} item={item} onEdit={openEditModal} />
                   ))}
@@ -231,7 +231,7 @@ export default function ProductServicesPage() {
                   />
                 )}
 
-                <div className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                   {paginatedServices.visibleItems.map((item) => (
                     <ProductCard key={item.id} item={item} onEdit={openEditModal} />
                   ))}
