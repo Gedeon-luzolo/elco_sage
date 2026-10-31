@@ -10,11 +10,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        // Les routes de la SPA (/sales, /stock...) servent toutes index.html, y compris hors ligne
+        // Les routes de la SPA servent toutes index.html, y compris hors ligne
         navigateFallback: '/index.html',
         // L'API ne doit jamais être servie par le service worker
         navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Pas de .woff : tous les navigateurs qui gèrent les service workers lisent le woff2
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         cleanupOutdatedCaches: true,
       },

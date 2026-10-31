@@ -1,7 +1,8 @@
-import '@fontsource/inter/400.css'
-import '@fontsource/inter/500.css'
-import '@fontsource/inter/600.css'
-import '@fontsource/inter/700.css'
+// Seul le sous-ensemble latin : il couvre le français (é, ç, œ, €) sans embarquer cyrillique, grec et vietnamien
+import '@fontsource/inter/latin-400.css'
+import '@fontsource/inter/latin-500.css'
+import '@fontsource/inter/latin-600.css'
+import '@fontsource/inter/latin-700.css'
 import './css/app.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
