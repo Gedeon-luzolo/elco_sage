@@ -28,6 +28,7 @@ import { useSearch } from '~/hooks/use_search'
 import { useSelectionDate } from '~/hooks/use_selection_date'
 import { useSimplePrint } from '~/hooks/use_simple_print'
 import { useCrud } from '~/hooks/common/useCrud'
+import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useOutbox } from '~/hooks/useOutbox'
 import { applyPendingRecoveries } from '~/lib/offline/pending_debts'
 import type { DebtItem, DebtStats, DebtsPageProps } from '~/types/debt_types'
@@ -52,6 +53,8 @@ export default function DebtsPage() {
   const { data, isFetching: isLoading } = useCrud<DebtItem>({
     endpoint: '/debts',
   }).useGetWithParams<Pick<DebtsPageProps, 'debts' | 'stats'>>(appliedPeriod)
+  // Un paiement entre dans la caisse de celui qui l'encaisse : sans session ouverte, pas de bouton Payer
+  const { data: currentCashSession } = useCurrentCashSession()
 
   // Les recouvrements faits hors ligne sont déduits des dettes du serveur en attendant leur envoi
   const outbox = useOutbox()
@@ -223,7 +226,11 @@ export default function DebtsPage() {
                     </TableBody>
                   </Table>
                 ) : (
-                  <DebtsTable debts={paginatedDebts.visibleItems} onSelectDebt={setSelectedDebt} />
+                  <DebtsTable
+                    debts={paginatedDebts.visibleItems}
+                    onSelectDebt={setSelectedDebt}
+                    showActions={Boolean(currentCashSession)}
+                  />
                 )}
               </CardContent>
             </Card>
