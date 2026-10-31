@@ -41,6 +41,9 @@ export default defineConfig({
     },
   },
   build: {
+    // Les polices Inter sont intégrées au CSS au lieu d'être 4 fichiers à part ; le reste suit la règle par défaut
+    assetsInlineLimit: (filePath) =>
+      filePath.includes('/@fontsource/inter/') && filePath.endsWith('.woff2') ? true : undefined,
     rollupOptions: {
       output: {
         // Les librairies chargées au démarrage ont leur propre chunk : leur nom ne change pas
@@ -49,14 +52,18 @@ export default defineConfig({
         manualChunks: (id) => {
           if (!id.includes('/node_modules/')) return undefined
 
-          if (/\/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)) {
+          if (
+            /\/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)
+          ) {
             return 'react-vendor'
           }
           if (id.includes('/node_modules/@tanstack/') || id.includes('/node_modules/idb/')) {
             return 'query-vendor'
           }
           if (
-            /\/node_modules\/(@base-ui|@floating-ui|lucide-react|framer-motion|motion-dom|motion-utils|sonner)\//.test(id)
+            /\/node_modules\/(@base-ui|@floating-ui|lucide-react|framer-motion|motion-dom|motion-utils|sonner)\//.test(
+              id
+            )
           ) {
             return 'ui-vendor'
           }
