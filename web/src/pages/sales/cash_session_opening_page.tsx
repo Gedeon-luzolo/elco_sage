@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { AppLink as Link } from '~/components/common/app_link'
 import { toast } from 'sonner'
-import { ArrowRight, Banknote, CalendarDays, Clock, LogIn, User } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Banknote, CalendarDays, Clock, LogIn, User } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { useAuth } from '~/hooks/auth/useAuth'
@@ -33,7 +33,7 @@ export default function CashSessionOpeningPage() {
             </div>
 
             <div>
-              <h1 className="text-2xl font-semibold tracking-normal">Ouverture de caisse</h1>
+              <h1 className="text-2xl font-semibold tracking-normal">Ouverture de session</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Demarrez votre session avant les operations de vente.
               </p>
@@ -89,22 +89,34 @@ export default function CashSessionOpeningPage() {
                 </Button>
               </div>
             ) : (
-              <Button
-                type="button"
-                className="h-12 w-full rounded-xl"
-                disabled={openSession.isPending}
-                onClick={() =>
-                  openSession.mutate(undefined, {
-                    onSuccess: () => {
-                      toast.success('Session de caisse ouverte avec succès.')
-                      navigate('/sales')
-                    },
-                  })
-                }
-              >
-                <LogIn className="size-4" />
-                {openSession.isPending ? 'Ouverture...' : 'Ouvrir la caisse'}
-              </Button>
+              <div className="flex gap-2">
+                {/* Retour à l'accueil des ventes sans ouvrir de session */}
+                <Button
+                  render={<Link href="/sales" />}
+                  variant="outline"
+                  className="size-12 shrink-0 rounded-xl"
+                  aria-label="Retour"
+                  title="Retour"
+                >
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  className="h-12 flex-1 rounded-xl"
+                  disabled={openSession.isPending}
+                  onClick={() =>
+                    openSession.mutate(undefined, {
+                      onSuccess: () => {
+                        toast.success('Session de caisse ouverte avec succès.')
+                        navigate('/sales')
+                      },
+                    })
+                  }
+                >
+                  <LogIn className="size-4" />
+                  {openSession.isPending ? 'Ouverture...' : 'Ouvrir la session'}
+                </Button>
+              </div>
             )}
           </div>
         </CardContent>
