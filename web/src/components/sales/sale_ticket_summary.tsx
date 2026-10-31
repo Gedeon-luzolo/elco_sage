@@ -1,6 +1,6 @@
 import { Save } from 'lucide-react'
 import { SaleSummaryLine } from '~/components/sales/sale_summary_line'
-import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import type { CurrencyCode } from '~/utils/currency'
@@ -67,15 +67,16 @@ export function SaleTicketSummary({
         />
       </div>
 
-      <Button
+      <SubmitButton
         type="button"
         className="h-12 w-full text-base"
-        disabled={!canSubmit || isSubmitting}
+        disabled={!canSubmit}
+        isPending={isSubmitting}
         onClick={onSubmit}
-      >
-        <Save className="size-4" />
-        {isSubmitting ? 'Enregistrement...' : submitLabel}
-      </Button>
+        icon={<Save className="size-4" />}
+        label={submitLabel}
+        loadingLabel="Enregistrement..."
+      />
     </div>
   )
 }

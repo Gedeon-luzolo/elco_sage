@@ -23,6 +23,7 @@ interface ProductCategoryModalProps {
   submitLabel: string
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
+  isPending?: boolean
 }
 
 export function ProductCategoryModal({
@@ -33,6 +34,7 @@ export function ProductCategoryModal({
   submitLabel,
   onOpenChange,
   action,
+  isPending = false,
 }: ProductCategoryModalProps) {
   // Indique si on est en mode édition (category présente) ou création (null).
   const isEditing = category !== null
@@ -75,7 +77,7 @@ export function ProductCategoryModal({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <SubmitButton size="lg" label={submitLabel} />
+            <SubmitButton size="lg" label={submitLabel} isPending={isPending} />
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,6 +1,6 @@
 import { KeyRound } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { Button } from '~/components/ui/button'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
@@ -157,9 +157,14 @@ export function ProfileSheet({ user, open, onOpenChange }: ProfileSheetProps) {
           </div>
 
           <SheetFooter className="border-t border-border">
-            <Button type="submit" size="lg" disabled={!isOnline || changePassword.isPending}>
-              {changePassword.isPending ? 'Enregistrement...' : 'Changer le mot de passe'}
-            </Button>
+            <SubmitButton
+              type="submit"
+              size="lg"
+              disabled={!isOnline}
+              isPending={changePassword.isPending}
+              label="Changer le mot de passe"
+              loadingLabel="Enregistrement..."
+            />
           </SheetFooter>
         </form>
       </SheetContent>

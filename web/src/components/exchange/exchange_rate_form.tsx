@@ -6,10 +6,11 @@ import { Label } from '~/components/ui/label'
 
 interface ExchangeRateFormProps {
   action: (formData: FormData) => void | Promise<void>
+  isPending?: boolean
 }
 
 // Affiche le formulaire de mise à jour du taux courant.
-export function ExchangeRateForm({ action }: ExchangeRateFormProps) {
+export function ExchangeRateForm({ action, isPending = false }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">
       <CardHeader>
@@ -61,6 +62,7 @@ export function ExchangeRateForm({ action }: ExchangeRateFormProps) {
           <SubmitButton
             className="justify-self-start"
             label="Enregistrer"
+            isPending={isPending}
             icon={<Save className="size-4" />}
           />
         </form>

@@ -252,6 +252,7 @@ export default function SalesHistoryPage() {
         description={`La facture ${saleToCancel ? getSaleNumberLabel(saleToCancel) : ''} sera annulée.`}
         confirmLabel="Annuler la vente"
         variant="destructive"
+        processing={cancelSale.isPending}
         onOpenChange={(open) => {
           if (!open) setSaleToCancel(null)
         }}

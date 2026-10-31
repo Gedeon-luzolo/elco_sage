@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CurrencyClosingField } from '~/components/sales/currency_closing_field'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -174,14 +175,15 @@ export function CashSessionClosingDialog({
           <Button type="button" variant="outline" onClick={closeDialog} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button
+          <SubmitButton
             type="button"
             onClick={submitClosing}
-            disabled={!canSubmit || isSubmitting || isLoadingSystemAmounts || unsyncedCount > 0}
-          >
-            <Save className="size-4" />
-            {isSubmitting ? 'Fermeture...' : 'Valider la cloture'}
-          </Button>
+            disabled={!canSubmit || isLoadingSystemAmounts || unsyncedCount > 0}
+            isPending={isSubmitting}
+            icon={<Save className="size-4" />}
+            label="Valider la cloture"
+            loadingLabel="Fermeture..."
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

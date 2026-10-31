@@ -159,6 +159,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
             <SubmitButton
               label="Encaisser"
               loadingLabel="Encaissement..."
+              isPending={recover.isPending}
               icon={<CreditCard className="size-4" />}
               disabled={!debt}
             />

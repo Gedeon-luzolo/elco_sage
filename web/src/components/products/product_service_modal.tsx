@@ -30,6 +30,7 @@ interface ProductServiceModalProps {
   defaultType?: 'PRODUCT' | 'SERVICE'
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
+  isPending?: boolean
 }
 
 // Option vide de la liste des produits liés : un service peut ne consommer aucun produit.
@@ -51,6 +52,7 @@ export function ProductServiceModal({
   defaultType = 'PRODUCT',
   onOpenChange,
   action,
+  isPending = false,
 }: ProductServiceModalProps) {
   // Détermine si le modal est en mode édition ou création.
   const isEditing = item !== null
@@ -258,7 +260,7 @@ export function ProductServiceModal({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <SubmitButton size="lg" label={submitLabel} />
+            <SubmitButton size="lg" label={submitLabel} isPending={isPending} />
           </DialogFooter>
         </form>
       </DialogContent>

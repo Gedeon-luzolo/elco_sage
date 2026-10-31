@@ -79,7 +79,7 @@ export default function RatesPage() {
         </section>
 
         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <ExchangeRateForm action={saveRate} />
+          <ExchangeRateForm action={saveRate} isPending={createRate.isPending} />
           <ExchangeRateHistoryTable exchangeRates={exchangeRates} />
         </section>
       </section>

@@ -64,7 +64,7 @@ export function ConfirmationDialog({
             >
               {cancelLabel}
             </Button>
-            <SubmitButton variant={confirmVariant} label={confirmLabel} />
+            <SubmitButton variant={confirmVariant} label={confirmLabel} isPending={processing} />
           </DialogFooter>
         </form>
       </DialogContent>

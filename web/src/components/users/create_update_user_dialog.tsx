@@ -25,6 +25,7 @@ interface CreateUpdateUserDialogProps {
   statusOptions: Array<UserSelectOption<UserStatus>>
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
+  isPending?: boolean
 }
 
 // Formulaire unique utilise pour creer et modifier un utilisateur.
@@ -38,6 +39,7 @@ export function CreateUpdateUserDialog({
   statusOptions,
   onOpenChange,
   action,
+  isPending = false,
 }: CreateUpdateUserDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,7 +100,7 @@ export function CreateUpdateUserDialog({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Fermer
             </Button>
-            <SubmitButton size="lg" label={submitLabel} />
+            <SubmitButton size="lg" label={submitLabel} isPending={isPending} />
           </DialogFooter>
         </form>
       </DialogContent>

@@ -155,7 +155,11 @@ export function CustomerDialog({
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <SubmitButton size="lg" label={submitLabel} />
+            <SubmitButton
+              size="lg"
+              label={submitLabel}
+              isPending={createCustomer.isPending || updateCustomer.isPending}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

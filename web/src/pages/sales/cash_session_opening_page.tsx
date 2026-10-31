@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { AppLink as Link } from '~/components/common/app_link'
 import { toast } from 'sonner'
 import { ArrowLeft, ArrowRight, Banknote, CalendarDays, Clock, LogIn, User } from 'lucide-react'
+import { SubmitButton } from '~/components/common/submit_button'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { useAuth } from '~/hooks/auth/useAuth'
@@ -100,10 +101,10 @@ export default function CashSessionOpeningPage() {
                 >
                   <ArrowLeft className="size-4" />
                 </Button>
-                <Button
+                <SubmitButton
                   type="button"
                   className="h-12 flex-1 rounded-xl"
-                  disabled={openSession.isPending}
+                  isPending={openSession.isPending}
                   onClick={() =>
                     openSession.mutate(undefined, {
                       onSuccess: () => {
@@ -112,10 +113,10 @@ export default function CashSessionOpeningPage() {
                       },
                     })
                   }
-                >
-                  <LogIn className="size-4" />
-                  {openSession.isPending ? 'Ouverture...' : 'Ouvrir la session'}
-                </Button>
+                  icon={<LogIn className="size-4" />}
+                  label="Ouvrir la session"
+                  loadingLabel="Ouverture..."
+                />
               </div>
             )}
           </div>

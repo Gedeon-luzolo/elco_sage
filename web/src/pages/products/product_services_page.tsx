@@ -267,6 +267,7 @@ export default function ProductServicesPage() {
           if (!open) closeModal()
         }}
         action={saveItem}
+        isPending={saveItemMutation.isPending || updateItemMutation.isPending}
       />
     </ManagementLayout>
   )

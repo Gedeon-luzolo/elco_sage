@@ -204,6 +204,7 @@ export default function ProductCategoriesPage() {
           else setIsModalOpen(true)
         }}
         action={saveCategory}
+        isPending={createCategory.isPending || updateCategory.isPending}
       />
     </ManagementLayout>
   )

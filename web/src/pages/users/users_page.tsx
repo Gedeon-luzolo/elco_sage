@@ -175,6 +175,7 @@ export default function UsersPage() {
           setIsCreateOpen(true)
         }}
         action={saveUser}
+        isPending={createUser.isPending || updateUser.isPending}
       />
     </ManagementLayout>
   )
