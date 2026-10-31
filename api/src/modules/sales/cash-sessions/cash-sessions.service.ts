@@ -152,6 +152,7 @@ export class CashSessionsService {
       systemAmounts: null,
       closingAmounts: null,
       differenceAmounts: null,
+      closingNote: null,
     });
 
     await this.journalisationsService.create(
@@ -206,6 +207,8 @@ export class CashSessionsService {
       systemAmounts,
       closingAmounts,
       differenceAmounts,
+      // Une note vide n'est pas gardée.
+      closingNote: dto.closingNote || null,
     });
 
     await this.journalisationsService.create(

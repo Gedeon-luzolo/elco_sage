@@ -74,32 +74,34 @@ function CashSessionDetail({
   pendingCount,
 }: CashSessionDetailProps) {
   const { PrintContainer, handlePrint } = useSimplePrint()
-  const renderSessionHeaderDetails = () => (
+  const renderSessionDetails = () => (
     <>
-      <HeaderDetail label="Vendeur" value={getUserDisplayName(session.user) ?? 'Utilisateur'} />
-      <HeaderDetail label="Ouverture" value={formatDateTimeLabel(session.openedAt)} />
-      <HeaderDetail label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
-      <HeaderDetail label="Système" value={renderMoneyMap(session.systemAmounts)} strong />
-      <HeaderDetail label="Physique" value={renderMoneyMap(session.closingAmounts)} strong />
-      <HeaderDetail label="Écart" value={renderMoneyMap(session.differenceAmounts)} strong />
+      <SessionDetail label="Vendeur" value={getUserDisplayName(session.user) ?? 'Utilisateur'} />
+      <SessionDetail label="Ouverture" value={formatDateTimeLabel(session.openedAt)} />
+      <SessionDetail label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
+      <SessionDetail label="Système" value={renderMoneyMap(session.systemAmounts)} strong />
+      <SessionDetail label="Physique" value={renderMoneyMap(session.closingAmounts)} strong />
+      <SessionDetail label="Écart" value={renderMoneyMap(session.differenceAmounts)} strong />
+      {/* La note de clôture n'apparaît que si le vendeur en a écrit une */}
+      {session.closingNote && <SessionDetail label="Note" value={session.closingNote} />}
     </>
   )
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <PrintContainer>
-        <PrintReportHeader
-          title="Rapport journalier des ventes"
-          details={renderSessionHeaderDetails()}
-        />
+        <PrintReportHeader title="Rapport journalier des ventes" />
         <SaleReportTable sales={sales} totals={totals} pendingSaleIds={pendingSaleIds} />
         <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
+        {/* Les informations de la session viennent après les chiffres */}
+        <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 border-t border-black pt-3 text-[11px] text-black">
+          {renderSessionDetails()}
+        </div>
       </PrintContainer>
 
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PrintReportHeader
           title="Rapport journalier des ventes"
-          details={renderSessionHeaderDetails()}
           actions={
             <Button render={<Link href="/sales/sessions" />} variant="outline">
               <ArrowLeft className="size-4" />
@@ -132,12 +134,19 @@ function CashSessionDetail({
         </Card>
 
         <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
+
+        {/* Les informations de la session viennent après les chiffres */}
+        <Card className="bg-background">
+          <CardContent className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+            {renderSessionDetails()}
+          </CardContent>
+        </Card>
       </section>
     </main>
   )
 }
 
-function HeaderDetail({
+function SessionDetail({
   label,
   value,
   strong = false,

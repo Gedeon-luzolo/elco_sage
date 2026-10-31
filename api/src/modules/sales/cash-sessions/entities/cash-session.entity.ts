@@ -52,6 +52,10 @@ export class CashSession {
   @Column({ name: 'difference_amounts', type: 'jsonb', nullable: true })
   differenceAmounts: MoneyMap | null;
 
+  // Remarque du vendeur à la clôture, par exemple pour expliquer un écart.
+  @Column({ name: 'closing_note', type: 'text', nullable: true })
+  closingNote: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 

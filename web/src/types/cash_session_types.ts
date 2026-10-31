@@ -14,6 +14,7 @@ export type CashSessionItem = {
   systemAmounts: MoneyMap | null
   closingAmounts: MoneyMap | null
   differenceAmounts: MoneyMap | null
+  closingNote: string | null
   user: UserSummaryDTO | null
 }
 

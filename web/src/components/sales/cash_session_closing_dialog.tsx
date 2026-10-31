@@ -13,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
+import { Label } from '~/components/ui/label'
+import { Textarea } from '~/components/ui/textarea'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useOutbox } from '~/hooks/useOutbox'
 import { api } from '~/lib/api/fetch'
@@ -39,6 +41,7 @@ export function CashSessionClosingDialog({
   const unsyncedCount = useOutbox().length
   const [closingAmountCdf, setClosingAmountCdf] = useState('')
   const [closingAmountUsd, setClosingAmountUsd] = useState('')
+  const [closingNote, setClosingNote] = useState('')
 
   // Les montants systeme sont charges a chaque ouverture du dialog (jamais servis depuis le cache).
   const { data: systemAmountsResponse, isLoading: isLoadingSystemAmounts } = useQuery({
@@ -56,7 +59,11 @@ export function CashSessionClosingDialog({
     queryKey: '/cash-sessions',
     invalidateQueries: ['/sales', '/debts', '/recoveries'],
     showSuccessToast: false,
-  }).useCreate<{ closingAmountCdf: number | null; closingAmountUsd: number | null }>()
+  }).useCreate<{
+    closingAmountCdf: number | null
+    closingAmountUsd: number | null
+    closingNote: string | null
+  }>()
   const isSubmitting = closeSession.isPending
 
   // Tant que le GET n'a pas répondu, le dialog affiche 0 et désactive la validation.
@@ -84,6 +91,8 @@ export function CashSessionClosingDialog({
       {
         closingAmountCdf: parsedClosingAmountCdf,
         closingAmountUsd: parsedClosingAmountUsd,
+        // Une note laissée vide n'est pas envoyée
+        closingNote: closingNote.trim() || null,
       },
       {
         onSuccess: () => {
@@ -107,11 +116,12 @@ export function CashSessionClosingDialog({
   const resetForm = () => {
     setClosingAmountCdf('')
     setClosingAmountUsd('')
+    setClosingNote('')
   }
 
   return (
     <Dialog open={open} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Fermer la caisse</DialogTitle>
           <DialogDescription>
@@ -119,23 +129,38 @@ export function CashSessionClosingDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4">
-          <CurrencyClosingField
-            currency="CDF"
-            systemAmount={systemAmountCdf}
-            value={closingAmountCdf}
-            difference={differenceAmountCdf}
-            isLoading={isLoadingSystemAmounts}
-            onChange={setClosingAmountCdf}
-          />
-          <CurrencyClosingField
-            currency="USD"
-            systemAmount={systemAmountUsd}
-            value={closingAmountUsd}
-            difference={differenceAmountUsd}
-            isLoading={isLoadingSystemAmounts}
-            onChange={setClosingAmountUsd}
-          />
+        {/* Montants comptés à gauche, note à droite ; empilés sur petit écran */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4">
+            <CurrencyClosingField
+              currency="CDF"
+              systemAmount={systemAmountCdf}
+              value={closingAmountCdf}
+              difference={differenceAmountCdf}
+              isLoading={isLoadingSystemAmounts}
+              onChange={setClosingAmountCdf}
+            />
+            <CurrencyClosingField
+              currency="USD"
+              systemAmount={systemAmountUsd}
+              value={closingAmountUsd}
+              difference={differenceAmountUsd}
+              isLoading={isLoadingSystemAmounts}
+              onChange={setClosingAmountUsd}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="closing-note">Note (facultatif)</Label>
+            <Textarea
+              id="closing-note"
+              className="min-h-32 flex-1"
+              placeholder="Ex : écart expliqué, incident, remarque pour la direction"
+              maxLength={1000}
+              value={closingNote}
+              onChange={(event) => setClosingNote(event.target.value)}
+            />
+          </div>
         </div>
 
         {unsyncedCount > 0 && (

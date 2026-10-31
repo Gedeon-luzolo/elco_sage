@@ -13,6 +13,8 @@ export class CreateCashSessionsTable1800000006000 implements MigrationInterface 
         system_amounts jsonb,
         closing_amounts jsonb,
         difference_amounts jsonb,
+        -- Remarque du vendeur à la clôture (écart expliqué, incident…)
+        closing_note text,
         created_at timestamptz NOT NULL DEFAULT now(),
         updated_at timestamptz DEFAULT now()
       )
