@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react'
 import { Button } from '~/components/ui/button'
 import { SubmitButton } from '~/components/common/submit_button'
 import {
@@ -22,7 +23,7 @@ interface ProductCategoryModalProps {
   category: ProductCategoryItem | null
   submitLabel: string
   onOpenChange: (open: boolean) => void
-  action: (formData: FormData) => void | Promise<void>
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
   isPending?: boolean
 }
 
@@ -33,7 +34,7 @@ export function ProductCategoryModal({
   category,
   submitLabel,
   onOpenChange,
-  action,
+  onSubmit,
   isPending = false,
 }: ProductCategoryModalProps) {
   // Indique si on est en mode édition (category présente) ou création (null).
@@ -47,7 +48,7 @@ export function ProductCategoryModal({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <form key={`${title}-${category?.id ?? 'new'}`} className="grid gap-5" action={action}>
+        <form key={`${title}-${category?.id ?? 'new'}`} className="grid gap-5" onSubmit={onSubmit}>
           <div className="grid gap-2">
             <Label htmlFor="category-name">Nom de la catégorie *</Label>
             <Input

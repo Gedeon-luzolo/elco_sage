@@ -1,5 +1,5 @@
 import { CreditCard } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { OptionSelect } from '~/components/common/option_select'
 import { SubmitButton } from '~/components/common/submit_button'
 import { Button } from '~/components/ui/button'
@@ -48,7 +48,9 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
     onOpenChange(false)
   }
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
     if (!debt) return
 
     // Les champs visibles viennent du FormData, les champs de contexte viennent de la dette.
@@ -75,7 +77,7 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
           </DialogDescription>
         </DialogHeader>
 
-        <form key={debt?.sale.id ?? 'empty'} className="grid gap-4" action={handleSubmit}>
+        <form key={debt?.sale.id ?? 'empty'} className="grid gap-4" onSubmit={handleSubmit}>
           {debt && (
             <>
               <div className="grid gap-2 rounded-xl border border-border bg-muted/30 p-4 text-sm">

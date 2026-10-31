@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Button } from '~/components/ui/button'
 import { SubmitButton } from '~/components/common/submit_button'
 import {
@@ -29,7 +29,7 @@ interface ProductServiceModalProps {
   products: ProductServiceItem[]
   defaultType?: 'PRODUCT' | 'SERVICE'
   onOpenChange: (open: boolean) => void
-  action: (formData: FormData) => void | Promise<void>
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
   isPending?: boolean
 }
 
@@ -51,7 +51,7 @@ export function ProductServiceModal({
   products,
   defaultType = 'PRODUCT',
   onOpenChange,
-  action,
+  onSubmit,
   isPending = false,
 }: ProductServiceModalProps) {
   // Détermine si le modal est en mode édition ou création.
@@ -106,7 +106,7 @@ export function ProductServiceModal({
         <form
           key={`${title}-${item?.id ?? 'new'}-${defaultType}`}
           className="grid gap-5"
-          action={action}
+          onSubmit={onSubmit}
         >
           {/* Disposition en grille 2 colonnes */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -1,5 +1,4 @@
 import { Loader2 } from 'lucide-react'
-import { useFormStatus } from 'react-dom'
 import type { ComponentProps, ReactNode } from 'react'
 import { Button } from '~/components/ui/button'
 
@@ -20,16 +19,11 @@ export function SubmitButton({
   type = 'submit',
   ...props
 }: SubmitButtonProps) {
-  // useFormStatus ne voit que les actions asynchrones d'un <form action> (et vaut false hors formulaire) :
-  // quand l'action lance un mutation.mutate(), qui rend la main tout de suite, c'est isPending qui compte.
-  const { pending } = useFormStatus()
-  const isBusy = pending || isPending
-
   return (
-    <Button type={type} disabled={isBusy || disabled} aria-busy={isBusy} {...props}>
+    <Button type={type} disabled={isPending || disabled} aria-busy={isPending} {...props}>
       {/* Le spinner prend la place de l'icône pour que le bouton garde sa largeur */}
-      {isBusy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : icon}
-      {isBusy ? loadingLabel : label}
+      {isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : icon}
+      {isPending ? loadingLabel : label}
     </Button>
   )
 }

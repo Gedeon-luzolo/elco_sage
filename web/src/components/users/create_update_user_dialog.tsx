@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,7 @@ interface CreateUpdateUserDialogProps {
   roleOptions: Array<UserSelectOption<UserRole>>
   statusOptions: Array<UserSelectOption<UserStatus>>
   onOpenChange: (open: boolean) => void
-  action: (formData: FormData) => void | Promise<void>
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
   isPending?: boolean
 }
 
@@ -38,7 +39,7 @@ export function CreateUpdateUserDialog({
   roleOptions,
   statusOptions,
   onOpenChange,
-  action,
+  onSubmit,
   isPending = false,
 }: CreateUpdateUserDialogProps) {
   return (
@@ -49,7 +50,7 @@ export function CreateUpdateUserDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <form key={`${title}-${defaultValues.email}`} className="grid gap-5" action={action}>
+        <form key={`${title}-${defaultValues.email}`} className="grid gap-5" onSubmit={onSubmit}>
           <div className="grid gap-2">
             <Label htmlFor={`${title}-fullName`}>Nom complet</Label>
             <Input

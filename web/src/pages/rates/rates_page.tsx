@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react'
 import { ArrowDownToLine, ArrowUpFromLine, Banknote } from 'lucide-react'
 import { ExchangeRateForm } from '~/components/exchange/exchange_rate_form'
 import { ExchangeRateHistoryTable } from '~/components/exchange/exchange_rate_history_table'
@@ -23,11 +24,18 @@ export default function RatesPage() {
   const currentRate = exchangeRates[0]
 
   // Enregistre une nouvelle ligne pour conserver l'historique des taux.
-  const saveRate = (formData: FormData) => {
-    createRate.mutate({
-      exchangeRate: Number(formData.get('exchangeRate')),
-      sellRate: Number(formData.get('sellRate')),
-    })
+  const saveRate = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    createRate.mutate(
+      {
+        exchangeRate: Number(formData.get('exchangeRate')),
+        sellRate: Number(formData.get('sellRate')),
+      },
+      // Le formulaire n'est vidé qu'une fois le taux enregistré : en cas d'erreur la saisie reste
+      { onSuccess: () => form.reset() }
+    )
   }
 
   return (
@@ -79,7 +87,7 @@ export default function RatesPage() {
         </section>
 
         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <ExchangeRateForm action={saveRate} isPending={createRate.isPending} />
+          <ExchangeRateForm onSubmit={saveRate} isPending={createRate.isPending} />
           <ExchangeRateHistoryTable exchangeRates={exchangeRates} />
         </section>
       </section>

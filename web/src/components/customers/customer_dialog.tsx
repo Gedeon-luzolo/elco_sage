@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react'
 import { Button } from '~/components/ui/button'
 import { SubmitButton } from '~/components/common/submit_button'
 import { useCrud } from '~/hooks/common/useCrud'
@@ -47,7 +48,9 @@ export function CustomerDialog({
   // Indique si on est en mode edition ou creation.
   const isEditing = customer !== null
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
     const options = { onSuccess: () => onOpenChange(false) }
     // Construction du payload commun aux deux cas (creation et edition).
     const payload = {
@@ -88,7 +91,7 @@ export function CustomerDialog({
         <form
           key={`${title}-${customer?.id ?? 'new'}`}
           className="grid gap-5"
-          action={handleSubmit}
+          onSubmit={handleSubmit}
         >
           <div className="grid gap-2">
             <Label htmlFor="customer-full-name">Nom complet *</Label>

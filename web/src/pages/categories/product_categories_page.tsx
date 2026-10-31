@@ -1,5 +1,5 @@
 import { Plus, Tags } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { CategoryCard } from '~/components/categories/category_card'
 import { ProductCategoryModal } from '~/components/categories/product_category_modal'
 import { Button } from '~/components/ui/button'
@@ -87,7 +87,9 @@ export default function ProductCategoriesPage() {
   }
 
   // Envoie le formulaire vers la création ou la modification selon le mode courant.
-  const saveCategory = (formData: FormData) => {
+  const saveCategory = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
     const options = { onSuccess: closeModal }
 
     if (editingCategory) {
@@ -203,7 +205,7 @@ export default function ProductCategoriesPage() {
           if (!open) closeModal()
           else setIsModalOpen(true)
         }}
-        action={saveCategory}
+        onSubmit={saveCategory}
         isPending={createCategory.isPending || updateCategory.isPending}
       />
     </ManagementLayout>

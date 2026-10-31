@@ -1,5 +1,5 @@
 import { Package, Plus, Settings, Wrench } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { ProductCard } from '~/components/products/product_card'
 import { ProductServiceModal } from '~/components/products/product_service_modal'
 import { Button } from '~/components/ui/button'
@@ -96,7 +96,9 @@ export default function ProductServicesPage() {
   }
 
   // Soumet les données du formulaire de création ou d'édition vers le contrôleur backend via l'API.
-  const saveItem = (formData: FormData) => {
+  const saveItem = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
     const options = { onSuccess: closeModal }
     const payload: Record<string, FormDataEntryValue | null> = Object.fromEntries(formData)
 
@@ -266,7 +268,7 @@ export default function ProductServicesPage() {
         onOpenChange={(open) => {
           if (!open) closeModal()
         }}
-        action={saveItem}
+        onSubmit={saveItem}
         isPending={saveItemMutation.isPending || updateItemMutation.isPending}
       />
     </ManagementLayout>

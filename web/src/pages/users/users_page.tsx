@@ -1,5 +1,5 @@
 import { Plus, Users } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { StatCard } from '~/components/common/stat_card'
@@ -86,7 +86,9 @@ export default function UsersPage() {
   }
 
   // Envoie le formulaire vers la creation ou la modification selon le mode courant.
-  const saveUser = (formData: FormData) => {
+  const saveUser = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
     const payload = { ...getUserFormPayload(formData) }
 
     if (editingUser) {
@@ -174,7 +176,7 @@ export default function UsersPage() {
 
           setIsCreateOpen(true)
         }}
-        action={saveUser}
+        onSubmit={saveUser}
         isPending={createUser.isPending || updateUser.isPending}
       />
     </ManagementLayout>

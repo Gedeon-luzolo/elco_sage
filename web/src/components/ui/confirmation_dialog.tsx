@@ -1,3 +1,4 @@
+import { useState, type FormEvent } from 'react'
 import { CircleAlert, Trash2, type LucideIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { SubmitButton } from '~/components/common/submit_button'
@@ -43,6 +44,20 @@ export function ConfirmationDialog({
   const confirmVariant = variant === 'destructive' ? 'destructive' : 'default'
   const Icon = icon ?? (variant === 'destructive' ? Trash2 : CircleAlert)
 
+  // onConfirm peut être asynchrone (abandon dans la file d'attente) : on suit son attente ici
+  const [isConfirming, setIsConfirming] = useState(false)
+  const isPending = processing || isConfirming
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setIsConfirming(true)
+    try {
+      await onConfirm()
+    } finally {
+      setIsConfirming(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -54,17 +69,17 @@ export function ConfirmationDialog({
           <DialogDescription className="text-center text-base">{description}</DialogDescription>
         </DialogHeader>
 
-        <form action={onConfirm}>
+        <form onSubmit={handleSubmit}>
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              disabled={processing}
+              disabled={isPending}
               onClick={onCancel ?? (() => onOpenChange(false))}
             >
               {cancelLabel}
             </Button>
-            <SubmitButton variant={confirmVariant} label={confirmLabel} isPending={processing} />
+            <SubmitButton variant={confirmVariant} label={confirmLabel} isPending={isPending} />
           </DialogFooter>
         </form>
       </DialogContent>

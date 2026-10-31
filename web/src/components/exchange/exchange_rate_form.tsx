@@ -1,16 +1,17 @@
-﻿import { Save } from 'lucide-react'
+import type { FormEvent } from 'react'
+import { Save } from 'lucide-react'
 import { SubmitButton } from '~/components/common/submit_button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 
 interface ExchangeRateFormProps {
-  action: (formData: FormData) => void | Promise<void>
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
   isPending?: boolean
 }
 
 // Affiche le formulaire de mise à jour du taux courant.
-export function ExchangeRateForm({ action, isPending = false }: ExchangeRateFormProps) {
+export function ExchangeRateForm({ onSubmit, isPending = false }: ExchangeRateFormProps) {
   return (
     <Card className="bg-background">
       <CardHeader>
@@ -20,7 +21,7 @@ export function ExchangeRateForm({ action, isPending = false }: ExchangeRateForm
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form key={'new-rate'} className="grid gap-5" action={action}>
+        <form key={'new-rate'} className="grid gap-5" onSubmit={onSubmit}>
           <div className="grid gap-2">
             <Label htmlFor="exchangeRate">Taux de change</Label>
             <div className="relative">
