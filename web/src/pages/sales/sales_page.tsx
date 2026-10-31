@@ -98,32 +98,35 @@ export default function SalesPage() {
         {primaryAction && (
           <Link
             href={primaryAction.href}
-            className="group relative flex flex-wrap items-center justify-between gap-8 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 px-8 py-14 text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.01] hover:shadow-primary/60 sm:px-12"
+            className="group relative flex flex-wrap items-center justify-between gap-5 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 px-5 py-6 text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.01] hover:shadow-primary/60 sm:gap-8 sm:px-12 sm:py-14"
           >
             <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
 
-            <div className="relative flex items-center gap-6">
-              <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-                <primaryAction.icon className="size-8" />
+            {/* Plus compact sur mobile : icône, titre et espacements réduits */}
+            <div className="relative flex items-center gap-4 sm:gap-6">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm sm:size-16">
+                <primaryAction.icon className="size-6 sm:size-8" />
               </div>
               <div>
-                <p className="text-3xl font-semibold">{primaryAction.title}</p>
-                <p className="mt-1.5 text-base text-primary-foreground/80">
+                <p className="text-xl font-semibold sm:text-3xl">{primaryAction.title}</p>
+                <p className="mt-1 text-sm text-primary-foreground/80 sm:mt-1.5 sm:text-base">
                   {primaryAction.description}
                 </p>
               </div>
             </div>
 
-            <div className="relative flex items-center gap-10">
+            <div className="relative flex items-center gap-6 sm:gap-10">
               {sessionTotals && (
                 <div>
-                  <div className="flex flex-wrap gap-x-10 gap-y-3">
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 sm:gap-x-10 sm:gap-y-3">
                     {sessionSummary.map((item) => (
                       <div key={item.label}>
                         <p className="text-xs tracking-wide text-primary-foreground/70 uppercase">
                           {item.label}
                         </p>
-                        <p className="mt-1 text-lg font-semibold">{renderMoneyMap(item.amounts)}</p>
+                        <p className="mt-1 text-base font-semibold sm:text-lg">
+                          {renderMoneyMap(item.amounts)}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -135,7 +138,7 @@ export default function SalesPage() {
                   )}
                 </div>
               )}
-              <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
+              <ArrowRight className="size-5 shrink-0 sm:size-7 transition-transform duration-300 group-hover:translate-x-1.5" />
             </div>
           </Link>
         )}
