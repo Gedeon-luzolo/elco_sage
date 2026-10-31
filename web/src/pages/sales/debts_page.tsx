@@ -187,7 +187,7 @@ export default function DebtsPage() {
                   <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Rechercher client ou addition..."
+                    placeholder="Rechercher client ou facture..."
                     className="w-full lg:w-72"
                   />
                   <Button

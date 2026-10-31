@@ -69,7 +69,7 @@ export class DashboardService {
         label: toDayLabel(report.date, false),
         cdf: report.realAmounts[Currency.CDF],
         usd: report.realAmounts[Currency.USD],
-        count: report.additionsCount,
+        count: report.invoicesCount,
       })),
       paymentDistribution:
         this.dashboardReportsService.buildPaymentDistribution(sales),

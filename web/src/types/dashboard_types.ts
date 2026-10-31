@@ -53,7 +53,7 @@ export interface DashboardTopService {
 export interface DashboardStaffProductivityRow {
   staffId: string
   staffName: string
-  additionsCount: number
+  invoicesCount: number
   realAmounts: MoneyMap
   cashAmounts: MoneyMap
   recoveryAmounts: MoneyMap
@@ -79,7 +79,7 @@ export interface DashboardPeriodicReport {
   cashAmounts: MoneyMap
   recoveryAmounts: MoneyMap
   collectionAmounts: MoneyMap
-  additionsCount: number
+  invoicesCount: number
   soldServicesCount: number
 }
 

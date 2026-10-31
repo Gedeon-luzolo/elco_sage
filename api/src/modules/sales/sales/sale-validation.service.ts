@@ -44,7 +44,7 @@ export class SaleValidationService {
   }
 
   /**
-   * Une fois la caisse fermée, l'addition est figée dans le rapport de clôture.
+   * Une fois la caisse fermée, la facture est figée dans le rapport de clôture.
    */
   async ensureCanBeCancelled(sale: Sale) {
     const cashSession = await this.cashSessionsRepository.findOneOrFail({

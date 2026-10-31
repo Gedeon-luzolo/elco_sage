@@ -18,7 +18,7 @@ interface SalesNavLink {
 export const SALES_NAV_LINKS: SalesNavLink[] = [
   {
     title: 'Historique',
-    description: 'Retrouver et réimprimer une addition passée',
+    description: 'Retrouver et réimprimer une facture passée',
     href: '/sales/history',
     icon: History,
   },

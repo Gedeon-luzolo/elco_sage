@@ -133,7 +133,7 @@ export default function SalesHistoryPage() {
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PageHeader
           title="Historique des ventes"
-          description="Retrouvez une addition passée, toutes caisses et journées confondues, pour la réimprimer."
+          description="Retrouvez une facture passée, toutes caisses et journées confondues, pour la réimprimer."
           icon={History}
           accentClassName={MODULE_HEADER_ACCENTS.sales}
         >
@@ -206,7 +206,7 @@ export default function SalesHistoryPage() {
           <EmptyState
             icon={Search}
             title="Aucune vente trouvée"
-            description="Modifiez la date, le statut ou le numéro d'addition recherché."
+            description="Modifiez la date, le statut ou le numéro de facture recherché."
           />
         ) : (
           <div

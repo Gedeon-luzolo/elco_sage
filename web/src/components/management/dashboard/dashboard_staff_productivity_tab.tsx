@@ -47,7 +47,7 @@ export function DashboardStaffProductivityTab({
               <TableHeader>
                 <TableRow>
                   <TableHead>Personnel</TableHead>
-                  <TableHead className="text-right">Additions</TableHead>
+                  <TableHead className="text-right">Factures</TableHead>
                   <TableHead className="text-right">Chiffre réel</TableHead>
                   <TableHead className="text-right">Cash</TableHead>
                   <TableHead className="text-right">Recouvrement</TableHead>
@@ -80,7 +80,7 @@ function StaffProductivityRow({ row, isTotal = false }: StaffProductivityRowProp
   return (
     <TableRow className={isTotal ? 'font-semibold' : undefined}>
       <TableCell>{row.staffName}</TableCell>
-      <TableCell className="text-right">{formatNumber(row.additionsCount)}</TableCell>
+      <TableCell className="text-right">{formatNumber(row.invoicesCount)}</TableCell>
       <TableCell className="text-right">{renderMoneyMap(row.realAmounts)}</TableCell>
       <TableCell className="text-right">{renderMoneyMap(row.cashAmounts)}</TableCell>
       <TableCell className="text-right">{renderMoneyMap(row.recoveryAmounts)}</TableCell>

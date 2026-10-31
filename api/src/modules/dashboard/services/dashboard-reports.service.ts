@@ -65,7 +65,7 @@ export class DashboardReportsService {
           date,
           label: toDayLabel(date),
           ...createAmounts(),
-          additionsCount: 0,
+          invoicesCount: 0,
           soldServicesCount: 0,
         },
       ]),
@@ -76,7 +76,7 @@ export class DashboardReportsService {
       const report = reports.get(toDateKey(sale.saleDate))!;
 
       this.addSale(report, sale);
-      report.additionsCount += 1;
+      report.invoicesCount += 1;
       // Les services vendus sont la somme des quantités des lignes.
       report.soldServicesCount += sale.items.reduce(
         (total, item) => total + item.quantity,
@@ -101,7 +101,7 @@ export class DashboardReportsService {
       DashboardAmounts & {
         staffId: string;
         staffName: string;
-        additionsCount: number;
+        invoicesCount: number;
       }
     >();
 
@@ -111,7 +111,7 @@ export class DashboardReportsService {
         rows.set(staffId, {
           staffId,
           staffName,
-          additionsCount: 0,
+          invoicesCount: 0,
           ...createAmounts(),
         });
       }
@@ -125,7 +125,7 @@ export class DashboardReportsService {
         getUserDisplayName(sale.operator) ?? 'Opérateur',
       );
 
-      row.additionsCount += 1;
+      row.invoicesCount += 1;
       this.addSale(row, sale);
     }
 
@@ -145,14 +145,14 @@ export class DashboardReportsService {
         .map((row) => this.closeAmounts(row))
         .sort(
           (first, second) =>
-            second.additionsCount - first.additionsCount ||
+            second.invoicesCount - first.invoicesCount ||
             first.staffName.localeCompare(second.staffName),
         ),
       // Le total reprend toutes les ventes et tous les paiements de la période.
       totals: {
         staffId: 'total',
         staffName: 'Total',
-        additionsCount: sales.length,
+        invoicesCount: sales.length,
         ...this.accumulate(sales, recoveries),
       },
     };
