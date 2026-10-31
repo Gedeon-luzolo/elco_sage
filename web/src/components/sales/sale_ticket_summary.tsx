@@ -15,6 +15,7 @@ interface SaleTicketSummaryProps {
   totalAmount: number
   canSubmit: boolean
   isSubmitting: boolean
+  submitLabel?: string
   onSubmit: () => void
 }
 
@@ -28,6 +29,7 @@ export function SaleTicketSummary({
   totalAmount,
   canSubmit,
   isSubmitting,
+  submitLabel = 'Enregistrer la vente',
   onSubmit,
 }: SaleTicketSummaryProps) {
   return (
@@ -72,7 +74,7 @@ export function SaleTicketSummary({
         onClick={onSubmit}
       >
         <Save className="size-4" />
-        {isSubmitting ? 'Enregistrement...' : 'Enregistrer la vente'}
+        {isSubmitting ? 'Enregistrement...' : submitLabel}
       </Button>
     </div>
   )

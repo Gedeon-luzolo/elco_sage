@@ -13,6 +13,7 @@ import { CustomersModule } from './modules/customers/customers.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module.js';
 import { JournalisationsModule } from './modules/journalisations/journalisations.module.js';
+import { ProformasModule } from './modules/proformas/proformas.module.js';
 import { SalesModule } from './modules/sales/sales.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
@@ -33,6 +34,7 @@ import { UsersModule } from './modules/users/users.module.js';
     CatalogModule,
     CustomersModule,
     SalesModule,
+    ProformasModule,
     DashboardModule,
   ],
   controllers: [AppController],

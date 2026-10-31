@@ -115,7 +115,7 @@ export default function SalesPage() {
           )}
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-4 sm:grid-rows-2">
+        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-5 sm:grid-rows-2">
           {canCreateSale ? (
             <Link
               href="/sales/create"

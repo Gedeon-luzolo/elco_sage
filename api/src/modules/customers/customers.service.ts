@@ -55,6 +55,21 @@ export class CustomersService {
   }
 
   /**
+   * Vérifie qu'un client existe et peut encore être choisi sur une vente ou une proforma.
+   */
+  async ensureActive(customerId: string) {
+    const isActive = await this.customersRepository.exists({
+      where: { id: customerId, isActive: true },
+    });
+
+    if (!isActive) {
+      throw new UnprocessableEntityException(
+        'Le client sélectionné est invalide ou inactif.',
+      );
+    }
+  }
+
+  /**
    * Crée un client, toujours actif.
    */
   async create(actor: User, dto: CreateCustomerDto) {

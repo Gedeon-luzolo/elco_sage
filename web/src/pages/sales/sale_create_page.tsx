@@ -1,36 +1,34 @@
-import { ArrowLeft, Banknote, ShoppingCart } from 'lucide-react'
-import { useMemo, useState, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, Banknote, FileText, ShoppingCart } from 'lucide-react'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader } from '~/components/common/page_header'
 import { SaleServiceGrid } from '~/components/sales/sale_service_grid'
 import { SaleTicketFields } from '~/components/sales/sale_ticket_fields'
-import { SaleTicketLine } from '~/components/sales/sale_ticket_line'
 import { SaleTicketSummary } from '~/components/sales/sale_ticket_summary'
+import { TicketLineList, TicketPage, TicketWorkspace } from '~/components/sales/ticket_layout'
 import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import { usePrintInvoice } from '~/hooks/use_print_invoice'
-import { useRemainingViewportHeight } from '~/hooks/useRemainingViewportHeight'
 import { useCrud } from '~/hooks/common/useCrud'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import { useCreateSale } from '~/hooks/sales/useCreateSale'
+import { useTicketLines } from '~/hooks/sales/useTicketLines'
+import { invalidateQueriesByPrefix } from '~/lib/react-query/query_client'
 import { buildLocalSale } from '~/utils/sales/local_sale'
 import type { PaymentMethod } from '~/utils/sales/payment.utils'
 import type { CustomerDTO, ProductServiceDTO } from '~/types/dto'
+import type { ProformaRow } from '~/types/proforma_types'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { UserSummaryDTO } from '~/types/dto'
 import { Currency, type CurrencyCode } from '~/utils/currency'
+import { formatProformaNumber } from '~/utils/sales/proforma.utils'
 import {
   buildCreateSalePayload,
   canSubmitSaleForm,
-  EMPTY_SALE_LINE,
-  getSaleDiscountAmountFromPayableAmount,
-  getSaleLineService,
-  getSaleTheoreticalAmount,
-  normalizeSalePayableAmount,
   type SaleLineState,
   type SalePaymentType,
 } from '~/utils/sales/sale.utils'
@@ -70,14 +68,36 @@ export default function SaleCreatePage() {
   const [currency, setCurrency] = useState<CurrencyCode>(Currency.CDF)
   const [operatorId, setOperatorId] = useState('')
   const [customerId, setCustomerId] = useState('')
-  const [payableAmount, setPayableAmount] = useState(0)
-  const [hasCustomPayableAmount, setHasCustomPayableAmount] = useState(false)
-  const [lines, setLines] = useState<SaleLineState[]>([])
+  const ticket = useTicketLines<SaleLineState>({
+    services: saleServices,
+    currency,
+    createLine: (productServiceId) => ({ productServiceId, quantity: 1 }),
+  })
+  const { lines, theoreticalAmount, discountAmount } = ticket
   const [ticketTab, setTicketTab] = useState<TicketTab>('lines')
   const isSubmitting = createSale.isPending
 
-  // La page tient dans l'écran : seuls le catalogue et l'onglet ouvert défilent
-  const { ref: pageRef, height: pageHeight } = useRemainingViewportHeight<HTMLElement>()
+  // Conversion d'une proforma : la liste l'envoie dans le state de navigation
+  const location = useLocation()
+  const sourceProforma = (location.state as { proforma?: ProformaRow } | null)?.proforma ?? null
+  const [prefilledProformaId, setPrefilledProformaId] = useState<string | null>(null)
+
+  // Le ticket est rempli une seule fois ; seule une proforma encore émise se convertit.
+  if (sourceProforma?.status === 'ISSUED' && prefilledProformaId !== sourceProforma.id) {
+    setPrefilledProformaId(sourceProforma.id)
+    ticket.resetTicket({
+      lines: sourceProforma.items.map((item) => ({
+        productServiceId: item.productServiceId,
+        quantity: item.quantity,
+      })),
+      payableAmount: sourceProforma.discountAmount > 0 ? sourceProforma.totalAmount : undefined,
+    })
+    setCurrency(sourceProforma.currency as CurrencyCode)
+    setCustomerId(sourceProforma.customerId)
+  }
+
+  const linkedProforma =
+    sourceProforma && sourceProforma.id === prefilledProformaId ? sourceProforma : null
 
   // Imprime automatiquement le ticket de la vente venant d'être enregistrée.
   const { receiptRef } = usePrintInvoice({
@@ -87,28 +107,6 @@ export default function SaleCreatePage() {
     onSelectSale: ignoreSaleSelection,
   })
 
-  const serviceById = useMemo(
-    () => new Map(saleServices.map((service) => [service.id, service])),
-    [saleServices]
-  )
-
-  // Calcule les totaux à partir des prix exposés par les services.
-  const theoreticalAmount = useMemo(
-    () => getSaleTheoreticalAmount(lines, serviceById, currency),
-    [currency, lines, serviceById]
-  )
-
-  // Calcule le montant à payer effectif, en tenant compte d'un montant personnalisé si l'utilisateur l'a saisi.
-  const effectivePayableAmount = hasCustomPayableAmount
-    ? normalizeSalePayableAmount(payableAmount, theoreticalAmount)
-    : theoreticalAmount
-
-  // Calcule la remise à partir du montant à payer et du montant théorique.
-  const discountAmount = getSaleDiscountAmountFromPayableAmount(
-    theoreticalAmount,
-    effectivePayableAmount
-  )
-  const totalAmount = effectivePayableAmount
   // Vérifie si le formulaire peut être soumis, en tenant compte des champs requis.
   const canSubmit = canSubmitSaleForm({
     currentCashSessionId: currentCashSession?.id,
@@ -125,61 +123,12 @@ export default function SaleCreatePage() {
   const customerMissing = requiresCustomer && !customerId
   const hasMissingField = operatorMissing || customerMissing
 
-  // Quantité déjà au ticket pour chaque service, affichée en badge sur la grille
-  const quantityByServiceId = useMemo(() => {
-    const quantities = new Map<string, number>()
-
-    lines.forEach((line) => {
-      quantities.set(
-        line.productServiceId,
-        (quantities.get(line.productServiceId) ?? 0) + line.quantity
-      )
-    })
-
-    return quantities
-  }, [lines])
-
   /**
-   * Ajoute un service au ticket : une ligne existante du même service gagne une unité.
+   * Ajoute un service ; l'ajout se voit tout de suite, on revient donc sur les lignes.
    */
   const pickService = (serviceId: string) => {
-    // L'ajout se voit tout de suite : on revient sur les lignes si le paiement était ouvert
     setTicketTab('lines')
-    setLines((current) => {
-      const existingIndex = current.findIndex((line) => line.productServiceId === serviceId)
-
-      if (existingIndex === -1) {
-        return [...current, { ...EMPTY_SALE_LINE, productServiceId: serviceId }]
-      }
-
-      return current.map((line, index) =>
-        index === existingIndex ? { ...line, quantity: line.quantity + 1 } : line
-      )
-    })
-  }
-
-  /**
-   * Met à jour une ligne de service.
-   */
-  const updateLine = (index: number, patch: Partial<SaleLineState>) => {
-    setLines((current) =>
-      current.map((line, lineIndex) => (lineIndex === index ? { ...line, ...patch } : line))
-    )
-  }
-
-  /**
-   * Retire une ligne de service du ticket.
-   */
-  const removeLine = (index: number) => {
-    setLines((current) => current.filter((_, lineIndex) => lineIndex !== index))
-  }
-
-  /**
-   * Met à jour le montant à payer saisi, borné au montant théorique.
-   */
-  const changePayableAmount = (value: number) => {
-    setHasCustomPayableAmount(true)
-    setPayableAmount(normalizeSalePayableAmount(value, theoreticalAmount))
+    ticket.pickService(serviceId)
   }
 
   /**
@@ -190,9 +139,7 @@ export default function SaleCreatePage() {
     setPaymentMethod('CASH')
     setPaymentReference('')
     setCustomerId('')
-    setPayableAmount(0)
-    setHasCustomPayableAmount(false)
-    setLines([])
+    ticket.resetTicket({ lines: [] })
     setTicketTab('lines')
   }
 
@@ -210,17 +157,21 @@ export default function SaleCreatePage() {
 
     if (!currentCashSession || !user) return
 
-    const payload = buildCreateSalePayload({
-      paymentType,
-      paymentMethod,
-      paymentReference,
-      customerId,
-      operatorId,
-      currency,
-      payableAmount: effectivePayableAmount,
-      theoreticalAmount,
-      lines,
-    })
+    const payload = {
+      ...buildCreateSalePayload({
+        paymentType,
+        paymentMethod,
+        paymentReference,
+        customerId,
+        operatorId,
+        currency,
+        payableAmount: ticket.payableAmount,
+        theoreticalAmount,
+        lines,
+      }),
+      // Le serveur marque la proforma comme convertie avec la vente
+      proformaId: linkedProforma?.id ?? null,
+    }
 
     createSale.mutate(
       {
@@ -243,25 +194,27 @@ export default function SaleCreatePage() {
           setPrintSale(sale)
           setAutoPrintSaleId(sale.id)
           resetForm()
+
+          // La vente suivante ne reprend pas la proforma. prefilledProformaId garde son id :
+          // tant que le state porte encore la proforma, elle ne doit pas re-remplir le ticket.
+          if (linkedProforma) {
+            invalidateQueriesByPrefix('/proformas')
+            navigate(location.pathname, { replace: true, state: null })
+          }
         },
       }
     )
   }
 
   return (
-    <main
-      ref={pageRef}
-      style={{ '--sale-page-height': pageHeight } as CSSProperties}
-      className="flex min-h-screen flex-col bg-muted/40 text-foreground lg:h-(--sale-page-height) lg:min-h-0 lg:overflow-hidden"
-    >
-      <div className="fixed left-[10000px] top-0" aria-hidden="true">
-        {/* Le ticket reste monté hors écran pour que react-to-print puisse le lire via ref. */}
+    <TicketPage
+      // Le ticket reste monté hors écran pour que react-to-print puisse le lire via ref.
+      hidden={
         <div ref={receiptRef} className="bg-white">
           {printSale && <ThermalSaleReceipt sale={printSale} />}
         </div>
-      </div>
-
-      <section className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col gap-4 px-6 py-5 lg:px-10">
+      }
+      header={
         <PageHeader
           title="Nouvelle vente"
           description="Enregistrer une vente de services dans la session de caisse courante."
@@ -273,104 +226,111 @@ export default function SaleCreatePage() {
             Retour
           </Button>
         </PageHeader>
+      }
+    >
+      {linkedProforma && (
+        <p className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200">
+          <FileText className="size-4" />
+          Vente issue de la proforma N°{formatProformaNumber(linkedProforma)} (
+          {linkedProforma.customer?.fullName ?? '-'}).
+        </p>
+      )}
+      {sourceProforma && sourceProforma.status !== 'ISSUED' && (
+        <p className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+          <FileText className="size-4" />
+          La proforma N°{formatProformaNumber(sourceProforma)} est déjà convertie ou annulée.
+        </p>
+      )}
 
-        {!currentCashSession ? (
-          <Card className="rounded-2xl">
-            <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
-              <Banknote className="size-5" />
-              Ouvrez une session de caisse avant d&apos;enregistrer une vente.
-            </CardContent>
-          </Card>
-        ) : (
-          // Sur grand écran, la grille occupe la hauteur restante et chaque colonne défile seule
-          <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_480px]">
+      {!currentCashSession ? (
+        <Card className="rounded-2xl">
+          <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
+            <Banknote className="size-5" />
+            Ouvrez une session de caisse avant d&apos;enregistrer une vente.
+          </CardContent>
+        </Card>
+      ) : (
+        <TicketWorkspace
+          catalog={
             <SaleServiceGrid
               services={saleServices}
               currency={currency}
-              quantityByServiceId={quantityByServiceId}
+              quantityByServiceId={ticket.quantityByServiceId}
               onPick={pickService}
             />
+          }
+        >
+          <Tabs
+            value={ticketTab}
+            onValueChange={(value) => setTicketTab(value as TicketTab)}
+            className="min-h-0 flex-1 flex-col gap-0"
+          >
+            {/* Onglets de hauteur fixe : passer de l'un à l'autre ne déplace jamais le total */}
+            <TabsList className="m-3 mb-0 h-12! w-auto shrink-0">
+              <TabsTrigger value="lines" className="h-full! text-sm">
+                Articles ({lines.length})
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="h-full! text-sm">
+                Paiement
+                {hasMissingField && (
+                  <span className="size-2 rounded-full bg-destructive">
+                    <span className="sr-only">Champ requis manquant</span>
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-            <aside className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:min-h-0">
-              <Tabs
-                value={ticketTab}
-                onValueChange={(value) => setTicketTab(value as TicketTab)}
-                className="min-h-0 flex-1 flex-col gap-0"
-              >
-                {/* Onglets de hauteur fixe : passer de l'un à l'autre ne déplace jamais le total */}
-                <TabsList className="m-3 mb-0 h-12! w-auto shrink-0">
-                  <TabsTrigger value="lines" className="h-full! text-sm">
-                    Articles ({lines.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="payment" className="h-full! text-sm">
-                    Paiement
-                    {hasMissingField && (
-                      <span className="size-2 rounded-full bg-destructive">
-                        <span className="sr-only">Champ requis manquant</span>
-                      </span>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="lines" className="min-h-0 overflow-y-auto px-4 pt-1">
-                  {lines.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      Touchez un service pour l&apos;ajouter au ticket.
-                    </p>
-                  ) : (
-                    lines.map((line, index) => (
-                      <SaleTicketLine
-                        key={line.productServiceId}
-                        line={line}
-                        service={getSaleLineService(line, serviceById)}
-                        currency={currency}
-                        onChange={(patch) => updateLine(index, patch)}
-                        onRemove={() => removeLine(index)}
-                      />
-                    ))
-                  )}
-                </TabsContent>
-
-                <TabsContent value="payment" className="min-h-0 overflow-y-auto">
-                  <SaleTicketFields
-                    paymentType={paymentType}
-                    onPaymentTypeChange={setPaymentType}
-                    paymentMethod={paymentMethod}
-                    onPaymentMethodChange={setPaymentMethod}
-                    paymentReference={paymentReference}
-                    onPaymentReferenceChange={setPaymentReference}
-                    currency={currency}
-                    onCurrencyChange={setCurrency}
-                    operatorId={operatorId}
-                    onOperatorChange={setOperatorId}
-                    customerId={customerId}
-                    onCustomerChange={setCustomerId}
-                    operators={operators}
-                    customers={customers}
-                    onCustomerCreated={(customer) => setCustomerId(customer.id)}
-                    operatorMissing={operatorMissing}
-                    customerMissing={customerMissing}
-                  />
-                </TabsContent>
-              </Tabs>
-
-              {/* Le résumé reste sous les onglets, toujours visible */}
-              <SaleTicketSummary
+            <TabsContent value="lines" className="min-h-0 overflow-y-auto px-4 pt-1">
+              <TicketLineList
+                lines={lines}
+                serviceById={ticket.serviceById}
                 currency={currency}
-                theoreticalAmount={theoreticalAmount}
-                payableAmount={effectivePayableAmount}
-                onPayableAmountChange={changePayableAmount}
-                discountAmount={discountAmount}
-                totalAmount={totalAmount}
-                // Le bouton reste actif malgré un champ manquant : il ouvre alors l'onglet Paiement
-                canSubmit={lines.length > 0}
-                isSubmitting={isSubmitting}
-                onSubmit={submitSale}
+                emptyMessage="Touchez un service pour l'ajouter au ticket."
+                onChange={ticket.updateLine}
+                onRemove={ticket.removeLine}
               />
-            </aside>
-          </div>
-        )}
-      </section>
-    </main>
+            </TabsContent>
+
+            <TabsContent value="payment" className="min-h-0 overflow-y-auto">
+              <SaleTicketFields
+                payment={{
+                  paymentType,
+                  onPaymentTypeChange: setPaymentType,
+                  paymentMethod,
+                  onPaymentMethodChange: setPaymentMethod,
+                  paymentReference,
+                  onPaymentReferenceChange: setPaymentReference,
+                  operatorId,
+                  onOperatorChange: setOperatorId,
+                  operators,
+                  operatorMissing,
+                }}
+                currency={currency}
+                onCurrencyChange={setCurrency}
+                customerId={customerId}
+                onCustomerChange={setCustomerId}
+                customers={customers}
+                onCustomerCreated={(customer) => setCustomerId(customer.id)}
+                customerMissing={customerMissing}
+              />
+            </TabsContent>
+          </Tabs>
+
+          {/* Le résumé reste sous les onglets, toujours visible */}
+          <SaleTicketSummary
+            currency={currency}
+            theoreticalAmount={theoreticalAmount}
+            payableAmount={ticket.payableAmount}
+            onPayableAmountChange={ticket.changePayableAmount}
+            discountAmount={discountAmount}
+            totalAmount={ticket.payableAmount}
+            // Le bouton reste actif malgré un champ manquant : il ouvre alors l'onglet Paiement
+            canSubmit={lines.length > 0}
+            isSubmitting={isSubmitting}
+            onSubmit={submitSale}
+          />
+        </TicketWorkspace>
+      )}
+    </TicketPage>
   )
 }

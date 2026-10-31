@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductService } from '../catalog/product-services/entities/product-service.entity.js';
-import { Customer } from '../customers/entities/customer.entity.js';
+import { CatalogModule } from '../catalog/catalog.module.js';
+import { CustomersModule } from '../customers/customers.module.js';
+import { ProformasModule } from '../proformas/proformas.module.js';
 import { User } from '../users/entities/user.entity.js';
 import { AdditionNumbersService } from './addition-numbers/addition-numbers.service.js';
 import { AdditionNumberBlock } from './addition-numbers/entities/addition-number-block.entity.js';
@@ -29,10 +30,11 @@ import { SalesService } from './sales/sales.service.js';
       Sale,
       SaleItem,
       SaleRecovery,
-      ProductService,
-      Customer,
       User,
     ]),
+    CatalogModule,
+    CustomersModule,
+    ProformasModule,
   ],
   controllers: [
     CashSessionsController,

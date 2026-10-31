@@ -7,13 +7,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { isUniqueViolation } from '../../../common/database/database-error.utils.js';
-import { Currency } from '../../../common/enums/currency.enum.js';
 import { dayRange } from '../../../common/utils/date.utils.js';
-import { roundAmount } from '../../../common/utils/money-map.utils.js';
 import { paginateBatch } from '../../../common/utils/pagination.utils.js';
-import type { ProductService } from '../../catalog/product-services/entities/product-service.entity.js';
+import {
+  applyDiscount,
+  priceItems,
+} from '../../catalog/product-services/utils/pricing.utils.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
+import { ProformasService } from '../../proformas/proformas.service.js';
 import type { User } from '../../users/entities/user.entity.js';
 import {
   getUserDisplayName,
@@ -50,6 +52,7 @@ export class SalesService {
     private readonly recoveriesRepository: Repository<SaleRecovery>,
     private readonly saleValidationService: SaleValidationService,
     private readonly additionNumbersService: AdditionNumbersService,
+    private readonly proformasService: ProformasService,
     private readonly journalisationsService: JournalisationsService,
   ) {}
 
@@ -112,13 +115,12 @@ export class SalesService {
       await this.saleValidationService.validateCreateSale(dto);
 
     // Les prix viennent toujours du catalogue, jamais du client.
-    const { items, theoreticalAmount } = this.priceItems(dto, services);
-    const discountAmount = roundAmount(dto.discountAmount ?? 0);
-
-    this.saleValidationService.ensureDiscountWithinTotal(
-      discountAmount,
-      theoreticalAmount,
+    const { pricedItems, theoreticalAmount } = priceItems(
+      dto.items,
+      services,
+      dto.currency,
     );
+    const amounts = applyDiscount(theoreticalAmount, dto.discountAmount);
 
     // Numéro pris dans la plage de la caisse hors ligne, sinon attribué par le serveur.
     const additionNumber = dto.additionNumber
@@ -145,16 +147,26 @@ export class SalesService {
       // L'heure réelle de la vente hors ligne est conservée ; sinon celle du serveur.
       saleDate: dto.saleDate ? new Date(dto.saleDate) : new Date(),
       currency: dto.currency,
-      theoreticalAmount,
-      discountAmount,
-      totalAmount: roundAmount(theoreticalAmount - discountAmount),
+      ...amounts,
       status: SaleStatus.ACTIVE,
     });
 
     // Les lignes gardent le service et les montants calculés.
     await this.saleItemsRepository.insert(
-      items.map((item) => ({ ...item, saleId: sale.id })),
+      pricedItems.map(({ service, item, unitPrice, totalPrice }) => ({
+        saleId: sale.id,
+        productServiceId: service.id,
+        quantity: item.quantity,
+        currency: dto.currency,
+        unitPrice,
+        totalPrice,
+      })),
     );
+
+    // Une vente issue d'une proforma la marque comme convertie, dans la même transaction.
+    if (dto.proformaId) {
+      await this.proformasService.markConverted(dto.proformaId, sale.id);
+    }
 
     await this.journalisationsService.create(
       JournalisationModule.SALES,
@@ -264,36 +276,6 @@ export class SalesService {
     }
 
     return this.findResponse(existing.id);
-  }
-
-  // Lignes prêtes à insérer, au prix du catalogue dans la devise de la vente, et leur total.
-  private priceItems(
-    dto: CreateSaleDto,
-    services: Map<string, ProductService>,
-  ) {
-    const items = dto.items.map((item) => {
-      // Les services ont été vérifiés : chaque ligne a le sien.
-      const service = services.get(item.productServiceId)!;
-
-      // Le prix unitaire est celui du catalogue dans la devise de la vente.
-      const unitPrice =
-        dto.currency === Currency.USD ? service.priceUsd : service.priceCdf;
-
-      return {
-        productServiceId: service.id,
-        quantity: item.quantity,
-        currency: dto.currency,
-        unitPrice,
-        totalPrice: roundAmount(unitPrice * item.quantity),
-      };
-    });
-
-    // Le total brut se déduit uniquement des lignes.
-    const theoreticalAmount = roundAmount(
-      items.reduce((sum, item) => sum + item.totalPrice, 0),
-    );
-
-    return { items, theoreticalAmount };
   }
 
   // Numéro émis hors ligne : il doit appartenir à une plage du vendeur dans cette session.

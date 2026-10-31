@@ -1,4 +1,11 @@
-import { CalendarDays, CreditCard, HandCoins, History, type LucideIcon } from 'lucide-react'
+import {
+  CalendarDays,
+  CreditCard,
+  FileText,
+  HandCoins,
+  History,
+  type LucideIcon,
+} from 'lucide-react'
 
 interface SalesNavLink {
   title: string
@@ -14,6 +21,12 @@ export const SALES_NAV_LINKS: SalesNavLink[] = [
     description: 'Retrouver et réimprimer une addition passée',
     href: '/sales/history',
     icon: History,
+  },
+  {
+    title: 'Proformas',
+    description: 'Préparer et télécharger des factures proforma en PDF',
+    href: '/sales/proformas',
+    icon: FileText,
   },
   {
     title: 'Recouvrements',

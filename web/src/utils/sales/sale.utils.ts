@@ -44,11 +44,6 @@ export const SALE_PAYMENT_OPTIONS: Array<{ label: string; value: SalePaymentType
   { label: 'Offert', value: 'OFFERED' },
 ]
 
-export const EMPTY_SALE_LINE: SaleLineState = {
-  productServiceId: '',
-  quantity: 1,
-}
-
 // Retourne le prix du service selon la devise de vente selectionnee.
 export function getSaleServiceUnitPrice(
   service: SaleServiceOption | undefined,
@@ -71,14 +66,6 @@ export function getSaleLineTotal(
   const unitPrice = getSaleServiceUnitPrice(service, currency)
 
   return unitPrice * Number(line.quantity || 0)
-}
-
-// Retourne le service selectionne sur une ligne de vente.
-export function getSaleLineService(
-  line: SaleLineState,
-  servicesById: Map<string, SaleServiceOption>
-) {
-  return servicesById.get(line.productServiceId)
 }
 
 // Calcule le montant avant remise sur toutes les lignes.

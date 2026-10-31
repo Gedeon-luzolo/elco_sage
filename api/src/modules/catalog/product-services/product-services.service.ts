@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
@@ -66,6 +66,35 @@ export class ProductServicesService {
       .where('item.type = :service', { service: ProductServiceType.SERVICE })
       .andWhere('item.is_active')
       .getMany();
+  }
+
+  /**
+   * Services d'une vente ou d'une proforma, indexés par id : chacun une seule fois et tous actifs.
+   */
+  async findSellableServices(serviceIds: string[]) {
+    // Un service ne figure qu'une fois par document.
+    if (new Set(serviceIds).size !== serviceIds.length) {
+      throw new UnprocessableEntityException(
+        'Un service ne peut pas être ajouté plusieurs fois dans le même document.',
+      );
+    }
+
+    // Seuls les services actifs se vendent ; les produits en stock ne passent pas à la caisse.
+    const services = await this.productServicesRepository.find({
+      where: {
+        id: In(serviceIds),
+        type: ProductServiceType.SERVICE,
+        isActive: true,
+      },
+    });
+
+    if (services.length !== serviceIds.length) {
+      throw new UnprocessableEntityException(
+        'Un ou plusieurs services sélectionnés sont invalides ou inactifs.',
+      );
+    }
+
+    return new Map(services.map((service) => [service.id, service]));
   }
 
   /**

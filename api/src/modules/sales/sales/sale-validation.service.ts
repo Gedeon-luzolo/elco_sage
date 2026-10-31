@@ -1,9 +1,8 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
-import { ProductService } from '../../catalog/product-services/entities/product-service.entity.js';
-import { ProductServiceType } from '../../catalog/product-services/enums/product-service-type.enum.js';
-import { Customer } from '../../customers/entities/customer.entity.js';
+import { Not, Repository } from 'typeorm';
+import { ProductServicesService } from '../../catalog/product-services/product-services.service.js';
+import { CustomersService } from '../../customers/customers.service.js';
 import { User } from '../../users/entities/user.entity.js';
 import { UserRole, UserStatus } from '../../users/enums/user.enums.js';
 import { CashSessionsService } from '../cash-sessions/cash-sessions.service.js';
@@ -18,13 +17,11 @@ export class SaleValidationService {
   constructor(
     @InjectRepository(CashSession)
     private readonly cashSessionsRepository: Repository<CashSession>,
-    @InjectRepository(ProductService)
-    private readonly productServicesRepository: Repository<ProductService>,
-    @InjectRepository(Customer)
-    private readonly customersRepository: Repository<Customer>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly cashSessionsService: CashSessionsService,
+    private readonly productServicesService: ProductServicesService,
+    private readonly customersService: CustomersService,
   ) {}
 
   /**
@@ -39,20 +36,11 @@ export class SaleValidationService {
     await this.ensureOperatorIsValid(dto.operatorId);
 
     // Les prix seront relus sur ces services, jamais pris chez le client.
-    const services = await this.findSellableServices(dto);
+    const services = await this.productServicesService.findSellableServices(
+      dto.items.map((item) => item.productServiceId),
+    );
 
     return { cashSession, services };
-  }
-
-  /**
-   * La remise vient du montant à payer saisi et ne peut jamais dépasser le brut.
-   */
-  ensureDiscountWithinTotal(discountAmount: number, theoreticalAmount: number) {
-    if (discountAmount > theoreticalAmount) {
-      throw new UnprocessableEntityException(
-        'La remise ne peut pas dépasser le total de la vente.',
-      );
-    }
   }
 
   /**
@@ -145,15 +133,7 @@ export class SaleValidationService {
       return;
     }
 
-    const isActive = await this.customersRepository.exists({
-      where: { id: dto.customerId, isActive: true },
-    });
-
-    if (!isActive) {
-      throw new UnprocessableEntityException(
-        'Le client sélectionné est invalide ou inactif.',
-      );
-    }
+    await this.customersService.ensureActive(dto.customerId);
   }
 
   // Tout utilisateur actif peut être opérateur de la commande, sauf l'administrateur.
@@ -171,34 +151,5 @@ export class SaleValidationService {
         "L'opérateur sélectionné est invalide ou inactif.",
       );
     }
-  }
-
-  // Services vendus, chacun une seule fois et tous actifs, indexés par id.
-  private async findSellableServices(dto: CreateSaleDto) {
-    const serviceIds = dto.items.map((item) => item.productServiceId);
-
-    // Un service ne figure qu'une fois par vente.
-    if (new Set(serviceIds).size !== serviceIds.length) {
-      throw new UnprocessableEntityException(
-        'Un service ne peut pas être ajouté plusieurs fois dans la même vente.',
-      );
-    }
-
-    // Seuls les services actifs se vendent ; les produits en stock ne passent pas à la caisse.
-    const services = await this.productServicesRepository.find({
-      where: {
-        id: In(serviceIds),
-        type: ProductServiceType.SERVICE,
-        isActive: true,
-      },
-    });
-
-    if (services.length !== serviceIds.length) {
-      throw new UnprocessableEntityException(
-        'Un ou plusieurs services sélectionnés sont invalides ou inactifs.',
-      );
-    }
-
-    return new Map(services.map((service) => [service.id, service]));
   }
 }

@@ -28,6 +28,7 @@ export const CreateSaleSchema = z
       .string()
       .regex(/^\d{1,6}$/, "Le numéro d'addition est invalide.")
       .optional(),
+    proformaId: nullableUuid('La proforma'),
     cashSessionId: nullableUuid('La session de caisse'),
     customerId: nullableUuid('Le client'),
     operatorId: requiredUuid("L'opérateur"),

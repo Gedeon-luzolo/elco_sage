@@ -1,8 +1,10 @@
 import { Printer, XCircle } from 'lucide-react'
+import { InvoicePdfDownload } from '~/components/invoices/invoice_pdf_download'
 import { Button } from '~/components/ui/button'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
+import { saleToInvoice } from '~/utils/invoices/invoice.utils'
 import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
 import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
 import { getUserDisplayName } from '~/utils/user.utils'
@@ -47,6 +49,13 @@ export function SaleDetailPanel({
             <Printer className="size-4" />
             Imprimer
           </Button>
+
+          {/* Facture A4 pour les clients qui la demandent, en plus du ticket */}
+          <InvoicePdfDownload
+            invoice={saleToInvoice(sale)}
+            label="Facture A4"
+            className="w-full sm:w-auto"
+          />
 
           {canCancelSale && !isCancelled && (
             <Button
