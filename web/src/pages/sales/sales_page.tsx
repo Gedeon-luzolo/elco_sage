@@ -46,137 +46,124 @@ export default function SalesPage() {
   // La caisse est partagée : tout utilisateur peut vendre tant qu'une session est ouverte
   const canCreateSale = Boolean(currentCashSession)
 
+  // Action du bandeau : vendre sur la session ouverte, sinon en ouvrir une.
+  const primaryAction = canCreateSale
+    ? {
+        href: '/sales/create',
+        icon: Plus,
+        title: 'Nouvelle vente',
+        description: 'Enregistrer une addition sur la session ouverte',
+      }
+    : !currentCashSession
+      ? {
+          href: '/sales/session/open',
+          icon: Banknote,
+          title: 'Ouvrir une caisse',
+          description: 'Démarrer une nouvelle session pour encaisser',
+        }
+      : null
+
   // 66px retire la hauteur de l'AppBar (min-h-16 + bordure 2px) pour éviter un scroll résiduel.
   return (
-    <main className="relative flex min-h-[calc(100vh-66px)] w-full justify-center overflow-hidden px-6 py-16 text-foreground">
-      {/* Fond illustré : deux taches de couleur douces sur un gris neutre. */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-muted/40"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 20%, oklch(0.9 0.05 263), transparent 60%), radial-gradient(circle at 80% 80%, oklch(0.92 0.05 20), transparent 60%)',
-        }}
-      />
-
-      {isManagementUser && (
-        <Button
-          render={<Link href="/" />}
-          variant="outline"
-          size="sm"
-          className="absolute top-6 right-6 bg-background/70 backdrop-blur-sm"
-        >
-          <ArrowLeft className="size-4" />
-          Retour accueil
-        </Button>
-      )}
-
-      <div className="relative flex w-full max-w-6xl flex-col items-center gap-10">
-        <div className="flex w-full flex-wrap items-end justify-between gap-6">
-          <div className="text-left">
+    <main className="flex min-h-[calc(100vh-66px)] w-full justify-center bg-muted/40 px-6 py-12 text-foreground">
+      <div className="flex w-full max-w-6xl flex-col gap-8">
+        {/* En-tête : titre et session à gauche, retour à l'accueil à droite */}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
             <p className="text-3xl font-semibold">Gestion des ventes</p>
             {currentCashSession ? (
-              <>
-                <p className="mt-2.5 text-base text-muted-foreground">
-                  Session ouverte le {formatDateTimeLabel(currentCashSession.openedAt)}.
-                </p>
+              <p className="mt-2 text-base text-muted-foreground">
+                Session ouverte le {formatDateTimeLabel(currentCashSession.openedAt)}
                 {currentCashSession.openedBy && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Ouverte par{' '}
+                  <>
+                    {' '}
+                    · par{' '}
                     <span className="font-semibold text-foreground">
                       {getUserDisplayName(currentCashSession.openedBy)}
                     </span>
-                  </p>
+                  </>
                 )}
-              </>
+              </p>
             ) : (
-              <p className="mt-2.5 text-base text-muted-foreground">
+              <p className="mt-2 text-base text-muted-foreground">
                 Aucune session de caisse ouverte.
               </p>
             )}
           </div>
 
-          {sessionTotals && (
-            <div className="space-y-1 text-sm">
-              {sessionSummary.map((item) => (
-                <p key={item.label} className="text-muted-foreground">
-                  {item.label} :{' '}
-                  <span className="font-semibold text-foreground">
-                    {renderMoneyMap(item.amounts)}
-                  </span>
-                </p>
-              ))}
-              {/* Les montants incluent des opérations que le serveur ne connaît pas encore */}
-              {pendingCount > 0 && (
-                <p className="text-xs text-amber-700">
-                  Dont {pendingCount} opération(s) hors ligne, pas encore envoyée(s).
-                </p>
-              )}
-            </div>
+          {isManagementUser && (
+            <Button
+              render={<Link href="/" />}
+              variant="outline"
+              size="sm"
+              className="bg-background/70 backdrop-blur-sm"
+            >
+              <ArrowLeft className="size-4" />
+              Retour accueil
+            </Button>
           )}
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-5 sm:grid-rows-2">
-          {canCreateSale ? (
-            <Link
-              href="/sales/create"
-              className="group relative col-span-2 flex flex-col justify-end gap-6 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 p-10 text-left text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.015] hover:shadow-primary/60 sm:row-span-2"
-            >
-              <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
+        {/* Bandeau : l'action principale, avec les totaux de la session à droite */}
+        {primaryAction && (
+          <Link
+            href={primaryAction.href}
+            className="group relative flex flex-wrap items-center justify-between gap-8 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 px-8 py-14 text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.01] hover:shadow-primary/60 sm:px-12"
+          >
+            <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
 
-              <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-                <Plus className="size-7" />
+            <div className="relative flex items-center gap-6">
+              <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                <primaryAction.icon className="size-8" />
               </div>
+              <div>
+                <p className="text-3xl font-semibold">{primaryAction.title}</p>
+                <p className="mt-1.5 text-base text-primary-foreground/80">
+                  {primaryAction.description}
+                </p>
+              </div>
+            </div>
 
-              <div className="relative flex items-end justify-between gap-4">
+            <div className="relative flex items-center gap-10">
+              {sessionTotals && (
                 <div>
-                  <p className="text-3xl font-semibold">Nouvelle vente</p>
-                  <p className="mt-2 text-base text-primary-foreground/80">
-                    Enregistrer une addition sur la session ouverte
-                  </p>
+                  <div className="flex flex-wrap gap-x-10 gap-y-3">
+                    {sessionSummary.map((item) => (
+                      <div key={item.label}>
+                        <p className="text-xs tracking-wide text-primary-foreground/70 uppercase">
+                          {item.label}
+                        </p>
+                        <p className="mt-1 text-lg font-semibold">{renderMoneyMap(item.amounts)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Les montants incluent des opérations que le serveur ne connaît pas encore */}
+                  {pendingCount > 0 && (
+                    <p className="mt-2 text-xs text-amber-200">
+                      Dont {pendingCount} opération(s) hors ligne, pas encore envoyée(s).
+                    </p>
+                  )}
                 </div>
-                <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
-              </div>
-            </Link>
-          ) : !currentCashSession ? (
-            <Link
-              href="/sales/session/open"
-              className="group relative col-span-2 flex flex-col justify-end gap-6 overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary to-violet-700 p-10 text-left text-primary-foreground no-underline shadow-2xl shadow-primary/40 ring-1 ring-white/10 transition duration-300 hover:scale-[1.015] hover:shadow-primary/60 sm:row-span-2"
-            >
-              <div className="pointer-events-none absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-2xl" />
+              )}
+              <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
+            </div>
+          </Link>
+        )}
 
-              <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-                <Banknote className="size-7" />
-              </div>
-
-              <div className="relative flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-3xl font-semibold">Ouvrir une caisse</p>
-                  <p className="mt-2 text-base text-primary-foreground/80">
-                    Démarrer une nouvelle session pour encaisser
-                  </p>
-                </div>
-                <ArrowRight className="size-7 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
-              </div>
-            </Link>
-          ) : null}
-
+        {/* Barre d'outils : les destinations secondaires sur une seule rangée */}
+        <nav className="grid grid-cols-2 border-y border-border sm:grid-cols-5 sm:divide-x sm:divide-border">
           {SALES_NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="group flex flex-col items-start justify-center gap-4 rounded-2xl border border-border bg-background/70 p-8 text-foreground no-underline shadow-sm backdrop-blur-sm transition duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-background hover:shadow-lg"
+              className="group flex flex-col items-center gap-2.5 px-4 py-7 text-center text-foreground no-underline transition-colors duration-200 hover:bg-background/70"
             >
-              <link.icon className="size-8 text-muted-foreground transition-colors duration-300 group-hover:text-primary" />
-              <div className="flex w-full items-end justify-between gap-2">
-                <div>
-                  <p className="text-lg font-medium">{link.title}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{link.description}</p>
-                </div>
-                <ArrowRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
-              </div>
+              <link.icon className="size-7 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+              <span className="text-base font-semibold">{link.title}</span>
+              <span className="text-sm text-muted-foreground">{link.description}</span>
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
     </main>
   )
