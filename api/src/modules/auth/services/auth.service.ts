@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
@@ -96,6 +100,51 @@ export class AuthService {
 
     // Seul le token de cet appareil est révoqué ; les autres restent connectés.
     await this.accessTokensService.delete(accessTokenId);
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur connecté, après vérification de l'actuel.
+   * Les autres appareils sont déconnectés ; celui-ci reste connecté.
+   */
+  async changePassword(
+    user: User,
+    accessTokenId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    // Le mot de passe n'est jamais lu par défaut : on le demande ici.
+    const stored = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.id = :id', { id: user.id })
+      .getOneOrFail();
+
+    if (!(await bcrypt.compare(currentPassword, stored.password))) {
+      throw new UnprocessableEntityException(
+        'Le mot de passe actuel est incorrect.',
+      );
+    }
+
+    // Un nouveau mot de passe identique à l'ancien ne change rien.
+    if (currentPassword === newPassword) {
+      throw new UnprocessableEntityException(
+        "Le nouveau mot de passe doit être différent de l'actuel.",
+      );
+    }
+
+    await this.usersRepository.update(user.id, {
+      password: await bcrypt.hash(newPassword, 10),
+    });
+
+    // Un appareil resté connecté avec l'ancien mot de passe perd sa session.
+    await this.accessTokensService.deleteOthersForUser(user.id, accessTokenId);
+
+    await this.journalisationsService.create(
+      JournalisationModule.AUTHENTIFICATION,
+      // Le changement est tracé dans le journal, sans le mot de passe.
+      `${user.fullName ?? user.email} a changé son mot de passe`,
+      user,
+    );
   }
 
   /**

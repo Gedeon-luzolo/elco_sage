@@ -2,6 +2,7 @@ import { AppLink as Link } from '~/components/common/app_link'
 import { DoorClosed, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { SyncStatus } from '~/components/app/sync_status'
+import { ProfileSheet } from '~/components/auth/profile_sheet'
 import { BrandLogo } from '~/components/brand/brand_logo'
 import { CashSessionClosingDialog } from '~/components/sales/cash_session_closing_dialog'
 import { Button } from '~/components/ui/button'
@@ -21,6 +22,7 @@ export function AppBar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isClosingDialogOpen, setIsClosingDialogOpen] = useState(false)
+  const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   // Ferme le menu profil quand l'utilisateur clique ailleurs.
@@ -44,6 +46,12 @@ export function AppBar() {
   const openCashSessionClosingDialog = () => {
     setIsProfileMenuOpen(false)
     setIsClosingDialogOpen(true)
+  }
+
+  // Ouvre le tiroir du profil depuis le menu.
+  const openProfileSheet = () => {
+    setIsProfileMenuOpen(false)
+    setIsProfileSheetOpen(true)
   }
 
   // Ferme la session depuis le menu profil.
@@ -108,7 +116,7 @@ export function AppBar() {
                 variant="outline"
                 role="menuitem"
                 className="w-full justify-start rounded-sm"
-                onClick={() => setIsProfileMenuOpen(false)}
+                onClick={openProfileSheet}
               >
                 <UserRound className="size-4" />
                 Profil
@@ -149,6 +157,8 @@ export function AppBar() {
           )}
         </div>
       </div>
+
+      <ProfileSheet user={user} open={isProfileSheetOpen} onOpenChange={setIsProfileSheetOpen} />
 
       {currentCashSession && (
         <CashSessionClosingDialog

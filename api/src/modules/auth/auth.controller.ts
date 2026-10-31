@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -10,6 +11,7 @@ import {
 import { CacheInvalidate } from '../../common/cache/decorators/cache.decorators.js';
 import type { User } from '../users/entities/user.entity.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { AuthGuard } from './guards/auth.guard.js';
 import { AuthService } from './services/auth.service.js';
@@ -36,6 +38,26 @@ export class AuthController {
   @UseGuards(AuthGuard)
   me(@CurrentUser() user: User) {
     return { user };
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur connecté.
+   */
+  @Patch('password')
+  @HttpCode(204)
+  @UseGuards(AuthGuard)
+  async changePassword(
+    @CurrentUser() user: User,
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    // Le token utilisé est gardé : seuls les autres appareils sont déconnectés.
+    await this.authService.changePassword(
+      user,
+      request.accessTokenId!,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   /**

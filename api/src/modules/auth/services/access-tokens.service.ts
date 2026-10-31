@@ -134,6 +134,28 @@ export class AccessTokensService {
     );
   }
 
+  /**
+   * Révoque tous les tokens d'un utilisateur sauf celui de l'appareil courant (changement de mot de passe).
+   */
+  async deleteOthersForUser(userId: string, keptIdentifier: string) {
+    const userKey = USER_TOKENS_KEY + userId;
+    // Les autres appareils connectés de l'utilisateur.
+    const identifiers = (await this.redis.smembers(userKey)).filter(
+      (identifier) => identifier !== keptIdentifier,
+    );
+
+    if (identifiers.length === 0) {
+      return;
+    }
+
+    await this.redis
+      .multi()
+      // Les tokens et leurs références dans l'index disparaissent ensemble.
+      .unlink(...identifiers.map((identifier) => TOKEN_KEY + identifier))
+      .srem(userKey, ...identifiers)
+      .exec();
+  }
+
   // Sépare l'identifiant du secret : « elco_<identifiant>.<secret> ».
   private decode(value: string) {
     // Les tokens d'elco commencent tous par leur préfixe.
