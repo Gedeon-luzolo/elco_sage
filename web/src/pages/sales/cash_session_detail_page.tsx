@@ -74,34 +74,49 @@ function CashSessionDetail({
   pendingCount,
 }: CashSessionDetailProps) {
   const { PrintContainer, handlePrint } = useSimplePrint()
-  const renderSessionDetails = () => (
+  // En haut : à qui est la caisse et quand elle a tourné.
+  const renderSessionHeaderDetails = () => (
     <>
       <SessionDetail label="Vendeur" value={getUserDisplayName(session.user) ?? 'Utilisateur'} />
       <SessionDetail label="Ouverture" value={formatDateTimeLabel(session.openedAt)} />
       <SessionDetail label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
+    </>
+  )
+  // En bas, après les chiffres : les montants de clôture (la note est affichée à part).
+  const renderSessionClosingAmounts = () => (
+    <>
       <SessionDetail label="Système" value={renderMoneyMap(session.systemAmounts)} strong />
       <SessionDetail label="Physique" value={renderMoneyMap(session.closingAmounts)} strong />
       <SessionDetail label="Écart" value={renderMoneyMap(session.differenceAmounts)} strong />
-      {/* La note de clôture n'apparaît que si le vendeur en a écrit une */}
-      {session.closingNote && <SessionDetail label="Note" value={session.closingNote} />}
     </>
   )
 
   return (
     <main className="min-h-screen bg-muted/40 text-foreground">
       <PrintContainer>
-        <PrintReportHeader title="Rapport journalier des ventes" />
+        <PrintReportHeader
+          title="Rapport journalier des ventes"
+          details={renderSessionHeaderDetails()}
+        />
         <SaleReportTable sales={sales} totals={totals} pendingSaleIds={pendingSaleIds} />
         <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
-        {/* Les informations de la session viennent après les chiffres */}
-        <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 border-t border-black pt-3 text-[11px] text-black">
-          {renderSessionDetails()}
+        {/* Les montants de clôture viennent après les chiffres, sous un trait de séparation */}
+        <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 border-t border-black pt-3 text-[13px] text-black">
+          {renderSessionClosingAmounts()}
         </div>
+        {/* La note de clôture n'apparaît que si le vendeur en a écrit une */}
+        {session.closingNote && (
+          <div className="mt-3 border border-black p-2 text-[11px] text-black">
+            <p className="font-bold">Note de clôture</p>
+            <p className="mt-1 whitespace-pre-line">{session.closingNote}</p>
+          </div>
+        )}
       </PrintContainer>
 
       <section className="flex w-full flex-col gap-6 px-6 py-8 lg:px-10">
         <PrintReportHeader
           title="Rapport journalier des ventes"
+          details={renderSessionHeaderDetails()}
           actions={
             <Button render={<Link href="/sales/sessions" />} variant="outline">
               <ArrowLeft className="size-4" />
@@ -135,12 +150,22 @@ function CashSessionDetail({
 
         <SaleReportTotalSection totals={totals} pendingCount={pendingCount} />
 
-        {/* Les informations de la session viennent après les chiffres */}
-        <Card className="bg-background">
-          <CardContent className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-            {renderSessionDetails()}
-          </CardContent>
-        </Card>
+        {/* Les montants de clôture viennent après les chiffres, sous un trait de séparation */}
+        <div className="flex flex-wrap gap-x-8 gap-y-2 border-t border-border pt-4 text-base">
+          {renderSessionClosingAmounts()}
+        </div>
+
+        {/* La note de clôture n'apparaît que si le vendeur en a écrit une */}
+        {session.closingNote && (
+          <Card className="bg-background">
+            <CardHeader>
+              <CardTitle>Note de clôture</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-line text-sm">{session.closingNote}</p>
+            </CardContent>
+          </Card>
+        )}
       </section>
     </main>
   )
