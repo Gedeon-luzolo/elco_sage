@@ -21,13 +21,15 @@ export function useRecoverDebt() {
     mutationFn: ({ saleId, saleNumber, payload }: RecoverDebtVariables) => {
       // L'id généré ici rend l'envoi rejouable sans doublon
       const id = crypto.randomUUID()
+      // L'heure réelle du paiement est gardée, même si l'envoi part plus tard depuis la file
+      const recoveredAt = new Date().toISOString()
 
       return submitOrQueue({
         id,
         type: 'recovery',
         userId: user!.id,
         path: `/sales/${saleId}/recoveries`,
-        body: { ...payload, id },
+        body: { ...payload, id, recoveredAt },
         summary: `Recouvrement sur la facture ${saleNumber}`,
         sale: null,
       })

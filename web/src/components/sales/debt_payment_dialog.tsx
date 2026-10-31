@@ -146,13 +146,8 @@ export function DebtPaymentDialog({ debt, onOpenChange }: DebtPaymentDialogProps
 
               <div className="grid gap-2">
                 <Label htmlFor="debt-payment-date">Date de paiement</Label>
-                <Input
-                  id="debt-payment-date"
-                  name="recoveredAt"
-                  type="date"
-                  defaultValue={todayDateKey()}
-                  readOnly
-                />
+                {/* Affichage seulement : l'heure réelle de l'encaissement est ajoutée à l'envoi */}
+                <Input id="debt-payment-date" type="date" defaultValue={todayDateKey()} readOnly />
               </div>
             </>
           )}
