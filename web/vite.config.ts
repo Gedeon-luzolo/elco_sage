@@ -40,5 +40,30 @@ export default defineConfig({
       '~': `${import.meta.dirname}/src`,
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Les librairies chargées au démarrage ont leur propre chunk : leur nom ne change pas
+        // d'un déploiement à l'autre, donc la mise à jour ne retélécharge que le code de l'app.
+        // Les autres (react-pdf, recharts...) restent avec les modules lazy qui les utilisent.
+        manualChunks: (id) => {
+          if (!id.includes('/node_modules/')) return undefined
+
+          if (/\/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)) {
+            return 'react-vendor'
+          }
+          if (id.includes('/node_modules/@tanstack/') || id.includes('/node_modules/idb/')) {
+            return 'query-vendor'
+          }
+          if (
+            /\/node_modules\/(@base-ui|@floating-ui|lucide-react|framer-motion|motion-dom|motion-utils|sonner)\//.test(id)
+          ) {
+            return 'ui-vendor'
+          }
+          return undefined
+        },
+      },
+    },
+  },
   server: { port: 5173 },
 })

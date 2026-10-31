@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, type RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from '~/components/auth/protected_route'
+import { PageSkeleton } from '~/components/common/page_skeleton'
 import { useAuth } from '~/hooks/auth/useAuth'
 import { AppLayout } from '~/layouts/app_layout'
 import Home from '~/pages/home/home'
@@ -20,8 +21,8 @@ const ManagementModule = lazy(() =>
 )
 const CustomersPage = lazy(() => import('~/pages/customers/customers_page'))
 
-// Écran affiché le temps de charger un module
-const moduleFallback = <div className="min-h-screen" />
+// Squelette affiché le temps de charger un module
+const moduleFallback = <PageSkeleton />
 
 // L'accueil de pilotage est réservé à la direction ; les autres profils entrent par les ventes.
 function ManagementHome() {
