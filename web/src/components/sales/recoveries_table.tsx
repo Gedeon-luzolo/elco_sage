@@ -32,7 +32,7 @@ export function RecoveriesTable({ recoveries, showStatusBadge = true }: Recoveri
           <TableHead>Date de paiement</TableHead>
           <TableHead>Agent</TableHead>
           <TableHead>Client</TableHead>
-          <TableHead>Addition</TableHead>
+          <TableHead>Facture</TableHead>
           <TableHead>Date de vente</TableHead>
           <TableHead className="text-right">Montant payé</TableHead>
           <TableHead>Mode</TableHead>

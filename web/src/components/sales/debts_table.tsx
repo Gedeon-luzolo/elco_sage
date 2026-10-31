@@ -37,7 +37,7 @@ export function DebtsTable({
         <TableRow>
           <TableHead>Date de vente</TableHead>
           <TableHead>Client</TableHead>
-          <TableHead>Addition</TableHead>
+          <TableHead>Facture</TableHead>
           <TableHead className="text-right">Dette totale</TableHead>
           <TableHead className="text-right">Déjà payé</TableHead>
           <TableHead className="text-right">Reste</TableHead>
