@@ -16,15 +16,16 @@ export default function Home() {
     <main className="min-h-screen bg-muted/40 text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10">
         <PageHeader
-          title={`Bonjour, ${user?.fullName ?? ''}`}
+          title="Elco Sage"
           description="Choisissez une application pour commencer."
           icon={HomeIcon}
         >
           <span className="text-sm text-muted-foreground">{user?.role}</span>
         </PageHeader>
 
-        <div className="grid gap-x-10 sm:grid-cols-2 sm:divide-x sm:divide-border">
-          <div className="sm:pr-6">
+        {/* grid-cols-1 borne la colonne à la largeur de l'écran : les textes tronqués ne débordent plus */}
+        <div className="grid grid-cols-1 gap-x-10 sm:grid-cols-2 sm:divide-x sm:divide-border">
+          <div className="min-w-0 sm:pr-6">
             {leftModules.map((module) => (
               <ModuleListRow
                 key={module.title}
@@ -38,7 +39,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="sm:pl-6">
+          <div className="min-w-0 sm:pl-6">
             {rightModules.map((module) => (
               <ModuleListRow
                 key={module.title}
