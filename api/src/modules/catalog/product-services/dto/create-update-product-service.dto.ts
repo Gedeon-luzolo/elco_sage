@@ -17,6 +17,7 @@ const productServiceFields = {
   type: requiredEnum(ProductServiceType, "Le type d'article"),
   name: requiredText('Le nom', { min: 2, max: 150 }),
   categoryId: nullableUuid('La catégorie choisie'),
+  stockProductId: nullableUuid('Le produit lié'),
   baseUnit: nullableText("L'unité de base", 50),
   packagingUnit: nullableText("L'unité de conditionnement", 50),
   packagingCapacity: nullablePositiveInt('La capacité du conditionnement'),

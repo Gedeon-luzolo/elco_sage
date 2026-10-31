@@ -30,6 +30,8 @@ export type ProductServiceDTO = {
   name: string
   categoryId: string | null
   category: { id: string; name: string } | null
+  stockProductId: string | null
+  stockProduct: { id: string; name: string } | null
   isActive: boolean
   baseUnit: string | null
   packagingUnit: string | null

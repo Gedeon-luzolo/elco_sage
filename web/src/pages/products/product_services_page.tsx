@@ -21,7 +21,7 @@ import type {
   ProductServicesPageProps,
 } from '~/types/product_service_types'
 
-const PRODUCT_SERVICES_PAGE_SIZE = 20
+const PRODUCT_SERVICES_PAGE_SIZE = 12
 
 /**
  * Page principale de gestion des Produits et Services.
@@ -102,6 +102,7 @@ export default function ProductServicesPage() {
 
     // Les Select sans valeur renvoient une chaine vide; le backend attend null pour les champs optionnels.
     payload.categoryId = payload.categoryId || null
+    payload.stockProductId = payload.stockProductId || null
     payload.baseUnit = payload.baseUnit || null
     payload.packagingUnit = payload.packagingUnit || null
     payload.packagingCapacity = payload.packagingCapacity || null
@@ -198,6 +199,7 @@ export default function ProductServicesPage() {
                     currentPage={paginatedProducts.currentPage}
                     totalPages={paginatedProducts.totalLoadedPages}
                     onPageChange={paginatedProducts.goToPage}
+                    className="mb-3 justify-end"
                   />
                 )}
 
@@ -225,6 +227,7 @@ export default function ProductServicesPage() {
                     currentPage={paginatedServices.currentPage}
                     totalPages={paginatedServices.totalLoadedPages}
                     onPageChange={paginatedServices.goToPage}
+                    className="mb-3 justify-end"
                   />
                 )}
 
@@ -258,6 +261,7 @@ export default function ProductServicesPage() {
         item={selectedItem}
         submitLabel={selectedItem ? 'Enregistrer' : 'Créer'}
         categories={categories}
+        products={products}
         defaultType={defaultModalType}
         onOpenChange={(open) => {
           if (!open) closeModal()

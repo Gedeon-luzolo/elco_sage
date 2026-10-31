@@ -4,7 +4,8 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { isUniqueViolation } from '../../../common/database/database-error.utils.js';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
 import { JournalisationsService } from '../../journalisations/journalisations.service.js';
@@ -101,15 +102,17 @@ export class ProductServicesService {
    * Crée un article actif ; le prix est converti dans les deux devises.
    */
   async create(actor: User, dto: CreateProductServiceDto) {
-    // Deux articles ne peuvent pas porter le même nom.
-    await this.ensureNameAvailable(dto.name);
+    const fields = await this.buildFields(dto);
 
-    const item = await this.productServicesRepository.save(
-      this.productServicesRepository.create({
-        ...(await this.buildFields(dto)),
-        // Un nouvel article est toujours actif.
-        isActive: true,
-      }),
+    // Deux articles ne peuvent pas porter le même nom : la base le refuse.
+    const item = await this.withUniqueName(() =>
+      this.productServicesRepository.save(
+        this.productServicesRepository.create({
+          ...fields,
+          // Un nouvel article est toujours actif.
+          isActive: true,
+        }),
+      ),
     );
 
     await this.journalisationsService.create(
@@ -136,16 +139,16 @@ export class ProductServicesService {
       throw new NotFoundException('Article introuvable.');
     }
 
-    // Le nom n'est revérifié que s'il change réellement.
-    if (dto.name !== item.name) {
-      await this.ensureNameAvailable(dto.name, id);
-    }
-
     // Les prix sont recalculés avec le taux courant à chaque modification.
-    await this.productServicesRepository.update(id, {
-      ...(await this.buildFields(dto)),
-      isActive: dto.isActive,
-    });
+    const fields = await this.buildFields(dto);
+
+    // Un nom déjà porté par un autre article est refusé par la base.
+    await this.withUniqueName(() =>
+      this.productServicesRepository.update(id, {
+        ...fields,
+        isActive: dto.isActive,
+      }),
+    );
 
     await this.journalisationsService.create(
       JournalisationModule.PRODUCT_SERVICES,
@@ -166,6 +169,13 @@ export class ProductServicesService {
       );
     }
 
+    // Seul un service peut être lié à un produit, et ce lien est facultatif.
+    const stockProductId = isService ? dto.stockProductId : null;
+
+    if (stockProductId) {
+      await this.ensureStockProduct(stockProductId);
+    }
+
     // Le prix est saisi dans une devise et converti dans l'autre.
     const prices = await this.exchangeRatesService.toBothCurrencies(
       dto.price,
@@ -176,6 +186,7 @@ export class ProductServicesService {
       type: dto.type,
       name: dto.name,
       categoryId: dto.categoryId,
+      stockProductId,
       baseUnit: isService ? null : dto.baseUnit,
       packagingUnit: dto.packagingUnit,
       packagingCapacity: dto.packagingCapacity,
@@ -183,16 +194,32 @@ export class ProductServicesService {
     };
   }
 
-  private async ensureNameAvailable(name: string, ignoredId?: string) {
-    // En modification, l'article lui-même est ignoré.
-    const taken = await this.productServicesRepository.exists({
-      where: { name, ...(ignoredId ? { id: Not(ignoredId) } : {}) },
+  // Le produit lié doit exister et être un produit, pas un autre service.
+  private async ensureStockProduct(stockProductId: string) {
+    const exists = await this.productServicesRepository.exists({
+      where: { id: stockProductId, type: ProductServiceType.PRODUCT },
     });
 
-    if (taken) {
+    if (!exists) {
       throw new UnprocessableEntityException(
-        'Un article portant ce nom existe déjà.',
+        "Le produit lié est introuvable ou n'est pas un produit.",
       );
+    }
+  }
+
+  // Écrit l'article et traduit le refus de la contrainte d'unicité du nom en message lisible.
+  // La contrainte tient aussi face à deux enregistrements simultanés.
+  private async withUniqueName<T>(write: () => Promise<T>) {
+    try {
+      return await write();
+    } catch (error) {
+      if (isUniqueViolation(error, 'product_services_name_unique')) {
+        throw new UnprocessableEntityException(
+          'Un article portant ce nom existe déjà.',
+        );
+      }
+
+      throw error;
     }
   }
 
@@ -210,18 +237,19 @@ export class ProductServicesService {
     return {
       priceUsd: prices.usd,
       priceCdf: prices.cdf,
-      // Le coût matière d'un produit est le prix du conditionnement divisé par sa capacité.
       materialCostUsd: divider ? prices.usd / divider : 0,
       materialCostCdf: divider ? prices.cdf / divider : 0,
     };
   }
 
-  // Articles triés par nom, avec seulement l'id et le nom de leur catégorie.
+  // Articles triés par nom, avec seulement l'id et le nom de leur catégorie et de leur produit lié.
   private catalogQuery() {
     return this.productServicesRepository
       .createQueryBuilder('item')
       .leftJoin('item.category', 'category')
       .addSelect(['category.id', 'category.name'])
+      .leftJoin('item.stockProduct', 'stockProduct')
+      .addSelect(['stockProduct.id', 'stockProduct.name'])
       .orderBy('item.name', 'ASC');
   }
 }

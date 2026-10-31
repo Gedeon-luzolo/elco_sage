@@ -26,10 +26,14 @@ interface ProductServiceModalProps {
   item: ProductServiceItem | null
   submitLabel: string
   categories: ProductCategoryDTO[]
+  products: ProductServiceItem[]
   defaultType?: 'PRODUCT' | 'SERVICE'
   onOpenChange: (open: boolean) => void
   action: (formData: FormData) => void | Promise<void>
 }
+
+// Option vide de la liste des produits liés : un service peut ne consommer aucun produit.
+const NO_STOCK_PRODUCT = { id: '', name: 'Aucun produit lié' } as ProductServiceItem
 
 /**
  * Boîte de dialogue (Modal) pour la création et la modification d'un produit ou service.
@@ -43,6 +47,7 @@ export function ProductServiceModal({
   item,
   submitLabel,
   categories,
+  products,
   defaultType = 'PRODUCT',
   onOpenChange,
   action,
@@ -64,7 +69,17 @@ export function ProductServiceModal({
   // Choix de la catégorie, envoyé avec le formulaire
   const [categoryId, setCategoryId] = useState(item?.categoryId ?? '')
 
+  // Produit lié d'un service, facultatif : vide si le service ne consomme aucun produit
+  const [stockProductId, setStockProductId] = useState(item?.stockProductId ?? '')
+
   const isService = selectedType === 'SERVICE'
+
+  // Produits actifs, plus le produit déjà lié s'il a été désactivé depuis.
+  // Le choix « Aucun produit lié » permet de retirer le lien.
+  const stockProductOptions = [
+    NO_STOCK_PRODUCT,
+    ...products.filter((product) => product.isActive || product.id === item?.stockProductId),
+  ]
   /**
    * Lors du changement de devise, si un élément existe en édition,
    * la valeur du prix est mise à jour instantanément vers le montant correspondant (USD ou CDF).
@@ -131,7 +146,25 @@ export function ProductServiceModal({
 
             {/* Unité de base (Vente / Consommation) */}
             {isService ? (
-              <Input type="hidden" name="baseUnit" value="" />
+              <>
+                <Input type="hidden" name="baseUnit" value="" />
+
+                {/* Produit consommé par le service (ex : le papier d'une impression), facultatif */}
+                <div className="grid gap-2">
+                  <Label htmlFor="ps-stock-product">Produit lié</Label>
+                  <SearchableSelect
+                    id="ps-stock-product"
+                    name="stockProductId"
+                    items={stockProductOptions}
+                    value={stockProductId}
+                    onValueChange={setStockProductId}
+                    getValue={(product) => product.id}
+                    getLabel={(product) => product.name}
+                    placeholder="Aucun produit lié"
+                    emptyMessage="Aucun produit trouvé."
+                  />
+                </div>
+              </>
             ) : (
               <div className="grid gap-2">
                 <Label htmlFor="ps-base-unit">Unité de base *</Label>
