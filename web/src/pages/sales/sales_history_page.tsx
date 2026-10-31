@@ -220,7 +220,7 @@ export default function SalesHistoryPage() {
               />
             )}
 
-            <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(540px,620px)]">
+            <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
               <SalesTable
                 sales={visibleSales}
                 selectedSaleId={effectiveSelectedSaleId}

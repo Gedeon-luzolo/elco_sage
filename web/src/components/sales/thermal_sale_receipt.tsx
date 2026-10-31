@@ -1,4 +1,5 @@
 import elcoPrintLogo from '~/images/elco_print.png'
+import { cn } from '~/lib/utils'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
@@ -8,21 +9,29 @@ import { getUserDisplayName } from '~/utils/user.utils'
 
 interface ThermalSaleReceiptProps {
   sale: SaleItemRow
+  // Aperçu à l'écran : petit logo et pas de hauteur minimale d'impression
+  compact?: boolean
 }
 
-export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
+export function ThermalSaleReceipt({ sale, compact = false }: ThermalSaleReceiptProps) {
   const saleCurrency = sale.currency as CurrencyCode
 
   return (
     <section
-      className="min-h-[210mm] w-[72.1mm] bg-white p-[4mm] font-sans text-[9px] leading-tight text-black"
+      className={cn(
+        'w-[72.1mm] bg-white p-[4mm] font-sans text-[9px] leading-tight text-black',
+        !compact && 'min-h-[210mm]'
+      )}
       style={{ colorScheme: 'light' }}
     >
       <header className="text-center">
         <img
           src={elcoPrintLogo}
           alt="ELCO SAGE"
-          className="mx-auto mb-[1mm] h-[35mm] w-[50mm] object-contain"
+          className={cn(
+            'mx-auto mb-[1mm] object-contain',
+            compact ? 'h-[12mm] w-[30mm]' : 'h-[35mm] w-[50mm]'
+          )}
         />
         <p className="mt-[1mm]">Facture de vente</p>
         <p className="mt-[1mm] text-center text-[18px] font-bold leading-none">
@@ -79,7 +88,7 @@ export function ThermalSaleReceipt({ sale }: ThermalSaleReceiptProps) {
 
       <footer className="mt-[3mm] text-center">
         <p className="mt-[1mm]">Merci pour votre confiance.</p>
-        <p className="mt-[1mm]">Date d'impression: {formatDateTimeLabel(new Date())}</p>
+        <p className="mt-[1mm]">Date d'impression: {formatDateTimeLabel(sale.saleDate)}</p>
       </footer>
     </section>
   )

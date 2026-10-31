@@ -1,13 +1,10 @@
 import { Printer, XCircle } from 'lucide-react'
 import { InvoicePdfDownload } from '~/components/invoices/invoice_pdf_download'
+import { ThermalSaleReceipt } from '~/components/sales/thermal_sale_receipt'
 import { Button } from '~/components/ui/button'
 import type { SaleItemRow } from '~/types/sale_types'
-import type { CurrencyCode } from '~/utils/currency'
 import { formatDateTimeLabel } from '~/utils/date'
 import { saleToInvoice } from '~/utils/invoices/invoice.utils'
-import { formatMoneyWithCurrency } from '~/utils/format_number.utils'
-import { formatSalePaymentLabel } from '~/utils/sales/payment.utils'
-import { getUserDisplayName } from '~/utils/user.utils'
 
 // Propriétés du panneau ; isPending marque une vente faite hors ligne et pas encore envoyée.
 interface SaleDetailPanelProps {
@@ -19,7 +16,7 @@ interface SaleDetailPanelProps {
 }
 
 /**
- * Panneau de detail d'une vente selectionnee.
+ * Panneau d'une vente sélectionnée : ses actions, puis son ticket thermique.
  */
 export function SaleDetailPanel({
   sale,
@@ -32,18 +29,18 @@ export function SaleDetailPanel({
 
   return (
     <aside className="h-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-      <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border bg-card p-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-border bg-card p-4">
         <div className="min-w-0">
           <h3 className="text-lg font-semibold">Addition {sale.additionNumber}</h3>
           <p className="text-sm text-muted-foreground">{formatDateTimeLabel(sale.saleDate)}</p>
         </div>
-        {/* Actions tactiles : pleine largeur en mobile, compactes en desktop. */}
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
+        {/* Actions sous le titre : elles se partagent la largeur du panneau étroit */}
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="w-full sm:w-auto"
+            className="flex-1"
             onClick={() => onPrintSale?.(sale)}
           >
             <Printer className="size-4" />
@@ -51,18 +48,14 @@ export function SaleDetailPanel({
           </Button>
 
           {/* Facture A4 pour les clients qui la demandent, en plus du ticket */}
-          <InvoicePdfDownload
-            invoice={saleToInvoice(sale)}
-            label="Facture A4"
-            className="w-full sm:w-auto"
-          />
+          <InvoicePdfDownload invoice={saleToInvoice(sale)} label="Facture A4" className="flex-1" />
 
           {canCancelSale && !isCancelled && (
             <Button
               type="button"
               variant="destructive"
               size="sm"
-              className="w-full sm:w-auto"
+              className="flex-1"
               onClick={() => onCancelSale?.(sale)}
             >
               <XCircle className="size-4" />
@@ -72,68 +65,26 @@ export function SaleDetailPanel({
         </div>
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="flex flex-col items-center gap-4 p-4">
         {/* Cette vente n'existe que sur l'appareil : elle ne peut pas encore être annulée */}
         {isPending && (
-          <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
+          <p className="w-full rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
             Vente faite hors ligne
           </p>
         )}
-        <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-          <DetailLine label="Client" value={sale.customer?.fullName ?? '-'} />
-          <DetailLine label="Opérateur" value={getUserDisplayName(sale.operator) ?? '-'} />
-          <DetailLine label="Vendeur" value={getUserDisplayName(sale.seller) ?? '-'} />
-          <DetailLine label="Paiement" value={formatSalePaymentLabel(sale)} />
-          {sale.paymentReference && <DetailLine label="Référence" value={sale.paymentReference} />}
-          <DetailLine label="Statut" value={sale.status} />
-        </div>
 
-        <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-          <DetailLine
-            label="Montant theorique"
-            value={formatMoneyWithCurrency(sale.theoreticalAmount, sale.currency as CurrencyCode)}
-          />
-          <DetailLine
-            label="Remise"
-            value={formatMoneyWithCurrency(sale.discountAmount, sale.currency as CurrencyCode)}
-          />
-          <DetailLine
-            label="Total"
-            value={formatMoneyWithCurrency(sale.totalAmount, sale.currency as CurrencyCode)}
-          />
-        </div>
+        {/* Le ticket de l'imprimante thermique en petit format, un peu agrandi pour l'écran : même contenu, logo réduit */}
+        <div className="relative drop-shadow-md [zoom:1.25]">
+          <ThermalSaleReceipt sale={sale} compact />
 
-        <div className="rounded-lg border border-border bg-muted/40 p-4">
-          <h4 className="text-sm font-semibold">Services vendus</h4>
-          <div className="mt-3 space-y-3">
-            {sale.items.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-md border border-border bg-background p-3 text-sm"
-              >
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium">{item.productService?.name ?? 'Service inconnu'}</p>
-                    <p className="text-xs text-muted-foreground">Quantité : {item.quantity}</p>
-                  </div>
-                  <p className="shrink-0 font-semibold">
-                    {formatMoneyWithCurrency(item.totalPrice, item.currency as CurrencyCode)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Une vente annulée garde son ticket, barré d'un tampon */}
+          {isCancelled && (
+            <span className="absolute top-16 right-3 rotate-12 rounded border-2 border-red-700 bg-white/70 px-2 py-0.5 text-sm font-extrabold tracking-wider text-red-700 uppercase">
+              Annulée
+            </span>
+          )}
         </div>
       </div>
     </aside>
-  )
-}
-
-function DetailLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="min-w-0 text-right font-medium">{value}</span>
-    </div>
   )
 }
