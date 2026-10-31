@@ -7,16 +7,14 @@ export type MoneyMap = Record<string, number>
 // Les montants sont vides tant qu'elle est ouverte ; à la clôture, seules les devises comptées figurent.
 export type CashSessionItem = {
   id: string
-  openedById: string
-  closedById: string | null
+  userId: string
   status: string
   openedAt: string
   closedAt: string | null
   systemAmounts: MoneyMap | null
   closingAmounts: MoneyMap | null
   differenceAmounts: MoneyMap | null
-  openedBy: UserSummaryDTO | null
-  closedBy: UserSummaryDTO | null
+  user: UserSummaryDTO | null
 }
 
 // Type pour les totaux d'un rapport de ventes, regroupés par devise.

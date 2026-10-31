@@ -81,8 +81,10 @@ export class RecoveriesService {
 
     this.ensureSaleCanReceiveRecovery(sale, dto);
 
-    // La caisse est partagée : le paiement entre dans la session ouverte, quel que soit son ouvreur.
-    const cashSession = await this.cashSessionsService.lockOpenSession();
+    // Le paiement entre dans la caisse de celui qui l'encaisse.
+    const cashSession = await this.cashSessionsService.lockOpenSession(
+      actor.id,
+    );
 
     if (!cashSession) {
       throw new UnprocessableEntityException(

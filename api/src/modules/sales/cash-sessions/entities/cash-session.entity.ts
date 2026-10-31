@@ -14,27 +14,20 @@ import { User } from '../../../users/entities/user.entity.js';
 import { CashSessionStatus } from '../enums/cash-session-status.enum.js';
 
 @Entity('cash_sessions')
-@Index('cash_sessions_opened_by_id_index', ['openedById'])
-@Index('cash_sessions_status_index', ['status'])
+@Index('cash_sessions_user_id_index', ['userId'])
 @Index('cash_sessions_opened_at_index', ['openedAt'])
-// Index unique partiel cash_sessions_one_open (une seule session OPEN) : déclaré en migration, TypeORM ne sait pas l'exprimer
+// Index unique partiel cash_sessions_one_open_per_user (une session OPEN par utilisateur) : déclaré en migration, TypeORM ne sait pas l'exprimer
 export class CashSession {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'opened_by_id', type: 'uuid' })
-  openedById: string;
+  // Le vendeur à qui appartient la caisse.
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'opened_by_id' })
-  openedBy: Relation<User>;
-
-  @Column({ name: 'closed_by_id', type: 'uuid', nullable: true })
-  closedById: string | null;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'closed_by_id' })
-  closedBy: Relation<User> | null;
+  @JoinColumn({ name: 'user_id' })
+  user: Relation<User>;
 
   @Column({ type: 'text' })
   status: CashSessionStatus;

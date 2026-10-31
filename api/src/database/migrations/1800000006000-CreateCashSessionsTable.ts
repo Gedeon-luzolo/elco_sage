@@ -5,8 +5,8 @@ export class CreateCashSessionsTable1800000006000 implements MigrationInterface 
     await queryRunner.query(`
       CREATE TABLE cash_sessions (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        opened_by_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-        closed_by_id uuid REFERENCES users(id) ON DELETE RESTRICT,
+        -- Chaque vendeur a sa propre caisse : il l'ouvre, y vend et la clôture
+        user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
         status text NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'CLOSED')),
         opened_at timestamptz NOT NULL,
         closed_at timestamptz,
@@ -18,17 +18,14 @@ export class CreateCashSessionsTable1800000006000 implements MigrationInterface 
       )
     `);
     await queryRunner.query(`
-      CREATE INDEX cash_sessions_opened_by_id_index ON cash_sessions (opened_by_id)
-    `);
-    await queryRunner.query(`
-      CREATE INDEX cash_sessions_status_index ON cash_sessions (status)
+      CREATE INDEX cash_sessions_user_id_index ON cash_sessions (user_id)
     `);
     await queryRunner.query(`
       CREATE INDEX cash_sessions_opened_at_index ON cash_sessions (opened_at)
     `);
-    // Une seule session peut être ouverte à la fois pour toute la caisse, quel que soit l'utilisateur
+    // Une seule session ouverte à la fois par utilisateur
     await queryRunner.query(`
-      CREATE UNIQUE INDEX cash_sessions_one_open ON cash_sessions ((true)) WHERE status = 'OPEN'
+      CREATE UNIQUE INDEX cash_sessions_one_open_per_user ON cash_sessions (user_id) WHERE status = 'OPEN'
     `);
   }
 

@@ -25,7 +25,7 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {getUserDisplayName(session.openedBy) ?? 'Utilisateur'}
+              {getUserDisplayName(session.user) ?? 'Utilisateur'}
             </CardTitle>
             <CardDescription className="truncate text-xs">
               {formatDateTimeLabel(session.openedAt)}
@@ -48,11 +48,6 @@ export function CashSessionCard({ session, onSelect }: CashSessionCardProps) {
           <SessionMetric label="Clôture" value={renderMoneyMap(session.closingAmounts)} />
           <SessionMetric label="Écart" value={renderMoneyMap(session.differenceAmounts)} />
           <SessionMetric label="Fermeture" value={formatDateTimeLabel(session.closedAt)} />
-          <SessionMetric
-            className="col-span-2"
-            label="Fermée par"
-            value={getUserDisplayName(session.closedBy) ?? '-'}
-          />
         </div>
         <Button type="button" size="sm" variant="outline" className="w-full" onClick={onSelect}>
           Voir les détails

@@ -7,6 +7,7 @@ import {
   sumMoneyByCurrency,
   sumMoneyMaps,
 } from '../../../common/utils/money-map.utils.js';
+import type { User } from '../../users/entities/user.entity.js';
 import { SaleRecovery } from '../recoveries/entities/sale-recovery.entity.js';
 import type { Sale } from '../sales/entities/sale.entity.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
@@ -26,9 +27,13 @@ export class CashSessionReportService {
 
   /**
    * Rapport d'une session : son en-tête, ses ventes actives et ses totaux par devise.
+   * Un vendeur ne lit que les siennes ; la direction les lit toutes.
    */
-  async getReport(cashSessionId: string) {
-    const session = await this.cashSessionsService.findOneOrFail(cashSessionId);
+  async getReport(actor: User, cashSessionId: string) {
+    const session = await this.cashSessionsService.findVisibleOrFail(
+      actor,
+      cashSessionId,
+    );
 
     // Les ventes valides de la session, dans l'ordre où elles ont été faites.
     const sales = await this.salesService

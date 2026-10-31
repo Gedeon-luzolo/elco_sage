@@ -15,7 +15,6 @@ import type { SaleReportTotals } from '~/types/cash_session_types'
 import { formatDateTimeLabel } from '~/utils/date'
 import { renderMoneyMap } from '~/utils/money_map.utils'
 import { isManagementRole } from '~/utils/user_role.utils'
-import { getUserDisplayName } from '~/utils/user.utils'
 
 export default function SalesPage() {
   const { user } = useAuth()
@@ -43,7 +42,7 @@ export default function SalesPage() {
     { label: 'Dettes', amounts: sessionTotals?.debtAmounts },
     { label: 'Recouvrements', amounts: sessionTotals?.recoveryAmounts },
   ]
-  // La caisse est partagée : tout utilisateur peut vendre tant qu'une session est ouverte
+  // Le vendeur ne vend que tant que sa propre session est ouverte
   const canCreateSale = Boolean(currentCashSession)
 
   // Action du bandeau : vendre sur la session ouverte, sinon en ouvrir une.
@@ -52,7 +51,7 @@ export default function SalesPage() {
         href: '/sales/create',
         icon: Plus,
         title: 'Nouvelle vente',
-        description: 'Enregistrer une addition sur la session ouverte',
+        description: 'Enregistrer une vente sur votre session',
       }
     : !currentCashSession
       ? {
@@ -74,15 +73,6 @@ export default function SalesPage() {
             {currentCashSession ? (
               <p className="mt-2 text-base text-muted-foreground">
                 Session ouverte le {formatDateTimeLabel(currentCashSession.openedAt)}
-                {currentCashSession.openedBy && (
-                  <>
-                    {' '}
-                    · par{' '}
-                    <span className="font-semibold text-foreground">
-                      {getUserDisplayName(currentCashSession.openedBy)}
-                    </span>
-                  </>
-                )}
               </p>
             ) : (
               <p className="mt-2 text-base text-muted-foreground">

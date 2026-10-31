@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -6,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
+import { isUniqueViolation } from '../../../common/database/database-error.utils.js';
 import type { PeriodDto } from '../../../common/dto/period.dto.js';
 import { Currency } from '../../../common/enums/currency.enum.js';
 import type { MoneyMap } from '../../../common/types/money-map.type.js';
@@ -20,15 +22,13 @@ import { JournalisationsService } from '../../journalisations/journalisations.se
 import type { User } from '../../users/entities/user.entity.js';
 import {
   getUserDisplayName,
+  isManagementRole,
   userSummaryFields,
 } from '../../users/utils/user.utils.js';
 import { SalePaymentType, SaleStatus } from '../sales/enums/sale.enums.js';
 import type { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
 import { CashSession } from './entities/cash-session.entity.js';
 import { CashSessionStatus } from './enums/cash-session-status.enum.js';
-
-// Verrou qui sérialise les ouvertures de caisse, libéré à la fin de la transaction.
-const OPEN_SESSION_LOCK = `SELECT pg_advisory_xact_lock(hashtext('cash_sessions_open'))`;
 
 export const NO_OPEN_SESSION_MESSAGE =
   "Aucune session de caisse ouverte n'a été trouvée.";
@@ -44,32 +44,34 @@ export class CashSessionsService {
   ) {}
 
   /**
-   * Session ouverte, la même pour tous, ou null.
+   * Session ouverte de l'utilisateur, ou null.
    */
-  async getOpenSession() {
-    // L'index unique partiel garantit qu'au plus une session est ouverte.
+  async getOpenSession(userId: string) {
+    // L'index unique partiel garantit qu'un utilisateur a au plus une session ouverte.
     return this.sessionQuery()
-      .where('session.status = :open', { open: CashSessionStatus.OPEN })
+      .where('session.user_id = :userId', { userId })
+      .andWhere('session.status = :open', { open: CashSessionStatus.OPEN })
       .getOne();
   }
 
   /**
-   * Session ouverte, verrouillée en lecture jusqu'à la fin de la transaction, ou null.
+   * Session ouverte de l'utilisateur, verrouillée en lecture jusqu'à la fin de la transaction, ou null.
    * Une clôture attend ainsi la fin de la vente ou du recouvrement qui l'utilise.
    */
-  async lockOpenSession() {
+  async lockOpenSession(userId: string) {
     return this.cashSessionsRepository
       .createQueryBuilder('session')
-      .where('session.status = :open', { open: CashSessionStatus.OPEN })
+      .where('session.user_id = :userId', { userId })
+      .andWhere('session.status = :open', { open: CashSessionStatus.OPEN })
       .setLock('pessimistic_read')
       .getOne();
   }
 
   /**
-   * Session ouverte, ou 404 : pour les routes qui n'ont de sens que caisse ouverte.
+   * Session ouverte de l'utilisateur, ou 404 : pour les routes qui n'ont de sens que caisse ouverte.
    */
-  async getOpenSessionOrFail() {
-    const session = await this.getOpenSession();
+  async getOpenSessionOrFail(userId: string) {
+    const session = await this.getOpenSession(userId);
 
     if (!session) {
       throw new NotFoundException(NO_OPEN_SESSION_MESSAGE);
@@ -79,7 +81,7 @@ export class CashSessionsService {
   }
 
   /**
-   * Une session avec ses utilisateurs, ou 404.
+   * Une session avec son vendeur, ou 404.
    */
   async findOneOrFail(id: string) {
     const session = await this.sessionQuery()
@@ -94,49 +96,63 @@ export class CashSessionsService {
   }
 
   /**
-   * Sessions de la plus récente à la plus ancienne. La caisse est partagée : tout le monde les voit.
+   * Une session lisible par l'utilisateur : la sienne, ou n'importe laquelle pour la direction.
    */
-  async findSessions({ startDate, endDate }: PeriodDto) {
+  async findVisibleOrFail(actor: User, id: string) {
+    const session = await this.findOneOrFail(id);
+
+    if (session.userId !== actor.id && !isManagementRole(actor.role)) {
+      throw new ForbiddenException(
+        'Cette session de caisse appartient à un autre vendeur.',
+      );
+    }
+
+    return session;
+  }
+
+  /**
+   * Sessions de la plus récente à la plus ancienne : toutes pour la direction, les siennes pour les autres.
+   */
+  async findSessions(actor: User, { startDate, endDate }: PeriodDto) {
     const query = this.sessionQuery().orderBy('session.openedAt', 'DESC');
+
+    if (!isManagementRole(actor.role)) {
+      query.andWhere('session.user_id = :userId', { userId: actor.id });
+    }
 
     // La période couvre les journées complètes sélectionnées.
     if (startDate && endDate) {
       const { start, end } = dayRange(startDate, endDate);
-      query.where('session.opened_at BETWEEN :start AND :end', { start, end });
+      query.andWhere('session.opened_at BETWEEN :start AND :end', {
+        start,
+        end,
+      });
     }
 
     return query.getMany();
   }
 
   /**
-   * Ouvre la session de caisse et réserve une première plage de numéros à celui qui l'ouvre.
+   * Ouvre la session de caisse de l'utilisateur.
    */
   @Transactional()
   async open(actor: User) {
-    // Deux ouvertures simultanées passent l'une après l'autre : la seconde voit la première.
-    await this.cashSessionsRepository.query(OPEN_SESSION_LOCK);
-
-    // Une seule session ouverte à la fois : on dit qui l'a ouverte et depuis quand.
-    const existing = await this.getOpenSession();
+    // Une seule session ouverte par utilisateur : on lui rappelle depuis quand la sienne l'est.
+    const existing = await this.getOpenSession(actor.id);
     if (existing) {
-      throw new UnprocessableEntityException(
-        `Une session de caisse est déjà ouverte par ${getUserDisplayName(existing.openedBy) ?? 'un utilisateur'} depuis le ${toDateTimeLabel(existing.openedAt)}. Fermez-la avant d'en ouvrir une nouvelle.`,
-      );
+      throw this.alreadyOpenError(existing.openedAt);
     }
 
     // La date d'ouverture vient du serveur pour rester fiable.
-    const session = await this.cashSessionsRepository.save(
-      this.cashSessionsRepository.create({
-        openedById: actor.id,
-        closedById: null,
-        status: CashSessionStatus.OPEN,
-        openedAt: new Date(),
-        closedAt: null,
-        systemAmounts: null,
-        closingAmounts: null,
-        differenceAmounts: null,
-      }),
-    );
+    const session = await this.insertSession({
+      userId: actor.id,
+      status: CashSessionStatus.OPEN,
+      openedAt: new Date(),
+      closedAt: null,
+      systemAmounts: null,
+      closingAmounts: null,
+      differenceAmounts: null,
+    });
 
     await this.journalisationsService.create(
       JournalisationModule.SALES,
@@ -149,14 +165,15 @@ export class CashSessionsService {
   }
 
   /**
-   * Clôture la session ouverte : n'importe quel utilisateur peut le faire.
+   * Clôture la session ouverte de l'utilisateur : chacun ferme la sienne.
    */
   @Transactional()
   async close(actor: User, dto: CloseCashSessionDto) {
     // La ligne est verrouillée : une vente en cours se termine avant, une vente suivante voit la session fermée.
     const session = await this.cashSessionsRepository
       .createQueryBuilder('session')
-      .where('session.status = :open', { open: CashSessionStatus.OPEN })
+      .where('session.user_id = :userId', { userId: actor.id })
+      .andWhere('session.status = :open', { open: CashSessionStatus.OPEN })
       .setLock('pessimistic_write')
       .getOne();
 
@@ -186,7 +203,6 @@ export class CashSessionsService {
     await this.cashSessionsRepository.update(session.id, {
       status: CashSessionStatus.CLOSED,
       closedAt: new Date(),
-      closedById: actor.id,
       systemAmounts,
       closingAmounts,
       differenceAmounts,
@@ -228,15 +244,35 @@ export class CashSessionsService {
     );
   }
 
-  // Session avec celui qui l'a ouverte et celui qui l'a fermée, réduits à leur nom.
+  // Session avec son vendeur, réduit à son nom.
   private sessionQuery() {
     return this.cashSessionsRepository
       .createQueryBuilder('session')
-      .leftJoin('session.openedBy', 'openedBy')
-      .leftJoin('session.closedBy', 'closedBy')
-      .addSelect([
-        ...userSummaryFields('openedBy'),
-        ...userSummaryFields('closedBy'),
-      ]);
+      .leftJoin('session.user', 'user')
+      .addSelect(userSummaryFields('user'));
+  }
+
+  // Enregistre la session ; deux ouvertures simultanées du même utilisateur butent sur l'index unique.
+  private async insertSession(fields: Partial<CashSession>) {
+    try {
+      return await this.cashSessionsRepository.save(
+        this.cashSessionsRepository.create(fields),
+      );
+    } catch (error) {
+      if (isUniqueViolation(error, 'cash_sessions_one_open_per_user')) {
+        throw this.alreadyOpenError(null);
+      }
+
+      throw error;
+    }
+  }
+
+  // Refus d'ouvrir une seconde session, avec l'heure d'ouverture de la première quand elle est connue.
+  private alreadyOpenError(openedAt: Date | null) {
+    const since = openedAt ? ` depuis le ${toDateTimeLabel(openedAt)}` : '';
+
+    return new UnprocessableEntityException(
+      `Votre session de caisse est déjà ouverte${since}. Fermez-la avant d'en ouvrir une nouvelle.`,
+    );
   }
 }

@@ -28,9 +28,9 @@ export class SaleValidationService {
    * Vérifie toutes les règles d'une nouvelle vente avant son enregistrement.
    * Renvoie la session à utiliser et les services vendus, indexés par id.
    */
-  async validateCreateSale(dto: CreateSaleDto) {
+  async validateCreateSale(sellerId: string, dto: CreateSaleDto) {
     // La caisse est verrouillée en lecture : une clôture attend la fin de cette vente.
-    const cashSession = await this.resolveCashSession(dto);
+    const cashSession = await this.resolveCashSession(sellerId, dto);
 
     await this.ensureCustomerRules(dto);
     await this.ensureOperatorIsValid(dto.operatorId);
@@ -59,8 +59,8 @@ export class SaleValidationService {
     }
   }
 
-  // Session sur laquelle la vente est enregistrée, verrouillée en lecture jusqu'à la fin de la transaction.
-  private async resolveCashSession(dto: CreateSaleDto) {
+  // Session du vendeur sur laquelle la vente est enregistrée, verrouillée en lecture jusqu'à la fin de la transaction.
+  private async resolveCashSession(sellerId: string, dto: CreateSaleDto) {
     const query = this.cashSessionsRepository
       .createQueryBuilder('session')
       .setLock('pessimistic_read');
@@ -68,8 +68,10 @@ export class SaleValidationService {
     // Le client indique la caisse sur laquelle il a vendu : c'est la seule façon de rattacher
     // une vente hors ligne à la bonne caisse si une autre a été ouverte depuis.
     if (dto.cashSessionId) {
+      // Un vendeur ne vend que dans sa propre caisse.
       const session = await query
         .where('session.id = :id', { id: dto.cashSessionId })
+        .andWhere('session.user_id = :sellerId', { sellerId })
         .getOne();
 
       if (!session) {
@@ -92,8 +94,9 @@ export class SaleValidationService {
       );
     }
 
-    // Sans caisse indiquée, la vente va sur la session ouverte.
-    const openSession = await this.cashSessionsService.lockOpenSession();
+    // Sans caisse indiquée, la vente va sur la session ouverte du vendeur.
+    const openSession =
+      await this.cashSessionsService.lockOpenSession(sellerId);
 
     if (!openSession) {
       throw new UnprocessableEntityException(

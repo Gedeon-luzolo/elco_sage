@@ -9,7 +9,6 @@ import { useCrud } from '~/hooks/common/useCrud'
 import { useCurrentCashSession } from '~/hooks/sales/useCashSession'
 import type { CashSessionItem } from '~/types/cash_session_types'
 import { formatLongDate, formatShortTime } from '~/utils/date'
-import { getUserDisplayName } from '~/utils/user.utils'
 
 export default function CashSessionOpeningPage() {
   const { user } = useAuth()
@@ -79,13 +78,10 @@ export default function CashSessionOpeningPage() {
           <div className="w-full">
             {currentCashSession ? (
               <div className="flex flex-col gap-5">
-                {/* Une seule session peut être ouverte à la fois : on dit qui l'a ouverte */}
+                {/* Chaque vendeur a une seule session ouverte à la fois : la sienne */}
                 <p className="text-sm text-muted-foreground">
-                  Une session est déjà ouverte par{' '}
-                  <span className="font-medium text-foreground">
-                    {getUserDisplayName(currentCashSession.openedBy) ?? 'un utilisateur'}
-                  </span>
-                  . Continuez dessus ou fermez-la avant d&apos;en ouvrir une nouvelle.
+                  Votre session est déjà ouverte. Continuez dessus ou fermez-la avant d&apos;en
+                  ouvrir une nouvelle.
                 </p>
                 <Button render={<Link href="/sales" />} className="h-12 w-full rounded-xl">
                   <ArrowRight className="size-4" />

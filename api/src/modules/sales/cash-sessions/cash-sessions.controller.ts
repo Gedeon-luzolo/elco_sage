@@ -16,7 +16,7 @@ import { CashSessionReportService } from './cash-session-report.service.js';
 import { CashSessionsService } from './cash-sessions.service.js';
 import { CloseCashSessionDto } from './dto/close-cash-session.dto.js';
 
-// La caisse est partagée : tout utilisateur connecté l'ouvre, y vend et la clôture.
+// Chaque vendeur a sa caisse : il l'ouvre, y vend et la clôture. La direction voit toutes les sessions.
 @Controller('cash-sessions')
 @UseGuards(AuthGuard)
 export class CashSessionsController {
@@ -26,27 +26,29 @@ export class CashSessionsController {
   ) {}
 
   /**
-   * Sessions de caisse, filtrables par période.
+   * Sessions de caisse visibles par l'utilisateur, filtrables par période.
    */
   @Get()
-  findAll(@Query() query: PeriodDto) {
-    return this.cashSessionsService.findSessions(query);
+  findAll(@CurrentUser() actor: User, @Query() query: PeriodDto) {
+    return this.cashSessionsService.findSessions(actor, query);
   }
 
   /**
-   * Session ouverte ou null : la SPA en déduit si la vente est possible.
+   * Session ouverte de l'utilisateur ou null : la SPA en déduit si la vente est possible.
    */
   @Get('current')
-  findCurrent() {
-    return this.cashSessionsService.getOpenSession();
+  findCurrent(@CurrentUser() actor: User) {
+    return this.cashSessionsService.getOpenSession(actor.id);
   }
 
   /**
    * Montants attendus, affichés dans le dialogue de clôture.
    */
   @Get('current/system-amounts')
-  async findSystemAmounts() {
-    const session = await this.cashSessionsService.getOpenSessionOrFail();
+  async findSystemAmounts(@CurrentUser() actor: User) {
+    const session = await this.cashSessionsService.getOpenSessionOrFail(
+      actor.id,
+    );
 
     return {
       systemAmounts: await this.cashSessionsService.computeSystemAmounts(
@@ -76,7 +78,7 @@ export class CashSessionsController {
    * Rapport d'une session : ventes actives et totaux. Déclarée après les routes fixes (current, close).
    */
   @Get(':id')
-  findReport(@UuidParam() id: string) {
-    return this.cashSessionReportService.getReport(id);
+  findReport(@CurrentUser() actor: User, @UuidParam() id: string) {
+    return this.cashSessionReportService.getReport(actor, id);
   }
 }

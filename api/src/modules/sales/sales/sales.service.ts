@@ -121,7 +121,7 @@ export class SalesService {
 
     // Caisse, client, opérateur et services sont vérifiés avant tout calcul.
     const { cashSession, services } =
-      await this.saleValidationService.validateCreateSale(dto);
+      await this.saleValidationService.validateCreateSale(actor.id, dto);
 
     // Les prix viennent toujours du catalogue, jamais du client.
     const { pricedItems, theoreticalAmount } = priceItems(
