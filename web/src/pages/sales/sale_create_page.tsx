@@ -138,6 +138,7 @@ export default function SaleCreatePage() {
     setPaymentType('CASH')
     setPaymentMethod('CASH')
     setPaymentReference('')
+    setOperatorId('')
     setCustomerId('')
     ticket.resetTicket({ lines: [] })
     setTicketTab('lines')
@@ -155,6 +156,7 @@ export default function SaleCreatePage() {
 
     if (!canSubmit) return
 
+    // Si pas de session de caisse ouverte, la vente ne peut pas être enregistrée.
     if (!currentCashSession || !user) return
 
     const payload = {
@@ -173,6 +175,7 @@ export default function SaleCreatePage() {
       proformaId: linkedProforma?.id ?? null,
     }
 
+    // La vente est construite localement pour l'affichage immédiat du ticket, avant que le serveur ne réponde.
     createSale.mutate(
       {
         cashSessionId: currentCashSession.id,
