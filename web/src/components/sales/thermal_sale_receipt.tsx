@@ -1,4 +1,3 @@
-import elcoPrintLogo from '~/images/elco_print.png'
 import { cn } from '~/lib/utils'
 import type { SaleItemRow } from '~/types/sale_types'
 import type { CurrencyCode } from '~/utils/currency'
@@ -27,7 +26,7 @@ export function ThermalSaleReceipt({ sale, compact = false }: ThermalSaleReceipt
     >
       <header className="text-center">
         <img
-          src={elcoPrintLogo}
+          src="/images/elco_print.png"
           alt="ELCO SAGE"
           className={cn(
             'mx-auto mb-[1mm] object-contain',

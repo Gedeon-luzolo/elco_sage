@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import elcoPrintLogo from '~/images/elco_print.png'
 
 interface PrintReportHeaderProps {
   title: string
@@ -20,7 +19,7 @@ export function PrintReportHeader({
   return (
     <header className="mb-3 flex items-center justify-between gap-6 border-b border-black pb-3 text-black">
       <div className="flex min-w-0 items-center gap-3">
-        <img src={elcoPrintLogo} alt="ELCO SAGE" className="h-16 w-24 object-contain" />
+        <img src="/images/elco_print.png" alt="ELCO SAGE" className="h-16 w-24 object-contain" />
         <div className="min-w-0">
           <h1 className="text-lg font-bold uppercase leading-tight">{title}</h1>
           {description && <p className="mt-1 text-[11px] leading-snug">{description}</p>}

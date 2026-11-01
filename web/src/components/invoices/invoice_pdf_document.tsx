@@ -1,6 +1,5 @@
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { COMPANY } from '~/constants/company'
-import elcoPrintLogo from '~/images/elco_print.png'
 import { businessDateKey, formatDateLabel } from '~/utils/date'
 import { formatNumber } from '~/utils/format_number.utils'
 import type { InvoiceDocument } from '~/utils/invoices/invoice.utils'
@@ -84,7 +83,7 @@ export function InvoicePdfDocument({ invoice }: InvoicePdfDocumentProps) {
     <Document title={`${invoice.title} ${invoice.reference}`} author="Elco Print">
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Image src={elcoPrintLogo} style={styles.logo} />
+          <Image src="/images/elco_print.png" style={styles.logo} />
           <View>
             <Text style={styles.legal}>R.C.C.M {COMPANY.rccm}</Text>
             <Text style={styles.legal}>ID. NAT.: {COMPANY.idNat}</Text>

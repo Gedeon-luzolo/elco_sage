@@ -1,5 +1,4 @@
 import { COMPANY } from '~/constants/company'
-import elcoPrintLogo from '~/images/elco_print.png'
 import type { InvoiceDocument } from '~/utils/invoices/invoice.utils'
 import { businessDateKey, formatDateLabel } from '~/utils/date'
 import { formatNumber } from '~/utils/format_number.utils'
@@ -15,7 +14,7 @@ export function InvoicePaperPreview({ invoice }: { invoice: InvoiceDocument }) {
   return (
     <div className="bg-white p-8 text-[12px] text-black shadow-xl" style={{ colorScheme: 'light' }}>
       <div className="flex items-center gap-4">
-        <img src={elcoPrintLogo} alt="Elco Print" className="size-16 object-contain" />
+        <img src="/images/elco_print.png" alt="Elco Print" className="size-16 object-contain" />
         <div className="font-serif text-[13px] leading-snug font-bold text-[#1f2a5c]">
           <p>R.C.C.M {COMPANY.rccm}</p>
           <p>ID. NAT.: {COMPANY.idNat}</p>
