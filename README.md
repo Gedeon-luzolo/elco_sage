@@ -1,6 +1,6 @@
 # Elco Sage
 
-Application de caisse et de gestion d'un commerce de services à Kinshasa. Elle couvre la vente au comptant, à crédit ou offerte, en CDF et en USD, la caisse partagée (ouverture, clôture, écarts), les dettes et leurs recouvrements, le catalogue, les clients, les comptes et le pilotage de la direction (tableau de bord, productivité, journal).
+Application de caisse et de gestion d'une imprimerie à Kinshasa. Elle couvre la vente au comptant, à crédit ou offerte, en CDF et en USD, la caisse partagée (ouverture, clôture, écarts), les dettes et leurs recouvrements, le catalogue, les clients, les comptes et le pilotage de la direction (tableau de bord, productivité, journal).
 
 La caisse continue de vendre **hors ligne** : les ventes et les paiements sont mis en file sur le poste, puis envoyés au retour du réseau.
 
@@ -124,12 +124,7 @@ Les lectures peu changeantes (catalogue, clients, taux, comptes) sont mises en c
 
 ## Production
 
-En production, Nginx :
-
-- sert `web/dist`, en renvoyant les routes de l'application vers `index.html` ;
-- relaie `/api` vers l'API Nest.
-
-Pour que la PWA se mette à jour, les fichiers de `/assets` (nommés avec une empreinte) se mettent en cache pour un an. `index.html`, `sw.js` et le manifeste doivent, eux, être servis en `no-cache`. Le service worker exige le HTTPS. La configuration Nginx et la persistance Redis (AOF) restent à préparer avec le déploiement.
+L'application tourne sur https://elco.domicon.cloud. Nginx sert `web/dist` et relaie `/api` vers l'API, gérée par PM2 sous le nom `elco-sage-api` ([`api/ecosystem.config.cjs`](api/ecosystem.config.cjs)). Le déploiement passe par [`deploy.sh`](deploy.sh), lancé sur le serveur par l'utilisateur `deploy`.
 
 ## Conventions
 
