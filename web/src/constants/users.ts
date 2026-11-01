@@ -21,6 +21,7 @@ export const EMPTY_USER_FORM: UserFormState = {
   email: '',
   role: 'OPERATOR',
   status: 'ACTIVE',
+  hasSystemAccess: false,
 }
 
 // Libelles courts des roles dans les cards.

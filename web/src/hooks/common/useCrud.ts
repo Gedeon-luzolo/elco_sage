@@ -107,10 +107,10 @@ export function useCrud<T extends object>({
     })
 
   // Modifie un élément (PATCH /ressource/:id)
-  const usePatch = <TPayload = Partial<T>>() =>
+  const usePatch = <TPayload = Partial<T>, TResult = T>() =>
     useMutation({
       mutationFn: ({ id, data }: { id: Id; data: TPayload }) =>
-        api.patch<T>(`${endpoint}/${id}`, data),
+        api.patch<TResult>(`${endpoint}/${id}`, data),
       onSuccess: (_data, payload) => {
         // La fiche modifiée et les listes sont rechargées
         queryClient.invalidateQueries({ queryKey: [resourceKey, payload.id] })

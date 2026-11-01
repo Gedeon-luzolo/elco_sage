@@ -14,7 +14,10 @@ import { Label } from '~/components/ui/label'
 import { OptionSelect } from '~/components/common/option_select'
 import type { UserListItem, UserRole, UserSelectOption, UserStatus } from '~/types/user_types'
 
-type UserDialogDefaultValues = Pick<UserListItem, 'fullName' | 'email' | 'role' | 'status'>
+type UserDialogDefaultValues = Pick<
+  UserListItem,
+  'fullName' | 'email' | 'role' | 'status' | 'hasSystemAccess'
+>
 
 interface CreateUpdateUserDialogProps {
   title: string
@@ -96,6 +99,27 @@ export function CreateUpdateUserDialog({
               />
             </div>
           </div>
+
+          {/* La direction garde toujours l'accès : le serveur l'impose quel que soit ce choix */}
+          <label
+            htmlFor={`${title}-hasSystemAccess`}
+            className="flex cursor-pointer items-start gap-3 rounded-lg border p-3"
+          >
+            <input
+              id={`${title}-hasSystemAccess`}
+              name="hasSystemAccess"
+              type="checkbox"
+              defaultChecked={defaultValues.hasSystemAccess}
+              className="mt-0.5 size-4 accent-primary"
+            />
+            <span className="grid gap-0.5">
+              <span className="text-sm font-medium">Accès au système</span>
+              <span className="text-xs text-muted-foreground">
+                Permet de se connecter à l&apos;application. Toujours accordé à l&apos;admin et au
+                directeur.
+              </span>
+            </span>
+          </label>
 
           <DialogFooter>
             <Button type="button" size="lg" variant="outline" onClick={() => onOpenChange(false)}>

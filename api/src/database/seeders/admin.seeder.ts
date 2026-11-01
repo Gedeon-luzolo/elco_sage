@@ -42,6 +42,7 @@ export class AdminSeeder {
         password: await bcrypt.hash(this.admin.password, 10),
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
+        hasSystemAccess: true,
         failedLoginAttempts: 0,
       }),
     );

@@ -5,7 +5,6 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import bcrypt from 'bcryptjs';
 import { Not, Repository } from 'typeorm';
 import { AccessTokensService } from '../../auth/services/access-tokens.service.js';
 import { JournalisationModule } from '../../journalisations/enums/journalisation-module.enum.js';
@@ -16,10 +15,12 @@ import type {
 } from '../dto/create-update-user.dto.js';
 import { User } from '../entities/user.entity.js';
 import { UserRole, UserStatus } from '../enums/user.enums.js';
-import { isManagementRole } from '../utils/user.utils.js';
-
-// Mot de passe initial à communiquer au nouvel utilisateur.
-const DEFAULT_USER_PASSWORD = '12345678';
+import {
+  DEFAULT_USER_PASSWORD,
+  hashDefaultPassword,
+  isManagementRole,
+  resolveSystemAccess,
+} from '../utils/user.utils.js';
 
 type UserStatsRow = {
   stats_total: number;
@@ -109,14 +110,17 @@ export class UsersService {
     // Un email ne peut servir qu'à un seul compte.
     await this.ensureEmailAvailable(dto.email);
 
-    // Le mot de passe initial est haché ; le compte est actif sauf statut choisi.
+    const hasSystemAccess = resolveSystemAccess(dto.role, dto.hasSystemAccess);
+
+    // Le mot de passe initial est haché, seulement si le compte a l'accès ; le compte est actif sauf statut choisi.
     const user = await this.usersRepository.save(
       this.usersRepository.create({
         fullName: dto.fullName,
         email: dto.email,
-        password: await bcrypt.hash(DEFAULT_USER_PASSWORD, 10),
+        password: hasSystemAccess ? await hashDefaultPassword() : null,
         role: dto.role,
         status: dto.status ?? UserStatus.ACTIVE,
+        hasSystemAccess,
         failedLoginAttempts: 0,
       }),
     );
@@ -128,12 +132,15 @@ export class UsersService {
       actor,
     );
 
-    // Le mot de passe initial est affiché une fois pour être communiqué.
-    return { temporaryPassword: DEFAULT_USER_PASSWORD };
+    // Le mot de passe initial est affiché une fois pour être communiqué ; aucun sans accès.
+    return {
+      temporaryPassword: hasSystemAccess ? DEFAULT_USER_PASSWORD : null,
+    };
   }
 
   /**
-   * Met à jour un compte. Le mot de passe ne change pas par cette action.
+   * Met à jour un compte. Le mot de passe ne change que si l'accès au système est ouvert ou retiré.
+   * Renvoie le mot de passe initial quand l'accès vient d'être ouvert.
    */
   async update(actor: User, userId: string, dto: UpdateUserDto) {
     this.ensureCanManageUsers(actor);
@@ -150,20 +157,29 @@ export class UsersService {
       await this.ensureEmailAvailable(dto.email, user.id);
     }
 
-    // Seul le profil change : le mot de passe reste celui du compte.
+    // La direction garde toujours l'accès, quoi qu'envoie le formulaire.
+    const hasSystemAccess = resolveSystemAccess(dto.role, dto.hasSystemAccess);
+    // Accès ouvert : un mot de passe initial est créé. Accès retiré : le mot de passe est effacé.
+    const accessGranted = hasSystemAccess && !user.hasSystemAccess;
+    const accessRevoked = !hasSystemAccess && user.hasSystemAccess;
+
+    // Le profil change ; le mot de passe seulement si l'accès change.
     await this.usersRepository.update(user.id, {
       fullName: dto.fullName,
       email: dto.email,
       role: dto.role,
       status: dto.status,
+      hasSystemAccess,
+      ...(accessGranted ? { password: await hashDefaultPassword() } : {}),
+      ...(accessRevoked ? { password: null } : {}),
       // Un compte qui redevient actif repart sans échec de connexion, sinon il serait rebloqué à la prochaine erreur.
       ...(dto.status === UserStatus.ACTIVE && user.status !== UserStatus.ACTIVE
         ? { failedLoginAttempts: 0 }
         : {}),
     });
 
-    // Un compte qui n'est plus actif perd immédiatement toutes ses connexions.
-    if (dto.status !== UserStatus.ACTIVE) {
+    // Un compte qui n'est plus actif, ou qui perd l'accès, perd immédiatement toutes ses connexions.
+    if (dto.status !== UserStatus.ACTIVE || !hasSystemAccess) {
       await this.accessTokensService.deleteAllForUser(user.id);
     }
 
@@ -173,6 +189,9 @@ export class UsersService {
       `Le compte ${dto.fullName ?? dto.email} a été mis à jour par ${actor.fullName ?? actor.email}`,
       actor,
     );
+
+    // Le mot de passe initial n'est communiqué qu'à l'ouverture de l'accès.
+    return { temporaryPassword: accessGranted ? DEFAULT_USER_PASSWORD : null };
   }
 
   // Refuse qu'on désactive son propre compte ou qu'on se retire le rôle de direction.

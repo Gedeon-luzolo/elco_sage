@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import {
   CacheInvalidate,
   Cacheable,
@@ -45,16 +37,15 @@ export class UsersController {
   }
 
   /**
-   * Modifie un compte.
+   * Modifie un compte et renvoie le mot de passe initial si l'accès vient d'être ouvert.
    */
   @Patch(':id')
-  @HttpCode(204)
   @CacheInvalidate({ patterns: ['users:'] })
-  async update(
+  update(
     @CurrentUser() actor: User,
     @UuidParam() id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    await this.usersService.update(actor, id, updateUserDto);
+    return this.usersService.update(actor, id, updateUserDto);
   }
 }

@@ -1,6 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import {
+  booleanLike,
   nullableText,
   requiredEmail,
   requiredEnum,
@@ -14,15 +15,21 @@ const userFields = {
 };
 
 const status = requiredEnum(UserStatus, 'Le statut choisi');
+const hasSystemAccess = booleanLike("L'accès au système");
 
-// Le statut est facultatif à la création : un nouveau compte est actif.
+// Statut et accès sont facultatifs à la création : le service applique leurs valeurs par défaut.
 export const CreateUserSchema = z.object({
   ...userFields,
   status: status.optional(),
+  hasSystemAccess: hasSystemAccess.optional(),
 });
 
-// En édition, le formulaire présente toujours le statut.
-export const UpdateUserSchema = z.object({ ...userFields, status });
+// En édition, le formulaire présente toujours le statut et l'accès.
+export const UpdateUserSchema = z.object({
+  ...userFields,
+  status,
+  hasSystemAccess,
+});
 
 // DTO Nest générés depuis les schémas Zod.
 export class CreateUserDto extends createZodDto(CreateUserSchema) {}

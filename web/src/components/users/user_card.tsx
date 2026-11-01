@@ -41,6 +41,10 @@ export function UserCard({ user, roleLabels, statusLabels, onEdit }: UserCardPro
           <span className="text-muted-foreground">Role</span>
           <span className="font-medium">{roleLabels[role]}</span>
         </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Accès au système</span>
+          <span className="font-medium">{user.hasSystemAccess ? 'Oui' : 'Non'}</span>
+        </div>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" className="flex-1" onClick={() => onEdit(user)}>
             <Edit3 className="size-4" />

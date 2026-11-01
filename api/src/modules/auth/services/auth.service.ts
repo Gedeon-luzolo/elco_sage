@@ -52,6 +52,13 @@ export class AuthService {
       );
     }
 
+    // Sans accès, le compte n'a pas de mot de passe : il n'y a rien à vérifier.
+    if (!user.hasSystemAccess || !user.password) {
+      throw new UnauthorizedException(
+        "Ce compte n'a pas accès au système. Contactez un administrateur.",
+      );
+    }
+
     // Un mauvais mot de passe est compté, et peut bloquer le compte.
     if (!(await bcrypt.compare(password, user.password))) {
       await this.registerFailedAttempt(user);
@@ -119,7 +126,11 @@ export class AuthService {
       .where('user.id = :id', { id: user.id })
       .getOneOrFail();
 
-    if (!(await bcrypt.compare(currentPassword, stored.password))) {
+    // Un compte connecté a toujours un mot de passe ; sans lui, rien ne peut correspondre.
+    if (
+      !stored.password ||
+      !(await bcrypt.compare(currentPassword, stored.password))
+    ) {
       throw new UnprocessableEntityException(
         'Le mot de passe actuel est incorrect.',
       );
@@ -148,12 +159,12 @@ export class AuthService {
   }
 
   /**
-   * Retrouve l'utilisateur d'un token, seulement si son compte est encore actif.
+   * Retrouve l'utilisateur d'un token, seulement si son compte est encore actif et a l'accès.
    */
   async findAuthenticatedUser(userId: string) {
     return this.usersRepository.findOne({
-      // Un compte bloqué ou désactivé depuis l'émission du token n'est plus reconnu.
-      where: { id: userId, status: UserStatus.ACTIVE },
+      // Un compte bloqué, désactivé ou privé d'accès depuis l'émission du token n'est plus reconnu.
+      where: { id: userId, status: UserStatus.ACTIVE, hasSystemAccess: true },
     });
   }
 

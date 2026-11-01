@@ -21,15 +21,19 @@ export class User {
   @Column({ type: 'varchar', length: 254 })
   email: string;
 
-  // Jamais lu par défaut : seule la connexion le demande explicitement.
-  @Column({ type: 'varchar', length: 255, select: false })
-  password: string;
+  // Jamais lu par défaut : seule la connexion le demande explicitement. Null sans accès au système.
+  @Column({ type: 'varchar', length: 255, nullable: true, select: false })
+  password: string | null;
 
   @Column({ type: 'text' })
   role: UserRole;
 
   @Column({ type: 'text' })
   status: UserStatus;
+
+  // Seul un compte qui a l'accès peut se connecter ; un opérateur n'en a pas par défaut.
+  @Column({ name: 'has_system_access', type: 'boolean', default: false })
+  hasSystemAccess: boolean;
 
   // Attribuée à la première vente préparée hors ligne : elle ouvre ses références (A0009).
   @Column({ name: 'seller_code', type: 'varchar', length: 2, nullable: true })

@@ -25,6 +25,7 @@ export type UserListItem = {
   email: string
   role: UserRole
   status: UserStatus
+  hasSystemAccess: boolean
   createdAt: string | null
   updatedAt: string | null
 }
@@ -42,6 +43,12 @@ export interface UserFormState {
   email: string
   role: UserRole
   status: UserStatus
+  hasSystemAccess: boolean
+}
+
+// Réponse d'une création ou d'une modification : un mot de passe seulement si l'accès vient d'être ouvert.
+export interface UserPasswordResult {
+  temporaryPassword: string | null
 }
 
 // Option générique pour les selects rôle/statut.

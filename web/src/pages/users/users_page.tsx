@@ -18,6 +18,7 @@ import { MODULE_HEADER_ACCENTS } from '~/constants/modules'
 import type {
   UserFormState,
   UserListItem,
+  UserPasswordResult,
   UsersPageProps,
   UserStats,
   UserStatusDistribution,
@@ -34,7 +35,18 @@ function getUserFormPayload(formData: FormData): UserFormState {
     role: (fieldFormData('role', formData) ?? EMPTY_USER_FORM.role) as UserFormState['role'],
     status: (fieldFormData('status', formData) ??
       EMPTY_USER_FORM.status) as UserFormState['status'],
+    hasSystemAccess: formData.get('hasSystemAccess') === 'on',
   }
+}
+
+// Affiche le mot de passe temporaire assez longtemps pour le noter, sinon un simple succès.
+function notifyUserSaved(message: string, { temporaryPassword }: UserPasswordResult) {
+  if (!temporaryPassword) {
+    toast.success(message)
+    return
+  }
+
+  toast.success(`${message} Mot de passe temporaire : ${temporaryPassword}`, { duration: 30_000 })
 }
 
 const EMPTY_USERS: UserListItem[] = []
@@ -52,8 +64,8 @@ export default function UsersPage() {
   const users = data?.users ?? EMPTY_USERS
   const stats = data?.stats ?? EMPTY_STATS
   const statusDistribution = data?.statusDistribution ?? EMPTY_DISTRIBUTION
-  const createUser = useCreate<UserFormState, { temporaryPassword: string }>()
-  const updateUser = usePatch<UserFormState>()
+  const createUser = useCreate<UserFormState, UserPasswordResult>()
+  const updateUser = usePatch<UserFormState, UserPasswordResult>()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserListItem | null>(null)
@@ -95,8 +107,9 @@ export default function UsersPage() {
       updateUser.mutate(
         { id: editingUser.id, data: payload },
         {
-          onSuccess: () => {
-            toast.success('Utilisateur mis à jour.')
+          onSuccess: (result) => {
+            // Un mot de passe n'est renvoyé que si l'accès au système vient d'être ouvert.
+            notifyUserSaved('Utilisateur mis à jour.', result)
             closeDialogs()
           },
         }
@@ -104,10 +117,8 @@ export default function UsersPage() {
     } else {
       createUser.mutate(payload, {
         onSuccess: (result) => {
-          // Le mot de passe temporaire n'est affiche qu'ici : il doit rester lisible.
-          toast.success(`Utilisateur créé. Mot de passe temporaire : ${result.temporaryPassword}`, {
-            duration: 30_000,
-          })
+          // Le mot de passe temporaire n'est affiché qu'ici, et seulement si le compte a l'accès.
+          notifyUserSaved('Utilisateur créé.', result)
           closeDialogs()
         },
       })
